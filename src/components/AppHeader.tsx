@@ -9,7 +9,7 @@ import {
   IconButton,
   Drawer,
   List,
-  ListItem,
+  ListItemButton,
   ListItemText,
   useMediaQuery,
   useTheme,
@@ -47,9 +47,9 @@ const AppHeader = () => {
       </Box>
       <List>
         {menuItems.map((item) => (
-          <ListItem button key={item}>
+          <ListItemButton key={item}>
             <ListItemText primary={item} />
-          </ListItem>
+          </ListItemButton>
         ))}
       </List>
     </Box>

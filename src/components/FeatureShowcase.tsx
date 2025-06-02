@@ -4,7 +4,7 @@ import {
   Box,
   Container,
   Typography,
-  Grid,
+  Grid2,
   Card,
   CardContent,
 } from '@mui/material';
@@ -96,9 +96,9 @@ const FeatureShowcase = () => {
           </Typography>
         </motion.div>
 
-        <Grid container spacing={4}>
+        <Grid2 container spacing={4}>
           {features.map((feature, index) => (
-            <Grid item xs={12} sm={6} md={3} key={index}>
+            <Grid2 xs={12} sm={6} md={3} key={index}>
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -151,9 +151,9 @@ const FeatureShowcase = () => {
                   </CardContent>
                 </Card>
               </motion.div>
-            </Grid>
+            </Grid2>
           ))}
-        </Grid>
+        </Grid2>
       </Container>
     </Box>
   );
