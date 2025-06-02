@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import {
   AppBar,
@@ -12,9 +13,10 @@ import {
   Box,
   useTheme,
   useMediaQuery,
+  ListItemButton,
 } from '@mui/material';
 import { Menu, Close, DarkMode, LightMode } from '@mui/icons-material';
-import { smoothScrollToSection } from '../utils/smoothScroll';
+import { smoothScrollToSection } from '../lib/smoothScroll';
 
 const AppHeader = ({ darkMode, toggleDarkMode }: { darkMode: boolean; toggleDarkMode: () => void }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -45,24 +47,24 @@ const AppHeader = ({ darkMode, toggleDarkMode }: { darkMode: boolean; toggleDark
       </Box>
       <List>
         {navigationItems.map((item) => (
-          <ListItem 
-            key={item.id} 
-            button 
-            onClick={() => handleNavClick(item.id)}
-            sx={{
-              '&:hover': {
-                backgroundColor: 'rgba(255, 107, 53, 0.1)',
-              },
-            }}
-          >
-            <ListItemText 
-              primary={item.label}
+          <ListItem key={item.id} disablePadding>
+            <ListItemButton
+              onClick={() => handleNavClick(item.id)}
               sx={{
-                '& .MuiListItemText-primary': {
-                  fontWeight: 500,
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 107, 53, 0.1)',
                 },
               }}
-            />
+            >
+              <ListItemText 
+                primary={item.label}
+                sx={{
+                  '& .MuiListItemText-primary': {
+                    fontWeight: 500,
+                  },
+                }}
+              />
+            </ListItemButton>
           </ListItem>
         ))}
         <ListItem>
