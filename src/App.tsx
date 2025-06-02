@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { createAppTheme } from './theme/theme';
 import LandingPage from './pages/LandingPage';
 import Dashboard from './pages/Dashboard';
+import { AnalysisProvider } from './contexts/AnalysisContext';
 import { useState } from 'react';
 
 const App = () => {
@@ -18,12 +19,14 @@ const App = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Router>
-        <Routes>
-          <Route path="/" element={<LandingPage darkMode={darkMode} toggleDarkMode={toggleDarkMode} />} />
-          <Route path="/dashboard" element={<Dashboard darkMode={darkMode} toggleDarkMode={toggleDarkMode} />} />
-        </Routes>
-      </Router>
+      <AnalysisProvider>
+        <Router>
+          <Routes>
+            <Route path="/" element={<LandingPage darkMode={darkMode} toggleDarkMode={toggleDarkMode} />} />
+            <Route path="/dashboard" element={<Dashboard darkMode={darkMode} toggleDarkMode={toggleDarkMode} />} />
+          </Routes>
+        </Router>
+      </AnalysisProvider>
     </ThemeProvider>
   );
 };
