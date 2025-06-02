@@ -1,6 +1,5 @@
 
 import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 
 export interface AnalysisResponse {
   id: string;
@@ -85,39 +84,35 @@ export const useAnalysisApi = () => {
     setError(null);
     
     try {
-      const { data: result, error: functionError } = await supabase.functions.invoke('analyze', {
-        body: {},
-        headers: {},
-        method: 'GET',
-      });
-
-      if (functionError) {
-        throw new Error(functionError.message);
-      }
-
-      // For now, we'll call the function and get sample data
-      // Later this will be replaced with actual analysis results
+      console.log('Analyzing URL:', url);
+      
+      // Call the edge function directly with the URL parameter
       const response = await fetch(`https://sxrhpwmdslxgwpqfdmxu.supabase.co/functions/v1/analyze?url=${encodeURIComponent(url)}`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN4cmhwd21kc2x4Z3dwcWZkbXh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NTIwMDUsImV4cCI6MjA2NDQyODAwNX0.jdjgtwLQ-MGBMoRw2cLA14SzrivonF36POCC6YYUVwk'}`,
+          'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN4cmhwd21kc2x4Z3dwcWZkbXh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NTIwMDUsImV4cCI6MjA2NDQyODAwNX0.jdjgtwLQ-MGBMoRw2cLA14SzrivonF36POCC6YYUVwk`,
           'Content-Type': 'application/json',
         },
       });
 
+      console.log('Response status:', response.status);
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+        const errorData = await response.text();
+        console.error('API Error Response:', errorData);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorData}`);
       }
 
       const analysisResult: AnalysisResponse = await response.json();
+      console.log('Analysis result:', analysisResult);
+      
       setData(analysisResult);
       return analysisResult;
       
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-      setError(errorMessage);
       console.error('Analysis API Error:', err);
+      setError(errorMessage);
       return null;
     } finally {
       setLoading(false);
