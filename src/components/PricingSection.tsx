@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   Box,
@@ -30,27 +31,21 @@ const PricingSection = () => {
     },
     {
       title: 'Pro',
-      price: '$19/month',
+      price: '$19.99',
+      priceNote: 'One-time payment',
       description: 'Advanced features for designers and developers.',
       features: [
         'Unlimited color palette extraction',
         'Advanced font analysis',
         'Unlimited website scans',
         'Tech stack detection',
+        'Performance metrics',
+        'Security analysis',
+        'SEO insights',
+        'Export reports',
       ],
       cta: 'Upgrade to Pro',
-    },
-    {
-      title: 'Enterprise',
-      price: 'Contact Us',
-      description: 'Custom solutions for large organizations.',
-      features: [
-        'All Pro features',
-        'Dedicated support',
-        'Custom reporting',
-        'Security analysis',
-      ],
-      cta: 'Contact Us',
+      recommended: true,
     },
   ];
 
@@ -75,7 +70,7 @@ const PricingSection = () => {
               fontWeight: 700,
             }}
           >
-            Flexible Pricing Plans
+            Simple Pricing
           </Typography>
           <Typography
             variant="h6"
@@ -83,7 +78,7 @@ const PricingSection = () => {
             color="text.secondary"
             sx={{ mb: 8, maxWidth: 600, mx: 'auto' }}
           >
-            Choose the plan that best fits your needs. Upgrade or downgrade at any time.
+            Start for free, upgrade when you need more features. No monthly subscriptions.
           </Typography>
         </motion.div>
 
@@ -92,13 +87,33 @@ const PricingSection = () => {
             display: 'grid',
             gridTemplateColumns: {
               xs: '1fr',
-              md: 'repeat(3, 1fr)',
+              md: 'repeat(2, 1fr)',
             },
             gap: 4,
+            maxWidth: 800,
+            mx: 'auto',
           }}
         >
           {pricingPlans.map((plan, index) => (
-            <Box key={index}>
+            <Box key={index} sx={{ position: 'relative' }}>
+              {plan.recommended && (
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: -10,
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    zIndex: 1,
+                  }}
+                >
+                  <Chip
+                    icon={<Star />}
+                    label="Recommended"
+                    color="primary"
+                    sx={{ fontWeight: 600 }}
+                  />
+                </Box>
+              )}
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -114,6 +129,7 @@ const PricingSection = () => {
                     justifyContent: 'space-between',
                     cursor: 'pointer',
                     transition: 'all 0.3s ease',
+                    border: plan.recommended ? '2px solid #FF6B35' : '1px solid rgba(255, 255, 255, 0.1)',
                     '&:hover': {
                       transform: 'translateY(-8px)',
                       boxShadow: '0 12px 40px rgba(255, 107, 53, 0.2)',
@@ -129,10 +145,19 @@ const PricingSection = () => {
                     </Typography>
                     <Typography
                       variant="h3"
-                      sx={{ mb: 2, fontWeight: 700 }}
+                      sx={{ mb: 1, fontWeight: 700 }}
                     >
                       {plan.price}
                     </Typography>
+                    {plan.priceNote && (
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ mb: 2 }}
+                      >
+                        {plan.priceNote}
+                      </Typography>
+                    )}
                     <Typography
                       variant="body2"
                       color="text.secondary"
@@ -171,15 +196,6 @@ const PricingSection = () => {
               </motion.div>
             </Box>
           ))}
-        </Box>
-
-        <Box mt={4} display="flex" justifyContent="center">
-          <Chip
-            icon={<Star />}
-            label="Recommended for most users"
-            color="primary"
-            sx={{ fontWeight: 600 }}
-          />
         </Box>
       </Container>
     </Box>
