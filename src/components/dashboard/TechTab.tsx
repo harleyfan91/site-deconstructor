@@ -1,10 +1,19 @@
 
 import React from 'react';
-import { Box, Typography, Grid, Card, CardContent } from '@mui/material';
+import { Box, Typography, Grid, Card, CardContent, Chip } from '@mui/material';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
-import { Shield, Globe, Server, Database } from 'lucide-react';
+import { Shield, Globe, Server, Database, Code, Layers, Zap } from 'lucide-react';
 
-const TechnicalTab = () => {
+const TechTab = () => {
+  const techStack = [
+    { category: 'Frontend Framework', technology: 'React 18.2.0', icon: Code },
+    { category: 'Build Tool', technology: 'Vite 4.4.5', icon: Zap },
+    { category: 'Styling', technology: 'Tailwind CSS', icon: Layers },
+    { category: 'Backend', technology: 'Node.js', icon: Server },
+    { category: 'Database', technology: 'PostgreSQL', icon: Database },
+    { category: 'Hosting', technology: 'Vercel', icon: Globe },
+  ];
+
   const technicalChecks = [
     { category: 'Security', icon: Shield, score: '95%', status: 'Excellent' },
     { category: 'Accessibility', icon: Globe, score: '88%', status: 'Good' },
@@ -31,8 +40,48 @@ const TechnicalTab = () => {
   return (
     <Box>
       <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-        Technical Analysis
+        Tech Analysis
       </Typography>
+
+      {/* Tech Stack Section */}
+      <Card sx={{ borderRadius: 2, mb: 3 }}>
+        <CardContent sx={{ p: 3 }}>
+          <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
+            Tech Stack
+          </Typography>
+          <Grid container spacing={2}>
+            {techStack.map((tech, index) => {
+              const IconComponent = tech.icon;
+              return (
+                <Grid item xs={12} sm={6} md={4} key={index}>
+                  <Box
+                    sx={{
+                      p: 2,
+                      border: '1px solid #E0E0E0',
+                      borderRadius: 2,
+                      display: 'flex',
+                      alignItems: 'center',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 107, 53, 0.05)',
+                      },
+                    }}
+                  >
+                    <IconComponent size={20} color="#FF6B35" style={{ marginRight: 12 }} />
+                    <Box>
+                      <Typography variant="body2" color="text.secondary">
+                        {tech.category}
+                      </Typography>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
+                        {tech.technology}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Grid>
+              );
+            })}
+          </Grid>
+        </CardContent>
+      </Card>
 
       <Grid container spacing={3} sx={{ mb: 3 }}>
         {technicalChecks.map((check, index) => {
@@ -146,4 +195,4 @@ const TechnicalTab = () => {
   );
 };
 
-export default TechnicalTab;
+export default TechTab;
