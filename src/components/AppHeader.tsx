@@ -115,7 +115,7 @@ const AppHeader = ({ darkMode, toggleDarkMode }: { darkMode: boolean; toggleDark
             sx={{
               flexGrow: 1,
               fontWeight: 700,
-              background: 'linear-gradient(135deg, #FF6B35 0%, #FF8A65 100%)',
+              background: 'linear-gradient(linear-gradient(45deg, #FF6B35 30%, #0984E3 90%)',
               backgroundClip: 'text',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
