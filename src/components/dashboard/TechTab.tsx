@@ -119,6 +119,54 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
         </CardContent>
       </Card>
 
+      {/* Ad Tags Section */}
+      {data.data.adTags && (
+        <Card sx={{ borderRadius: 2, mb: 3 }}>
+          <CardContent sx={{ p: 3 }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
+              <Shield size={20} style={{ marginRight: 8, verticalAlign: 'middle' }} />
+              Detected Ad Tags
+            </Typography>
+            <Grid container spacing={2}>
+              {[
+                { label: 'Google GAM/GPT', key: 'hasGAM' },
+                { label: 'AdSense/DFP', key: 'hasAdSense' },
+                { label: 'Prebid.js', key: 'hasPrebid' },
+                { label: 'Amazon Publisher Services', key: 'hasAPS' },
+                { label: 'Index Exchange', key: 'hasIX' },
+                { label: 'AppNexus/Xandr', key: 'hasANX' },
+                { label: 'OpenX', key: 'hasOpenX' },
+                { label: 'Rubicon', key: 'hasRubicon' },
+                { label: 'PubMatic', key: 'hasPubMatic' },
+                { label: 'VPAID/VMAP/IMA', key: 'hasVPAID' },
+                { label: 'Criteo', key: 'hasCriteo' },
+                { label: 'Taboola', key: 'hasTaboola' },
+                { label: 'Outbrain', key: 'hasOutbrain' },
+                { label: 'Sharethrough', key: 'hasSharethrough' },
+                { label: 'Teads', key: 'hasTeads' },
+                { label: 'Moat', key: 'hasMoat' },
+                { label: 'DoubleVerify', key: 'hasDV' },
+                { label: 'Integral Ad Science', key: 'hasIAS' },
+              ].map(({ label, key }) => (
+                <Grid item xs={12} sm={6} md={4} key={key}>
+                  <Chip
+                    label={label}
+                    color={data.data.adTags[key] ? 'success' : 'default'}
+                    variant={data.data.adTags[key] ? 'filled' : 'outlined'}
+                    size="small"
+                    sx={{ 
+                      width: '100%', 
+                      justifyContent: 'flex-start',
+                      '& .MuiChip-label': { width: '100%', textAlign: 'left' }
+                    }}
+                  />
+                </Grid>
+              ))}
+            </Grid>
+          </CardContent>
+        </Card>
+      )}
+
       <Grid container spacing={3}>
         <Grid item xs={12} md={8}>
           <Card sx={{ borderRadius: 2 }}>

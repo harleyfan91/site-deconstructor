@@ -71,6 +71,28 @@ export interface AnalysisResponse {
         status: string;
       }>;
     };
+    adTags?: {
+      hasGAM: boolean;
+      hasAdSense: boolean;
+      hasPrebid: boolean;
+      hasAPS: boolean;
+      hasIX: boolean;
+      hasANX: boolean;
+      hasOpenX: boolean;
+      hasRubicon: boolean;
+      hasPubMatic: boolean;
+      hasVPAID: boolean;
+      hasVMAP: boolean;
+      hasIMA: boolean;
+      hasCriteo: boolean;
+      hasTaboola: boolean;
+      hasOutbrain: boolean;
+      hasSharethrough: boolean;
+      hasTeads: boolean;
+      hasMoat: boolean;
+      hasDV: boolean;
+      hasIAS: boolean;
+    };
   };
 }
 

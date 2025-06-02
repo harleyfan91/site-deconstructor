@@ -1,6 +1,6 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { DOMParser } from "https://deno.land/x/deno_dom/deno-dom-wasm.ts";
 
 // CORS headers for frontend communication
 const corsHeaders = {
@@ -30,6 +30,34 @@ const urlValidation = (url: string): { isValid: boolean; error?: string } => {
   }
 };
 
+// Ad Tag Detection Function
+const detectAdTags = (html: string) => {
+  const htmlLower = html.toLowerCase();
+  
+  return {
+    hasGAM: htmlLower.includes('googletag') || htmlLower.includes('gpt.js'),
+    hasAdSense: htmlLower.includes('pagead2.googlesyndication.com') || htmlLower.includes('adsbygoogle'),
+    hasPrebid: htmlLower.includes('prebid.js') || htmlLower.includes('pbjs.que'),
+    hasAPS: htmlLower.includes('apstag.js') || htmlLower.includes('apstag.init'),
+    hasIX: htmlLower.includes('ix.js') || htmlLower.includes('indexexchange'),
+    hasANX: htmlLower.includes('acdn.adnxs.com/prebid') || htmlLower.includes('anx'),
+    hasOpenX: htmlLower.includes('tags.openx.net') || htmlLower.includes('ox.request'),
+    hasRubicon: htmlLower.includes('rubiconproject.com'),
+    hasPubMatic: htmlLower.includes('ads.pubmatic.com'),
+    hasVPAID: htmlLower.includes('vpaid.js') || htmlLower.includes('vmap') || htmlLower.includes('ima3.js'),
+    hasVMAP: htmlLower.includes('vmap'),
+    hasIMA: htmlLower.includes('ima3.js'),
+    hasCriteo: htmlLower.includes('static.criteo.net/js/ld/publishertag.js') || htmlLower.includes('window.criteo'),
+    hasTaboola: htmlLower.includes('cdn.taboola.com') || htmlLower.includes('_tfa.push'),
+    hasOutbrain: htmlLower.includes('widgets.outbrain.com'),
+    hasSharethrough: htmlLower.includes('sharethrough.com'),
+    hasTeads: htmlLower.includes('teads.tv'),
+    hasMoat: htmlLower.includes('moatad.js'),
+    hasDV: htmlLower.includes('doubleverify') || htmlLower.includes('dv.js'),
+    hasIAS: htmlLower.includes('ias.js')
+  };
+};
+
 // Website analysis function
 const analyzeWebsite = async (url: string) => {
   console.log(`Starting analysis for: ${url}`);
@@ -54,6 +82,9 @@ const analyzeWebsite = async (url: string) => {
     // Basic HTML analysis
     const analysis = await performHtmlAnalysis(html, url);
     
+    // Detect ad tags
+    const adTags = detectAdTags(html);
+    
     return {
       id: crypto.randomUUID(),
       url: url,
@@ -70,6 +101,7 @@ const analyzeWebsite = async (url: string) => {
         performance: analysis.performance,
         seo: analysis.seo,
         technical: analysis.technical,
+        adTags: adTags,
       },
     };
   } catch (error) {
