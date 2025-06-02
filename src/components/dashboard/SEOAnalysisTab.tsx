@@ -140,7 +140,8 @@ const SEOAnalysisTab = () => {
                   <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: '#E65100', mb: 1 }}>
                     Add Alt Text to Images
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2"
+                    sx={{ color: 'rgba(0, 0, 0, 0.87)' }}>
                     3 images are missing alt text. This impacts accessibility and SEO.
                   </Typography>
                 </Box>
@@ -150,7 +151,8 @@ const SEOAnalysisTab = () => {
                   <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: '#2E7D32', mb: 1 }}>
                     Great Schema Markup
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2"
+                    sx={{ color: 'rgba(0, 0, 0, 0.87)' }}>
                     Structured data is properly implemented for better search visibility.
                   </Typography>
                 </Box>
