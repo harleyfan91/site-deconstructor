@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Box, Typography, Container } from '@mui/material';
 import { motion } from 'framer-motion';
@@ -46,6 +45,9 @@ const HeroSection = () => {
           sx={{
             textAlign: 'center',
             py: { xs: 8, md: 12 },
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
           }}
         >
           <motion.div
@@ -100,7 +102,9 @@ const HeroSection = () => {
             </Typography>
           </motion.div>
 
-          <URLInputForm />
+          <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+            <URLInputForm />
+          </Box>
 
           <motion.div
             initial={{ opacity: 0 }}
