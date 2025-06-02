@@ -9,7 +9,102 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      analysis_cache: {
+        Row: {
+          analysis_data: Json | null
+          created_at: string | null
+          expires_at: string | null
+          original_url: string | null
+          url_hash: string
+        }
+        Insert: {
+          analysis_data?: Json | null
+          created_at?: string | null
+          expires_at?: string | null
+          original_url?: string | null
+          url_hash: string
+        }
+        Update: {
+          analysis_data?: Json | null
+          created_at?: string | null
+          expires_at?: string | null
+          original_url?: string | null
+          url_hash?: string
+        }
+        Relationships: []
+      }
+      analysis_status: {
+        Row: {
+          created_at: string | null
+          id: string
+          progress: number | null
+          results: Json | null
+          status: string | null
+          url: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          progress?: number | null
+          results?: Json | null
+          status?: string | null
+          url?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          progress?: number | null
+          results?: Json | null
+          status?: string | null
+          url?: string | null
+        }
+        Relationships: []
+      }
+      api_logs: {
+        Row: {
+          error_message: string | null
+          id: string
+          ip_address: string | null
+          response_status: number | null
+          timestamp: string | null
+          url_parameter: string | null
+        }
+        Insert: {
+          error_message?: string | null
+          id?: string
+          ip_address?: string | null
+          response_status?: number | null
+          timestamp?: string | null
+          url_parameter?: string | null
+        }
+        Update: {
+          error_message?: string | null
+          id?: string
+          ip_address?: string | null
+          response_status?: number | null
+          timestamp?: string | null
+          url_parameter?: string | null
+        }
+        Relationships: []
+      }
+      rate_limits: {
+        Row: {
+          ip_address: string
+          request_count: number | null
+          window_start: string | null
+        }
+        Insert: {
+          ip_address: string
+          request_count?: number | null
+          window_start?: string | null
+        }
+        Update: {
+          ip_address?: string
+          request_count?: number | null
+          window_start?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
