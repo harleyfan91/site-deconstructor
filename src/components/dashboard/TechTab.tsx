@@ -124,7 +124,6 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
         <Card sx={{ borderRadius: 2, mb: 3 }}>
           <CardContent sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-              <Shield size={20} style={{ marginRight: 8, verticalAlign: 'middle' }} />
               Detected Ad Tags
             </Typography>
             <Grid container spacing={2}>
