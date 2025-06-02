@@ -147,7 +147,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                 { label: 'DoubleVerify', key: 'hasDV' },
                 { label: 'Integral Ad Science', key: 'hasIAS' },
               ].map(({ label, key }) => (
-                <Grid item xs={12} sm={6} md={4} key={key}>
+                <Grid item xs={6} sm={6} md={4} key={key}>
                   <Chip
                     label={label}
                     color={data.data.adTags[key] ? 'success' : 'default'}
