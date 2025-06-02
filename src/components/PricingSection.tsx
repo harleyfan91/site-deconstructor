@@ -1,9 +1,9 @@
+
 import React from 'react';
 import {
   Box,
   Container,
   Typography,
-  Grid,
   Card,
   CardContent,
   Button,
@@ -90,9 +90,24 @@ const PricingSection = () => {
           </Typography>
         </motion.div>
 
-        <Grid container spacing={4} justifyContent="center">
+        <Box
+          sx={{
+            display: 'flex',
+            gap: 4,
+            justifyContent: 'center',
+            flexDirection: { xs: 'column', md: 'row' },
+            alignItems: { xs: 'center', md: 'stretch' },
+          }}
+        >
           {plans.map((plan, index) => (
-            <Grid item xs={12} md={6} lg={5} key={index}>
+            <Box
+              key={index}
+              sx={{
+                width: { xs: '100%', md: '100%' },
+                maxWidth: { xs: '100%', md: '400px' },
+                flex: { md: '0 1 400px' },
+              }}
+            >
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -204,9 +219,9 @@ const PricingSection = () => {
                   </CardContent>
                 </Card>
               </motion.div>
-            </Grid>
+            </Box>
           ))}
-        </Grid>
+        </Box>
 
         <motion.div
           initial={{ opacity: 0 }}
