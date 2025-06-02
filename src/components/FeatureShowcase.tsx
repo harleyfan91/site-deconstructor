@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import {
   Box,
@@ -96,9 +97,24 @@ const FeatureShowcase = () => {
           </Typography>
         </motion.div>
 
-        <Grid container spacing={4}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 4,
+          }}
+        >
           {features.map((feature, index) => (
-            <Grid xs={12} sm={6} md={3} key={index}>
+            <Box
+              key={index}
+              sx={{
+                width: {
+                  xs: '100%',
+                  sm: 'calc(50% - 16px)',
+                  md: 'calc(25% - 24px)',
+                },
+              }}
+            >
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -151,12 +167,13 @@ const FeatureShowcase = () => {
                   </CardContent>
                 </Card>
               </motion.div>
-            </Grid>
+            </Box>
           ))}
-        </Grid>
+        </Box>
       </Container>
     </Box>
   );
 };
 
 export default FeatureShowcase;
+

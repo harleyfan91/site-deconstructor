@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   Box,
@@ -90,9 +91,26 @@ const PricingSection = () => {
           </Typography>
         </motion.div>
 
-        <Grid container spacing={4} justifyContent="center">
+        <Box
+          sx={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 4,
+            justifyContent: 'center',
+          }}
+        >
           {plans.map((plan, index) => (
-            <Grid xs={12} md={6} lg={5} key={index}>
+            <Box
+              key={index}
+              sx={{
+                width: {
+                  xs: '100%',
+                  md: 'calc(50% - 16px)',
+                  lg: 'calc(42% - 16px)',
+                },
+                maxWidth: '500px',
+              }}
+            >
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -204,9 +222,9 @@ const PricingSection = () => {
                   </CardContent>
                 </Card>
               </motion.div>
-            </Grid>
+            </Box>
           ))}
-        </Grid>
+        </Box>
 
         <motion.div
           initial={{ opacity: 0 }}
@@ -229,3 +247,4 @@ const PricingSection = () => {
 };
 
 export default PricingSection;
+
