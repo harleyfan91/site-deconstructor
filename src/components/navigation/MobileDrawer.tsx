@@ -104,9 +104,9 @@ const MobileDrawer = ({
   return (
     <>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <IconButton color="inherit" onClick={toggleDarkMode}>
+         {/* <IconButton color="inherit" onClick={toggleDarkMode}>
           {darkMode ? <LightMode /> : <DarkMode />}
-        </IconButton>
+        </IconButton> */}
         <IconButton
           color="inherit"
           edge="start"
