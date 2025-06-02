@@ -78,8 +78,7 @@ const PerformanceTab = () => {
                 </Box>
                 <LinearProgress variant="determinate" value={78} sx={{ height: 8, borderRadius: 4 }} />
               </Box>
-              <Typography   variant="body2"
-                sx={{ color: 'rgba(0, 0, 0, 0.87)' }}>
+              <Typography variant="body2" color="text.secondary">
                 Your page loads faster than 78% of websites
               </Typography>
             </CardContent>
@@ -99,7 +98,8 @@ const PerformanceTab = () => {
                   <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: '#E65100' }}>
                     Optimize Images
                   </Typography>
-                  <Typography variant="body2" color="text.primary">
+                  <Typography variant="body2"
+                    sx={{ color: 'rgba(0, 0, 0, 0.87)' }}>
                     Compress and resize images to reduce load time by ~0.8s
                   </Typography>
                 </Box>
@@ -109,7 +109,8 @@ const PerformanceTab = () => {
                   <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: '#2E7D32' }}>
                     Enable Caching
                   </Typography>
-                  <Typography variant="body2" color="text.primary">
+                  <Typography variant="body2"
+                    sx={{ color: 'rgba(0, 0, 0, 0.87)' }}>
                     Browser caching is properly configured
                   </Typography>
                 </Box>
