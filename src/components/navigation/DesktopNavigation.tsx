@@ -45,9 +45,9 @@ const DesktopNavigation = ({ navigationItems, darkMode, toggleDarkMode, onNavCli
           </Button>
         )
       ))}
-      <IconButton color="inherit" onClick={toggleDarkMode}>
+       {/* <IconButton color="inherit" onClick={toggleDarkMode}>
         {darkMode ? <LightMode /> : <DarkMode />}
-      </IconButton>
+      </IconButton> */}
       <Button
         variant="contained"
         sx={{
