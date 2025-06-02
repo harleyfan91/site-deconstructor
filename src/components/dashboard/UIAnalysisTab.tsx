@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Box, Typography, Grid, Card, CardContent, Chip } from '@mui/material';
-import { Palette, TextFields, Image, Download } from 'lucide-react';
+import { Palette, Type, Image, Download } from 'lucide-react';
 
 const UIAnalysisTab = () => {
   const colorPalette = [
@@ -79,7 +79,7 @@ const UIAnalysisTab = () => {
           <Card sx={{ borderRadius: 2, height: '100%' }}>
             <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                <TextFields size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+                <Type size={24} color="#FF6B35" style={{ marginRight: 8 }} />
                 <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
                   Font Analysis
                 </Typography>
