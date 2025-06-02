@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   AppBar,
@@ -30,6 +29,7 @@ const AppHeader = ({ darkMode, toggleDarkMode }: { darkMode: boolean; toggleDark
   ];
 
   const handleNavClick = (sectionId: string) => {
+    console.log('Nav clicked for section:', sectionId);
     smoothScrollToSection(sectionId);
     setMobileOpen(false); // Close mobile menu after clicking
   };
