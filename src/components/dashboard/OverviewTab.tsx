@@ -1,44 +1,76 @@
 
 import React from 'react';
-import { Box, Typography, Grid, Card, CardContent } from '@mui/material';
+import { Box, Typography, Grid, Card, CardContent, CircularProgress, Alert } from '@mui/material';
 import { TrendingUp, Users, Clock, Star } from 'lucide-react';
+import { AnalysisResponse } from '../../hooks/useAnalysisApi';
 
-const OverviewTab = () => {
+interface OverviewTabProps {
+  data: AnalysisResponse | null;
+  loading: boolean;
+  error: string | null;
+}
+
+const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
+        <CircularProgress size={60} />
+        <Typography variant="h6" sx={{ ml: 2 }}>Analyzing website...</Typography>
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Alert severity="error" sx={{ mt: 2 }}>
+        {error}
+      </Alert>
+    );
+  }
+
+  if (!data) {
+    return (
+      <Alert severity="info" sx={{ mt: 2 }}>
+        Enter a URL to analyze a website
+      </Alert>
+    );
+  }
+
   const metrics = [
     {
       title: 'Overall Score',
-      value: '87/100',
+      value: `${data.data.overview.overallScore}/100`,
       icon: Star,
-      color: '#4CAF50',
-      description: 'Excellent performance overall'
+      color: data.data.overview.overallScore >= 80 ? '#4CAF50' : data.data.overview.overallScore >= 60 ? '#FF9800' : '#F44336',
+      description: data.data.overview.overallScore >= 80 ? 'Excellent performance overall' : data.data.overview.overallScore >= 60 ? 'Good, could be improved' : 'Needs improvement'
     },
     {
       title: 'Page Load Time',
-      value: '2.3s',
+      value: data.data.overview.pageLoadTime,
       icon: Clock,
       color: '#FF9800',
-      description: 'Good, could be improved'
+      description: 'Page loading performance'
     },
     {
       title: 'SEO Score',
-      value: '92/100',
+      value: `${data.data.overview.seoScore}/100`,
       icon: TrendingUp,
-      color: '#4CAF50',
-      description: 'Excellent SEO optimization'
+      color: data.data.overview.seoScore >= 80 ? '#4CAF50' : data.data.overview.seoScore >= 60 ? '#FF9800' : '#F44336',
+      description: data.data.overview.seoScore >= 80 ? 'Excellent SEO optimization' : 'SEO could be improved'
     },
     {
       title: 'User Experience',
-      value: '85/100',
+      value: `${data.data.overview.userExperienceScore}/100`,
       icon: Users,
-      color: '#2196F3',
-      description: 'Good user experience'
+      color: data.data.overview.userExperienceScore >= 80 ? '#4CAF50' : '#2196F3',
+      description: data.data.overview.userExperienceScore >= 80 ? 'Excellent user experience' : 'Good user experience'
     }
   ];
 
   return (
     <Box>
       <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-        Website Overview
+        Website Overview - {data.url}
       </Typography>
       
       <Grid container spacing={3}>
@@ -84,21 +116,24 @@ const OverviewTab = () => {
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 3 }}>
             <Typography variant="body1" paragraph>
-              Your website shows strong performance across most metrics. The SEO optimization is excellent, 
-              and the overall user experience is good. 
+              Analysis completed at {new Date(data.timestamp).toLocaleString()}. 
+              {data.data.overview.overallScore >= 80 ? 
+                ' Your website shows excellent performance across most metrics.' :
+                ' Your website has room for improvement in several areas.'
+              }
             </Typography>
             <Typography variant="body1" paragraph>
-              <strong>Key Recommendations:</strong>
+              <strong>Key Findings:</strong>
             </Typography>
             <Box component="ul" sx={{ pl: 2 }}>
               <Typography component="li" variant="body2" sx={{ mb: 1 }}>
-                Optimize image loading to improve page speed
+                SEO Score: {data.data.overview.seoScore}/100
               </Typography>
               <Typography component="li" variant="body2" sx={{ mb: 1 }}>
-                Consider implementing lazy loading for below-the-fold content
+                Page Load Time: {data.data.overview.pageLoadTime}
               </Typography>
               <Typography component="li" variant="body2" sx={{ mb: 1 }}>
-                Review and optimize largest contentful paint (LCP)
+                User Experience Score: {data.data.overview.userExperienceScore}/100
               </Typography>
             </Box>
           </CardContent>

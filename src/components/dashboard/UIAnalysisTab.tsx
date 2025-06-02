@@ -1,29 +1,42 @@
 
 import React from 'react';
-import { Box, Typography, Grid, Card, CardContent, Chip } from '@mui/material';
-import { Palette, Type, Image, Download } from 'lucide-react';
+import { Box, Typography, Grid, Card, CardContent, Chip, CircularProgress, Alert } from '@mui/material';
+import { Palette, Type, Image } from 'lucide-react';
+import { AnalysisResponse } from '../../hooks/useAnalysisApi';
 
-const UIAnalysisTab = () => {
-  const colorPalette = [
-    { name: 'Primary', hex: '#FF6B35', usage: 'Headers, CTAs' },
-    { name: 'Secondary', hex: '#0984E3', usage: 'Links, Accents' },
-    { name: 'Background', hex: '#FFFFFF', usage: 'Main Background' },
-    { name: 'Text', hex: '#2D3436', usage: 'Body Text' },
-    { name: 'Gray', hex: '#636E72', usage: 'Secondary Text' },
-  ];
+interface UIAnalysisTabProps {
+  data: AnalysisResponse | null;
+  loading: boolean;
+  error: string | null;
+}
 
-  const fonts = [
-    { name: 'Inter', category: 'Sans-serif', usage: 'Headings', weight: '400, 600, 700' },
-    { name: 'Roboto', category: 'Sans-serif', usage: 'Body Text', weight: '300, 400, 500' },
-    { name: 'Source Code Pro', category: 'Monospace', usage: 'Code Blocks', weight: '400, 500' },
-  ];
+const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) => {
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
+        <CircularProgress size={60} />
+        <Typography variant="h6" sx={{ ml: 2 }}>Analyzing UI elements...</Typography>
+      </Box>
+    );
+  }
 
-  const images = [
-    { type: 'Logo', count: 3, format: 'SVG, PNG', totalSize: '45KB' },
-    { type: 'Icons', count: 24, format: 'SVG', totalSize: '128KB' },
-    { type: 'Photos', count: 8, format: 'JPG, WebP', totalSize: '2.4MB' },
-    { type: 'Graphics', count: 12, format: 'PNG, SVG', totalSize: '890KB' },
-  ];
+  if (error) {
+    return (
+      <Alert severity="error" sx={{ mt: 2 }}>
+        {error}
+      </Alert>
+    );
+  }
+
+  if (!data) {
+    return (
+      <Alert severity="info" sx={{ mt: 2 }}>
+        Enter a URL to analyze website UI elements
+      </Alert>
+    );
+  }
+
+  const { colors, fonts, images } = data.data.ui;
 
   return (
     <Box>
@@ -44,7 +57,7 @@ const UIAnalysisTab = () => {
               </Box>
               
               <Box>
-                {colorPalette.map((color, index) => (
+                {colors.map((color, index) => (
                   <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     <Box
                       sx={{
@@ -96,7 +109,7 @@ const UIAnalysisTab = () => {
                       <Chip label={font.usage} size="small" />
                     </Box>
                     <Typography variant="body2" color="text.secondary">
-                      Weights: {font.weight}
+                      Weight: {font.weight}
                     </Typography>
                   </Box>
                 ))}
@@ -105,7 +118,7 @@ const UIAnalysisTab = () => {
           </Card>
         </Grid>
 
-        {/* Image Gallery */}
+        {/* Image Analysis */}
         <Grid item xs={12}>
           <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ p: 3 }}>
@@ -113,11 +126,11 @@ const UIAnalysisTab = () => {
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                   <Image size={24} color="#FF6B35" style={{ marginRight: 8 }} />
                   <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                    Image Gallery
+                    Image Analysis
                   </Typography>
                 </Box>
                 <Typography variant="body2" color="text.secondary">
-                  Total: 47 assets (3.4MB)
+                  Total: {images.reduce((acc, img) => acc + img.count, 0)} assets
                 </Typography>
               </Box>
               
@@ -148,9 +161,6 @@ const UIAnalysisTab = () => {
                       <Typography variant="caption" color="text.secondary">
                         {imageType.totalSize}
                       </Typography>
-                      <Box sx={{ mt: 1 }}>
-                        <Download size={16} color="#757575" />
-                      </Box>
                     </Box>
                   </Grid>
                 ))}

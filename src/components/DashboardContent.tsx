@@ -7,8 +7,11 @@ import PerformanceTab from './dashboard/PerformanceTab';
 import SEOAnalysisTab from './dashboard/SEOAnalysisTab';
 import TechTab from './dashboard/TechTab';
 import UIAnalysisTab from './dashboard/UIAnalysisTab';
+import { useAnalysisContext } from '../contexts/AnalysisContext';
 
 const DashboardContent = () => {
+  const { data: analysisData, loading, error } = useAnalysisContext();
+
   return (
     <Box>
       <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
@@ -26,23 +29,23 @@ const DashboardContent = () => {
           </TabsList>
           
           <TabsContent value="overview">
-            <OverviewTab />
+            <OverviewTab data={analysisData} loading={loading} error={error} />
           </TabsContent>
           
           <TabsContent value="ui">
-            <UIAnalysisTab />
+            <UIAnalysisTab data={analysisData} loading={loading} error={error} />
           </TabsContent>
           
           <TabsContent value="performance">
-            <PerformanceTab />
+            <PerformanceTab data={analysisData} loading={loading} error={error} />
           </TabsContent>
           
           <TabsContent value="seo">
-            <SEOAnalysisTab />
+            <SEOAnalysisTab data={analysisData} loading={loading} error={error} />
           </TabsContent>
           
           <TabsContent value="tech">
-            <TechTab />
+            <TechTab data={analysisData} loading={loading} error={error} />
           </TabsContent>
         </Tabs>
 

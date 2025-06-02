@@ -1,32 +1,61 @@
 
 import React from 'react';
-import { Box, Typography, Grid, Card, CardContent, Chip } from '@mui/material';
+import { Box, Typography, Grid, Card, CardContent, Chip, CircularProgress, Alert } from '@mui/material';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Shield, Globe, Server, Database, Code, Layers, Zap } from 'lucide-react';
+import { AnalysisResponse } from '../../hooks/useAnalysisApi';
 
-const TechTab = () => {
-  const techStack = [
-    { category: 'Frontend Framework', technology: 'React 18.2.0', icon: Code },
-    { category: 'Build Tool', technology: 'Vite 4.4.5', icon: Zap },
-    { category: 'Styling', technology: 'Tailwind CSS', icon: Layers },
-    { category: 'Backend', technology: 'Node.js', icon: Server },
-    { category: 'Database', technology: 'PostgreSQL', icon: Database },
-    { category: 'Hosting', technology: 'Vercel', icon: Globe },
-  ];
+interface TechTabProps {
+  data: AnalysisResponse | null;
+  loading: boolean;
+  error: string | null;
+}
 
-  const technicalChecks = [
-    { category: 'Security', icon: Shield, score: '95%', status: 'Excellent' },
-    { category: 'Accessibility', icon: Globe, score: '88%', status: 'Good' },
-    { category: 'Server Response', icon: Server, score: '92%', status: 'Excellent' },
-    { category: 'Database', icon: Database, score: '85%', status: 'Good' },
-  ];
+const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
+        <CircularProgress size={60} />
+        <Typography variant="h6" sx={{ ml: 2 }}>Analyzing tech stack...</Typography>
+      </Box>
+    );
+  }
 
-  const technicalIssues = [
-    { type: 'Error', description: 'Mixed content warning on contact form', severity: 'Low', status: 'Open' },
-    { type: 'Warning', description: 'Large DOM size detected', severity: 'Medium', status: 'In Progress' },
-    { type: 'Info', description: 'HTTP/2 not enabled', severity: 'Low', status: 'Resolved' },
-    { type: 'Error', description: 'Missing security headers', severity: 'High', status: 'Open' },
-  ];
+  if (error) {
+    return (
+      <Alert severity="error" sx={{ mt: 2 }}>
+        {error}
+      </Alert>
+    );
+  }
+
+  if (!data) {
+    return (
+      <Alert severity="info" sx={{ mt: 2 }}>
+        Enter a URL to analyze website technology
+      </Alert>
+    );
+  }
+
+  const { technical } = data.data;
+
+  const iconMap: { [key: string]: any } = {
+    'Frontend Framework': Code,
+    'Framework': Code,
+    'Build Tool': Zap,
+    'Styling': Layers,
+    'CSS Framework': Layers,
+    'Backend': Server,
+    'Database': Database,
+    'Hosting': Globe,
+    'Library': Code,
+    'Markup': Code,
+    'default': Server
+  };
+
+  const getIcon = (category: string) => {
+    return iconMap[category] || iconMap['default'];
+  };
 
   const getSeverityColor = (severity: string) => {
     switch (severity.toLowerCase()) {
@@ -35,6 +64,13 @@ const TechTab = () => {
       case 'low': return '#4CAF50';
       default: return '#757575';
     }
+  };
+
+  const getHealthGradeColor = (grade: string) => {
+    if (grade.startsWith('A')) return '#4CAF50';
+    if (grade.startsWith('B')) return '#8BC34A';
+    if (grade.startsWith('C')) return '#FF9800';
+    return '#F44336';
   };
 
   return (
@@ -50,8 +86,8 @@ const TechTab = () => {
             Tech Stack
           </Typography>
           <Grid container spacing={2}>
-            {techStack.map((tech, index) => {
-              const IconComponent = tech.icon;
+            {technical.techStack.map((tech, index) => {
+              const IconComponent = getIcon(tech.category);
               return (
                 <Grid item xs={12} sm={6} md={4} key={index}>
                   <Box
@@ -83,32 +119,6 @@ const TechTab = () => {
         </CardContent>
       </Card>
 
-      <Grid container spacing={3} sx={{ mb: 3 }}>
-        {technicalChecks.map((check, index) => {
-          const IconComponent = check.icon;
-          return (
-            <Grid item xs={12} sm={6} md={3} key={index}>
-              <Card sx={{ borderRadius: 2, height: '100%' }}>
-                <CardContent sx={{ p: 3, textAlign: 'center' }}>
-                  <Box sx={{ mb: 2 }}>
-                    <IconComponent size={32} color="#2196F3" />
-                  </Box>
-                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
-                    {check.score}
-                  </Typography>
-                  <Typography variant="subtitle1" gutterBottom>
-                    {check.category}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {check.status}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          );
-        })}
-      </Grid>
-
       <Grid container spacing={3}>
         <Grid item xs={12} md={8}>
           <Card sx={{ borderRadius: 2 }}>
@@ -126,25 +136,20 @@ const TechTab = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {technicalIssues.map((issue, index) => (
+                  {technical.issues.map((issue, index) => (
                     <TableRow key={index}>
                       <TableCell>{issue.type}</TableCell>
                       <TableCell>{issue.description}</TableCell>
                       <TableCell>
-                        <Box
+                        <Chip
+                          label={issue.severity}
+                          size="small"
                           sx={{
-                            display: 'inline-block',
-                            px: 2,
-                            py: 0.5,
-                            borderRadius: 1,
                             backgroundColor: `${getSeverityColor(issue.severity)}20`,
                             color: getSeverityColor(issue.severity),
-                            fontSize: '0.875rem',
                             fontWeight: 'medium'
                           }}
-                        >
-                          {issue.severity}
-                        </Box>
+                        />
                       </TableCell>
                       <TableCell>{issue.status}</TableCell>
                     </TableRow>
@@ -162,29 +167,39 @@ const TechTab = () => {
                 Technical Health
               </Typography>
               <Box sx={{ mb: 3 }}>
-                <Typography variant="h3" sx={{ fontWeight: 'bold', color: '#4CAF50', textAlign: 'center' }}>
-                  B+
+                <Typography variant="h3" sx={{ 
+                  fontWeight: 'bold', 
+                  color: getHealthGradeColor(technical.healthGrade),
+                  textAlign: 'center' 
+                }}>
+                  {technical.healthGrade}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
-                  Good Technical Health
+                  Technical Health Grade
                 </Typography>
               </Box>
               
               <Box>
                 <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 2 }}>
-                  Key Metrics
+                  Issue Summary
                 </Typography>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography variant="body2">SSL Grade</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#4CAF50' }}>A+</Typography>
+                  <Typography variant="body2">High Severity</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#F44336' }}>
+                    {technical.issues.filter(i => i.severity === 'high').length}
+                  </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography variant="body2">Uptime</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 'bold' }}>99.8%</Typography>
+                  <Typography variant="body2">Medium Severity</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#FF9800' }}>
+                    {technical.issues.filter(i => i.severity === 'medium').length}
+                  </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography variant="body2">Response Time</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 'bold' }}>245ms</Typography>
+                  <Typography variant="body2">Low Severity</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#4CAF50' }}>
+                    {technical.issues.filter(i => i.severity === 'low').length}
+                  </Typography>
                 </Box>
               </Box>
             </CardContent>
