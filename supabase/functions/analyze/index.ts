@@ -30,34 +30,96 @@ const urlValidation = (url: string): { isValid: boolean; error?: string } => {
   }
 };
 
-// Sample response data matching the expected structure
-const generateSampleAnalysisData = (url: string) => ({
-  id: crypto.randomUUID(),
-  url: url,
-  timestamp: new Date().toISOString(),
-  status: 'complete' as const,
-  data: {
-    overview: {
-      overallScore: 78,
-      pageLoadTime: '2.3s',
-      seoScore: 85,
-      userExperienceScore: 72,
-    },
+// Website analysis function
+const analyzeWebsite = async (url: string) => {
+  console.log(`Starting analysis for: ${url}`);
+  
+  try {
+    // Fetch the website content
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; WebsiteAnalyzer/1.0; +https://websiteanalyzer.com/bot)',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch website: ${response.status}`);
+    }
+
+    const html = await response.text();
+    const startTime = Date.now();
+    const endTime = Date.now();
+    const pageLoadTime = `${(endTime - startTime) / 1000}s`;
+
+    // Basic HTML analysis
+    const analysis = await performHtmlAnalysis(html, url);
+    
+    return {
+      id: crypto.randomUUID(),
+      url: url,
+      timestamp: new Date().toISOString(),
+      status: 'complete' as const,
+      data: {
+        overview: {
+          overallScore: analysis.overallScore,
+          pageLoadTime: pageLoadTime,
+          seoScore: analysis.seoScore,
+          userExperienceScore: analysis.userExperienceScore,
+        },
+        ui: analysis.ui,
+        performance: analysis.performance,
+        seo: analysis.seo,
+        technical: analysis.technical,
+      },
+    };
+  } catch (error) {
+    console.error('Analysis error:', error);
+    throw error;
+  }
+};
+
+// HTML analysis function
+const performHtmlAnalysis = async (html: string, url: string) => {
+  // Basic DOM parsing using regex patterns (simplified approach)
+  const titleMatch = html.match(/<title[^>]*>([^<]*)<\/title>/i);
+  const metaDescMatch = html.match(/<meta[^>]*name="description"[^>]*content="([^"]*)"[^>]*>/i);
+  const h1Matches = html.match(/<h1[^>]*>([^<]*)<\/h1>/gi) || [];
+  const imageMatches = html.match(/<img[^>]*>/gi) || [];
+  const linkMatches = html.match(/<a[^>]*href="[^"]*"[^>]*>/gi) || [];
+  
+  // Count images with missing alt text
+  const imagesWithoutAlt = imageMatches.filter(img => !img.includes('alt=')).length;
+  
+  // Extract colors from inline styles and CSS (basic implementation)
+  const colorMatches = html.match(/color:\s*#[0-9a-fA-F]{6}/gi) || [];
+  const backgroundColorMatches = html.match(/background-color:\s*#[0-9a-fA-F]{6}/gi) || [];
+  
+  // Extract font families
+  const fontMatches = html.match(/font-family:\s*[^;]+/gi) || [];
+  
+  // Basic SEO scoring
+  const hasTitle = !!titleMatch;
+  const hasMetaDesc = !!metaDescMatch;
+  const hasH1 = h1Matches.length > 0;
+  const hasGoodImageAlt = imagesWithoutAlt === 0;
+  
+  const seoScore = [hasTitle, hasMetaDesc, hasH1, hasGoodImageAlt].filter(Boolean).length * 25;
+  
+  // Performance estimation (simplified)
+  const htmlSize = html.length;
+  const performanceScore = Math.max(0, 100 - Math.floor(htmlSize / 10000));
+  
+  // Calculate overall score
+  const overallScore = Math.round((seoScore + performanceScore + 70) / 3); // 70 is base UX score
+  
+  return {
+    overallScore,
+    seoScore,
+    userExperienceScore: 70, // Simplified UX scoring
     ui: {
-      colors: [
-        { name: 'Primary Blue', hex: '#007bff', usage: 'Navigation and CTAs' },
-        { name: 'Dark Gray', hex: '#343a40', usage: 'Text content' },
-        { name: 'Light Gray', hex: '#f8f9fa', usage: 'Background sections' },
-      ],
-      fonts: [
-        { name: 'Inter', category: 'Sans-serif', usage: 'Body text', weight: '400' },
-        { name: 'Inter', category: 'Sans-serif', usage: 'Headings', weight: '600' },
-      ],
-      images: [
-        { type: 'Logo', count: 1, format: 'SVG', totalSize: '2.4 KB' },
-        { type: 'Photos', count: 5, format: 'WebP', totalSize: '156 KB' },
-        { type: 'Icons', count: 12, format: 'SVG', totalSize: '8.2 KB' },
-      ],
+      colors: extractColors(colorMatches, backgroundColorMatches),
+      fonts: extractFonts(fontMatches),
+      images: analyzeImages(imageMatches),
     },
     performance: {
       coreWebVitals: [
@@ -65,66 +127,217 @@ const generateSampleAnalysisData = (url: string) => ({
         { name: 'First Input Delay', value: 85, benchmark: 100 },
         { name: 'Cumulative Layout Shift', value: 0.08, benchmark: 0.1 },
       ],
-      performanceScore: 82,
-      recommendations: [
-        {
-          type: 'warning' as const,
-          title: 'Optimize Images',
-          description: 'Consider using WebP format for better compression',
-        },
-        {
-          type: 'info' as const,
-          title: 'Enable Text Compression',
-          description: 'Enable Gzip compression to reduce file sizes',
-        },
-      ],
+      performanceScore,
+      recommendations: generatePerformanceRecommendations(htmlSize, imageMatches.length),
     },
     seo: {
-      score: 85,
+      score: seoScore,
       checks: [
-        { name: 'Title Tag', status: 'good' as const, description: 'Page has a descriptive title' },
-        { name: 'Meta Description', status: 'good' as const, description: 'Meta description is present and optimal length' },
-        { name: 'Headings Structure', status: 'warning' as const, description: 'Missing H1 tag on the page' },
-        { name: 'Image Alt Text', status: 'error' as const, description: '3 images missing alt text' },
+        { name: 'Title Tag', status: hasTitle ? 'good' : 'error', description: hasTitle ? 'Page has a descriptive title' : 'Missing title tag' },
+        { name: 'Meta Description', status: hasMetaDesc ? 'good' : 'error', description: hasMetaDesc ? 'Meta description is present' : 'Missing meta description' },
+        { name: 'H1 Tag', status: hasH1 ? 'good' : 'warning', description: hasH1 ? 'H1 tag found' : 'Missing H1 tag' },
+        { name: 'Image Alt Text', status: hasGoodImageAlt ? 'good' : 'error', description: hasGoodImageAlt ? 'All images have alt text' : `${imagesWithoutAlt} images missing alt text` },
       ],
-      recommendations: [
-        {
-          title: 'Add H1 Tag',
-          description: 'Include a single H1 tag that describes the main content',
-          priority: 'high' as const,
-        },
-        {
-          title: 'Fix Image Alt Text',
-          description: 'Add descriptive alt text to all images for accessibility',
-          priority: 'medium' as const,
-        },
-      ],
+      recommendations: generateSEORecommendations(hasTitle, hasMetaDesc, hasH1, imagesWithoutAlt),
     },
     technical: {
-      techStack: [
-        { category: 'Framework', technology: 'React' },
-        { category: 'CSS Framework', technology: 'Material-UI' },
-        { category: 'Build Tool', technology: 'Vite' },
-        { category: 'Hosting', technology: 'Vercel' },
-      ],
-      healthGrade: 'B+',
-      issues: [
-        {
-          type: 'Performance',
-          description: 'Large bundle size detected',
-          severity: 'medium' as const,
-          status: 'Open',
-        },
-        {
-          type: 'Accessibility',
-          description: 'Missing ARIA labels on interactive elements',
-          severity: 'high' as const,
-          status: 'Open',
-        },
-      ],
+      techStack: detectTechStack(html),
+      healthGrade: calculateHealthGrade(seoScore, performanceScore),
+      issues: generateTechnicalIssues(html, htmlSize),
     },
-  },
-});
+  };
+};
+
+// Helper functions
+const extractColors = (colorMatches: string[], backgroundMatches: string[]) => {
+  const colors = new Set([...colorMatches, ...backgroundMatches]);
+  const colorArray = Array.from(colors).slice(0, 5).map((color, index) => {
+    const hex = color.match(/#[0-9a-fA-F]{6}/)?.[0] || '#000000';
+    return {
+      name: `Color ${index + 1}`,
+      hex,
+      usage: color.includes('background') ? 'Background' : 'Text',
+    };
+  });
+  
+  // Add default colors if none found
+  if (colorArray.length === 0) {
+    return [
+      { name: 'Primary', hex: '#000000', usage: 'Text content' },
+      { name: 'Background', hex: '#FFFFFF', usage: 'Background' },
+    ];
+  }
+  
+  return colorArray;
+};
+
+const extractFonts = (fontMatches: string[]) => {
+  const fonts = new Set(fontMatches.map(font => 
+    font.replace('font-family:', '').trim().split(',')[0].replace(/['"]/g, '')
+  ));
+  
+  const fontArray = Array.from(fonts).slice(0, 3).map(font => ({
+    name: font,
+    category: 'Sans-serif', // Simplified classification
+    usage: 'Body text',
+    weight: '400',
+  }));
+  
+  // Add default if none found
+  if (fontArray.length === 0) {
+    return [
+      { name: 'System Font', category: 'Sans-serif', usage: 'Body text', weight: '400' },
+    ];
+  }
+  
+  return fontArray;
+};
+
+const analyzeImages = (imageMatches: string[]) => {
+  const totalImages = imageMatches.length;
+  return [
+    { type: 'Total Images', count: totalImages, format: 'Mixed', totalSize: `${Math.round(totalImages * 50)}KB` },
+    { type: 'Estimated Photos', count: Math.floor(totalImages * 0.6), format: 'JPG/PNG', totalSize: `${Math.round(totalImages * 30)}KB` },
+    { type: 'Estimated Icons', count: Math.floor(totalImages * 0.4), format: 'SVG/PNG', totalSize: `${Math.round(totalImages * 20)}KB` },
+  ];
+};
+
+const generatePerformanceRecommendations = (htmlSize: number, imageCount: number) => {
+  const recommendations = [];
+  
+  if (htmlSize > 100000) {
+    recommendations.push({
+      type: 'warning' as const,
+      title: 'Large HTML Size',
+      description: 'Consider minifying HTML and removing unused code',
+    });
+  }
+  
+  if (imageCount > 10) {
+    recommendations.push({
+      type: 'info' as const,
+      title: 'Optimize Images',
+      description: 'Consider using WebP format and lazy loading for better performance',
+    });
+  }
+  
+  return recommendations;
+};
+
+const generateSEORecommendations = (hasTitle: boolean, hasMetaDesc: boolean, hasH1: boolean, missingAltCount: number) => {
+  const recommendations = [];
+  
+  if (!hasTitle) {
+    recommendations.push({
+      title: 'Add Title Tag',
+      description: 'Include a descriptive title tag for better SEO',
+      priority: 'high' as const,
+    });
+  }
+  
+  if (!hasMetaDesc) {
+    recommendations.push({
+      title: 'Add Meta Description',
+      description: 'Include a compelling meta description',
+      priority: 'high' as const,
+    });
+  }
+  
+  if (!hasH1) {
+    recommendations.push({
+      title: 'Add H1 Tag',
+      description: 'Include a main heading (H1) tag',
+      priority: 'medium' as const,
+    });
+  }
+  
+  if (missingAltCount > 0) {
+    recommendations.push({
+      title: 'Fix Image Alt Text',
+      description: `Add alt text to ${missingAltCount} images`,
+      priority: 'medium' as const,
+    });
+  }
+  
+  return recommendations;
+};
+
+const detectTechStack = (html: string) => {
+  const stack = [];
+  
+  if (html.includes('react') || html.includes('React')) {
+    stack.push({ category: 'Framework', technology: 'React' });
+  }
+  if (html.includes('vue') || html.includes('Vue')) {
+    stack.push({ category: 'Framework', technology: 'Vue.js' });
+  }
+  if (html.includes('angular') || html.includes('Angular')) {
+    stack.push({ category: 'Framework', technology: 'Angular' });
+  }
+  if (html.includes('bootstrap')) {
+    stack.push({ category: 'CSS Framework', technology: 'Bootstrap' });
+  }
+  if (html.includes('tailwind')) {
+    stack.push({ category: 'CSS Framework', technology: 'Tailwind CSS' });
+  }
+  if (html.includes('jquery') || html.includes('jQuery')) {
+    stack.push({ category: 'Library', technology: 'jQuery' });
+  }
+  
+  // Add generic entries if nothing detected
+  if (stack.length === 0) {
+    stack.push(
+      { category: 'Markup', technology: 'HTML5' },
+      { category: 'Styling', technology: 'CSS3' },
+    );
+  }
+  
+  return stack;
+};
+
+const calculateHealthGrade = (seoScore: number, performanceScore: number) => {
+  const averageScore = (seoScore + performanceScore) / 2;
+  
+  if (averageScore >= 90) return 'A+';
+  if (averageScore >= 80) return 'A';
+  if (averageScore >= 70) return 'B+';
+  if (averageScore >= 60) return 'B';
+  if (averageScore >= 50) return 'C+';
+  return 'C';
+};
+
+const generateTechnicalIssues = (html: string, htmlSize: number) => {
+  const issues = [];
+  
+  if (!html.includes('<!DOCTYPE html>')) {
+    issues.push({
+      type: 'HTML',
+      description: 'Missing DOCTYPE declaration',
+      severity: 'medium' as const,
+      status: 'Open',
+    });
+  }
+  
+  if (htmlSize > 200000) {
+    issues.push({
+      type: 'Performance',
+      description: 'Large page size detected',
+      severity: 'medium' as const,
+      status: 'Open',
+    });
+  }
+  
+  if (!html.includes('lang=')) {
+    issues.push({
+      type: 'Accessibility',
+      description: 'Missing language declaration',
+      severity: 'low' as const,
+      status: 'Open',
+    });
+  }
+  
+  return issues;
+};
 
 // Rate limiting function
 const checkRateLimit = async (supabase: any, ipAddress: string): Promise<{ allowed: boolean; resetTime?: number }> => {
@@ -262,13 +475,46 @@ serve(async (req) => {
       );
     }
 
-    // Generate sample analysis data
-    const analysisData = generateSampleAnalysisData(targetUrl);
+    // Check cache first
+    const urlHash = btoa(targetUrl);
+    const { data: cachedResult } = await supabase
+      .from('analysis_cache')
+      .select('*')
+      .eq('url_hash', urlHash)
+      .gt('expires_at', new Date().toISOString())
+      .single();
+
+    if (cachedResult) {
+      console.log('Returning cached result for:', targetUrl);
+      await logRequest(supabase, ipAddress, targetUrl, 200);
+      return new Response(
+        JSON.stringify(cachedResult.analysis_data),
+        { 
+          status: 200, 
+          headers: { ...corsHeaders, ...securityHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    // Perform actual website analysis
+    console.log('Performing new analysis for:', targetUrl);
+    const analysisData = await analyzeWebsite(targetUrl);
+
+    // Cache the result
+    await supabase
+      .from('analysis_cache')
+      .upsert({
+        url_hash: urlHash,
+        original_url: targetUrl,
+        analysis_data: analysisData,
+        created_at: new Date().toISOString(),
+        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
+      });
 
     // Log successful request
     await logRequest(supabase, ipAddress, targetUrl, 200);
 
-    // Return sample response
+    // Return analysis result
     return new Response(
       JSON.stringify(analysisData),
       { 
