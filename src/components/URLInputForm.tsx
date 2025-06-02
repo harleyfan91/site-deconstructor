@@ -8,14 +8,16 @@ import {
   CircularProgress,
   Chip,
   Typography,
+  Alert,
 } from '@mui/material';
 import { Search, Link as LinkIcon } from '@mui/icons-material';
 import { motion } from 'framer-motion';
+import { useAnalysisContext } from '../contexts/AnalysisContext';
 
 const URLInputForm = () => {
   const [url, setUrl] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [isValid, setIsValid] = useState(true);
+  const { analyzeWebsite, loading, error } = useAnalysisContext();
 
   const recentSearches = [
     'apple.com',
@@ -35,25 +37,32 @@ const URLInputForm = () => {
     setIsValid(validateUrl(value));
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (url && isValid) {
-      setIsLoading(true);
-      // Simulate API call
-      setTimeout(() => {
-        setIsLoading(false);
-        console.log('Analyzing:', url);
-      }, 2000);
+      let fullUrl = url;
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        fullUrl = `https://${url}`;
+      }
+      await analyzeWebsite(fullUrl);
     }
   };
 
-  const handleRecentSearch = (searchUrl: string) => {
+  const handleRecentSearch = async (searchUrl: string) => {
     setUrl(searchUrl);
     setIsValid(true);
+    const fullUrl = `https://${searchUrl}`;
+    await analyzeWebsite(fullUrl);
   };
 
   return (
     <Box sx={{ width: '100%', maxWidth: 600 }}>
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+      
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -105,7 +114,7 @@ const URLInputForm = () => {
             type="submit"
             variant="contained"
             size="large"
-            disabled={!url || !isValid || isLoading}
+            disabled={!url || !isValid || loading}
             sx={{
               minWidth: { xs: '100%', sm: 150 },
               height: 56,
@@ -127,7 +136,7 @@ const URLInputForm = () => {
               },
             }}
           >
-            {isLoading ? (
+            {loading ? (
               <CircularProgress size={24} color="inherit" />
             ) : (
               <>
@@ -169,6 +178,7 @@ const URLInputForm = () => {
               <Chip
                 label={search}
                 onClick={() => handleRecentSearch(search)}
+                disabled={loading}
                 sx={{
                   bgcolor: 'rgba(255, 255, 255, 0.1)',
                   color: 'text.primary',
