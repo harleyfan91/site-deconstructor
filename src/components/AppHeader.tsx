@@ -36,7 +36,23 @@ const AppHeader = () => {
     setDarkMode(!darkMode);
   };
 
-  const menuItems = ['Features', 'Pricing', 'About', 'Contact'];
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+    // Close mobile drawer after navigation
+    if (isMobile) {
+      setMobileOpen(false);
+    }
+  };
+
+  const menuItems = [
+    { name: 'Features', id: 'features' },
+    { name: 'Pricing', id: 'pricing' },
+    { name: 'About', id: 'about' },
+    { name: 'Contact', id: 'contact' },
+  ];
 
   const drawer = (
     <Box sx={{ width: 250, bgcolor: 'background.paper', height: '100%' }}>
@@ -47,8 +63,8 @@ const AppHeader = () => {
       </Box>
       <List>
         {menuItems.map((item) => (
-          <ListItemButton key={item}>
-            <ListItemText primary={item} />
+          <ListItemButton key={item.name} onClick={() => scrollToSection(item.id)}>
+            <ListItemText primary={item.name} />
           </ListItemButton>
         ))}
       </List>
@@ -92,20 +108,21 @@ const AppHeader = () => {
             <Box sx={{ display: 'flex', gap: 3, alignItems: 'center' }}>
               {menuItems.map((item, index) => (
                 <motion.div
-                  key={item}
+                  key={item.name}
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                 >
                   <Button
                     color="inherit"
+                    onClick={() => scrollToSection(item.id)}
                     sx={{
                       '&:hover': {
                         color: 'primary.main',
                       },
                     }}
                   >
-                    {item}
+                    {item.name}
                   </Button>
                 </motion.div>
               ))}

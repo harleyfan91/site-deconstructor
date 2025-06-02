@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Box,
@@ -17,49 +16,46 @@ import { Check, Star } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 
 const PricingSection = () => {
-  const plans = [
+  const pricingPlans = [
     {
-      name: 'Free',
-      price: '$0',
-      period: 'forever',
-      description: 'Perfect for getting started',
+      title: 'Basic',
+      price: 'Free',
+      description: 'For individuals and small teams to get started.',
       features: [
-        '5 website analyses per month',
-        'Basic color extraction',
-        'Font identification',
-        'Image gallery access',
-        'Basic tech stack detection',
-        'Community support',
+        'Limited color palette extraction',
+        'Basic font analysis',
+        'Up to 5 website scans per month',
       ],
-      buttonText: 'Get Started Free',
-      buttonVariant: 'outlined' as const,
-      popular: false,
+      cta: 'Get Started',
     },
     {
-      name: 'Pro',
-      price: '$29',
-      period: 'per month',
-      description: 'For professionals and teams',
+      title: 'Pro',
+      price: '$19/month',
+      description: 'Advanced features for designers and developers.',
       features: [
-        'Unlimited website analyses',
-        'Advanced color palettes',
-        'Complete font analysis',
-        'High-resolution image downloads',
-        'Detailed tech stack reports',
-        'Performance metrics',
-        'SEO insights',
-        'Export to PDF/JSON/CSV',
-        'Priority support',
-        'API access',
+        'Unlimited color palette extraction',
+        'Advanced font analysis',
+        'Unlimited website scans',
+        'Tech stack detection',
       ],
-      buttonText: 'Start Pro Trial',
-      buttonVariant: 'contained' as const,
-      popular: true,
+      cta: 'Upgrade to Pro',
+    },
+    {
+      title: 'Enterprise',
+      price: 'Contact Us',
+      description: 'Custom solutions for large organizations.',
+      features: [
+        'All Pro features',
+        'Dedicated support',
+        'Custom reporting',
+        'Security analysis',
+      ],
+      cta: 'Contact Us',
     },
   ];
 
   return (
-    <Box sx={{ py: { xs: 8, md: 12 } }}>
+    <Box id="pricing" sx={{ py: { xs: 8, md: 12 }, bgcolor: 'background.default' }}>
       <Container maxWidth="lg">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -72,13 +68,14 @@ const PricingSection = () => {
             align="center"
             sx={{
               mb: 2,
-              background: 'linear-gradient(135deg, #FFFFFF 0%, rgba(255, 255, 255, 0.8) 100%)',
+              background: 'linear-gradient(135deg, #FF6B35 0%, #FF8A65 100%)',
               backgroundClip: 'text',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
+              fontWeight: 700,
             }}
           >
-            Simple, Transparent Pricing
+            Flexible Pricing Plans
           </Typography>
           <Typography
             variant="h6"
@@ -86,158 +83,104 @@ const PricingSection = () => {
             color="text.secondary"
             sx={{ mb: 8, maxWidth: 600, mx: 'auto' }}
           >
-            Choose the plan that fits your needs. Upgrade or downgrade at any time.
+            Choose the plan that best fits your needs. Upgrade or downgrade at any time.
           </Typography>
         </motion.div>
 
         <Box
           sx={{
-            display: 'flex',
+            display: 'grid',
+            gridTemplateColumns: {
+              xs: '1fr',
+              md: 'repeat(3, 1fr)',
+            },
             gap: 4,
-            justifyContent: 'center',
-            flexDirection: { xs: 'column', md: 'row' },
-            alignItems: { xs: 'center', md: 'stretch' },
           }}
         >
-          {plans.map((plan, index) => (
-            <Box
-              key={index}
-              sx={{
-                width: { xs: '100%', md: '100%' },
-                maxWidth: { xs: '100%', md: '400px' },
-                flex: { md: '0 1 400px' },
-              }}
-            >
+          {pricingPlans.map((plan, index) => (
+            <Box key={index}>
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.2 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
                 viewport={{ once: true }}
                 whileHover={{ y: -10 }}
               >
                 <Card
                   sx={{
                     height: '100%',
-                    position: 'relative',
-                    border: plan.popular ? '2px solid' : '1px solid',
-                    borderColor: plan.popular ? 'primary.main' : 'rgba(255, 255, 255, 0.1)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    cursor: 'pointer',
                     transition: 'all 0.3s ease',
                     '&:hover': {
                       transform: 'translateY(-8px)',
-                      boxShadow: plan.popular 
-                        ? '0 20px 60px rgba(255, 107, 53, 0.3)'
-                        : '0 20px 60px rgba(0, 0, 0, 0.3)',
+                      boxShadow: '0 12px 40px rgba(255, 107, 53, 0.2)',
                     },
                   }}
                 >
-                  {plan.popular && (
-                    <Chip
-                      icon={<Star />}
-                      label="Most Popular"
-                      color="primary"
-                      sx={{
-                        position: 'absolute',
-                        top: -12,
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        fontWeight: 600,
-                      }}
-                    />
-                  )}
-                  
-                  <CardContent sx={{ p: 4 }}>
+                  <CardContent sx={{ p: 3, textAlign: 'center' }}>
                     <Typography
-                      variant="h4"
-                      sx={{ mb: 1, fontWeight: 600 }}
+                      variant="h5"
+                      sx={{ mb: 2, fontWeight: 600 }}
                     >
-                      {plan.name}
+                      {plan.title}
                     </Typography>
-                    
+                    <Typography
+                      variant="h3"
+                      sx={{ mb: 2, fontWeight: 700 }}
+                    >
+                      {plan.price}
+                    </Typography>
                     <Typography
                       variant="body2"
                       color="text.secondary"
-                      sx={{ mb: 3 }}
+                      sx={{ mb: 3, lineHeight: 1.6 }}
                     >
                       {plan.description}
                     </Typography>
-
-                    <Box sx={{ mb: 4 }}>
-                      <Typography
-                        variant="h3"
-                        component="span"
-                        sx={{ fontWeight: 700 }}
-                      >
-                        {plan.price}
-                      </Typography>
-                      <Typography
-                        variant="body1"
-                        component="span"
-                        color="text.secondary"
-                        sx={{ ml: 1 }}
-                      >
-                        {plan.period}
-                      </Typography>
-                    </Box>
-
-                    <Button
-                      variant={plan.buttonVariant}
-                      fullWidth
-                      size="large"
-                      sx={{
-                        mb: 3,
-                        py: 1.5,
-                        ...(plan.popular && {
-                          background: 'linear-gradient(45deg, #FF6B35 30%, #FF8A65 90%)',
-                          boxShadow: '0 4px 15px rgba(255, 107, 53, 0.3)',
-                        }),
-                      }}
-                    >
-                      {plan.buttonText}
-                    </Button>
-
-                    <List sx={{ p: 0 }}>
-                      {plan.features.map((feature, featureIndex) => (
-                        <ListItem key={featureIndex} sx={{ px: 0, py: 0.5 }}>
-                          <ListItemIcon sx={{ minWidth: 36 }}>
-                            <Check
-                              sx={{
-                                color: plan.popular ? 'primary.main' : 'success.main',
-                                fontSize: '1.25rem',
-                              }}
-                            />
+                    <List>
+                      {plan.features.map((feature, i) => (
+                        <ListItem key={i} disablePadding>
+                          <ListItemIcon sx={{ minWidth: '30px' }}>
+                            <Check color="primary" />
                           </ListItemIcon>
-                          <ListItemText
-                            primary={feature}
-                            primaryTypographyProps={{
-                              variant: 'body2',
-                              color: 'text.primary',
-                            }}
-                          />
+                          <ListItemText primary={feature} />
                         </ListItem>
                       ))}
                     </List>
                   </CardContent>
+                  <Box sx={{ p: 3, textAlign: 'center' }}>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      fullWidth
+                      sx={{
+                        background: 'linear-gradient(45deg, #FF6B35 30%, #FF8A65 90%)',
+                        boxShadow: '0 4px 15px rgba(255, 107, 53, 0.3)',
+                        '&:hover': {
+                          background: 'linear-gradient(45deg, #FF8A65 30%, #FF6B35 90%)',
+                        },
+                      }}
+                    >
+                      {plan.cta}
+                    </Button>
+                  </Box>
                 </Card>
               </motion.div>
             </Box>
           ))}
         </Box>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          viewport={{ once: true }}
-        >
-          <Typography
-            variant="body2"
-            align="center"
-            color="text.secondary"
-            sx={{ mt: 6 }}
-          >
-            All plans include 14-day free trial • No credit card required • Cancel anytime
-          </Typography>
-        </motion.div>
+        <Box mt={4} display="flex" justifyContent="center">
+          <Chip
+            icon={<Star />}
+            label="Recommended for most users"
+            color="primary"
+            sx={{ fontWeight: 600 }}
+          />
+        </Box>
       </Container>
     </Box>
   );

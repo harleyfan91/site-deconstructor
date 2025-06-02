@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Box,
@@ -64,7 +63,7 @@ const FeatureShowcase = () => {
   ];
 
   return (
-    <Box sx={{ py: { xs: 8, md: 12 }, bgcolor: 'rgba(0, 0, 0, 0.2)' }}>
+    <Box id="features" sx={{ py: { xs: 8, md: 12 }, bgcolor: 'rgba(0, 0, 0, 0.2)' }}>
       <Container maxWidth="lg">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
