@@ -50,8 +50,9 @@ const AppHeader = ({ darkMode, toggleDarkMode }: { darkMode: boolean; toggleDark
         position="fixed" 
         sx={{ 
           backdropFilter: 'blur(20px)',
-          backgroundColor: 'rgba(0, 0, 0, 0.8)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+          backgroundColor: darkMode ? 'rgba(0, 0, 0, 0.8)' : 'rgba(255, 255, 255, 0.8)',
+          boxShadow: darkMode ? '0 8px 32px rgba(0, 0, 0, 0.3)' : '0 8px 32px rgba(0, 0, 0, 0.1)',
+          color: darkMode ? '#FFFFFF' : '#000000',
         }}
       >
         <Toolbar>

@@ -127,7 +127,9 @@ const MobileDrawer = ({
         }}
         sx={{
           '& .MuiDrawer-paper': {
-            backgroundImage: 'linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(45, 52, 54, 0.95) 100%)',
+            backgroundImage: darkMode 
+              ? 'linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(45, 52, 54, 0.95) 100%)'
+              : 'linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(245, 245, 245, 0.95) 100%)',
             backdropFilter: 'blur(20px)',
           },
         }}

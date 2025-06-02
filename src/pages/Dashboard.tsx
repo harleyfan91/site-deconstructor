@@ -4,13 +4,12 @@ import { Box, Container } from '@mui/material';
 import AppHeader from '../components/AppHeader';
 import DashboardContent from '../components/DashboardContent';
 
-const Dashboard = () => {
-  const [darkMode, setDarkMode] = React.useState(false);
+interface DashboardProps {
+  darkMode: boolean;
+  toggleDarkMode: () => void;
+}
 
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-  };
-
+const Dashboard = ({ darkMode, toggleDarkMode }: DashboardProps) => {
   return (
     <Box>
       <AppHeader darkMode={darkMode} toggleDarkMode={toggleDarkMode} />

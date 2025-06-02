@@ -1,9 +1,9 @@
 
 import { createTheme } from '@mui/material/styles';
 
-export const theme = createTheme({
+export const createAppTheme = (darkMode: boolean) => createTheme({
   palette: {
-    mode: 'dark',
+    mode: darkMode ? 'dark' : 'light',
     primary: {
       main: '#FF6B35',
       light: '#FF8A65',
@@ -15,12 +15,12 @@ export const theme = createTheme({
       dark: '#0D47A1',
     },
     background: {
-      default: '#0F0F0F',
-      paper: 'rgba(45, 52, 54, 0.8)',
+      default: darkMode ? '#0F0F0F' : '#FFFFFF',
+      paper: darkMode ? 'rgba(45, 52, 54, 0.8)' : 'rgba(255, 255, 255, 0.9)',
     },
     text: {
-      primary: '#FFFFFF',
-      secondary: 'rgba(255, 255, 255, 0.7)',
+      primary: darkMode ? '#FFFFFF' : '#000000',
+      secondary: darkMode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)',
     },
   },
   typography: {
@@ -75,8 +75,8 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           backdropFilter: 'blur(20px)',
-          background: 'rgba(45, 52, 54, 0.4)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
+          background: darkMode ? 'rgba(45, 52, 54, 0.4)' : 'rgba(255, 255, 255, 0.6)',
+          border: darkMode ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.1)',
           borderRadius: '16px',
         },
       },
@@ -86,12 +86,12 @@ export const theme = createTheme({
         root: {
           '& .MuiOutlinedInput-root': {
             borderRadius: '12px',
-            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+            backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)',
             '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 0.08)',
+              backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)',
             },
             '&.Mui-focused': {
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
             },
           },
         },
@@ -99,3 +99,6 @@ export const theme = createTheme({
     },
   },
 });
+
+// Export default theme for backward compatibility
+export const theme = createAppTheme(true);

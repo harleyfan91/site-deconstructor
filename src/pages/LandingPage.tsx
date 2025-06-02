@@ -1,18 +1,17 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Box } from '@mui/material';
 import AppHeader from '../components/AppHeader';
 import HeroSection from '../components/HeroSection';
 import FeatureShowcase from '../components/FeatureShowcase';
 import PricingSection from '../components/PricingSection';
 
-const LandingPage = () => {
-  const [darkMode, setDarkMode] = useState(false);
+interface LandingPageProps {
+  darkMode: boolean;
+  toggleDarkMode: () => void;
+}
 
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-  };
-
+const LandingPage = ({ darkMode, toggleDarkMode }: LandingPageProps) => {
   return (
     <Box>
       <AppHeader darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
