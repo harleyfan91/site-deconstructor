@@ -121,7 +121,7 @@ const AppHeader = ({ darkMode, toggleDarkMode }: { darkMode: boolean; toggleDark
               WebkitTextFillColor: 'transparent',
             }}
           >
-            Website Deconstructor
+            SiteDeconstructor
           </Typography>
 
           {/* Desktop Navigation */}
