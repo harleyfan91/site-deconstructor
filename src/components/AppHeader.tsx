@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import {
   AppBar,
@@ -15,33 +16,44 @@ import {
   ListItemButton,
 } from '@mui/material';
 import { Menu, Close, DarkMode, LightMode } from '@mui/icons-material';
+import { Link, useLocation } from 'react-router-dom';
 import { smoothScrollToSection } from '../lib/smoothScroll';
 
 const AppHeader = ({ darkMode, toggleDarkMode }: { darkMode: boolean; toggleDarkMode: () => void }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const location = useLocation();
 
   const navigationItems = [
-    { label: 'Features', id: 'features' },
-    { label: 'Pricing', id: 'pricing' },
-    { label: 'Dashboard', id: 'dashboard' }, // if you have this section
+    { label: 'Features', id: 'features', type: 'scroll' },
+    { label: 'Pricing', id: 'pricing', type: 'scroll' },
+    { label: 'Dashboard', id: '/dashboard', type: 'link' },
   ];
 
-  const handleNavClick = (sectionId: string) => {
-    console.log('Nav clicked for section:', sectionId, 'isMobile:', isMobile, 'mobileOpen:', mobileOpen);
+  const handleNavClick = (item: typeof navigationItems[0]) => {
+    console.log('Nav clicked for:', item, 'isMobile:', isMobile, 'mobileOpen:', mobileOpen);
     
+    if (item.type === 'link') {
+      // Handle routing - just close mobile menu if open
+      if (isMobile && mobileOpen) {
+        setMobileOpen(false);
+      }
+      return;
+    }
+
+    // Handle scrolling
     if (isMobile && mobileOpen) {
       // Close mobile menu first
       setMobileOpen(false);
       // Add delay to ensure drawer closes before scrolling
       setTimeout(() => {
         console.log('Delayed scroll for mobile drawer');
-        smoothScrollToSection(sectionId);
+        smoothScrollToSection(item.id);
       }, 300); // 300ms delay to match drawer close animation
     } else {
       // Desktop or mobile menu not open - scroll immediately
-      smoothScrollToSection(sectionId);
+      smoothScrollToSection(item.id);
       setMobileOpen(false); // Ensure mobile menu is closed
     }
   };
@@ -60,23 +72,45 @@ const AppHeader = ({ darkMode, toggleDarkMode }: { darkMode: boolean; toggleDark
       <List>
         {navigationItems.map((item) => (
           <ListItem key={item.id} disablePadding>
-            <ListItemButton
-              onClick={() => handleNavClick(item.id)}
-              sx={{
-                '&:hover': {
-                  backgroundColor: 'rgba(255, 107, 53, 0.1)',
-                },
-              }}
-            >
-              <ListItemText 
-                primary={item.label}
+            {item.type === 'link' ? (
+              <ListItemButton
+                component={Link}
+                to={item.id}
+                onClick={() => handleNavClick(item)}
                 sx={{
-                  '& .MuiListItemText-primary': {
-                    fontWeight: 500,
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 107, 53, 0.1)',
                   },
                 }}
-              />
-            </ListItemButton>
+              >
+                <ListItemText 
+                  primary={item.label}
+                  sx={{
+                    '& .MuiListItemText-primary': {
+                      fontWeight: 500,
+                    },
+                  }}
+                />
+              </ListItemButton>
+            ) : (
+              <ListItemButton
+                onClick={() => handleNavClick(item)}
+                sx={{
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 107, 53, 0.1)',
+                  },
+                }}
+              >
+                <ListItemText 
+                  primary={item.label}
+                  sx={{
+                    '& .MuiListItemText-primary': {
+                      fontWeight: 500,
+                    },
+                  }}
+                />
+              </ListItemButton>
+            )}
           </ListItem>
         ))}
         <ListItem>
@@ -111,7 +145,8 @@ const AppHeader = ({ darkMode, toggleDarkMode }: { darkMode: boolean; toggleDark
         <Toolbar>
           <Typography
             variant="h6"
-            component="div"
+            component={Link}
+            to="/"
             sx={{
               flexGrow: 1,
               fontWeight: 700,
@@ -119,6 +154,7 @@ const AppHeader = ({ darkMode, toggleDarkMode }: { darkMode: boolean; toggleDark
               backgroundClip: 'text',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
+              textDecoration: 'none',
             }}
           >
             SiteDeconstructor
@@ -128,18 +164,34 @@ const AppHeader = ({ darkMode, toggleDarkMode }: { darkMode: boolean; toggleDark
           {!isMobile && (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               {navigationItems.map((item) => (
-                <Button
-                  key={item.id}
-                  color="inherit"
-                  onClick={() => handleNavClick(item.id)}
-                  sx={{
-                    '&:hover': {
-                      backgroundColor: 'rgba(255, 107, 53, 0.1)',
-                    },
-                  }}
-                >
-                  {item.label}
-                </Button>
+                item.type === 'link' ? (
+                  <Button
+                    key={item.id}
+                    color="inherit"
+                    component={Link}
+                    to={item.id}
+                    sx={{
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 107, 53, 0.1)',
+                      },
+                    }}
+                  >
+                    {item.label}
+                  </Button>
+                ) : (
+                  <Button
+                    key={item.id}
+                    color="inherit"
+                    onClick={() => handleNavClick(item)}
+                    sx={{
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 107, 53, 0.1)',
+                      },
+                    }}
+                  >
+                    {item.label}
+                  </Button>
+                )
               ))}
               <IconButton color="inherit" onClick={toggleDarkMode}>
                 {darkMode ? <LightMode /> : <DarkMode />}
