@@ -1,10 +1,9 @@
-
 import React from 'react';
 import {
   Box,
   Container,
   Typography,
-  Grid2,
+  Grid,
   Card,
   CardContent,
   Button,
@@ -91,9 +90,9 @@ const PricingSection = () => {
           </Typography>
         </motion.div>
 
-        <Grid2 container spacing={4} justifyContent="center">
+        <Grid container spacing={4} justifyContent="center">
           {plans.map((plan, index) => (
-            <Grid2 xs={12} md={6} lg={5} key={index}>
+            <Grid item xs={12} md={6} lg={5} key={index}>
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -205,9 +204,9 @@ const PricingSection = () => {
                   </CardContent>
                 </Card>
               </motion.div>
-            </Grid2>
+            </Grid>
           ))}
-        </Grid2>
+        </Grid>
 
         <motion.div
           initial={{ opacity: 0 }}
