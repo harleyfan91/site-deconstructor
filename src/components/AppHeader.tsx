@@ -10,6 +10,7 @@ import {
   Drawer,
   List,
   ListItem,
+  ListItemButton,
   ListItemText,
   useMediaQuery,
   useTheme,
@@ -47,8 +48,10 @@ const AppHeader = () => {
       </Box>
       <List>
         {menuItems.map((item) => (
-          <ListItem button key={item}>
-            <ListItemText primary={item} />
+          <ListItem key={item} disablePadding>
+            <ListItemButton>
+              <ListItemText primary={item} />
+            </ListItemButton>
           </ListItem>
         ))}
       </List>

@@ -4,7 +4,7 @@ import {
   Box,
   Container,
   Typography,
-  Grid,
+  Grid2 as Grid,
   Card,
   CardContent,
   Button,
@@ -93,7 +93,7 @@ const PricingSection = () => {
 
         <Grid container spacing={4} justifyContent="center">
           {plans.map((plan, index) => (
-            <Grid item xs={12} md={6} lg={5} key={index}>
+            <Grid xs={12} md={6} lg={5} key={index}>
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
