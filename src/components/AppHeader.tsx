@@ -29,9 +29,21 @@ const AppHeader = ({ darkMode, toggleDarkMode }: { darkMode: boolean; toggleDark
   ];
 
   const handleNavClick = (sectionId: string) => {
-    console.log('Nav clicked for section:', sectionId);
-    smoothScrollToSection(sectionId);
-    setMobileOpen(false); // Close mobile menu after clicking
+    console.log('Nav clicked for section:', sectionId, 'isMobile:', isMobile, 'mobileOpen:', mobileOpen);
+    
+    if (isMobile && mobileOpen) {
+      // Close mobile menu first
+      setMobileOpen(false);
+      // Add delay to ensure drawer closes before scrolling
+      setTimeout(() => {
+        console.log('Delayed scroll for mobile drawer');
+        smoothScrollToSection(sectionId);
+      }, 300); // 300ms delay to match drawer close animation
+    } else {
+      // Desktop or mobile menu not open - scroll immediately
+      smoothScrollToSection(sectionId);
+      setMobileOpen(false); // Ensure mobile menu is closed
+    }
   };
 
   const handleDrawerToggle = () => {
