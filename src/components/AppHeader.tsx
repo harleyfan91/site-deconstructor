@@ -4,68 +4,82 @@ import {
   Toolbar,
   Typography,
   Button,
-  Box,
   IconButton,
   Drawer,
   List,
-  ListItemButton,
+  ListItem,
   ListItemText,
-  useMediaQuery,
+  Box,
   useTheme,
+  useMediaQuery,
 } from '@mui/material';
-import {
-  Menu as MenuIcon,
-  Close as CloseIcon,
-  LightMode,
-  DarkMode,
-} from '@mui/icons-material';
-import { motion } from 'framer-motion';
+import { Menu, Close, DarkMode, LightMode } from '@mui/icons-material';
+import { smoothScrollToSection } from '../utils/smoothScroll';
 
-const AppHeader = () => {
+const AppHeader = ({ darkMode, toggleDarkMode }: { darkMode: boolean; toggleDarkMode: () => void }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(true);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+  const navigationItems = [
+    { label: 'Features', id: 'features' },
+    { label: 'Pricing', id: 'pricing' },
+    { label: 'Dashboard', id: 'dashboard' }, // if you have this section
+  ];
+
+  const handleNavClick = (sectionId: string) => {
+    smoothScrollToSection(sectionId);
+    setMobileOpen(false); // Close mobile menu after clicking
+  };
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
-  const toggleTheme = () => {
-    setDarkMode(!darkMode);
-  };
-
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-    // Close mobile drawer after navigation
-    if (isMobile) {
-      setMobileOpen(false);
-    }
-  };
-
-  const menuItems = [
-    { name: 'Features', id: 'features' },
-    { name: 'Pricing', id: 'pricing' },
-    { name: 'About', id: 'about' },
-    { name: 'Contact', id: 'contact' },
-  ];
-
   const drawer = (
-    <Box sx={{ width: 250, bgcolor: 'background.paper', height: '100%' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 2 }}>
-        <IconButton onClick={handleDrawerToggle}>
-          <CloseIcon />
+    <Box sx={{ width: 250, pt: 2 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', pr: 2, pb: 2 }}>
+        <IconButton onClick={handleDrawerToggle} color="inherit">
+          <Close />
         </IconButton>
       </Box>
       <List>
-        {menuItems.map((item) => (
-          <ListItemButton key={item.name} onClick={() => scrollToSection(item.id)}>
-            <ListItemText primary={item.name} />
-          </ListItemButton>
+        {navigationItems.map((item) => (
+          <ListItem 
+            key={item.id} 
+            button 
+            onClick={() => handleNavClick(item.id)}
+            sx={{
+              '&:hover': {
+                backgroundColor: 'rgba(255, 107, 53, 0.1)',
+              },
+            }}
+          >
+            <ListItemText 
+              primary={item.label}
+              sx={{
+                '& .MuiListItemText-primary': {
+                  fontWeight: 500,
+                },
+              }}
+            />
+          </ListItem>
         ))}
+        <ListItem>
+          <Button
+            variant="contained"
+            fullWidth
+            sx={{
+              background: 'linear-gradient(45deg, #FF6B35 30%, #FF8A65 90%)',
+              boxShadow: '0 4px 15px rgba(255, 107, 53, 0.3)',
+              '&:hover': {
+                background: 'linear-gradient(45deg, #FF8A65 30%, #FF6B35 90%)',
+              },
+            }}
+          >
+            Get Started
+          </Button>
+        </ListItem>
       </List>
     </Box>
   );
@@ -74,105 +88,101 @@ const AppHeader = () => {
     <>
       <AppBar 
         position="fixed" 
-        elevation={0}
-        sx={{
-          background: 'rgba(15, 15, 15, 0.8)',
+        sx={{ 
           backdropFilter: 'blur(20px)',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
         }}
       >
-        <Toolbar sx={{ justifyContent: 'space-between' }}>
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
+        <Toolbar>
+          <Typography
+            variant="h6"
+            component="div"
+            sx={{
+              flexGrow: 1,
+              fontWeight: 700,
+              background: 'linear-gradient(135deg, #FF6B35 0%, #FF8A65 100%)',
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}
           >
-            <Typography
-              variant="h6"
-              component="div"
-              sx={{
-                fontWeight: 700,
-                background: 'linear-gradient(45deg, #FF6B35 30%, #0984E3 90%)',
-                backgroundClip: 'text',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                fontSize: '1.5rem',
-              }}
-            >
-              SiteDeconstructor
-            </Typography>
-          </motion.div>
+            Website Deconstructor
+          </Typography>
 
+          {/* Desktop Navigation */}
           {!isMobile && (
-            <Box sx={{ display: 'flex', gap: 3, alignItems: 'center' }}>
-              {menuItems.map((item, index) => (
-                <motion.div
-                  key={item.name}
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              {navigationItems.map((item) => (
+                <Button
+                  key={item.id}
+                  color="inherit"
+                  onClick={() => handleNavClick(item.id)}
+                  sx={{
+                    '&:hover': {
+                      backgroundColor: 'rgba(255, 107, 53, 0.1)',
+                    },
+                  }}
                 >
-                  <Button
-                    color="inherit"
-                    onClick={() => scrollToSection(item.id)}
-                    sx={{
-                      '&:hover': {
-                        color: 'primary.main',
-                      },
-                    }}
-                  >
-                    {item.name}
-                  </Button>
-                </motion.div>
+                  {item.label}
+                </Button>
               ))}
+              <IconButton color="inherit" onClick={toggleDarkMode}>
+                {darkMode ? <LightMode /> : <DarkMode />}
+              </IconButton>
+              <Button
+                variant="contained"
+                sx={{
+                  background: 'linear-gradient(45deg, #FF6B35 30%, #FF8A65 90%)',
+                  boxShadow: '0 4px 15px rgba(255, 107, 53, 0.3)',
+                  '&:hover': {
+                    background: 'linear-gradient(45deg, #FF8A65 30%, #FF6B35 90%)',
+                  },
+                }}
+              >
+                Get Started
+              </Button>
             </Box>
           )}
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <IconButton onClick={toggleTheme} color="inherit">
-              {darkMode ? <LightMode /> : <DarkMode />}
-            </IconButton>
-            
-            {isMobile ? (
+          {/* Mobile Menu Button */}
+          {isMobile && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <IconButton color="inherit" onClick={toggleDarkMode}>
+                {darkMode ? <LightMode /> : <DarkMode />}
+              </IconButton>
               <IconButton
                 color="inherit"
-                aria-label="open drawer"
+                edge="start"
                 onClick={handleDrawerToggle}
               >
-                <MenuIcon />
+                <Menu />
               </IconButton>
-            ) : (
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-              >
-                <Button
-                  variant="contained"
-                  color="primary"
-                  sx={{
-                    background: 'linear-gradient(45deg, #FF6B35 30%, #FF8A65 90%)',
-                    boxShadow: '0 4px 15px rgba(255, 107, 53, 0.3)',
-                  }}
-                >
-                  Get Started
-                </Button>
-              </motion.div>
-            )}
-          </Box>
+            </Box>
+          )}
         </Toolbar>
       </AppBar>
 
+      {/* Mobile Drawer */}
       <Drawer
         anchor="right"
         open={mobileOpen}
         onClose={handleDrawerToggle}
         ModalProps={{
-          keepMounted: true,
+          keepMounted: true, // Better open performance on mobile
+        }}
+        sx={{
+          '& .MuiDrawer-paper': {
+            backgroundImage: 'linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(45, 52, 54, 0.95) 100%)',
+            backdropFilter: 'blur(20px)',
+          },
         }}
       >
         {drawer}
       </Drawer>
+
+      {/* Spacer to account for fixed AppBar */}
+      <Toolbar />
     </>
   );
 };
