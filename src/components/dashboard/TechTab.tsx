@@ -106,12 +106,24 @@ const TechTab: React.FC<TechTabProps> = ({
         <CardContent sx={{
         p: 3
       }}>
-          <Typography variant="h6" gutterBottom sx={{
-          fontWeight: 'bold',
-          mb: 3
-        }} className="font-thin text-base">
-            Tech Stack (Powered by Wappalyzer)
-          </Typography>
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="h6" sx={{
+              fontWeight: 'bold',
+              display: 'inline'
+            }}>
+              Tech Stack
+            </Typography>
+            <Typography variant="body2" sx={{
+              fontSize: '0.75rem',
+              fontWeight: 'normal',
+              color: 'text.secondary',
+              ml: 1,
+              display: 'inline'
+            }}>
+              (Powered by Wappalyzer)
+            </Typography>
+          </Box>
+          
           <Grid container spacing={2}>
             {technical.techStack.map((tech, index) => {
             const IconComponent = getIcon(tech.category);
