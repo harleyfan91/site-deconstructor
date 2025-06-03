@@ -3,7 +3,7 @@
 
 import React, { useState } from 'react';
 import { Box, Typography, Grid, Card, CardContent, Chip, CircularProgress, Alert, List, ListItem, Link } from '@mui/material';
-import { Palette, Type, Image, ExpandMore } from 'lucide-react';
+import { Palette, Type, Image, ChevronDown } from 'lucide-react';
 import { AnalysisResponse } from '../../hooks/useAnalysisApi';
 
 interface UIAnalysisTabProps {
@@ -172,7 +172,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
                     </Typography>
                     <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: expandedTotal ? 'bold' : 'normal' }}>
                       Total Images
-                      <ExpandMore 
+                      <ChevronDown 
                         size={16} 
                         style={{ 
                           marginLeft: 4,
@@ -236,7 +236,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
                     </Typography>
                     <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: expandedPhotos ? 'bold' : 'normal' }}>
                       Estimated Photos
-                      <ExpandMore 
+                      <ChevronDown 
                         size={16} 
                         style={{ 
                           marginLeft: 4,
@@ -300,7 +300,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
                     </Typography>
                     <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: expandedIcons ? 'bold' : 'normal' }}>
                       Estimated Icons
-                      <ExpandMore 
+                      <ChevronDown 
                         size={16} 
                         style={{ 
                           marginLeft: 4,
