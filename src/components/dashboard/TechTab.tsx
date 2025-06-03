@@ -2,7 +2,7 @@
 import React from 'react';
 import { Box, Typography, Grid, Card, CardContent, Chip, CircularProgress, Alert } from '@mui/material';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
-import { Shield, Globe, Server, Database, Code, Layers, Zap } from 'lucide-react';
+import { Shield, Globe, Server, Database, Code, Layers, Zap, Activity, BarChart } from 'lucide-react';
 import { AnalysisResponse } from '../../hooks/useAnalysisApi';
 
 interface TechTabProps {
@@ -41,15 +41,26 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
 
   const iconMap: { [key: string]: any } = {
     'Frontend Framework': Code,
+    'JavaScript frameworks': Code,
     'Framework': Code,
     'Build Tool': Zap,
     'Styling': Layers,
+    'CSS frameworks': Layers,
     'CSS Framework': Layers,
     'Backend': Server,
     'Database': Database,
+    'Databases': Database,
     'Hosting': Globe,
     'Library': Code,
+    'JavaScript libraries': Code,
     'Markup': Code,
+    'Web servers': Server,
+    'Analytics': BarChart,
+    'Tag managers': Activity,
+    'CDN': Globe,
+    'Content delivery networks': Globe,
+    'Widgets': Code,
+    'Unknown': Code,
     'default': Server
   };
 
@@ -83,7 +94,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
       <Card sx={{ borderRadius: 2, mb: 3 }}>
         <CardContent sx={{ p: 3 }}>
           <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-            Tech Stack
+            Tech Stack (Powered by Wappalyzer)
           </Typography>
           <Grid container spacing={2}>
             {technical.techStack.map((tech, index) => {

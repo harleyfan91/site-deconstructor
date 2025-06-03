@@ -1,3 +1,4 @@
+
 # Welcome to your Lovable project
 
 ## Project info
@@ -57,8 +58,23 @@ This project is built with:
 - Vite
 - TypeScript
 - React
-- shadcn-ui
+- Material-UI
 - Tailwind CSS
+- Supabase (Backend & Database)
+
+## Tech Stack Detection
+
+This application uses **Wappalyzer** for accurate technology detection on analyzed websites. Wappalyzer is an open-source tool that identifies technologies used on websites including:
+
+- JavaScript frameworks (React, Vue, Angular, etc.)
+- CSS frameworks (Bootstrap, Tailwind, etc.)
+- Content Management Systems
+- Analytics tools
+- E-commerce platforms
+- Web servers and hosting solutions
+- And much more...
+
+The integration provides comprehensive technology fingerprinting without requiring API keys or external dependencies beyond the Wappalyzer npm package.
 
 ## How can I deploy this project?
 

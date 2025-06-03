@@ -1,6 +1,8 @@
+// DEPRECATED: Old HTML keyword scans removed—now using Wappalyzer for tech detection
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { DOMParser } from "https://deno.land/x/deno_dom/deno-dom-wasm.ts";
+import Wappalyzer from "npm:wappalyzer";
 
 // CORS headers for frontend communication
 const corsHeaders = {
@@ -30,7 +32,12 @@ const urlValidation = (url: string): { isValid: boolean; error?: string } => {
   }
 };
 
-// Ad Tag Detection Function
+interface TechEntry {
+  category: string;
+  technology: string;
+}
+
+// Ad Tag Detection Function (preserved from original)
 const detectAdTags = (html: string) => {
   const htmlLower = html.toLowerCase();
   
@@ -58,12 +65,16 @@ const detectAdTags = (html: string) => {
   };
 };
 
-// Website analysis function
+// Website analysis function using Wappalyzer
 const analyzeWebsite = async (url: string) => {
   console.log(`Starting analysis for: ${url}`);
   
   try {
-    // Fetch the website content
+    // Initialize Wappalyzer
+    const wappalyzer = new Wappalyzer();
+    await wappalyzer.init();
+
+    // Fetch HTML for ad tag detection
     const response = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (compatible; WebsiteAnalyzer/1.0; +https://websiteanalyzer.com/bot)',
@@ -75,15 +86,40 @@ const analyzeWebsite = async (url: string) => {
     }
 
     const html = await response.text();
+    
+    // Open and analyze the site with Wappalyzer
+    const site = await wappalyzer.open(url);
+    const analysis = await site.analyze();
+    await wappalyzer.destroy();
+
+    // Convert Wappalyzer results to our format
+    const techStack: TechEntry[] = (analysis.technologies || []).map((tech: any) => {
+      const categoryName = tech.categories && tech.categories.length > 0
+        ? tech.categories[0].name
+        : "Unknown";
+      return {
+        category: categoryName,
+        technology: tech.name,
+      };
+    });
+
+    // Fallback if Wappalyzer found nothing
+    if (techStack.length === 0) {
+      techStack.push(
+        { category: "Markup", technology: "HTML5" },
+        { category: "Styling", technology: "CSS3" }
+      );
+    }
+
+    // Detect ad tags
+    const adTags = detectAdTags(html);
+    
     const startTime = Date.now();
     const endTime = Date.now();
     const pageLoadTime = `${(endTime - startTime) / 1000}s`;
 
-    // Basic HTML analysis
-    const analysis = await performHtmlAnalysis(html, url);
-    
-    // Detect ad tags
-    const adTags = detectAdTags(html);
+    // Basic analysis for other sections (simplified)
+    const analysis_basic = await performBasicAnalysis(html, url);
     
     return {
       id: crypto.randomUUID(),
@@ -92,62 +128,116 @@ const analyzeWebsite = async (url: string) => {
       status: 'complete' as const,
       data: {
         overview: {
-          overallScore: analysis.overallScore,
+          overallScore: analysis_basic.overallScore,
           pageLoadTime: pageLoadTime,
-          seoScore: analysis.seoScore,
-          userExperienceScore: analysis.userExperienceScore,
+          seoScore: analysis_basic.seoScore,
+          userExperienceScore: analysis_basic.userExperienceScore,
         },
-        ui: analysis.ui,
-        performance: analysis.performance,
-        seo: analysis.seo,
-        technical: analysis.technical,
+        ui: analysis_basic.ui,
+        performance: analysis_basic.performance,
+        seo: analysis_basic.seo,
+        technical: {
+          techStack,
+          healthGrade: analysis_basic.technical.healthGrade,
+          issues: analysis_basic.technical.issues,
+        },
         adTags: adTags,
       },
     };
   } catch (error) {
     console.error('Analysis error:', error);
+    
+    // Fallback response on error
+    const fallback = {
+      id: crypto.randomUUID(),
+      url: url,
+      timestamp: new Date().toISOString(),
+      status: 'error' as const,
+      data: {
+        overview: {
+          overallScore: 50,
+          pageLoadTime: "N/A",
+          seoScore: 50,
+          userExperienceScore: 50,
+        },
+        ui: {
+          colors: [{ name: 'Primary', hex: '#000000', usage: 'Text content' }],
+          fonts: [{ name: 'System Font', category: 'Sans-serif', usage: 'Body text', weight: '400' }],
+          images: [{ type: 'Total Images', count: 0, format: 'Mixed', totalSize: '0KB' }],
+        },
+        performance: {
+          coreWebVitals: [],
+          performanceScore: 50,
+          recommendations: [],
+        },
+        seo: {
+          score: 50,
+          checks: [],
+          recommendations: [],
+        },
+        technical: {
+          techStack: [
+            { category: "Markup", technology: "HTML5" },
+            { category: "Styling", technology: "CSS3" }
+          ],
+          healthGrade: 'C',
+          issues: [],
+        },
+        adTags: {
+          hasGAM: false,
+          hasAdSense: false,
+          hasPrebid: false,
+          hasAPS: false,
+          hasIX: false,
+          hasANX: false,
+          hasOpenX: false,
+          hasRubicon: false,
+          hasPubMatic: false,
+          hasVPAID: false,
+          hasVMAP: false,
+          hasIMA: false,
+          hasCriteo: false,
+          hasTaboola: false,
+          hasOutbrain: false,
+          hasSharethrough: false,
+          hasTeads: false,
+          hasMoat: false,
+          hasDV: false,
+          hasIAS: false,
+        },
+      },
+      message: "Tech detection failed—fallback applied",
+    };
     throw error;
   }
 };
 
-// HTML analysis function
-const performHtmlAnalysis = async (html: string, url: string) => {
-  // Basic DOM parsing using regex patterns (simplified approach)
+// Basic HTML analysis function (preserved existing logic minus detectTechStack)
+const performBasicAnalysis = async (html: string, url: string) => {
   const titleMatch = html.match(/<title[^>]*>([^<]*)<\/title>/i);
   const metaDescMatch = html.match(/<meta[^>]*name="description"[^>]*content="([^"]*)"[^>]*>/i);
   const h1Matches = html.match(/<h1[^>]*>([^<]*)<\/h1>/gi) || [];
   const imageMatches = html.match(/<img[^>]*>/gi) || [];
-  const linkMatches = html.match(/<a[^>]*href="[^"]*"[^>]*>/gi) || [];
   
-  // Count images with missing alt text
   const imagesWithoutAlt = imageMatches.filter(img => !img.includes('alt=')).length;
-  
-  // Extract colors from inline styles and CSS (basic implementation)
   const colorMatches = html.match(/color:\s*#[0-9a-fA-F]{6}/gi) || [];
   const backgroundColorMatches = html.match(/background-color:\s*#[0-9a-fA-F]{6}/gi) || [];
-  
-  // Extract font families
   const fontMatches = html.match(/font-family:\s*[^;]+/gi) || [];
   
-  // Basic SEO scoring
   const hasTitle = !!titleMatch;
   const hasMetaDesc = !!metaDescMatch;
   const hasH1 = h1Matches.length > 0;
   const hasGoodImageAlt = imagesWithoutAlt === 0;
   
   const seoScore = [hasTitle, hasMetaDesc, hasH1, hasGoodImageAlt].filter(Boolean).length * 25;
-  
-  // Performance estimation (simplified)
   const htmlSize = html.length;
   const performanceScore = Math.max(0, 100 - Math.floor(htmlSize / 10000));
-  
-  // Calculate overall score
-  const overallScore = Math.round((seoScore + performanceScore + 70) / 3); // 70 is base UX score
+  const overallScore = Math.round((seoScore + performanceScore + 70) / 3);
   
   return {
     overallScore,
     seoScore,
-    userExperienceScore: 70, // Simplified UX scoring
+    userExperienceScore: 70,
     ui: {
       colors: extractColors(colorMatches, backgroundColorMatches),
       fonts: extractFonts(fontMatches),
@@ -173,7 +263,6 @@ const performHtmlAnalysis = async (html: string, url: string) => {
       recommendations: generateSEORecommendations(hasTitle, hasMetaDesc, hasH1, imagesWithoutAlt),
     },
     technical: {
-      techStack: detectTechStack(html),
       healthGrade: calculateHealthGrade(seoScore, performanceScore),
       issues: generateTechnicalIssues(html, htmlSize),
     },
@@ -192,7 +281,6 @@ const extractColors = (colorMatches: string[], backgroundMatches: string[]) => {
     };
   });
   
-  // Add default colors if none found
   if (colorArray.length === 0) {
     return [
       { name: 'Primary', hex: '#000000', usage: 'Text content' },
@@ -210,12 +298,11 @@ const extractFonts = (fontMatches: string[]) => {
   
   const fontArray = Array.from(fonts).slice(0, 3).map(font => ({
     name: font,
-    category: 'Sans-serif', // Simplified classification
+    category: 'Sans-serif',
     usage: 'Body text',
     weight: '400',
   }));
   
-  // Add default if none found
   if (fontArray.length === 0) {
     return [
       { name: 'System Font', category: 'Sans-serif', usage: 'Body text', weight: '400' },
@@ -294,39 +381,6 @@ const generateSEORecommendations = (hasTitle: boolean, hasMetaDesc: boolean, has
   return recommendations;
 };
 
-const detectTechStack = (html: string) => {
-  const stack = [];
-  
-  if (html.includes('react') || html.includes('React')) {
-    stack.push({ category: 'Framework', technology: 'React' });
-  }
-  if (html.includes('vue') || html.includes('Vue')) {
-    stack.push({ category: 'Framework', technology: 'Vue.js' });
-  }
-  if (html.includes('angular') || html.includes('Angular')) {
-    stack.push({ category: 'Framework', technology: 'Angular' });
-  }
-  if (html.includes('bootstrap')) {
-    stack.push({ category: 'CSS Framework', technology: 'Bootstrap' });
-  }
-  if (html.includes('tailwind')) {
-    stack.push({ category: 'CSS Framework', technology: 'Tailwind CSS' });
-  }
-  if (html.includes('jquery') || html.includes('jQuery')) {
-    stack.push({ category: 'Library', technology: 'jQuery' });
-  }
-  
-  // Add generic entries if nothing detected
-  if (stack.length === 0) {
-    stack.push(
-      { category: 'Markup', technology: 'HTML5' },
-      { category: 'Styling', technology: 'CSS3' },
-    );
-  }
-  
-  return stack;
-};
-
 const calculateHealthGrade = (seoScore: number, performanceScore: number) => {
   const averageScore = (seoScore + performanceScore) / 2;
   
@@ -371,17 +425,15 @@ const generateTechnicalIssues = (html: string, htmlSize: number) => {
   return issues;
 };
 
-// Rate limiting function
+// Rate limiting function (preserved from original)
 const checkRateLimit = async (supabase: any, ipAddress: string): Promise<{ allowed: boolean; resetTime?: number }> => {
   const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
   
-  // Clean up old rate limit entries
   await supabase
     .from('rate_limits')
     .delete()
     .lt('window_start', oneHourAgo);
 
-  // Get current rate limit for IP
   const { data: rateLimit } = await supabase
     .from('rate_limits')
     .select('*')
@@ -389,7 +441,6 @@ const checkRateLimit = async (supabase: any, ipAddress: string): Promise<{ allow
     .single();
 
   if (!rateLimit) {
-    // First request from this IP
     await supabase
       .from('rate_limits')
       .insert({
@@ -405,7 +456,6 @@ const checkRateLimit = async (supabase: any, ipAddress: string): Promise<{ allow
     return { allowed: false, resetTime };
   }
 
-  // Increment request count
   await supabase
     .from('rate_limits')
     .update({ request_count: rateLimit.request_count + 1 })
@@ -414,7 +464,7 @@ const checkRateLimit = async (supabase: any, ipAddress: string): Promise<{ allow
   return { allowed: true };
 };
 
-// Logging function
+// Logging function (preserved from original)
 const logRequest = async (supabase: any, ipAddress: string, urlParam: string, status: number, errorMessage?: string) => {
   await supabase
     .from('api_logs')
@@ -540,7 +590,7 @@ serve(async (req) => {
         original_url: targetUrl,
         analysis_data: analysisData,
         created_at: new Date().toISOString(),
-        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
+        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
       });
 
     // Log successful request
