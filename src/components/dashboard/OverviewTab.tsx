@@ -118,8 +118,8 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
             <Typography variant="body1" paragraph>
               Analysis completed at {new Date(data.timestamp).toLocaleString()}. 
               {data.data.overview.overallScore >= 80 ? 
-                ' Your website shows excellent performance across most metrics.' :
-                ' Your website has room for improvement in several areas.'
+                ' The page shows excellent performance across most metrics.' :
+                ' The page has room for improvement in several areas.'
               }
             </Typography>
             <Typography variant="body1" paragraph>
