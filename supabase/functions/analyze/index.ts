@@ -1,9 +1,9 @@
 
+
 // DEPRECATED: Old HTML keyword scans removed—now using Wappalyzer for tech detection
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import Wappalyzer from "npm:wappalyzer";
 
 // CORS headers for frontend communication
 const corsHeaders = {
@@ -66,16 +66,52 @@ const detectAdTags = (html: string) => {
   };
 };
 
-// Website analysis function using Wappalyzer
+// Basic tech stack detection (fallback method)
+const detectBasicTechStack = (html: string): TechEntry[] => {
+  const techStack: TechEntry[] = [];
+  const htmlLower = html.toLowerCase();
+  
+  // Frontend Frameworks
+  if (htmlLower.includes('react') || htmlLower.includes('_reactinternalfiber')) {
+    techStack.push({ category: 'JavaScript frameworks', technology: 'React' });
+  }
+  if (htmlLower.includes('angular') || htmlLower.includes('ng-version')) {
+    techStack.push({ category: 'JavaScript frameworks', technology: 'Angular' });
+  }
+  if (htmlLower.includes('vue') || htmlLower.includes('__vue__')) {
+    techStack.push({ category: 'JavaScript frameworks', technology: 'Vue.js' });
+  }
+  
+  // CSS Frameworks
+  if (htmlLower.includes('bootstrap') || htmlLower.includes('btn-primary')) {
+    techStack.push({ category: 'CSS frameworks', technology: 'Bootstrap' });
+  }
+  if (htmlLower.includes('tailwind') || htmlLower.includes('tw-')) {
+    techStack.push({ category: 'CSS frameworks', technology: 'Tailwind CSS' });
+  }
+  
+  // Analytics
+  if (htmlLower.includes('google-analytics') || htmlLower.includes('gtag')) {
+    techStack.push({ category: 'Analytics', technology: 'Google Analytics' });
+  }
+  
+  // Default fallback
+  if (techStack.length === 0) {
+    techStack.push(
+      { category: "Markup", technology: "HTML5" },
+      { category: "Styling", technology: "CSS3" }
+    );
+  }
+  
+  return techStack;
+};
+
+// Website analysis function
 const analyzeWebsite = async (url: string) => {
   console.log(`Starting analysis for: ${url}`);
   
   try {
-    // Initialize Wappalyzer
-    const wappalyzer = new Wappalyzer();
-    await wappalyzer.init();
-
-    // Fetch HTML for ad tag detection
+    // Fetch HTML for analysis
     const response = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (compatible; WebsiteAnalyzer/1.0; +https://websiteanalyzer.com/bot)',
@@ -88,29 +124,8 @@ const analyzeWebsite = async (url: string) => {
 
     const html = await response.text();
     
-    // Open and analyze the site with Wappalyzer
-    const site = await wappalyzer.open(url);
-    const analysis = await site.analyze();
-    await wappalyzer.destroy();
-
-    // Convert Wappalyzer results to our format
-    const techStack: TechEntry[] = (analysis.technologies || []).map((tech: any) => {
-      const categoryName = tech.categories && tech.categories.length > 0
-        ? tech.categories[0].name
-        : "Unknown";
-      return {
-        category: categoryName,
-        technology: tech.name,
-      };
-    });
-
-    // Fallback if Wappalyzer found nothing
-    if (techStack.length === 0) {
-      techStack.push(
-        { category: "Markup", technology: "HTML5" },
-        { category: "Styling", technology: "CSS3" }
-      );
-    }
+    // Use basic tech stack detection for now
+    const techStack = detectBasicTechStack(html);
 
     // Detect ad tags
     const adTags = detectAdTags(html);
@@ -619,3 +634,4 @@ serve(async (req) => {
     );
   }
 });
+
