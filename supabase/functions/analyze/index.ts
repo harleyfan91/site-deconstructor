@@ -1,9 +1,8 @@
-
-
 // DEPRECATED: Old HTML keyword scans removed—now using Wappalyzer for tech detection
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { parse } from "https://deno.land/x/deno_dom/deno-dom-wasm.ts";
 
 // CORS headers for frontend communication
 const corsHeaders = {
@@ -38,6 +37,15 @@ interface TechEntry {
   technology: string;
 }
 
+interface ImageAnalysisData {
+  totalImages: number;
+  estimatedPhotos: number;
+  estimatedIcons: number;
+  imageUrls: string[];
+  photoUrls: string[];
+  iconUrls: string[];
+}
+
 // Ad Tag Detection Function (preserved from original)
 const detectAdTags = (html: string) => {
   const htmlLower = html.toLowerCase();
@@ -63,6 +71,67 @@ const detectAdTags = (html: string) => {
     hasMoat: htmlLower.includes('moatad.js'),
     hasDV: htmlLower.includes('doubleverify') || htmlLower.includes('dv.js'),
     hasIAS: htmlLower.includes('ias.js')
+  };
+};
+
+// Image scraping function
+const scrapeImages = (html: string, targetUrl: string): ImageAnalysisData => {
+  let allImageUrls: string[] = [];
+  let photoUrls: string[] = [];
+  let iconUrls: string[] = [];
+  let totalImages = 0;
+  let estimatedPhotos = 0;
+  let estimatedIcons = 0;
+
+  try {
+    // Parse the HTML into a DOM
+    const doc = parse(html);
+    const imgElements = doc.querySelectorAll("img");
+    const pageOrigin = new URL(targetUrl).origin;
+
+    imgElements.forEach((el) => {
+      let src = el.getAttribute("src") || "";
+      
+      // Normalize protocol-relative URLs (e.g. //cdn.example.com/img.png)
+      if (src.startsWith("//")) {
+        src = "https:" + src;
+      }
+      // Normalize relative paths
+      else if (!src.startsWith("http")) {
+        src = pageOrigin + (src.startsWith("/") ? src : "/" + src);
+      }
+      
+      if (src) {
+        allImageUrls.push(src);
+      }
+    });
+
+    // Classify icons vs. photos
+    allImageUrls.forEach((url) => {
+      const lower = url.toLowerCase();
+      if (/logo|icon/.test(lower)) {
+        iconUrls.push(url);
+      } else {
+        photoUrls.push(url);
+      }
+    });
+
+    totalImages = allImageUrls.length;
+    estimatedPhotos = photoUrls.length;
+    estimatedIcons = iconUrls.length;
+
+  } catch (err) {
+    console.error("Image scraping error:", err);
+    // Leave arrays empty on error
+  }
+
+  return {
+    totalImages,
+    estimatedPhotos,
+    estimatedIcons,
+    imageUrls: allImageUrls,
+    photoUrls,
+    iconUrls,
   };
 };
 
@@ -130,6 +199,9 @@ const analyzeWebsite = async (url: string) => {
     // Detect ad tags
     const adTags = detectAdTags(html);
     
+    // Scrape real images from the HTML
+    const imageAnalysis = scrapeImages(html, url);
+    
     const startTime = Date.now();
     const endTime = Date.now();
     const pageLoadTime = `${(endTime - startTime) / 1000}s`;
@@ -149,7 +221,10 @@ const analyzeWebsite = async (url: string) => {
           seoScore: analysis_basic.seoScore,
           userExperienceScore: analysis_basic.userExperienceScore,
         },
-        ui: analysis_basic.ui,
+        ui: {
+          ...analysis_basic.ui,
+          imageAnalysis,
+        },
         performance: analysis_basic.performance,
         seo: analysis_basic.seo,
         technical: {
@@ -180,6 +255,14 @@ const analyzeWebsite = async (url: string) => {
           colors: [{ name: 'Primary', hex: '#000000', usage: 'Text content' }],
           fonts: [{ name: 'System Font', category: 'Sans-serif', usage: 'Body text', weight: '400' }],
           images: [{ type: 'Total Images', count: 0, format: 'Mixed', totalSize: '0KB' }],
+          imageAnalysis: {
+            totalImages: 0,
+            estimatedPhotos: 0,
+            estimatedIcons: 0,
+            imageUrls: [],
+            photoUrls: [],
+            iconUrls: [],
+          },
         },
         performance: {
           coreWebVitals: [],
@@ -222,7 +305,7 @@ const analyzeWebsite = async (url: string) => {
           hasIAS: false,
         },
       },
-      message: "Tech detection failed—fallback applied",
+      message: "Image scraping failed, returning empty arrays",
     };
     throw error;
   }
@@ -634,4 +717,3 @@ serve(async (req) => {
     );
   }
 });
-
