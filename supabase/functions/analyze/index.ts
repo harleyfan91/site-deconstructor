@@ -1,8 +1,9 @@
+
 // DEPRECATED: Old HTML keyword scans removed—now using Wappalyzer for tech detection
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { parse } from "https://deno.land/x/deno_dom/deno-dom-wasm.ts";
+import { DOMParser } from "https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm.ts";
 
 // CORS headers for frontend communication
 const corsHeaders = {
@@ -84,8 +85,14 @@ const scrapeImages = (html: string, targetUrl: string): ImageAnalysisData => {
   let estimatedIcons = 0;
 
   try {
-    // Parse the HTML into a DOM
-    const doc = parse(html);
+    // Parse the HTML into a DOM using DOMParser
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, "text/html");
+    
+    if (!doc) {
+      throw new Error("Failed to parse HTML");
+    }
+    
     const imgElements = doc.querySelectorAll("img");
     const pageOrigin = new URL(targetUrl).origin;
 
