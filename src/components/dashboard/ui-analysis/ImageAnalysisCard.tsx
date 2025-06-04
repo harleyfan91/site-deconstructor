@@ -22,10 +22,14 @@ const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnal
   const [expandedPhotos, setExpandedPhotos] = useState(false);
   const [expandedIcons, setExpandedIcons] = useState(false);
 
-  // Use real scraped URLs if available, otherwise fall back to empty arrays
+  // Use real scraped URLs, make sure they're arrays even if undefined
   const imageUrls = imageAnalysis?.imageUrls || [];
   const photoUrls = imageAnalysis?.photoUrls || [];
   const iconUrls = imageAnalysis?.iconUrls || [];
+
+  const totalImagesCount = imageAnalysis?.totalImages || images.reduce((acc, img) => acc + img.count, 0);
+  const photosCount = imageAnalysis?.estimatedPhotos || images.find(img => img.type === 'Estimated Photos')?.count || 0;
+  const iconsCount = imageAnalysis?.estimatedIcons || images.find(img => img.type === 'Estimated Icons')?.count || 0;
 
   return (
     <Card sx={{ borderRadius: 2 }}>
@@ -38,7 +42,7 @@ const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnal
             </Typography>
           </Box>
           <Typography variant="body2" color="text.secondary">
-            Total: {imageAnalysis?.totalImages || images.reduce((acc, img) => acc + img.count, 0)} assets
+            Total: {totalImagesCount} assets
           </Typography>
         </Box>
         
@@ -47,7 +51,7 @@ const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnal
           <Grid item xs={12} sm={6} md={4}>
             <ExpandableImageBox
               title="Total Images"
-              count={imageAnalysis?.totalImages || images.reduce((acc, img) => acc + img.count, 0)}
+              count={totalImagesCount}
               format="Mixed"
               totalSize={images.find(img => img.type === 'Total Images')?.totalSize || '0KB'}
               isExpanded={expandedTotal}
@@ -61,7 +65,7 @@ const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnal
           <Grid item xs={12} sm={6} md={4}>
             <ExpandableImageBox
               title="Estimated Photos"
-              count={imageAnalysis?.estimatedPhotos || images.find(img => img.type === 'Estimated Photos')?.count || 0}
+              count={photosCount}
               format={images.find(img => img.type === 'Estimated Photos')?.format || 'JPG/PNG'}
               totalSize={images.find(img => img.type === 'Estimated Photos')?.totalSize || '0KB'}
               isExpanded={expandedPhotos}
@@ -75,7 +79,7 @@ const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnal
           <Grid item xs={12} sm={6} md={4}>
             <ExpandableImageBox
               title="Estimated Icons"
-              count={imageAnalysis?.estimatedIcons || images.find(img => img.type === 'Estimated Icons')?.count || 0}
+              count={iconsCount}
               format={images.find(img => img.type === 'Estimated Icons')?.format || 'SVG/PNG'}
               totalSize={images.find(img => img.type === 'Estimated Icons')?.totalSize || '0KB'}
               isExpanded={expandedIcons}

@@ -39,7 +39,9 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
   }
 
   const { colors, fonts, images, imageAnalysis } = data.data.ui;
-
+  
+  console.log('Image analysis data:', imageAnalysis);
+  
   return (
     <Box>
       <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
@@ -59,7 +61,10 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
 
         {/* Image Analysis */}
         <Grid item xs={12}>
-          <ImageAnalysisCard images={images} imageAnalysis={imageAnalysis} />
+          <ImageAnalysisCard 
+            images={images} 
+            imageAnalysis={imageAnalysis} 
+          />
         </Grid>
       </Grid>
     </Box>

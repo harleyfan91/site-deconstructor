@@ -61,7 +61,7 @@ const ExpandableImageBox: React.FC<ExpandableImageBoxProps> = ({
       
       {isExpanded && (
         <Box sx={{ width: '100%', mt: 2, textAlign: 'left' }}>
-          {urls.length > 0 ? (
+          {urls && urls.length > 0 ? (
             <List dense>
               {urls.map((url, idx) => (
                 <ListItem key={idx} disableGutters>
@@ -79,7 +79,7 @@ const ExpandableImageBox: React.FC<ExpandableImageBoxProps> = ({
             </List>
           ) : (
             <Typography variant="body2" color="text.secondary">
-              {emptyMessage}
+              {count > 0 ? "Loading image links..." : emptyMessage}
             </Typography>
           )}
         </Box>
