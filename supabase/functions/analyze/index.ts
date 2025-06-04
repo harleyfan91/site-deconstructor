@@ -74,7 +74,7 @@ const detectAdTags = (html: string) => {
   };
 };
 
-// Real image scraping function (FIXED to properly extract URLs)
+// Real image scraping function (ENHANCED to handle modern websites)
 const scrapeImages = (html: string, targetUrl: string): ImageAnalysisData => {
   let allImageUrls: string[] = [];
   let photoUrls: string[] = [];
@@ -84,7 +84,7 @@ const scrapeImages = (html: string, targetUrl: string): ImageAnalysisData => {
   let estimatedIcons = 0;
 
   try {
-    console.log("Starting image scraping for:", targetUrl);
+    console.log("Starting enhanced image scraping for:", targetUrl);
     
     // Parse the HTML into a DOM using DOMParser
     const parser = new DOMParser();
@@ -100,43 +100,113 @@ const scrapeImages = (html: string, targetUrl: string): ImageAnalysisData => {
     
     console.log(`Found ${imgElements.length} img elements`);
 
-    imgElements.forEach((el) => {
-      let src = el.getAttribute("src") || "";
-      
-      // Skip empty sources, data URLs, and very small tracking pixels
-      if (!src || src.startsWith("data:") || src.length < 5) {
-        return;
+    // Function to normalize and validate URLs
+    const normalizeUrl = (src: string): string | null => {
+      if (!src || src.startsWith("data:") || src.length < 10) {
+        return null;
       }
       
-      // Normalize protocol-relative URLs (e.g. //cdn.example.com/img.png)
+      // Handle protocol-relative URLs
       if (src.startsWith("//")) {
-        src = pageProtocol + src;
+        return pageProtocol + src;
       }
-      // Normalize relative paths
+      // Handle relative paths
       else if (!src.startsWith("http")) {
         if (src.startsWith("/")) {
-          src = pageOrigin + src;
+          return pageOrigin + src;
         } else {
-          src = pageOrigin + "/" + src;
+          return pageOrigin + "/" + src;
         }
       }
       
-      // Only add valid URLs
-      try {
-        new URL(src); // Validate URL
-        allImageUrls.push(src);
-        console.log("Found image URL:", src);
-      } catch (urlError) {
-        console.log("Invalid URL skipped:", src);
+      return src;
+    };
+
+    imgElements.forEach((el) => {
+      // Try multiple attributes commonly used for images
+      const srcCandidates = [
+        el.getAttribute("src"),
+        el.getAttribute("data-src"), // Lazy loading
+        el.getAttribute("data-lazy-src"),
+        el.getAttribute("data-original"),
+        el.getAttribute("data-url"),
+        el.getAttribute("srcset")?.split(',')[0]?.split(' ')[0], // Take first from srcset
+      ].filter(Boolean);
+
+      for (const candidate of srcCandidates) {
+        if (candidate) {
+          const normalizedUrl = normalizeUrl(candidate);
+          if (normalizedUrl) {
+            try {
+              new URL(normalizedUrl); // Validate URL
+              
+              // Avoid duplicates
+              if (!allImageUrls.includes(normalizedUrl)) {
+                allImageUrls.push(normalizedUrl);
+                console.log("Found image URL:", normalizedUrl);
+              }
+              break; // Stop after finding first valid URL for this element
+            } catch (urlError) {
+              console.log("Invalid URL skipped:", candidate);
+            }
+          }
+        }
       }
     });
 
-    // Classify icons vs. photos based on URL patterns and attributes
+    // Also scan for CSS background images in style attributes and style tags
+    const elementsWithStyle = doc.querySelectorAll("[style*='background']");
+    elementsWithStyle.forEach((el) => {
+      const style = el.getAttribute("style") || "";
+      const bgImageMatch = style.match(/background-image:\s*url\(['"]?([^'"\\)]+)['"]?\)/i);
+      if (bgImageMatch) {
+        const bgUrl = normalizeUrl(bgImageMatch[1]);
+        if (bgUrl && !allImageUrls.includes(bgUrl)) {
+          try {
+            new URL(bgUrl);
+            allImageUrls.push(bgUrl);
+            console.log("Found background image URL:", bgUrl);
+          } catch (e) {
+            console.log("Invalid background URL skipped:", bgUrl);
+          }
+        }
+      }
+    });
+
+    // Scan style tags for CSS background images
+    const styleTags = doc.querySelectorAll("style");
+    styleTags.forEach((styleTag) => {
+      const styleContent = styleTag.textContent || "";
+      const bgImageMatches = styleContent.match(/background-image:\s*url\(['"]?([^'"\\)]+)['"]?\)/gi);
+      if (bgImageMatches) {
+        bgImageMatches.forEach((match) => {
+          const urlMatch = match.match(/url\(['"]?([^'"\\)]+)['"]?\)/i);
+          if (urlMatch) {
+            const bgUrl = normalizeUrl(urlMatch[1]);
+            if (bgUrl && !allImageUrls.includes(bgUrl)) {
+              try {
+                new URL(bgUrl);
+                allImageUrls.push(bgUrl);
+                console.log("Found CSS background image URL:", bgUrl);
+              } catch (e) {
+                console.log("Invalid CSS background URL skipped:", bgUrl);
+              }
+            }
+          }
+        });
+      }
+    });
+
+    // Classify icons vs. photos based on URL patterns and file extensions
     allImageUrls.forEach((url) => {
       const lower = url.toLowerCase();
-      const isIcon = /logo|icon|favicon|sprite|symbol|arrow|check|close|menu|search|play|pause|stop/.test(lower) ||
+      const isIcon = /logo|icon|favicon|sprite|symbol|arrow|check|close|menu|search|play|pause|stop|avatar/.test(lower) ||
                      /\.svg(\?|$)/.test(lower) ||
-                     /icon/.test(lower);
+                     /icon|logo/.test(lower) ||
+                     url.includes('icon') ||
+                     url.includes('logo') ||
+                     // Small images are likely icons
+                     /w=\d{1,2}[^0-9]|h=\d{1,2}[^0-9]/.test(url);
       
       if (isIcon) {
         iconUrls.push(url);
@@ -149,11 +219,12 @@ const scrapeImages = (html: string, targetUrl: string): ImageAnalysisData => {
     estimatedPhotos = photoUrls.length;
     estimatedIcons = iconUrls.length;
 
-    console.log(`Image scraping results: ${totalImages} total, ${estimatedPhotos} photos, ${estimatedIcons} icons`);
-    console.log("Sample URLs:", allImageUrls.slice(0, 3));
+    console.log(`Enhanced image scraping results: ${totalImages} total, ${estimatedPhotos} photos, ${estimatedIcons} icons`);
+    console.log("Sample photo URLs:", photoUrls.slice(0, 3));
+    console.log("Sample icon URLs:", iconUrls.slice(0, 3));
 
   } catch (err) {
-    console.error("Image scraping error:", err);
+    console.error("Enhanced image scraping error:", err);
     // Leave arrays empty on error
   }
 
