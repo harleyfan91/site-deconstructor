@@ -31,6 +31,14 @@ export interface AnalysisResponse {
         format: string;
         totalSize: string;
       }>;
+      imageAnalysis: {
+        totalImages: number;
+        estimatedPhotos: number;
+        estimatedIcons: number;
+        imageUrls: string[];
+        photoUrls: string[];
+        iconUrls: string[];
+      };
     };
     performance: {
       coreWebVitals: Array<{

@@ -7,23 +7,25 @@ import ExpandableImageBox from './ExpandableImageBox';
 
 interface ImageAnalysisCardProps {
   images: AnalysisResponse['data']['ui']['images'];
+  imageAnalysis?: {
+    totalImages: number;
+    estimatedPhotos: number;
+    estimatedIcons: number;
+    imageUrls: string[];
+    photoUrls: string[];
+    iconUrls: string[];
+  };
 }
 
-const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images }) => {
+const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnalysis }) => {
   const [expandedTotal, setExpandedTotal] = useState(false);
   const [expandedPhotos, setExpandedPhotos] = useState(false);
   const [expandedIcons, setExpandedIcons] = useState(false);
 
-  // Generate mock URLs for demonstration since the API doesn't return actual URLs yet
-  const generateMockUrls = (count: number, type: string) => {
-    return Array.from({ length: Math.min(count, 10) }, (_, i) => 
-      `https://example.com/${type}${i + 1}.${type === 'icon' ? 'svg' : 'jpg'}`
-    );
-  };
-
-  const imageUrls = generateMockUrls(images.reduce((acc, img) => acc + img.count, 0), 'image');
-  const photoUrls = generateMockUrls(Math.floor(images.reduce((acc, img) => acc + img.count, 0) * 0.6), 'photo');
-  const iconUrls = generateMockUrls(Math.floor(images.reduce((acc, img) => acc + img.count, 0) * 0.4), 'icon');
+  // Use real scraped URLs if available, otherwise fall back to empty arrays
+  const imageUrls = imageAnalysis?.imageUrls || [];
+  const photoUrls = imageAnalysis?.photoUrls || [];
+  const iconUrls = imageAnalysis?.iconUrls || [];
 
   return (
     <Card sx={{ borderRadius: 2 }}>
@@ -36,7 +38,7 @@ const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images }) => {
             </Typography>
           </Box>
           <Typography variant="body2" color="text.secondary">
-            Total: {images.reduce((acc, img) => acc + img.count, 0)} assets
+            Total: {imageAnalysis?.totalImages || images.reduce((acc, img) => acc + img.count, 0)} assets
           </Typography>
         </Box>
         
@@ -45,7 +47,7 @@ const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images }) => {
           <Grid item xs={12} sm={6} md={4}>
             <ExpandableImageBox
               title="Total Images"
-              count={images.reduce((acc, img) => acc + img.count, 0)}
+              count={imageAnalysis?.totalImages || images.reduce((acc, img) => acc + img.count, 0)}
               format="Mixed"
               totalSize={images.find(img => img.type === 'Total Images')?.totalSize || '0KB'}
               isExpanded={expandedTotal}
@@ -59,7 +61,7 @@ const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images }) => {
           <Grid item xs={12} sm={6} md={4}>
             <ExpandableImageBox
               title="Estimated Photos"
-              count={images.find(img => img.type === 'Estimated Photos')?.count || 0}
+              count={imageAnalysis?.estimatedPhotos || images.find(img => img.type === 'Estimated Photos')?.count || 0}
               format={images.find(img => img.type === 'Estimated Photos')?.format || 'JPG/PNG'}
               totalSize={images.find(img => img.type === 'Estimated Photos')?.totalSize || '0KB'}
               isExpanded={expandedPhotos}
@@ -73,7 +75,7 @@ const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images }) => {
           <Grid item xs={12} sm={6} md={4}>
             <ExpandableImageBox
               title="Estimated Icons"
-              count={images.find(img => img.type === 'Estimated Icons')?.count || 0}
+              count={imageAnalysis?.estimatedIcons || images.find(img => img.type === 'Estimated Icons')?.count || 0}
               format={images.find(img => img.type === 'Estimated Icons')?.format || 'SVG/PNG'}
               totalSize={images.find(img => img.type === 'Estimated Icons')?.totalSize || '0KB'}
               isExpanded={expandedIcons}

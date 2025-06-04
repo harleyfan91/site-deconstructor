@@ -1,6 +1,4 @@
 
-// UPDATED: Refactored into smaller focused components for better maintainability.
-
 import React from 'react';
 import { Box, Typography, Grid, CircularProgress, Alert } from '@mui/material';
 import { AnalysisResponse } from '../../hooks/useAnalysisApi';
@@ -40,7 +38,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
     );
   }
 
-  const { colors, fonts, images } = data.data.ui;
+  const { colors, fonts, images, imageAnalysis } = data.data.ui;
 
   return (
     <Box>
@@ -61,7 +59,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
 
         {/* Image Analysis */}
         <Grid item xs={12}>
-          <ImageAnalysisCard images={images} />
+          <ImageAnalysisCard images={images} imageAnalysis={imageAnalysis} />
         </Grid>
       </Grid>
     </Box>
