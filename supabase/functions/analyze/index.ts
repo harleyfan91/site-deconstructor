@@ -74,7 +74,7 @@ const detectAdTags = (html: string) => {
   };
 };
 
-// Real image scraping function (updated to actually scrape from HTML)
+// Real image scraping function (FIXED to properly extract URLs)
 const scrapeImages = (html: string, targetUrl: string): ImageAnalysisData => {
   let allImageUrls: string[] = [];
   let photoUrls: string[] = [];
@@ -96,30 +96,49 @@ const scrapeImages = (html: string, targetUrl: string): ImageAnalysisData => {
     
     const imgElements = doc.querySelectorAll("img");
     const pageOrigin = new URL(targetUrl).origin;
+    const pageProtocol = new URL(targetUrl).protocol;
     
     console.log(`Found ${imgElements.length} img elements`);
 
     imgElements.forEach((el) => {
       let src = el.getAttribute("src") || "";
       
+      // Skip empty sources, data URLs, and very small tracking pixels
+      if (!src || src.startsWith("data:") || src.length < 5) {
+        return;
+      }
+      
       // Normalize protocol-relative URLs (e.g. //cdn.example.com/img.png)
       if (src.startsWith("//")) {
-        src = "https:" + src;
+        src = pageProtocol + src;
       }
       // Normalize relative paths
       else if (!src.startsWith("http")) {
-        src = pageOrigin + (src.startsWith("/") ? src : "/" + src);
+        if (src.startsWith("/")) {
+          src = pageOrigin + src;
+        } else {
+          src = pageOrigin + "/" + src;
+        }
       }
       
-      if (src) {
+      // Only add valid URLs
+      try {
+        new URL(src); // Validate URL
         allImageUrls.push(src);
+        console.log("Found image URL:", src);
+      } catch (urlError) {
+        console.log("Invalid URL skipped:", src);
       }
     });
 
-    // Classify icons vs. photos
+    // Classify icons vs. photos based on URL patterns and attributes
     allImageUrls.forEach((url) => {
       const lower = url.toLowerCase();
-      if (/logo|icon/.test(lower)) {
+      const isIcon = /logo|icon|favicon|sprite|symbol|arrow|check|close|menu|search|play|pause|stop/.test(lower) ||
+                     /\.svg(\?|$)/.test(lower) ||
+                     /icon/.test(lower);
+      
+      if (isIcon) {
         iconUrls.push(url);
       } else {
         photoUrls.push(url);
@@ -131,6 +150,7 @@ const scrapeImages = (html: string, targetUrl: string): ImageAnalysisData => {
     estimatedIcons = iconUrls.length;
 
     console.log(`Image scraping results: ${totalImages} total, ${estimatedPhotos} photos, ${estimatedIcons} icons`);
+    console.log("Sample URLs:", allImageUrls.slice(0, 3));
 
   } catch (err) {
     console.error("Image scraping error:", err);
@@ -204,6 +224,7 @@ const analyzeWebsite = async (url: string) => {
     }
 
     const html = await response.text();
+    console.log(`Fetched HTML, length: ${html.length} characters`);
     
     // Use basic tech stack detection for now
     const techStack = detectBasicTechStack(html);
@@ -213,6 +234,7 @@ const analyzeWebsite = async (url: string) => {
     
     // Scrape real images from the HTML
     const imageAnalysis = scrapeImages(html, url);
+    console.log("Image analysis completed:", imageAnalysis);
     
     const startTime = Date.now();
     const endTime = Date.now();
@@ -374,6 +396,7 @@ const performBasicAnalysis = async (html: string, url: string) => {
       recommendations: generateSEORecommendations(hasTitle, hasMetaDesc, hasH1, imagesWithoutAlt),
     },
     technical: {
+      techStack: [],
       healthGrade: calculateHealthGrade(seoScore, performanceScore),
       issues: generateTechnicalIssues(html, htmlSize),
     },
