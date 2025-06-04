@@ -1,4 +1,3 @@
-
 // DEPRECATED: Old HTML keyword scans removed—now using Wappalyzer for tech detection
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
@@ -75,7 +74,7 @@ const detectAdTags = (html: string) => {
   };
 };
 
-// Image scraping function
+// Real image scraping function (updated to actually scrape from HTML)
 const scrapeImages = (html: string, targetUrl: string): ImageAnalysisData => {
   let allImageUrls: string[] = [];
   let photoUrls: string[] = [];
@@ -85,6 +84,8 @@ const scrapeImages = (html: string, targetUrl: string): ImageAnalysisData => {
   let estimatedIcons = 0;
 
   try {
+    console.log("Starting image scraping for:", targetUrl);
+    
     // Parse the HTML into a DOM using DOMParser
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, "text/html");
@@ -95,6 +96,8 @@ const scrapeImages = (html: string, targetUrl: string): ImageAnalysisData => {
     
     const imgElements = doc.querySelectorAll("img");
     const pageOrigin = new URL(targetUrl).origin;
+    
+    console.log(`Found ${imgElements.length} img elements`);
 
     imgElements.forEach((el) => {
       let src = el.getAttribute("src") || "";
@@ -126,6 +129,8 @@ const scrapeImages = (html: string, targetUrl: string): ImageAnalysisData => {
     totalImages = allImageUrls.length;
     estimatedPhotos = photoUrls.length;
     estimatedIcons = iconUrls.length;
+
+    console.log(`Image scraping results: ${totalImages} total, ${estimatedPhotos} photos, ${estimatedIcons} icons`);
 
   } catch (err) {
     console.error("Image scraping error:", err);
