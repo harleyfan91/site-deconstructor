@@ -74,7 +74,7 @@ const detectAdTags = (html: string) => {
   };
 };
 
-// Real image scraping function (ENHANCED to handle modern websites)
+// Enhanced image scraping function with better URL extraction
 const scrapeImages = (html: string, targetUrl: string): ImageAnalysisData => {
   let allImageUrls: string[] = [];
   let photoUrls: string[] = [];
@@ -86,7 +86,6 @@ const scrapeImages = (html: string, targetUrl: string): ImageAnalysisData => {
   try {
     console.log("Starting enhanced image scraping for:", targetUrl);
     
-    // Parse the HTML into a DOM using DOMParser
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, "text/html");
     
@@ -102,35 +101,38 @@ const scrapeImages = (html: string, targetUrl: string): ImageAnalysisData => {
 
     // Function to normalize and validate URLs
     const normalizeUrl = (src: string): string | null => {
-      if (!src || src.startsWith("data:") || src.length < 10) {
+      if (!src || src.startsWith("data:") || src.length < 5) {
         return null;
       }
       
+      let normalizedSrc = src.trim();
+      
       // Handle protocol-relative URLs
-      if (src.startsWith("//")) {
-        return pageProtocol + src;
+      if (normalizedSrc.startsWith("//")) {
+        return pageProtocol + normalizedSrc;
       }
       // Handle relative paths
-      else if (!src.startsWith("http")) {
-        if (src.startsWith("/")) {
-          return pageOrigin + src;
+      else if (!normalizedSrc.startsWith("http")) {
+        if (normalizedSrc.startsWith("/")) {
+          return pageOrigin + normalizedSrc;
         } else {
-          return pageOrigin + "/" + src;
+          return pageOrigin + "/" + normalizedSrc;
         }
       }
       
-      return src;
+      return normalizedSrc;
     };
 
+    // Extract URLs from img elements with multiple attribute checks
     imgElements.forEach((el) => {
-      // Try multiple attributes commonly used for images
       const srcCandidates = [
         el.getAttribute("src"),
-        el.getAttribute("data-src"), // Lazy loading
+        el.getAttribute("data-src"),
         el.getAttribute("data-lazy-src"),
         el.getAttribute("data-original"),
         el.getAttribute("data-url"),
-        el.getAttribute("srcset")?.split(',')[0]?.split(' ')[0], // Take first from srcset
+        el.getAttribute("data-srcset")?.split(',')[0]?.split(' ')[0],
+        el.getAttribute("srcset")?.split(',')[0]?.split(' ')[0],
       ].filter(Boolean);
 
       for (const candidate of srcCandidates) {
@@ -140,12 +142,11 @@ const scrapeImages = (html: string, targetUrl: string): ImageAnalysisData => {
             try {
               new URL(normalizedUrl); // Validate URL
               
-              // Avoid duplicates
               if (!allImageUrls.includes(normalizedUrl)) {
                 allImageUrls.push(normalizedUrl);
                 console.log("Found image URL:", normalizedUrl);
               }
-              break; // Stop after finding first valid URL for this element
+              break;
             } catch (urlError) {
               console.log("Invalid URL skipped:", candidate);
             }
@@ -154,7 +155,7 @@ const scrapeImages = (html: string, targetUrl: string): ImageAnalysisData => {
       }
     });
 
-    // Also scan for CSS background images in style attributes and style tags
+    // Scan for CSS background images in style attributes
     const elementsWithStyle = doc.querySelectorAll("[style*='background']");
     elementsWithStyle.forEach((el) => {
       const style = el.getAttribute("style") || "";
@@ -197,16 +198,26 @@ const scrapeImages = (html: string, targetUrl: string): ImageAnalysisData => {
       }
     });
 
-    // Classify icons vs. photos based on URL patterns and file extensions
+    // Enhanced classification of icons vs. photos
     allImageUrls.forEach((url) => {
       const lower = url.toLowerCase();
-      const isIcon = /logo|icon|favicon|sprite|symbol|arrow|check|close|menu|search|play|pause|stop|avatar/.test(lower) ||
-                     /\.svg(\?|$)/.test(lower) ||
-                     /icon|logo/.test(lower) ||
-                     url.includes('icon') ||
-                     url.includes('logo') ||
-                     // Small images are likely icons
-                     /w=\d{1,2}[^0-9]|h=\d{1,2}[^0-9]/.test(url);
+      const filename = url.split('/').pop() || '';
+      const filenameLower = filename.toLowerCase();
+      
+      // Enhanced icon detection
+      const isIcon = 
+        // Keywords in URL path
+        /logo|icon|favicon|sprite|symbol|arrow|check|close|menu|search|play|pause|stop|avatar|btn|button/.test(lower) ||
+        // SVG files are typically icons
+        /\.svg(\?|$)/.test(lower) ||
+        // Small dimensions in URL
+        /w=\d{1,2}[^0-9]|h=\d{1,2}[^0-9]/.test(url) ||
+        // Icon-specific domains or paths
+        /cdn.*icon|icon.*cdn/.test(lower) ||
+        // Filename patterns
+        /^(icon|logo|sprite|symbol)/.test(filenameLower) ||
+        // Small file size indicators
+        /thumb|mini|small/.test(lower);
       
       if (isIcon) {
         iconUrls.push(url);
@@ -220,12 +231,13 @@ const scrapeImages = (html: string, targetUrl: string): ImageAnalysisData => {
     estimatedIcons = iconUrls.length;
 
     console.log(`Enhanced image scraping results: ${totalImages} total, ${estimatedPhotos} photos, ${estimatedIcons} icons`);
-    console.log("Sample photo URLs:", photoUrls.slice(0, 3));
-    console.log("Sample icon URLs:", iconUrls.slice(0, 3));
+    console.log("Sample URLs found:", allImageUrls.slice(0, 5));
+    console.log("Photo URLs sample:", photoUrls.slice(0, 3));
+    console.log("Icon URLs sample:", iconUrls.slice(0, 3));
 
   } catch (err) {
     console.error("Enhanced image scraping error:", err);
-    // Leave arrays empty on error
+    // Return empty arrays on error but log the issue
   }
 
   return {
