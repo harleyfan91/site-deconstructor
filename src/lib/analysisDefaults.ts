@@ -7,7 +7,9 @@ export function createDefaultAnalysis(url: string): AnalysisResponse {
     timestamp: new Date().toISOString(),
     status: 'complete',
     coreWebVitals: { lcp: 0, fid: 0, cls: 0 },
+
     securityHeaders: { csp: '', hsts: '', xfo: '', xcto: '', referrer: '' },
+
     performanceScore: 0,
     seoScore: 0,
     readabilityScore: 0,
@@ -31,6 +33,7 @@ export function createDefaultAnalysis(url: string): AnalysisResponse {
           photoUrls: [],
           iconUrls: [],
         },
+
       },
       performance: {
         coreWebVitals: [],
@@ -46,7 +49,9 @@ export function createDefaultAnalysis(url: string): AnalysisResponse {
         techStack: [],
         healthGrade: '',
         issues: [],
+
         accessibility: { violations: [] },
+
       },
       adTags: {
         hasGAM: false,

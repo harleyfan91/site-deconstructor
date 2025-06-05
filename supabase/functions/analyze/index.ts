@@ -5,6 +5,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { DOMParser } from "https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm.ts";
 import { analyzeAccessibility, extractSecurityHeaders } from '../../src/lib/accessibility.ts';
 
+
 // CORS headers for frontend communication
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -380,6 +381,7 @@ const analyzeWebsite = async (url: string) => {
       seoScore: psi.seoScore,
       readabilityScore: psi.readabilityScore,
       complianceStatus,
+
       data: {
         overview: {
           overallScore: analysis_basic.overallScore,
@@ -413,6 +415,7 @@ const analyzeWebsite = async (url: string) => {
       status: 'error' as const,
       coreWebVitals: { lcp: 0, fid: 0, cls: 0 },
       securityHeaders: { csp: '', hsts: '', xfo: '', xcto: '', referrer: '' },
+
       performanceScore: 0,
       seoScore: 0,
       readabilityScore: 0,
@@ -493,9 +496,6 @@ const performBasicAnalysis = async (html: string, url: string) => {
   const imageMatches = html.match(/<img[^>]*>/gi) || [];
   
   const imagesWithoutAlt = imageMatches.filter(img => !img.includes('alt=')).length;
-  const colorMatches = html.match(/color:\s*#[0-9a-fA-F]{6}/gi) || [];
-  const backgroundColorMatches = html.match(/background-color:\s*#[0-9a-fA-F]{6}/gi) || [];
-  const fontMatches = html.match(/font-family:\s*[^;]+/gi) || [];
   
   const hasTitle = !!titleMatch;
   const hasMetaDesc = !!metaDescMatch;
@@ -512,9 +512,10 @@ const performBasicAnalysis = async (html: string, url: string) => {
     seoScore,
     userExperienceScore: 70,
     ui: {
-      colors: extractColors(colorMatches, backgroundColorMatches),
-      fonts: extractFonts(fontMatches),
+      colors: buildColorObjects(extractCssColors(html)),
+      fonts: buildFontObjects(extractFontFamilies(html)),
       images: analyzeImages(imageMatches),
+      contrastIssues: extractContrastIssues(html),
     },
     performance: {
       coreWebVitals: [
@@ -544,46 +545,23 @@ const performBasicAnalysis = async (html: string, url: string) => {
 };
 
 // Helper functions
-const extractColors = (colorMatches: string[], backgroundMatches: string[]) => {
-  const colors = new Set([...colorMatches, ...backgroundMatches]);
-  const colorArray = Array.from(colors).slice(0, 5).map((color, index) => {
-    const hex = color.match(/#[0-9a-fA-F]{6}/)?.[0] || '#000000';
-    return {
-      name: `Color ${index + 1}`,
-      hex,
-      usage: color.includes('background') ? 'Background' : 'Text',
-    };
-  });
-  
-  if (colorArray.length === 0) {
+const buildColorObjects = (colors: string[]) => {
+  if (colors.length === 0) {
     return [
       { name: 'Primary', hex: '#000000', usage: 'Text content' },
       { name: 'Background', hex: '#FFFFFF', usage: 'Background' },
     ];
   }
-  
-  return colorArray;
+  return colors.map((hex, index) => ({ name: `Color ${index + 1}`, hex, usage: index === 0 ? 'Primary' : 'Secondary' }));
 };
 
-const extractFonts = (fontMatches: string[]) => {
-  const fonts = new Set(fontMatches.map(font => 
-    font.replace('font-family:', '').trim().split(',')[0].replace(/['"]/g, '')
-  ));
-  
-  const fontArray = Array.from(fonts).slice(0, 3).map(font => ({
-    name: font,
-    category: 'Sans-serif',
-    usage: 'Body text',
-    weight: '400',
-  }));
-  
-  if (fontArray.length === 0) {
+const buildFontObjects = (fonts: string[]) => {
+  if (fonts.length === 0) {
     return [
       { name: 'System Font', category: 'Sans-serif', usage: 'Body text', weight: '400' },
     ];
   }
-  
-  return fontArray;
+  return fonts.map(font => ({ name: font, category: 'Sans-serif', usage: 'Body text', weight: '400' }));
 };
 
 const analyzeImages = (imageMatches: string[]) => {
