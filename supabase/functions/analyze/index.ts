@@ -357,20 +357,16 @@ const analyzeWebsite = async (url: string) => {
 
     // Basic analysis for other sections (simplified)
     const analysis_basic = await performBasicAnalysis(html, url);
+    const responseSecurityHeaders = {
 
-    const securityHeaders = {
       csp: response.headers.get('content-security-policy') || '',
       hsts: response.headers.get('strict-transport-security') || ''
     };
 
- 1ccvdv-codex/implement-schema-and-typing-updates
     // Fetch PageSpeed Insights metrics (resolved from merge conflict)
     const psi = await fetchPageSpeedData(url);
 
     const coreWebVitals = psi.coreWebVitals;
-
-    const coreWebVitals = { lcp: 0, fid: 0, cls: 0 };
- Codex
 
     return {
       id: crypto.randomUUID(),
@@ -378,16 +374,10 @@ const analyzeWebsite = async (url: string) => {
       timestamp: new Date().toISOString(),
       status: 'complete' as const,
       coreWebVitals,
-      securityHeaders,
- 1ccvdv-codex/implement-schema-and-typing-updates
+      securityHeaders: responseSecurityHeaders,
       performanceScore: psi.performanceScore,
       seoScore: psi.seoScore,
       readabilityScore: psi.readabilityScore,
-
-      performanceScore: analysis_basic.performance.performanceScore,
-      seoScore: analysis_basic.seo.score,
-      readabilityScore: 0,
- Codex
       complianceStatus: 'pass' as const,
       data: {
         overview: {

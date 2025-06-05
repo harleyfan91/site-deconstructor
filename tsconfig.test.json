@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "dist",
     "module": "ES2020",
- 1ccvdv-codex/implement-schema-and-typing-updates
+
     "moduleResolution": "node",
     "lib": ["ES2020", "DOM"]
   },
@@ -13,8 +13,4 @@
     "src/types/analysis.ts"
   ]
 
-    "moduleResolution": "node"
-  },
-  "include": ["src/lib/analysisDefaults.ts", "src/types/analysis.ts"]
- Codex
 }
