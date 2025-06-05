@@ -3,6 +3,7 @@
   "compilerOptions": {
     "outDir": "dist",
     "module": "ES2020",
+
     "moduleResolution": "node",
     "lib": ["ES2020", "DOM"]
   },
@@ -11,4 +12,5 @@
     "src/lib/psi.ts",
     "src/types/analysis.ts"
   ]
+
 }

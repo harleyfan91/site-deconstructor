@@ -357,8 +357,8 @@ const analyzeWebsite = async (url: string) => {
 
     // Basic analysis for other sections (simplified)
     const analysis_basic = await performBasicAnalysis(html, url);
-
     const responseSecurityHeaders = {
+
       csp: response.headers.get('content-security-policy') || '',
       hsts: response.headers.get('strict-transport-security') || ''
     };
