@@ -67,12 +67,6 @@ export interface AnalysisResponse {
         iconUrls: string[];
       };
 
-      contrastIssues: Array<{
-        textColor: string;
-        backgroundColor: string;
-        ratio: number;
-      }>;
-
     };
     performance: {
       coreWebVitals: Array<{

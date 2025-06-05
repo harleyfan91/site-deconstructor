@@ -4,7 +4,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { DOMParser } from "https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm.ts";
 import { analyzeAccessibility, extractSecurityHeaders } from '../../src/lib/accessibility.ts';
-import { extractContrastIssues, extractCssColors, extractFontFamilies } from '../../src/lib/design.ts';
+
 
 // CORS headers for frontend communication
 const corsHeaders = {
@@ -360,12 +360,10 @@ const analyzeWebsite = async (url: string) => {
     // Basic analysis for other sections (simplified)
     const analysis_basic = await performBasicAnalysis(html, url);
 
-
     const responseSecurityHeaders = extractSecurityHeaders(response.headers as any);
 
     const accessibilityViolations = analyzeAccessibility(html);
     const complianceStatus = accessibilityViolations.length === 0 ? 'pass' as const : 'fail' as const;
-
 
     // Fetch PageSpeed Insights metrics (resolved from merge conflict)
     const psi = await fetchPageSpeedData(url);
@@ -416,7 +414,6 @@ const analyzeWebsite = async (url: string) => {
       timestamp: new Date().toISOString(),
       status: 'error' as const,
       coreWebVitals: { lcp: 0, fid: 0, cls: 0 },
-
       securityHeaders: { csp: '', hsts: '', xfo: '', xcto: '', referrer: '' },
 
       performanceScore: 0,

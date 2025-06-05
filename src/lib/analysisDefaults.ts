@@ -34,8 +34,6 @@ export function createDefaultAnalysis(url: string): AnalysisResponse {
           iconUrls: [],
         },
 
-        contrastIssues: [],
-
       },
       performance: {
         coreWebVitals: [],
