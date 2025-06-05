@@ -80,6 +80,12 @@ The integration provides comprehensive technology fingerprinting without requiri
 
 Simply open [Lovable](https://lovable.dev/projects/3a4c0dbb-697f-4cc3-8786-dfa109c5a225) and click on Share -> Publish.
 
+## Environment Variables
+
+The frontend needs your Supabase anonymous key to authorize requests. Set
+`NEXT_PUBLIC_SUPABASE_ANON_KEY` in your shell or `.env` file with the value from
+your Supabase project before running the app or tests.
+
 ## Can I connect a custom domain to my Lovable project?
 
 Yes, you can!
