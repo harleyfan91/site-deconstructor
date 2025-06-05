@@ -10,6 +10,9 @@
   "include": [
     "src/lib/analysisDefaults.ts",
     "src/lib/psi.ts",
+
+    "src/lib/accessibility.ts",
+    "src/lib/design.ts",
     "src/types/analysis.ts"
   ]
 

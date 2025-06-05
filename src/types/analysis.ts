@@ -7,7 +7,17 @@ export interface CoreWebVitals {
 export interface SecurityHeaders {
   csp: string;
   hsts: string;
+
+  xfo: string;
+  xcto: string;
+  referrer: string;
   [key: string]: string;
+}
+
+export interface AccessibilityViolation {
+  id: string;
+  impact?: string;
+  description?: string;
 }
 
 export type ComplianceStatus = 'pass' | 'fail' | 'warn';
@@ -56,6 +66,13 @@ export interface AnalysisResponse {
         photoUrls: string[];
         iconUrls: string[];
       };
+
+      contrastIssues: Array<{
+        textColor: string;
+        backgroundColor: string;
+        ratio: number;
+      }>;
+
     };
     performance: {
       coreWebVitals: Array<{
@@ -95,6 +112,11 @@ export interface AnalysisResponse {
         severity: 'high' | 'medium' | 'low';
         status: string;
       }>;
+
+      accessibility: {
+        violations: AccessibilityViolation[];
+      };
+
     };
     adTags?: {
       hasGAM: boolean;

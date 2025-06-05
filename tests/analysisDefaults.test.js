@@ -11,4 +11,7 @@ assert.strictEqual(record.performanceScore, 0);
 assert.strictEqual(record.seoScore, 0);
 assert.strictEqual(record.readabilityScore, 0);
 assert.strictEqual(record.complianceStatus, 'warn');
+
+assert.ok(Array.isArray(record.data.ui.contrastIssues));
+
 console.log('analysisDefaults test passed');
