@@ -3,6 +3,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { DOMParser } from "https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm.ts";
+import { analyzeAccessibility, extractSecurityHeaders } from '../../src/lib/accessibility.ts';
 
 // CORS headers for frontend communication
 const corsHeaders = {
@@ -290,6 +291,38 @@ const detectBasicTechStack = (html: string): TechEntry[] => {
   return techStack;
 };
 
+// Fetch Google PageSpeed Insights data
+const fetchPageSpeedData = async (url: string) => {
+  const apiUrl =
+    `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&category=performance&category=accessibility&category=seo`;
+  try {
+    const res = await fetch(apiUrl);
+    if (!res.ok) throw new Error(`PSI request failed: ${res.status}`);
+    const json = await res.json();
+    const lhr = json.lighthouseResult || {};
+    const audits = lhr.audits || {};
+    const categories = lhr.categories || {};
+    return {
+      coreWebVitals: {
+        lcp: (audits['largest-contentful-paint']?.numericValue || 0) / 1000,
+        fid: audits['first-input-delay']?.numericValue || 0,
+        cls: audits['cumulative-layout-shift']?.numericValue || 0,
+      },
+      performanceScore: categories.performance?.score ?? 0,
+      seoScore: categories.seo?.score ?? 0,
+      readabilityScore: categories.accessibility?.score ?? 0,
+    };
+  } catch (err) {
+    console.error('PSI fetch failed:', err);
+    return {
+      coreWebVitals: { lcp: 0, fid: 0, cls: 0 },
+      performanceScore: 0,
+      seoScore: 0,
+      readabilityScore: 0,
+    };
+  }
+};
+
 // Website analysis function
 const analyzeWebsite = async (url: string) => {
   console.log(`Starting analysis for: ${url}`);
@@ -325,12 +358,28 @@ const analyzeWebsite = async (url: string) => {
 
     // Basic analysis for other sections (simplified)
     const analysis_basic = await performBasicAnalysis(html, url);
-    
+
+    const responseSecurityHeaders = extractSecurityHeaders(response.headers as any);
+
+    const accessibilityViolations = analyzeAccessibility(html);
+    const complianceStatus = accessibilityViolations.length === 0 ? 'pass' as const : 'fail' as const;
+
+    // Fetch PageSpeed Insights metrics (resolved from merge conflict)
+    const psi = await fetchPageSpeedData(url);
+
+    const coreWebVitals = psi.coreWebVitals;
+
     return {
       id: crypto.randomUUID(),
       url: url,
       timestamp: new Date().toISOString(),
       status: 'complete' as const,
+      coreWebVitals,
+      securityHeaders: responseSecurityHeaders,
+      performanceScore: psi.performanceScore,
+      seoScore: psi.seoScore,
+      readabilityScore: psi.readabilityScore,
+      complianceStatus,
       data: {
         overview: {
           overallScore: analysis_basic.overallScore,
@@ -348,6 +397,7 @@ const analyzeWebsite = async (url: string) => {
           techStack,
           healthGrade: analysis_basic.technical.healthGrade,
           issues: analysis_basic.technical.issues,
+          accessibility: { violations: accessibilityViolations },
         },
         adTags: adTags,
       },
@@ -361,6 +411,12 @@ const analyzeWebsite = async (url: string) => {
       url: url,
       timestamp: new Date().toISOString(),
       status: 'error' as const,
+      coreWebVitals: { lcp: 0, fid: 0, cls: 0 },
+      securityHeaders: { csp: '', hsts: '', xfo: '', xcto: '', referrer: '' },
+      performanceScore: 0,
+      seoScore: 0,
+      readabilityScore: 0,
+      complianceStatus: 'fail' as const,
       data: {
         overview: {
           overallScore: 50,
@@ -398,6 +454,7 @@ const analyzeWebsite = async (url: string) => {
           ],
           healthGrade: 'C',
           issues: [],
+          accessibility: { violations: [] },
         },
         adTags: {
           hasGAM: false,
@@ -806,6 +863,12 @@ serve(async (req) => {
         url_hash: urlHash,
         original_url: targetUrl,
         analysis_data: analysisData,
+        core_web_vitals: analysisData.coreWebVitals,
+        security_headers: analysisData.securityHeaders,
+        performance_score: analysisData.performanceScore,
+        seo_score: analysisData.seoScore,
+        readability_score: analysisData.readabilityScore,
+        compliance_status: analysisData.complianceStatus,
         created_at: new Date().toISOString(),
         expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
       });
