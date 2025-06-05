@@ -19,7 +19,6 @@ export interface AccessibilityViolation {
   description?: string;
 }
 
-
 export interface SocialMeta {
   hasOpenGraph: boolean;
   hasTwitterCard: boolean;

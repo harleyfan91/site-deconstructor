@@ -33,7 +33,7 @@ export function createDefaultAnalysis(url: string): AnalysisResponse {
           photoUrls: [],
           iconUrls: [],
         },
-
+        
         contrastIssues: [],
 
       },
