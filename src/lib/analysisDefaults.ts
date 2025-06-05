@@ -7,7 +7,6 @@ export function createDefaultAnalysis(url: string): AnalysisResponse {
     timestamp: new Date().toISOString(),
     status: 'complete',
     coreWebVitals: { lcp: 0, fid: 0, cls: 0 },
-
     securityHeaders: { csp: '', hsts: '', xfo: '', xcto: '', referrer: '' },
 
     performanceScore: 0,
