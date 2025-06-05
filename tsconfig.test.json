@@ -14,8 +14,8 @@
     "src/lib/social.ts",
     "src/lib/export.ts",
     "src/types/analysis.ts",
-    "src/types/node-vibrant.d.ts",
     "src/lib/ui.ts"
+    ,"supabase/functions/analyze/index.ts"
   ]
 
 }

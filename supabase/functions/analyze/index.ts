@@ -529,7 +529,9 @@ const performBasicAnalysis = async (html: string, url: string) => {
     seoScore,
     userExperienceScore: 70,
     ui: {
-      colors: buildColorObjects(await extractCssColors(html)),
+
+      colors: buildColorObjects(extractCssColors(html)),
+
       fonts: buildFontObjects(extractFontFamilies(html)),
       images: analyzeImages(imageMatches),
       contrastIssues: extractContrastIssues(html),
@@ -904,3 +906,6 @@ serve(async (req) => {
     );
   }
 });
+
+// Export for testing purposes
+export { analyzeWebsite };

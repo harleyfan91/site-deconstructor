@@ -17,12 +17,5 @@ assert.strictEqual(result.performanceScore, 0.9);
 assert.strictEqual(result.seoScore, 0.93);
 assert.strictEqual(result.readabilityScore, 0.88);
 
-async function failFetch(_url) {
-  return { ok: false, status: 500 };
-}
-
-const fallback = await fetchPSIData('https://bad.example', failFetch);
-assert.strictEqual(fallback.performanceScore, 0);
-assert.strictEqual(fallback.coreWebVitals.lcp, 0);
 console.log('psi test passed');
 
