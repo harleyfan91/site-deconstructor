@@ -87,3 +87,23 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+
+## Continuous Integration and Testing
+
+Automated tests cover the analysis utilities, export functions and UI helpers.
+Every pull request runs these tests via GitHub Actions using the workflow at
+`.github/workflows/ci.yml`.
+
+Run tests locally with:
+
+```sh
+npm run test
+npx tsc -p tsconfig.json --noEmit
+```
+
+## Manual UI Review
+
+For changes that affect the dashboard, follow the
+[Manual UI Review Checklist](docs/Manual_UI_Checklist.md). It walks through
+loading the app locally, verifying each tab, testing export features and checking
+responsive layout.
