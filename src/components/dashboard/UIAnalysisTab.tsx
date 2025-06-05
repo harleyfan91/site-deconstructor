@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Box, Typography, Grid, CircularProgress, Alert } from '@mui/material';
-import { AnalysisResponse } from '../../hooks/useAnalysisApi';
+import type { AnalysisResponse } from '@/types/analysis';
 import ColorExtractionCard from './ui-analysis/ColorExtractionCard';
 import FontAnalysisCard from './ui-analysis/FontAnalysisCard';
 import ImageAnalysisCard from './ui-analysis/ImageAnalysisCard';

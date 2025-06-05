@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Typography, Card, CardContent } from '@mui/material';
 import { AlertTriangle } from 'lucide-react';
-import { AnalysisResponse } from '../../../hooks/useAnalysisApi';
+import type { AnalysisResponse } from '@/types/analysis';
 
 interface ContrastWarningsCardProps {
   issues: AnalysisResponse['data']['ui']['contrastIssues'];

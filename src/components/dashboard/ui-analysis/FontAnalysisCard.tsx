@@ -2,7 +2,7 @@
 import React from 'react';
 import { Box, Typography, Card, CardContent, Chip } from '@mui/material';
 import { Type } from 'lucide-react';
-import { AnalysisResponse } from '../../../hooks/useAnalysisApi';
+import type { AnalysisResponse } from '@/types/analysis';
 
 interface FontAnalysisCardProps {
   fonts: AnalysisResponse['data']['ui']['fonts'];
