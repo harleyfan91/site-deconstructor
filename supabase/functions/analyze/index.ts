@@ -7,6 +7,7 @@ import { analyzeAccessibility, extractSecurityHeaders } from '../../src/lib/acce
 import { extractContrastIssues, extractCssColors, extractFontFamilies } from '../../src/lib/design.ts';
 import { detectSocialMeta, detectShareButtons, detectCookieScripts, detectMinification, checkLinks } from '../../src/lib/social.ts';
 
+
 // CORS headers for frontend communication
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -388,6 +389,7 @@ const analyzeWebsite = async (url: string) => {
       seoScore: psi.seoScore,
       readabilityScore: psi.readabilityScore,
       complianceStatus,
+
       data: {
         overview: {
           overallScore: analysis_basic.overallScore,
@@ -410,6 +412,7 @@ const analyzeWebsite = async (url: string) => {
           cookies: cookieInfo,
           minification: minInfo,
           linkIssues: linkIssues,
+
         },
         adTags: adTags,
       },
@@ -471,6 +474,7 @@ const analyzeWebsite = async (url: string) => {
           cookies: { hasCookieScript: false, scripts: [] },
           minification: { cssMinified: false, jsMinified: false },
           linkIssues: { brokenLinks: [], mixedContentLinks: [] },
+
         },
         adTags: {
           hasGAM: false,
