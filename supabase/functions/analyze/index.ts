@@ -529,7 +529,7 @@ const performBasicAnalysis = async (html: string, url: string) => {
     seoScore,
     userExperienceScore: 70,
     ui: {
-      colors: buildColorObjects(extractCssColors(html)),
+      colors: buildColorObjects(await extractCssColors(html)),
       fonts: buildFontObjects(extractFontFamilies(html)),
       images: analyzeImages(imageMatches),
       contrastIssues: extractContrastIssues(html),
