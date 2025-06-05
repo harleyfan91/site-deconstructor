@@ -15,13 +15,21 @@ export const useAnalysisApi = () => {
       console.log('Analyzing URL:', url);
       
       // Call the edge function directly with the URL parameter
-      const response = await fetch(`https://sxrhpwmdslxgwpqfdmxu.supabase.co/functions/v1/analyze?url=${encodeURIComponent(url)}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN4cmhwd21kc2x4Z3dwcWZkbXh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NTIwMDUsImV4cCI6MjA2NDQyODAwNX0.jdjgtwLQ-MGBMoRw2cLA14SzrivonF36POCC6YYUVwk`,
-          'Content-Type': 'application/json',
+      const supabaseAnonKey =
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+        import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+        '';
+
+      const response = await fetch(
+        `https://sxrhpwmdslxgwpqfdmxu.supabase.co/functions/v1/analyze?url=${encodeURIComponent(url)}`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${supabaseAnonKey}`,
+            'Content-Type': 'application/json',
+          },
         },
-      });
+      );
 
       console.log('Response status:', response.status);
 
