@@ -33,7 +33,6 @@ export function createDefaultAnalysis(url: string): AnalysisResponse {
           photoUrls: [],
           iconUrls: [],
         },
-        
         contrastIssues: [],
 
       },
@@ -56,7 +55,6 @@ export function createDefaultAnalysis(url: string): AnalysisResponse {
         social: { hasOpenGraph: false, hasTwitterCard: false, hasShareButtons: false },
         cookies: { hasCookieScript: false, scripts: [] },
         minification: { cssMinified: false, jsMinified: false },
-
         linkIssues: { brokenLinks: [], mixedContentLinks: [] },
 
       },
