@@ -57,6 +57,8 @@ export function createDefaultAnalysis(url: string): AnalysisResponse {
         cookies: { hasCookieScript: false, scripts: [] },
         minification: { cssMinified: false, jsMinified: false },
 
+        linkIssues: { brokenLinks: [], mixedContentLinks: [] },
+
       },
       adTags: {
         hasGAM: false,
