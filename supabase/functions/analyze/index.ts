@@ -501,7 +501,7 @@ const analyzeWebsite = async (url: string) => {
       },
       message: "Image scraping failed, returning empty arrays",
     };
-    throw error;
+    return fallback;
   }
 };
 
@@ -851,6 +851,17 @@ serve(async (req) => {
     console.log('Performing new analysis for:', targetUrl);
     const analysisData = await analyzeWebsite(targetUrl);
 
+    if (analysisData.status === 'error') {
+      await logRequest(supabase, ipAddress, targetUrl, 200, analysisData.message || 'analysis failed');
+      return new Response(
+        JSON.stringify(analysisData),
+        {
+          status: 200,
+          headers: { ...corsHeaders, ...securityHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
     // Cache the result
     await supabase
       .from('analysis_cache')
@@ -874,8 +885,8 @@ serve(async (req) => {
     // Return analysis result
     return new Response(
       JSON.stringify(analysisData),
-      { 
-        status: 200, 
+      {
+        status: 200,
         headers: { ...corsHeaders, ...securityHeaders, 'Content-Type': 'application/json' }
       }
     );
