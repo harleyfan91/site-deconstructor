@@ -290,6 +290,38 @@ const detectBasicTechStack = (html: string): TechEntry[] => {
   return techStack;
 };
 
+// Fetch Google PageSpeed Insights data
+const fetchPageSpeedData = async (url: string) => {
+  const apiUrl =
+    `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&category=performance&category=accessibility&category=seo`;
+  try {
+    const res = await fetch(apiUrl);
+    if (!res.ok) throw new Error(`PSI request failed: ${res.status}`);
+    const json = await res.json();
+    const lhr = json.lighthouseResult || {};
+    const audits = lhr.audits || {};
+    const categories = lhr.categories || {};
+    return {
+      coreWebVitals: {
+        lcp: (audits['largest-contentful-paint']?.numericValue || 0) / 1000,
+        fid: audits['first-input-delay']?.numericValue || 0,
+        cls: audits['cumulative-layout-shift']?.numericValue || 0,
+      },
+      performanceScore: categories.performance?.score ?? 0,
+      seoScore: categories.seo?.score ?? 0,
+      accessibilityScore: categories.accessibility?.score ?? 0,
+    };
+  } catch (err) {
+    console.error('PSI fetch failed:', err);
+    return {
+      coreWebVitals: { lcp: 0, fid: 0, cls: 0 },
+      performanceScore: 0,
+      seoScore: 0,
+      accessibilityScore: 0,
+    };
+  }
+};
+
 // Website analysis function
 const analyzeWebsite = async (url: string) => {
   console.log(`Starting analysis for: ${url}`);
@@ -331,7 +363,10 @@ const analyzeWebsite = async (url: string) => {
       hsts: response.headers.get('strict-transport-security') || ''
     };
 
-    const coreWebVitals = { lcp: 0, fid: 0, cls: 0 };
+    // Fetch PageSpeed Insights metrics
+    const psi = await fetchPageSpeedData(url);
+
+    const coreWebVitals = psi.coreWebVitals;
 
     return {
       id: crypto.randomUUID(),
@@ -340,9 +375,9 @@ const analyzeWebsite = async (url: string) => {
       status: 'complete' as const,
       coreWebVitals,
       securityHeaders,
-      performanceScore: analysis_basic.performance.performanceScore,
-      seoScore: analysis_basic.seo.score,
-      readabilityScore: 0,
+      performanceScore: psi.performanceScore,
+      seoScore: psi.seoScore,
+      readabilityScore: psi.accessibilityScore,
       complianceStatus: 'pass' as const,
       data: {
         overview: {
