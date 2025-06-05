@@ -325,12 +325,25 @@ const analyzeWebsite = async (url: string) => {
 
     // Basic analysis for other sections (simplified)
     const analysis_basic = await performBasicAnalysis(html, url);
-    
+
+    const securityHeaders = {
+      csp: response.headers.get('content-security-policy') || '',
+      hsts: response.headers.get('strict-transport-security') || ''
+    };
+
+    const coreWebVitals = { lcp: 0, fid: 0, cls: 0 };
+
     return {
       id: crypto.randomUUID(),
       url: url,
       timestamp: new Date().toISOString(),
       status: 'complete' as const,
+      coreWebVitals,
+      securityHeaders,
+      performanceScore: analysis_basic.performance.performanceScore,
+      seoScore: analysis_basic.seo.score,
+      readabilityScore: 0,
+      complianceStatus: 'pass' as const,
       data: {
         overview: {
           overallScore: analysis_basic.overallScore,
@@ -361,6 +374,12 @@ const analyzeWebsite = async (url: string) => {
       url: url,
       timestamp: new Date().toISOString(),
       status: 'error' as const,
+      coreWebVitals: { lcp: 0, fid: 0, cls: 0 },
+      securityHeaders: { csp: '', hsts: '' },
+      performanceScore: 0,
+      seoScore: 0,
+      readabilityScore: 0,
+      complianceStatus: 'fail' as const,
       data: {
         overview: {
           overallScore: 50,
@@ -806,6 +825,12 @@ serve(async (req) => {
         url_hash: urlHash,
         original_url: targetUrl,
         analysis_data: analysisData,
+        core_web_vitals: analysisData.coreWebVitals,
+        security_headers: analysisData.securityHeaders,
+        performance_score: analysisData.performanceScore,
+        seo_score: analysisData.seoScore,
+        readability_score: analysisData.readabilityScore,
+        compliance_status: analysisData.complianceStatus,
         created_at: new Date().toISOString(),
         expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
       });
