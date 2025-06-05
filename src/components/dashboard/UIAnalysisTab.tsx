@@ -5,6 +5,7 @@ import { AnalysisResponse } from '../../hooks/useAnalysisApi';
 import ColorExtractionCard from './ui-analysis/ColorExtractionCard';
 import FontAnalysisCard from './ui-analysis/FontAnalysisCard';
 import ImageAnalysisCard from './ui-analysis/ImageAnalysisCard';
+import ContrastWarningsCard from './ui-analysis/ContrastWarningsCard';
 
 interface UIAnalysisTabProps {
   data: AnalysisResponse | null;
@@ -57,6 +58,11 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
         {/* Font Analysis */}
         <Grid item xs={12} md={6}>
           <FontAnalysisCard fonts={fonts} />
+        </Grid>
+
+        {/* Contrast Warnings */}
+        <Grid item xs={12}>
+          <ContrastWarningsCard issues={data.data.ui.contrastIssues} />
         </Grid>
 
         {/* Image Analysis */}
