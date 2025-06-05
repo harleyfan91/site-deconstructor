@@ -68,9 +68,9 @@ export async function extractCssColors(
 
   try {
     if (!vibrant) {
-      // @ts-ignore -- optional dependency loaded at runtime
-      const mod = await import('node-vibrant');
-      vibrant = mod.default || mod;
+      // @ts-ignore optional dependency loaded at runtime
+      const mod = (await import('node-vibrant')) as any;
+      vibrant = mod.default ?? mod;
     }
 
     const imgMatch = html.match(/<img[^>]*src=["']([^"']+)["']/i);
