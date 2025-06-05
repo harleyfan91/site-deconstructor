@@ -48,17 +48,20 @@ export function extractContrastIssues(html: string): ContrastIssue[] {
   return issues;
 }
 
+
 export async function extractCssColors(
   html: string,
   vibrant?: { from: (src: string) => { getPalette: () => Promise<Record<string, { hex: string }> > } }
 ): Promise<string[]> {
   const fallback = (): string[] => {
+
     const colorRegex = /#[0-9a-fA-F]{6}/g;
     const matches = html.match(colorRegex) || [];
     const counts: Record<string, number> = {};
     matches.forEach(hex => {
       counts[hex] = (counts[hex] || 0) + 1;
     });
+
     const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
     return sorted.slice(0,5).map(([hex])=>hex);
   };
@@ -85,6 +88,7 @@ export async function extractCssColors(
     if (colors.length === 0) return fallback();
     return colors.slice(0, 5);
   } catch (_e) {
+
     return fallback();
   }
 }

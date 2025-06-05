@@ -17,4 +17,5 @@
     "src/lib/ui.ts"
     ,"supabase/functions/analyze/index.ts"
   ]
+
 }
