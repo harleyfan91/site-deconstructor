@@ -4,6 +4,9 @@ export interface ContrastIssue {
   ratio: number;
 }
 
+// Deno global is only available in Deno runtime
+declare const Deno: undefined | unknown;
+
 function hexToRgb(hex: string): {r:number;g:number;b:number} | null {
   const match = hex.replace('#','').match(/^([0-9a-f]{3}|[0-9a-f]{6})$/i);
   if (!match) return null;
@@ -48,15 +51,59 @@ export function extractContrastIssues(html: string): ContrastIssue[] {
   return issues;
 }
 
-export function extractCssColors(html: string): string[] {
-  const colorRegex = /#[0-9a-fA-F]{6}/g;
-  const matches = html.match(colorRegex) || [];
-  const counts: Record<string, number> = {};
-  matches.forEach(hex => {
-    counts[hex] = (counts[hex] || 0) + 1;
-  });
-  const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
-  return sorted.slice(0,5).map(([hex])=>hex);
+export async function extractCssColors(html: string): Promise<string[]> {
+  const fallback = () => {
+    const colorRegex = /#[0-9a-fA-F]{6}/g;
+    const matches = html.match(colorRegex) || [];
+    const counts: Record<string, number> = {};
+    matches.forEach(hex => {
+      counts[hex] = (counts[hex] || 0) + 1;
+    });
+    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    return sorted.slice(0, 5).map(([hex]) => hex);
+  };
+
+  try {
+    let VibrantMod: any;
+    try {
+      if (typeof Deno !== 'undefined') {
+        VibrantMod = await import('npm:node-vibrant');
+      } else {
+        VibrantMod = await import('node-vibrant');
+      }
+    } catch {
+      return fallback();
+    }
+    const Vibrant = VibrantMod.default || VibrantMod;
+
+    const imgRegex = /<img[^>]+src=["']([^"']+)["']/gi;
+    const urls: string[] = [];
+    let match;
+    while ((match = imgRegex.exec(html)) !== null) {
+      urls.push(match[1]);
+    }
+
+    const counts: Record<string, number> = {};
+    for (const url of urls) {
+      try {
+        const palette = await Vibrant.from(url).getPalette();
+        Object.values(palette).forEach((sw: any) => {
+          if (sw) {
+            const hex = sw.getHex();
+            counts[hex] = (counts[hex] || 0) + 1;
+          }
+        });
+      } catch {
+        /* ignore single image failure */
+      }
+    }
+
+    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    if (sorted.length === 0) return fallback();
+    return sorted.slice(0, 5).map(([hex]) => hex);
+  } catch {
+    return fallback();
+  }
 }
 
 export function extractFontFamilies(html: string): string[] {
