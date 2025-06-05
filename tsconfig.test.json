@@ -3,14 +3,17 @@
   "compilerOptions": {
     "outDir": "dist",
     "module": "ES2020",
+
     "moduleResolution": "node",
     "lib": ["ES2020", "DOM"]
   },
   "include": [
     "src/lib/analysisDefaults.ts",
     "src/lib/psi.ts",
+
     "src/lib/accessibility.ts",
     "src/lib/design.ts",
     "src/types/analysis.ts"
   ]
+
 }

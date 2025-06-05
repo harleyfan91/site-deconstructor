@@ -360,10 +360,12 @@ const analyzeWebsite = async (url: string) => {
     // Basic analysis for other sections (simplified)
     const analysis_basic = await performBasicAnalysis(html, url);
 
+
     const responseSecurityHeaders = extractSecurityHeaders(response.headers as any);
 
     const accessibilityViolations = analyzeAccessibility(html);
     const complianceStatus = accessibilityViolations.length === 0 ? 'pass' as const : 'fail' as const;
+
 
     // Fetch PageSpeed Insights metrics (resolved from merge conflict)
     const psi = await fetchPageSpeedData(url);
@@ -381,6 +383,7 @@ const analyzeWebsite = async (url: string) => {
       seoScore: psi.seoScore,
       readabilityScore: psi.readabilityScore,
       complianceStatus,
+
       data: {
         overview: {
           overallScore: analysis_basic.overallScore,
@@ -413,7 +416,9 @@ const analyzeWebsite = async (url: string) => {
       timestamp: new Date().toISOString(),
       status: 'error' as const,
       coreWebVitals: { lcp: 0, fid: 0, cls: 0 },
+
       securityHeaders: { csp: '', hsts: '', xfo: '', xcto: '', referrer: '' },
+
       performanceScore: 0,
       seoScore: 0,
       readabilityScore: 0,

@@ -7,6 +7,7 @@ export interface CoreWebVitals {
 export interface SecurityHeaders {
   csp: string;
   hsts: string;
+
   xfo: string;
   xcto: string;
   referrer: string;
@@ -65,11 +66,13 @@ export interface AnalysisResponse {
         photoUrls: string[];
         iconUrls: string[];
       };
+
       contrastIssues: Array<{
         textColor: string;
         backgroundColor: string;
         ratio: number;
       }>;
+
     };
     performance: {
       coreWebVitals: Array<{
@@ -109,9 +112,11 @@ export interface AnalysisResponse {
         severity: 'high' | 'medium' | 'low';
         status: string;
       }>;
+
       accessibility: {
         violations: AccessibilityViolation[];
       };
+
     };
     adTags?: {
       hasGAM: boolean;
