@@ -4,6 +4,8 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { DOMParser } from "https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm.ts";
 import { analyzeAccessibility, extractSecurityHeaders } from '../../src/lib/accessibility.ts';
+import { extractContrastIssues, extractCssColors, extractFontFamilies } from '../../src/lib/design.ts';
+import { detectSocialMeta, detectShareButtons, detectCookieScripts, detectMinification, checkLinks } from '../../src/lib/social.ts';
 
 
 // CORS headers for frontend communication
@@ -365,6 +367,12 @@ const analyzeWebsite = async (url: string) => {
     const accessibilityViolations = analyzeAccessibility(html);
     const complianceStatus = accessibilityViolations.length === 0 ? 'pass' as const : 'fail' as const;
 
+    const socialMeta = detectSocialMeta(html);
+    socialMeta.hasShareButtons = detectShareButtons(html);
+    const cookieInfo = detectCookieScripts(html);
+    const minInfo = detectMinification(html);
+    const linkIssues = await checkLinks(html, url);
+
     // Fetch PageSpeed Insights metrics (resolved from merge conflict)
     const psi = await fetchPageSpeedData(url);
 
@@ -400,6 +408,11 @@ const analyzeWebsite = async (url: string) => {
           healthGrade: analysis_basic.technical.healthGrade,
           issues: analysis_basic.technical.issues,
           accessibility: { violations: accessibilityViolations },
+          social: socialMeta,
+          cookies: cookieInfo,
+          minification: minInfo,
+          linkIssues: linkIssues,
+
         },
         adTags: adTags,
       },
@@ -415,7 +428,6 @@ const analyzeWebsite = async (url: string) => {
       status: 'error' as const,
       coreWebVitals: { lcp: 0, fid: 0, cls: 0 },
       securityHeaders: { csp: '', hsts: '', xfo: '', xcto: '', referrer: '' },
-
       performanceScore: 0,
       seoScore: 0,
       readabilityScore: 0,
@@ -458,6 +470,11 @@ const analyzeWebsite = async (url: string) => {
           healthGrade: 'C',
           issues: [],
           accessibility: { violations: [] },
+          social: { hasOpenGraph: false, hasTwitterCard: false, hasShareButtons: false },
+          cookies: { hasCookieScript: false, scripts: [] },
+          minification: { cssMinified: false, jsMinified: false },
+          linkIssues: { brokenLinks: [], mixedContentLinks: [] },
+
         },
         adTags: {
           hasGAM: false,

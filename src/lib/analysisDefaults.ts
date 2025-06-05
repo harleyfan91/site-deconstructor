@@ -34,6 +34,8 @@ export function createDefaultAnalysis(url: string): AnalysisResponse {
           iconUrls: [],
         },
 
+        contrastIssues: [],
+
       },
       performance: {
         coreWebVitals: [],
@@ -51,6 +53,9 @@ export function createDefaultAnalysis(url: string): AnalysisResponse {
         issues: [],
 
         accessibility: { violations: [] },
+        social: { hasOpenGraph: false, hasTwitterCard: false, hasShareButtons: false },
+        cookies: { hasCookieScript: false, scripts: [] },
+        minification: { cssMinified: false, jsMinified: false },
 
       },
       adTags: {

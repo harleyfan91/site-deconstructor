@@ -7,7 +7,6 @@ export interface CoreWebVitals {
 export interface SecurityHeaders {
   csp: string;
   hsts: string;
-
   xfo: string;
   xcto: string;
   referrer: string;
@@ -18,6 +17,28 @@ export interface AccessibilityViolation {
   id: string;
   impact?: string;
   description?: string;
+}
+
+
+export interface SocialMeta {
+  hasOpenGraph: boolean;
+  hasTwitterCard: boolean;
+  hasShareButtons: boolean;
+}
+
+export interface CookieInfo {
+  hasCookieScript: boolean;
+  scripts: string[];
+}
+
+export interface MinificationInfo {
+  cssMinified: boolean;
+  jsMinified: boolean;
+}
+
+export interface LinkIssueInfo {
+  brokenLinks: string[];
+  mixedContentLinks: string[];
 }
 
 export type ComplianceStatus = 'pass' | 'fail' | 'warn';
@@ -67,6 +88,12 @@ export interface AnalysisResponse {
         iconUrls: string[];
       };
 
+      contrastIssues: Array<{
+        textColor: string;
+        backgroundColor: string;
+        ratio: number;
+      }>;
+
     };
     performance: {
       coreWebVitals: Array<{
@@ -110,6 +137,10 @@ export interface AnalysisResponse {
       accessibility: {
         violations: AccessibilityViolation[];
       };
+      social?: SocialMeta;
+      cookies?: CookieInfo;
+      minification?: MinificationInfo;
+      linkIssues?: LinkIssueInfo;
 
     };
     adTags?: {
