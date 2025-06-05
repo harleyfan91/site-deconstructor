@@ -32,6 +32,10 @@ cd <YOUR_PROJECT_NAME>
 
 # Step 3: Install the necessary dependencies.
 npm i
+# If installation fails due to registry access, see .npmrc for an example of using HTTP and disabling strict SSL.
+
+# This project uses [node-vibrant](https://github.com/Vibrant-Colors/node-vibrant) for color palette extraction.
+# It's an optional runtime dependency but should be installed for tests.
 
 # Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
