@@ -9,6 +9,7 @@ const mockVibrant = {
 };
 const palette = await extractCssColors(html, mockVibrant);
 assert.ok(palette.includes('#112233'));
+
 const fonts = extractFontFamilies(html);
 assert.ok(fonts.includes('Roboto'));
 const issues = extractContrastIssues(`<div style="color:#777777;background-color:#888888">test</div>`);

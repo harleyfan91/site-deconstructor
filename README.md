@@ -78,13 +78,16 @@ The integration provides comprehensive technology fingerprinting without requiri
 
 ## Environment Setup
 
+
 Copy `.env.example` to `.env` in the project root and fill in your credentials. The variables are:
+
 
 ```sh
 VITE_SUPABASE_ANON_KEY=<your-supabase-anon-key>
 SUPABASE_URL=<your-supabase-url>
 SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key>
 ```
+
 
 `VITE_SUPABASE_ANON_KEY` is exposed to the browser so the dashboard can call the Supabase function. `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are used by the serverless function when running locally.
 
@@ -94,15 +97,23 @@ To test the edge function locally, install the [Supabase CLI](https://supabase.c
 supabase functions serve --env-file .env
 ```
 
+
 To enable color palette extraction with `node-vibrant`, install the optional dependency:
 
 ```sh
 npm install node-vibrant
 ```
 
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/3a4c0dbb-697f-4cc3-8786-dfa109c5a225) and click on Share -> Publish.
+
+## Environment Variables
+
+The frontend needs your Supabase anonymous key to authorize requests. Set
+`NEXT_PUBLIC_SUPABASE_ANON_KEY` in your shell or `.env` file with the value from
+your Supabase project before running the app or tests.
 
 ## Can I connect a custom domain to my Lovable project?
 

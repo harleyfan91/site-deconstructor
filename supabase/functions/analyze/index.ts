@@ -8,6 +8,7 @@ import { extractContrastIssues, extractCssColors, extractFontFamilies } from '..
 import { detectSocialMeta, detectShareButtons, detectCookieScripts, detectMinification, checkLinks } from '../../src/lib/social.ts';
 import { extractMetaTags, isMobileResponsive, computeReadabilityScore, calculateSecurityScore } from '../../src/lib/seo.ts';
 
+
 // CORS headers for frontend communication
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -363,6 +364,7 @@ const analyzeWebsite = async (url: string) => {
     const analysis_basic = await performBasicAnalysis(html, url);
 
     const responseSecurityHeaders = extractSecurityHeaders(response.headers as any);
+
     const securityScore = calculateSecurityScore(responseSecurityHeaders);
 
     const accessibilityViolations = analyzeAccessibility(html);
@@ -396,8 +398,10 @@ const analyzeWebsite = async (url: string) => {
       securityHeaders: responseSecurityHeaders,
       performanceScore: psi.performanceScore,
       seoScore: psi.seoScore,
+
       readabilityScore: readabilityScore,
       complianceStatus,
+
       data: {
         overview: {
           overallScore: analysis_basic.overallScore,
@@ -416,11 +420,13 @@ const analyzeWebsite = async (url: string) => {
           healthGrade: analysis_basic.technical.healthGrade,
           issues: analysis_basic.technical.issues,
           securityScore,
+
           accessibility: { violations: accessibilityViolations },
           social: socialMeta,
           cookies: cookieInfo,
           minification: minInfo,
           linkIssues: linkIssues,
+
         },
         adTags: adTags,
       },
@@ -481,11 +487,13 @@ const analyzeWebsite = async (url: string) => {
           healthGrade: 'C',
           issues: [],
           securityScore: 0,
+
           accessibility: { violations: [] },
           social: { hasOpenGraph: false, hasTwitterCard: false, hasShareButtons: false },
           cookies: { hasCookieScript: false, scripts: [] },
           minification: { cssMinified: false, jsMinified: false },
           linkIssues: { brokenLinks: [], mixedContentLinks: [] },
+
         },
         adTags: {
           hasGAM: false,
@@ -541,6 +549,7 @@ const performBasicAnalysis = async (html: string, url: string) => {
     userExperienceScore: 70,
     ui: {
       colors: buildColorObjects(extractCssColors(html)),
+
       fonts: buildFontObjects(extractFontFamilies(html)),
       images: analyzeImages(imageMatches),
       contrastIssues: extractContrastIssues(html),
@@ -862,6 +871,17 @@ serve(async (req) => {
     console.log('Performing new analysis for:', targetUrl);
     const analysisData = await analyzeWebsite(targetUrl);
 
+    if (analysisData.status === 'error') {
+      await logRequest(supabase, ipAddress, targetUrl, 200, analysisData.message || 'analysis failed');
+      return new Response(
+        JSON.stringify(analysisData),
+        {
+          status: 200,
+          headers: { ...corsHeaders, ...securityHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
     // Cache the result
     await supabase
       .from('analysis_cache')
@@ -885,8 +905,8 @@ serve(async (req) => {
     // Return analysis result
     return new Response(
       JSON.stringify(analysisData),
-      { 
-        status: 200, 
+      {
+        status: 200,
         headers: { ...corsHeaders, ...securityHeaders, 'Content-Type': 'application/json' }
       }
     );

@@ -16,4 +16,6 @@ assert.strictEqual(result.coreWebVitals.cls, 0.01);
 assert.strictEqual(result.performanceScore, 0.9);
 assert.strictEqual(result.seoScore, 0.93);
 assert.strictEqual(result.readabilityScore, 0.88);
+
 console.log('psi test passed');
+
