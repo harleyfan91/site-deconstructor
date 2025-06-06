@@ -24,7 +24,7 @@ const DashboardContent = () => {
           <TabsList className="grid w-full grid-cols-6 mb-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="ui">User Interface</TabsTrigger>
-            <TabsTrigger value="performance">Performance</TabsTrigger>
+            <TabsTrigger value="performance">Performance & Security</TabsTrigger>
             <TabsTrigger value="seo">SEO Analysis</TabsTrigger>
             <TabsTrigger value="tech">Tech</TabsTrigger>
             <TabsTrigger value="compliance">Compliance</TabsTrigger>
