@@ -3,6 +3,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { DOMParser } from "https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm.ts";
+import { analyzeAccessibility, extractSecurityHeaders } from '../../src/lib/accessibility.ts';
+import { extractContrastIssues, extractCssColors, extractFontFamilies } from '../../src/lib/design.ts';
+import { detectSocialMeta, detectShareButtons, detectCookieScripts, detectMinification, checkLinks } from '../../src/lib/social.ts';
+
 
 // CORS headers for frontend communication
 const corsHeaders = {
@@ -290,6 +294,38 @@ const detectBasicTechStack = (html: string): TechEntry[] => {
   return techStack;
 };
 
+// Fetch Google PageSpeed Insights data
+const fetchPageSpeedData = async (url: string) => {
+  const apiUrl =
+    `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&category=performance&category=accessibility&category=seo`;
+  try {
+    const res = await fetch(apiUrl);
+    if (!res.ok) throw new Error(`PSI request failed: ${res.status}`);
+    const json = await res.json();
+    const lhr = json.lighthouseResult || {};
+    const audits = lhr.audits || {};
+    const categories = lhr.categories || {};
+    return {
+      coreWebVitals: {
+        lcp: (audits['largest-contentful-paint']?.numericValue || 0) / 1000,
+        fid: audits['first-input-delay']?.numericValue || 0,
+        cls: audits['cumulative-layout-shift']?.numericValue || 0,
+      },
+      performanceScore: categories.performance?.score ?? 0,
+      seoScore: categories.seo?.score ?? 0,
+      readabilityScore: categories.accessibility?.score ?? 0,
+    };
+  } catch (err) {
+    console.error('PSI fetch failed:', err);
+    return {
+      coreWebVitals: { lcp: 0, fid: 0, cls: 0 },
+      performanceScore: 0,
+      seoScore: 0,
+      readabilityScore: 0,
+    };
+  }
+};
+
 // Website analysis function
 const analyzeWebsite = async (url: string) => {
   console.log(`Starting analysis for: ${url}`);
@@ -325,12 +361,35 @@ const analyzeWebsite = async (url: string) => {
 
     // Basic analysis for other sections (simplified)
     const analysis_basic = await performBasicAnalysis(html, url);
-    
+
+    const responseSecurityHeaders = extractSecurityHeaders(response.headers as any);
+
+    const accessibilityViolations = analyzeAccessibility(html);
+    const complianceStatus = accessibilityViolations.length === 0 ? 'pass' as const : 'fail' as const;
+
+    const socialMeta = detectSocialMeta(html);
+    socialMeta.hasShareButtons = detectShareButtons(html);
+    const cookieInfo = detectCookieScripts(html);
+    const minInfo = detectMinification(html);
+    const linkIssues = await checkLinks(html, url);
+
+    // Fetch PageSpeed Insights metrics (resolved from merge conflict)
+    const psi = await fetchPageSpeedData(url);
+
+    const coreWebVitals = psi.coreWebVitals;
+
     return {
       id: crypto.randomUUID(),
       url: url,
       timestamp: new Date().toISOString(),
       status: 'complete' as const,
+      coreWebVitals,
+      securityHeaders: responseSecurityHeaders,
+      performanceScore: psi.performanceScore,
+      seoScore: psi.seoScore,
+      readabilityScore: psi.readabilityScore,
+      complianceStatus,
+
       data: {
         overview: {
           overallScore: analysis_basic.overallScore,
@@ -348,6 +407,12 @@ const analyzeWebsite = async (url: string) => {
           techStack,
           healthGrade: analysis_basic.technical.healthGrade,
           issues: analysis_basic.technical.issues,
+          accessibility: { violations: accessibilityViolations },
+          social: socialMeta,
+          cookies: cookieInfo,
+          minification: minInfo,
+          linkIssues: linkIssues,
+
         },
         adTags: adTags,
       },
@@ -361,6 +426,12 @@ const analyzeWebsite = async (url: string) => {
       url: url,
       timestamp: new Date().toISOString(),
       status: 'error' as const,
+      coreWebVitals: { lcp: 0, fid: 0, cls: 0 },
+      securityHeaders: { csp: '', hsts: '', xfo: '', xcto: '', referrer: '' },
+      performanceScore: 0,
+      seoScore: 0,
+      readabilityScore: 0,
+      complianceStatus: 'fail' as const,
       data: {
         overview: {
           overallScore: 50,
@@ -398,6 +469,12 @@ const analyzeWebsite = async (url: string) => {
           ],
           healthGrade: 'C',
           issues: [],
+          accessibility: { violations: [] },
+          social: { hasOpenGraph: false, hasTwitterCard: false, hasShareButtons: false },
+          cookies: { hasCookieScript: false, scripts: [] },
+          minification: { cssMinified: false, jsMinified: false },
+          linkIssues: { brokenLinks: [], mixedContentLinks: [] },
+
         },
         adTags: {
           hasGAM: false,
@@ -424,7 +501,7 @@ const analyzeWebsite = async (url: string) => {
       },
       message: "Image scraping failed, returning empty arrays",
     };
-    throw error;
+    return fallback;
   }
 };
 
@@ -436,9 +513,6 @@ const performBasicAnalysis = async (html: string, url: string) => {
   const imageMatches = html.match(/<img[^>]*>/gi) || [];
   
   const imagesWithoutAlt = imageMatches.filter(img => !img.includes('alt=')).length;
-  const colorMatches = html.match(/color:\s*#[0-9a-fA-F]{6}/gi) || [];
-  const backgroundColorMatches = html.match(/background-color:\s*#[0-9a-fA-F]{6}/gi) || [];
-  const fontMatches = html.match(/font-family:\s*[^;]+/gi) || [];
   
   const hasTitle = !!titleMatch;
   const hasMetaDesc = !!metaDescMatch;
@@ -455,9 +529,12 @@ const performBasicAnalysis = async (html: string, url: string) => {
     seoScore,
     userExperienceScore: 70,
     ui: {
-      colors: extractColors(colorMatches, backgroundColorMatches),
-      fonts: extractFonts(fontMatches),
+
+      colors: buildColorObjects(extractCssColors(html)),
+
+      fonts: buildFontObjects(extractFontFamilies(html)),
       images: analyzeImages(imageMatches),
+      contrastIssues: extractContrastIssues(html),
     },
     performance: {
       coreWebVitals: [
@@ -487,46 +564,23 @@ const performBasicAnalysis = async (html: string, url: string) => {
 };
 
 // Helper functions
-const extractColors = (colorMatches: string[], backgroundMatches: string[]) => {
-  const colors = new Set([...colorMatches, ...backgroundMatches]);
-  const colorArray = Array.from(colors).slice(0, 5).map((color, index) => {
-    const hex = color.match(/#[0-9a-fA-F]{6}/)?.[0] || '#000000';
-    return {
-      name: `Color ${index + 1}`,
-      hex,
-      usage: color.includes('background') ? 'Background' : 'Text',
-    };
-  });
-  
-  if (colorArray.length === 0) {
+const buildColorObjects = (colors: string[]) => {
+  if (colors.length === 0) {
     return [
       { name: 'Primary', hex: '#000000', usage: 'Text content' },
       { name: 'Background', hex: '#FFFFFF', usage: 'Background' },
     ];
   }
-  
-  return colorArray;
+  return colors.map((hex, index) => ({ name: `Color ${index + 1}`, hex, usage: index === 0 ? 'Primary' : 'Secondary' }));
 };
 
-const extractFonts = (fontMatches: string[]) => {
-  const fonts = new Set(fontMatches.map(font => 
-    font.replace('font-family:', '').trim().split(',')[0].replace(/['"]/g, '')
-  ));
-  
-  const fontArray = Array.from(fonts).slice(0, 3).map(font => ({
-    name: font,
-    category: 'Sans-serif',
-    usage: 'Body text',
-    weight: '400',
-  }));
-  
-  if (fontArray.length === 0) {
+const buildFontObjects = (fonts: string[]) => {
+  if (fonts.length === 0) {
     return [
       { name: 'System Font', category: 'Sans-serif', usage: 'Body text', weight: '400' },
     ];
   }
-  
-  return fontArray;
+  return fonts.map(font => ({ name: font, category: 'Sans-serif', usage: 'Body text', weight: '400' }));
 };
 
 const analyzeImages = (imageMatches: string[]) => {
@@ -799,6 +853,17 @@ serve(async (req) => {
     console.log('Performing new analysis for:', targetUrl);
     const analysisData = await analyzeWebsite(targetUrl);
 
+    if (analysisData.status === 'error') {
+      await logRequest(supabase, ipAddress, targetUrl, 200, analysisData.message || 'analysis failed');
+      return new Response(
+        JSON.stringify(analysisData),
+        {
+          status: 200,
+          headers: { ...corsHeaders, ...securityHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
     // Cache the result
     await supabase
       .from('analysis_cache')
@@ -806,6 +871,12 @@ serve(async (req) => {
         url_hash: urlHash,
         original_url: targetUrl,
         analysis_data: analysisData,
+        core_web_vitals: analysisData.coreWebVitals,
+        security_headers: analysisData.securityHeaders,
+        performance_score: analysisData.performanceScore,
+        seo_score: analysisData.seoScore,
+        readability_score: analysisData.readabilityScore,
+        compliance_status: analysisData.complianceStatus,
         created_at: new Date().toISOString(),
         expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
       });
@@ -816,8 +887,8 @@ serve(async (req) => {
     // Return analysis result
     return new Response(
       JSON.stringify(analysisData),
-      { 
-        status: 200, 
+      {
+        status: 200,
         headers: { ...corsHeaders, ...securityHeaders, 'Content-Type': 'application/json' }
       }
     );
@@ -835,3 +906,6 @@ serve(async (req) => {
     );
   }
 });
+
+// Export for testing purposes
+export { analyzeWebsite };

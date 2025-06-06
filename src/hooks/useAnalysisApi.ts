@@ -1,108 +1,6 @@
 
 import { useState } from 'react';
-
-export interface AnalysisResponse {
-  id: string;
-  url: string;
-  timestamp: string;
-  status: 'complete' | 'error';
-  data: {
-    overview: {
-      overallScore: number;
-      pageLoadTime: string;
-      seoScore: number;
-      userExperienceScore: number;
-    };
-    ui: {
-      colors: Array<{
-        name: string;
-        hex: string;
-        usage: string;
-      }>;
-      fonts: Array<{
-        name: string;
-        category: string;
-        usage: string;
-        weight: string;
-      }>;
-      images: Array<{
-        type: string;
-        count: number;
-        format: string;
-        totalSize: string;
-      }>;
-      imageAnalysis: {
-        totalImages: number;
-        estimatedPhotos: number;
-        estimatedIcons: number;
-        imageUrls: string[];
-        photoUrls: string[];
-        iconUrls: string[];
-      };
-    };
-    performance: {
-      coreWebVitals: Array<{
-        name: string;
-        value: number;
-        benchmark: number;
-      }>;
-      performanceScore: number;
-      recommendations: Array<{
-        type: 'error' | 'warning' | 'info';
-        title: string;
-        description: string;
-      }>;
-    };
-    seo: {
-      score: number;
-      checks: Array<{
-        name: string;
-        status: 'good' | 'warning' | 'error';
-        description: string;
-      }>;
-      recommendations: Array<{
-        title: string;
-        description: string;
-        priority: 'high' | 'medium' | 'low';
-      }>;
-    };
-    technical: {
-      techStack: Array<{
-        category: string;
-        technology: string;
-      }>;
-      healthGrade: string;
-      issues: Array<{
-        type: string;
-        description: string;
-        severity: 'high' | 'medium' | 'low';
-        status: string;
-      }>;
-    };
-    adTags?: {
-      hasGAM: boolean;
-      hasAdSense: boolean;
-      hasPrebid: boolean;
-      hasAPS: boolean;
-      hasIX: boolean;
-      hasANX: boolean;
-      hasOpenX: boolean;
-      hasRubicon: boolean;
-      hasPubMatic: boolean;
-      hasVPAID: boolean;
-      hasVMAP: boolean;
-      hasIMA: boolean;
-      hasCriteo: boolean;
-      hasTaboola: boolean;
-      hasOutbrain: boolean;
-      hasSharethrough: boolean;
-      hasTeads: boolean;
-      hasMoat: boolean;
-      hasDV: boolean;
-      hasIAS: boolean;
-    };
-  };
-}
+import type { AnalysisResponse } from '@/types/analysis';
 
 export const useAnalysisApi = () => {
   const [loading, setLoading] = useState(false);
@@ -117,13 +15,21 @@ export const useAnalysisApi = () => {
       console.log('Analyzing URL:', url);
       
       // Call the edge function directly with the URL parameter
-      const response = await fetch(`https://sxrhpwmdslxgwpqfdmxu.supabase.co/functions/v1/analyze?url=${encodeURIComponent(url)}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN4cmhwd21kc2x4Z3dwcWZkbXh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NTIwMDUsImV4cCI6MjA2NDQyODAwNX0.jdjgtwLQ-MGBMoRw2cLA14SzrivonF36POCC6YYUVwk`,
-          'Content-Type': 'application/json',
+      const supabaseAnonKey =
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+        import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+        '';
+
+      const response = await fetch(
+        `https://sxrhpwmdslxgwpqfdmxu.supabase.co/functions/v1/analyze?url=${encodeURIComponent(url)}`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${supabaseAnonKey}`,
+            'Content-Type': 'application/json',
+          },
         },
-      });
+      );
 
       console.log('Response status:', response.status);
 

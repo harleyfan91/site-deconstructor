@@ -80,6 +80,12 @@ The integration provides comprehensive technology fingerprinting without requiri
 
 Simply open [Lovable](https://lovable.dev/projects/3a4c0dbb-697f-4cc3-8786-dfa109c5a225) and click on Share -> Publish.
 
+## Environment Variables
+
+The frontend needs your Supabase anonymous key to authorize requests. Set
+`NEXT_PUBLIC_SUPABASE_ANON_KEY` in your shell or `.env` file with the value from
+your Supabase project before running the app or tests.
+
 ## Can I connect a custom domain to my Lovable project?
 
 Yes, you can!
@@ -87,3 +93,23 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+
+## Continuous Integration and Testing
+
+Automated tests cover the analysis utilities, export functions and UI helpers.
+Every pull request runs these tests via GitHub Actions using the workflow at
+`.github/workflows/ci.yml`.
+
+Run tests locally with:
+
+```sh
+npm run test
+npx tsc -p tsconfig.json --noEmit
+```
+
+## Manual UI Review
+
+For changes that affect the dashboard, follow the
+[Manual UI Review Checklist](docs/Manual_UI_Checklist.md). It walks through
+loading the app locally, verifying each tab, testing export features and checking
+responsive layout.
