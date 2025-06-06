@@ -2,7 +2,7 @@
 import React from 'react';
 import { Box, Typography, Card, CardContent } from '@mui/material';
 import { Palette } from 'lucide-react';
-import { AnalysisResponse } from '../../../hooks/useAnalysisApi';
+import type { AnalysisResponse } from '@/types/analysis';
 
 interface ColorExtractionCardProps {
   colors: AnalysisResponse['data']['ui']['colors'];

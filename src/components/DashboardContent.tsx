@@ -7,6 +7,7 @@ import PerformanceTab from './dashboard/PerformanceTab';
 import SEOAnalysisTab from './dashboard/SEOAnalysisTab';
 import TechTab from './dashboard/TechTab';
 import UIAnalysisTab from './dashboard/UIAnalysisTab';
+import ComplianceTab from './dashboard/ComplianceTab';
 import { useAnalysisContext } from '../contexts/AnalysisContext';
 
 const DashboardContent = () => {
@@ -20,12 +21,13 @@ const DashboardContent = () => {
       
       <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-5 mb-6">
+          <TabsList className="grid w-full grid-cols-6 mb-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="ui">User Interface</TabsTrigger>
             <TabsTrigger value="performance">Performance</TabsTrigger>
             <TabsTrigger value="seo">SEO Analysis</TabsTrigger>
             <TabsTrigger value="tech">Tech</TabsTrigger>
+            <TabsTrigger value="compliance">Compliance</TabsTrigger>
           </TabsList>
           
           <TabsContent value="overview">
@@ -46,6 +48,10 @@ const DashboardContent = () => {
           
           <TabsContent value="tech">
             <TechTab data={analysisData} loading={loading} error={error} />
+          </TabsContent>
+
+          <TabsContent value="compliance">
+            <ComplianceTab data={analysisData} loading={loading} error={error} />
           </TabsContent>
         </Tabs>
 

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Box, Typography, Grid, Card, CardContent, Chip, CircularProgress, Alert } from '@mui/material';
 import { CheckCircle, AlertCircle, XCircle } from 'lucide-react';
-import { AnalysisResponse } from '../../hooks/useAnalysisApi';
+import type { AnalysisResponse } from '@/types/analysis';
 
 interface SEOAnalysisTabProps {
   data: AnalysisResponse | null;

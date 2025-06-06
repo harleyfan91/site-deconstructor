@@ -3,7 +3,7 @@ import React from 'react';
 import { Box, Typography, Grid, Card, CardContent, LinearProgress, CircularProgress, Alert } from '@mui/material';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from 'recharts';
-import { AnalysisResponse } from '../../hooks/useAnalysisApi';
+import type { AnalysisResponse } from '@/types/analysis';
 
 interface PerformanceTabProps {
   data: AnalysisResponse | null;
