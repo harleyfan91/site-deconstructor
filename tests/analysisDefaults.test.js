@@ -12,4 +12,8 @@ assert.strictEqual(record.seoScore, 0);
 assert.strictEqual(record.readabilityScore, 0);
 assert.strictEqual(record.complianceStatus, 'warn');
 assert.ok(Array.isArray(record.data.ui.contrastIssues));
+assert.strictEqual(record.data.performance.mobileResponsive, false);
+assert.deepStrictEqual(record.data.seo.metaTags, {});
+assert.strictEqual(record.data.technical.securityScore, 0);
+
 console.log('analysisDefaults test passed');

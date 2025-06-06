@@ -6,6 +6,7 @@ import { DOMParser } from "https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm.ts
 import { analyzeAccessibility, extractSecurityHeaders } from '../../src/lib/accessibility.ts';
 import { extractContrastIssues, extractCssColors, extractFontFamilies } from '../../src/lib/design.ts';
 import { detectSocialMeta, detectShareButtons, detectCookieScripts, detectMinification, checkLinks } from '../../src/lib/social.ts';
+import { extractMetaTags, isMobileResponsive, computeReadabilityScore, calculateSecurityScore } from '../../src/lib/seo.ts';
 
 
 // CORS headers for frontend communication
@@ -364,8 +365,19 @@ const analyzeWebsite = async (url: string) => {
 
     const responseSecurityHeaders = extractSecurityHeaders(response.headers as any);
 
+    const securityScore = calculateSecurityScore(responseSecurityHeaders);
+
     const accessibilityViolations = analyzeAccessibility(html);
-    const complianceStatus = accessibilityViolations.length === 0 ? 'pass' as const : 'fail' as const;
+
+    const mobileResponsive = isMobileResponsive(html);
+    const metaTags = extractMetaTags(html);
+    const readabilityScore = computeReadabilityScore(html);
+
+    let complianceStatus: 'pass' | 'warn' | 'fail' = 'pass';
+    if (accessibilityViolations.length > 0 || securityScore < 80) {
+      complianceStatus = securityScore < 50 || accessibilityViolations.length > 2 ? 'fail' : 'warn';
+    }
+
 
     const socialMeta = detectSocialMeta(html);
     socialMeta.hasShareButtons = detectShareButtons(html);
@@ -387,7 +399,8 @@ const analyzeWebsite = async (url: string) => {
       securityHeaders: responseSecurityHeaders,
       performanceScore: psi.performanceScore,
       seoScore: psi.seoScore,
-      readabilityScore: psi.readabilityScore,
+
+      readabilityScore: readabilityScore,
       complianceStatus,
 
       data: {
@@ -401,12 +414,15 @@ const analyzeWebsite = async (url: string) => {
           ...analysis_basic.ui,
           imageAnalysis,
         },
-        performance: analysis_basic.performance,
-        seo: analysis_basic.seo,
+        performance: { ...analysis_basic.performance, mobileResponsive },
+        seo: { ...analysis_basic.seo, metaTags, readabilityScore },
         technical: {
           techStack,
           healthGrade: analysis_basic.technical.healthGrade,
           issues: analysis_basic.technical.issues,
+
+          securityScore,
+
           accessibility: { violations: accessibilityViolations },
           social: socialMeta,
           cookies: cookieInfo,
@@ -455,10 +471,13 @@ const analyzeWebsite = async (url: string) => {
         performance: {
           coreWebVitals: [],
           performanceScore: 50,
+          mobileResponsive: false,
           recommendations: [],
         },
         seo: {
           score: 50,
+          metaTags: {},
+          readabilityScore: 0,
           checks: [],
           recommendations: [],
         },
@@ -469,6 +488,8 @@ const analyzeWebsite = async (url: string) => {
           ],
           healthGrade: 'C',
           issues: [],
+          securityScore: 0,
+
           accessibility: { violations: [] },
           social: { hasOpenGraph: false, hasTwitterCard: false, hasShareButtons: false },
           cookies: { hasCookieScript: false, scripts: [] },
@@ -529,7 +550,6 @@ const performBasicAnalysis = async (html: string, url: string) => {
     seoScore,
     userExperienceScore: 70,
     ui: {
-
       colors: buildColorObjects(extractCssColors(html)),
 
       fonts: buildFontObjects(extractFontFamilies(html)),

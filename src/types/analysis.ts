@@ -101,6 +101,8 @@ export interface AnalysisResponse {
         benchmark: number;
       }>;
       performanceScore: number;
+      mobileResponsive: boolean;
+
       recommendations: Array<{
         type: 'error' | 'warning' | 'info';
         title: string;
@@ -109,6 +111,8 @@ export interface AnalysisResponse {
     };
     seo: {
       score: number;
+      metaTags: Record<string, string>;
+
       checks: Array<{
         name: string;
         status: 'good' | 'warning' | 'error';
@@ -132,6 +136,8 @@ export interface AnalysisResponse {
         severity: 'high' | 'medium' | 'low';
         status: string;
       }>;
+
+      securityScore: number;
 
       accessibility: {
         violations: AccessibilityViolation[];

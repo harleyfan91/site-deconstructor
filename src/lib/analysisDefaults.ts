@@ -38,10 +38,14 @@ export function createDefaultAnalysis(url: string): AnalysisResponse {
       performance: {
         coreWebVitals: [],
         performanceScore: 0,
+        mobileResponsive: false,
+
         recommendations: [],
       },
       seo: {
         score: 0,
+        metaTags: {},
+
         checks: [],
         recommendations: [],
       },
@@ -49,6 +53,7 @@ export function createDefaultAnalysis(url: string): AnalysisResponse {
         techStack: [],
         healthGrade: '',
         issues: [],
+        securityScore: 0,
 
         accessibility: { violations: [] },
         social: { hasOpenGraph: false, hasTwitterCard: false, hasShareButtons: false },
