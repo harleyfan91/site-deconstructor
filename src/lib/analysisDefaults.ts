@@ -8,6 +8,7 @@ export function createDefaultAnalysis(url: string): AnalysisResponse {
     status: 'complete',
     coreWebVitals: { lcp: 0, fid: 0, cls: 0 },
     securityHeaders: { csp: '', hsts: '', xfo: '', xcto: '', referrer: '' },
+
     performanceScore: 0,
     seoScore: 0,
     readabilityScore: 0,
@@ -32,16 +33,19 @@ export function createDefaultAnalysis(url: string): AnalysisResponse {
           iconUrls: [],
         },
         contrastIssues: [],
+
       },
       performance: {
         coreWebVitals: [],
         performanceScore: 0,
         mobileResponsive: false,
+
         recommendations: [],
       },
       seo: {
         score: 0,
         metaTags: {},
+
         checks: [],
         recommendations: [],
       },
@@ -50,11 +54,13 @@ export function createDefaultAnalysis(url: string): AnalysisResponse {
         healthGrade: '',
         issues: [],
         securityScore: 0,
+
         accessibility: { violations: [] },
         social: { hasOpenGraph: false, hasTwitterCard: false, hasShareButtons: false },
         cookies: { hasCookieScript: false, scripts: [] },
         minification: { cssMinified: false, jsMinified: false },
         linkIssues: { brokenLinks: [], mixedContentLinks: [] },
+
       },
       adTags: {
         hasGAM: false,
