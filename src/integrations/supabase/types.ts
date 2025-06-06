@@ -16,12 +16,6 @@ export type Database = {
           expires_at: string | null
           original_url: string | null
           url_hash: string
-          core_web_vitals: Json | null
-          security_headers: Json | null
-          performance_score: number | null
-          seo_score: number | null
-          readability_score: number | null
-          compliance_status: string | null
         }
         Insert: {
           analysis_data?: Json | null
@@ -29,12 +23,6 @@ export type Database = {
           expires_at?: string | null
           original_url?: string | null
           url_hash: string
-          core_web_vitals?: Json | null
-          security_headers?: Json | null
-          performance_score?: number | null
-          seo_score?: number | null
-          readability_score?: number | null
-          compliance_status?: string | null
         }
         Update: {
           analysis_data?: Json | null
@@ -42,12 +30,6 @@ export type Database = {
           expires_at?: string | null
           original_url?: string | null
           url_hash?: string
-          core_web_vitals?: Json | null
-          security_headers?: Json | null
-          performance_score?: number | null
-          seo_score?: number | null
-          readability_score?: number | null
-          compliance_status?: string | null
         }
         Relationships: []
       }
