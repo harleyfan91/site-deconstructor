@@ -86,11 +86,13 @@ export interface AnalysisResponse {
         photoUrls: string[];
         iconUrls: string[];
       };
+
       contrastIssues: Array<{
         textColor: string;
         backgroundColor: string;
         ratio: number;
       }>;
+
     };
     performance: {
       coreWebVitals: Array<{
@@ -100,6 +102,7 @@ export interface AnalysisResponse {
       }>;
       performanceScore: number;
       mobileResponsive: boolean;
+
       recommendations: Array<{
         type: 'error' | 'warning' | 'info';
         title: string;
@@ -109,6 +112,7 @@ export interface AnalysisResponse {
     seo: {
       score: number;
       metaTags: Record<string, string>;
+
       checks: Array<{
         name: string;
         status: 'good' | 'warning' | 'error';
@@ -133,6 +137,7 @@ export interface AnalysisResponse {
         status: string;
       }>;
       securityScore: number;
+
       accessibility: {
         violations: AccessibilityViolation[];
       };
@@ -140,6 +145,7 @@ export interface AnalysisResponse {
       cookies?: CookieInfo;
       minification?: MinificationInfo;
       linkIssues?: LinkIssueInfo;
+
     };
     adTags?: {
       hasGAM: boolean;

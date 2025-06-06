@@ -13,8 +13,10 @@
     "src/lib/design.ts",
     "src/lib/social.ts",
     "src/lib/seo.ts",
+
     "src/lib/export.ts",
     "src/types/analysis.ts",
     "src/lib/ui.ts"
   ]
+
 }
