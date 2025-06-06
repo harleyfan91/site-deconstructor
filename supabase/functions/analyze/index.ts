@@ -378,7 +378,6 @@ const analyzeWebsite = async (url: string) => {
       complianceStatus = securityScore < 50 || accessibilityViolations.length > 2 ? 'fail' : 'warn';
     }
 
-
     const socialMeta = detectSocialMeta(html);
     socialMeta.hasShareButtons = detectShareButtons(html);
     const cookieInfo = detectCookieScripts(html);

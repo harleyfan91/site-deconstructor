@@ -136,7 +136,7 @@ export interface AnalysisResponse {
         severity: 'high' | 'medium' | 'low';
         status: string;
       }>;
-      
+
       securityScore: number;
 
       accessibility: {
