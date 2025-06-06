@@ -420,7 +420,6 @@ const analyzeWebsite = async (url: string) => {
           techStack,
           healthGrade: analysis_basic.technical.healthGrade,
           issues: analysis_basic.technical.issues,
-
           securityScore,
 
           accessibility: { violations: accessibilityViolations },

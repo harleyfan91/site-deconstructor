@@ -76,6 +76,18 @@ This application uses **Wappalyzer** for accurate technology detection on analyz
 
 The integration provides comprehensive technology fingerprinting without requiring API keys or external dependencies beyond the Wappalyzer npm package.
 
+## Environment Setup
+
+Create a `.env` file in the project root with these variables:
+
+```sh
+VITE_SUPABASE_ANON_KEY=<your-supabase-anon-key>
+SUPABASE_URL=<your-supabase-url>
+SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key>
+```
+
+The Vite build exposes `VITE_SUPABASE_ANON_KEY` to the browser so the dashboard can call the Supabase function. The remaining variables are used by the serverless function when running locally.
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/3a4c0dbb-697f-4cc3-8786-dfa109c5a225) and click on Share -> Publish.
