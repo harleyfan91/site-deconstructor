@@ -2,6 +2,8 @@
 import { useState } from 'react';
 import type { AnalysisResponse } from '@/types/analysis';
 
+export type { AnalysisResponse } from '@/types/analysis';
+
 export const useAnalysisApi = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

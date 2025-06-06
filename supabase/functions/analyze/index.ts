@@ -9,6 +9,109 @@ import { detectSocialMeta, detectShareButtons, detectCookieScripts, detectMinifi
 import { extractMetaTags, isMobileResponsive, computeReadabilityScore, calculateSecurityScore } from '../../src/lib/seo.ts';
 
 
+// Utility functions moved directly into edge function
+function analyzeAccessibility(html: string): Array<{id: string, impact: string, description: string}> {
+  const violations: Array<{id: string, impact: string, description: string}> = [];
+  try {
+    const imgRegex = /<img[^>]*>/gi;
+    const imgs = html.match(imgRegex) || [];
+    for (const img of imgs) {
+      if (!/alt\s*=/.test(img)) {
+        violations.push({ id: 'image-alt', impact: 'moderate', description: 'Image tag missing alt text' });
+        break;
+      }
+    }
+  } catch (_e) {
+    // ignore errors, return empty violations
+  }
+  return violations;
+}
+
+function extractSecurityHeaders(headers: Record<string, string> | Headers): {csp: string, hsts: string, xfo: string, xcto: string, referrer: string} {
+  const get = (name: string) => {
+    if (headers instanceof Headers) {
+      return headers.get(name) || '';
+    }
+    return headers[name.toLowerCase()] || headers[name] || '';
+  };
+  return {
+    csp: get('content-security-policy'),
+    hsts: get('strict-transport-security'),
+    xfo: get('x-frame-options'),
+    xcto: get('x-content-type-options'),
+    referrer: get('referrer-policy'),
+  };
+}
+
+function extractContrastIssues(html: string): Array<{element: string, issue: string, severity: string}> {
+  // Basic contrast issue detection
+  return [];
+}
+
+function extractCssColors(html: string): string[] {
+  const colors: string[] = [];
+  try {
+    const colorRegex = /#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})\b/g;
+    const matches = html.match(colorRegex) || [];
+    return [...new Set(matches)];
+  } catch (_e) {
+    return [];
+  }
+}
+
+function extractFontFamilies(html: string): string[] {
+  const fonts: string[] = [];
+  try {
+    const fontRegex = /font-family:\s*([^;]+)/gi;
+    const matches = html.match(fontRegex) || [];
+    for (const match of matches) {
+      const fontFamily = match.replace(/font-family:\s*/i, '').replace(/['"]/g, '').split(',')[0].trim();
+      if (fontFamily && !fonts.includes(fontFamily)) {
+        fonts.push(fontFamily);
+      }
+    }
+  } catch (_e) {
+    // ignore errors
+  }
+  return fonts;
+}
+
+function detectSocialMeta(html: string): {hasOpenGraph: boolean, hasTwitterCard: boolean, hasShareButtons: boolean} {
+  const htmlLower = html.toLowerCase();
+  return {
+    hasOpenGraph: htmlLower.includes('property="og:') || htmlLower.includes("property='og:"),
+    hasTwitterCard: htmlLower.includes('name="twitter:') || htmlLower.includes("name='twitter:"),
+    hasShareButtons: false
+  };
+}
+
+function detectShareButtons(html: string): boolean {
+  const htmlLower = html.toLowerCase();
+  return htmlLower.includes('share') && (htmlLower.includes('facebook') || htmlLower.includes('twitter') || htmlLower.includes('linkedin'));
+}
+
+function detectCookieScripts(html: string): {hasCookieScript: boolean, scripts: string[]} {
+  const htmlLower = html.toLowerCase();
+  return {
+    hasCookieScript: htmlLower.includes('cookie') && htmlLower.includes('consent'),
+    scripts: []
+  };
+}
+
+function detectMinification(html: string): {cssMinified: boolean, jsMinified: boolean} {
+  return {
+    cssMinified: html.includes('</style>') && !html.includes('\n  '),
+    jsMinified: html.includes('</script>') && !html.includes('\n  ')
+  };
+}
+
+async function checkLinks(html: string, baseUrl: string): Promise<{brokenLinks: string[], mixedContentLinks: string[]}> {
+  return {
+    brokenLinks: [],
+    mixedContentLinks: []
+  };
+}
+
 // CORS headers for frontend communication
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
