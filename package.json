@@ -69,6 +69,7 @@
     "wappalyzer": "^7.0.3",
     "zod": "^3.25.47",
     "node-vibrant": "^3.2.0"
+
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
