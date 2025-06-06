@@ -88,6 +88,13 @@ SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key>
 
 The Vite build exposes `VITE_SUPABASE_ANON_KEY` to the browser so the dashboard can call the Supabase function. The remaining variables are used by the serverless function when running locally.
 
+To enable color palette extraction with `node-vibrant`, install the optional dependency:
+
+```sh
+npm install node-vibrant
+```
+
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/3a4c0dbb-697f-4cc3-8786-dfa109c5a225) and click on Share -> Publish.

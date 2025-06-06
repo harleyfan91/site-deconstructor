@@ -1,7 +1,6 @@
 import assert from 'node:assert';
 import { extractCssColors, extractFontFamilies, extractContrastIssues, contrastRatio } from '../dist/lib/design.js';
 
-
 const html = `<div style="color:#333333;background-color:#ffffff;font-family:'Roboto', sans-serif"><img src='img.jpg'></div>`;
 const mockVibrant = {
   from: () => ({
