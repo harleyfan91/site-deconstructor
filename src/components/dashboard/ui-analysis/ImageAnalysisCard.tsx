@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Box, Typography, Grid, Card, CardContent } from '@mui/material';
 import { Image } from 'lucide-react';
-import { AnalysisResponse } from '../../../hooks/useAnalysisApi';
+import type { AnalysisResponse } from '@/types/analysis';
 import ExpandableImageBox from './ExpandableImageBox';
 
 interface ImageAnalysisCardProps {

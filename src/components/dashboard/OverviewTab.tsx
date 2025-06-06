@@ -2,7 +2,7 @@
 import React from 'react';
 import { Box, Typography, Grid, Card, CardContent, CircularProgress, Alert } from '@mui/material';
 import { TrendingUp, Users, Clock, Star } from 'lucide-react';
-import { AnalysisResponse } from '../../hooks/useAnalysisApi';
+import type { AnalysisResponse } from '@/types/analysis';
 
 interface OverviewTabProps {
   data: AnalysisResponse | null;
