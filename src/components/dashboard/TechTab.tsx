@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Typography, Grid, Card, CardContent, Chip, CircularProgress, Alert } from '@mui/material';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Shield, Globe, Server, Database, Code, Layers, Zap, Activity, BarChart } from 'lucide-react';
-import { AnalysisResponse } from '../../hooks/useAnalysisApi';
+import type { AnalysisResponse } from '@/types/analysis';
 interface TechTabProps {
   data: AnalysisResponse | null;
   loading: boolean;
