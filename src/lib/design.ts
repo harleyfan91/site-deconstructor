@@ -68,9 +68,14 @@ export async function extractCssColors(
 
   try {
     if (!vibrant) {
-      // @ts-ignore optional dependency loaded at runtime
-      const mod = (await import('node-vibrant')) as any;
-      vibrant = mod.default ?? mod;
+
+      // Optional dependency loaded at runtime. The module provides a default export
+      // when bundled via CommonJS, but may appear as the module itself when using
+      // ESM typings. Cast to any to support both forms without type errors.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const mod: any = await import('node-vibrant');
+      vibrant = mod.default || mod;
+
     }
 
     const imgMatch = html.match(/<img[^>]*src=["']([^"']+)["']/i);

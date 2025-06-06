@@ -17,19 +17,13 @@ export const useAnalysisApi = () => {
       console.log('Analyzing URL:', url);
       
       // Call the edge function directly with the URL parameter
-      const supabaseAnonKey =
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
-        import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
-        '';
 
-      const response = await fetch(
-        `https://sxrhpwmdslxgwpqfdmxu.supabase.co/functions/v1/analyze?url=${encodeURIComponent(url)}`,
-        {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${supabaseAnonKey}`,
-            'Content-Type': 'application/json',
-          },
+      const response = await fetch(`https://sxrhpwmdslxgwpqfdmxu.supabase.co/functions/v1/analyze?url=${encodeURIComponent(url)}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY ?? ''}`,
+          'Content-Type': 'application/json',
+
         },
       );
 
