@@ -1,3 +1,4 @@
+
 declare module 'node-vibrant' {
   interface Swatch { hex: string }
   interface Palette { [name: string]: Swatch | null }
@@ -7,3 +8,4 @@ declare module 'node-vibrant' {
     getPalette(): Promise<Palette>
   }
 }
+
