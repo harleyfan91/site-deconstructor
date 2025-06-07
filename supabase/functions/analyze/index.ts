@@ -48,15 +48,198 @@ function extractContrastIssues(html: string): Array<{element: string, issue: str
   return [];
 }
 
-function extractCssColors(html: string): string[] {
-  const colors: string[] = [];
+// Enhanced color extraction with usage-based categorization
+function extractCssColors(html: string): Array<{name: string, hex: string, usage: string}> {
+  const colors: Array<{name: string, hex: string, usage: string}> = [];
+  const colorCounts: Record<string, number> = {};
+  
   try {
-    const colorRegex = /#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})\b/g;
-    const matches = html.match(colorRegex) || [];
-    return [...new Set(matches)];
-  } catch (_e) {
-    return [];
+    // Extract colors from various CSS properties
+    const backgroundColorRegex = /background-color:\s*(#[0-9a-fA-F]{3,6})/gi;
+    const colorRegex = /(?:^|[^-])color:\s*(#[0-9a-fA-F]{3,6})/gi;
+    const borderColorRegex = /border(?:-\w+)?-color:\s*(#[0-9a-fA-F]{3,6})/gi;
+    const boxShadowRegex = /box-shadow:[^;]*?(#[0-9a-fA-F]{3,6})/gi;
+    
+    // Count occurrences of each color
+    const allColorRegex = /#[0-9a-fA-F]{3,6}/g;
+    const matches = html.match(allColorRegex) || [];
+    matches.forEach(hex => {
+      const normalized = hex.toUpperCase();
+      colorCounts[normalized] = (colorCounts[normalized] || 0) + 1;
+    });
+
+    // Extract background colors
+    let match;
+    const backgroundColors = new Set<string>();
+    while ((match = backgroundColorRegex.exec(html)) !== null) {
+      backgroundColors.add(match[1].toUpperCase());
+    }
+
+    // Extract text colors
+    const textColors = new Set<string>();
+    while ((match = colorRegex.exec(html)) !== null) {
+      textColors.add(match[1].toUpperCase());
+    }
+
+    // Extract border colors
+    const borderColors = new Set<string>();
+    while ((match = borderColorRegex.exec(html)) !== null) {
+      borderColors.add(match[1].toUpperCase());
+    }
+
+    // Extract accent colors (from box-shadow, etc.)
+    const accentColors = new Set<string>();
+    while ((match = boxShadowRegex.exec(html)) !== null) {
+      accentColors.add(match[1].toUpperCase());
+    }
+
+    // Categorize colors by usage
+    const processedColors = new Set<string>();
+
+    // Add background colors
+    backgroundColors.forEach(hex => {
+      if (!processedColors.has(hex)) {
+        colors.push({
+          name: getColorName(hex),
+          hex: hex,
+          usage: 'Background'
+        });
+        processedColors.add(hex);
+      }
+    });
+
+    // Add text colors
+    textColors.forEach(hex => {
+      if (!processedColors.has(hex)) {
+        colors.push({
+          name: getColorName(hex),
+          hex: hex,
+          usage: 'Text'
+        });
+        processedColors.add(hex);
+      }
+    });
+
+    // Add border colors
+    borderColors.forEach(hex => {
+      if (!processedColors.has(hex)) {
+        colors.push({
+          name: getColorName(hex),
+          hex: hex,
+          usage: 'Border'
+        });
+        processedColors.add(hex);
+      }
+    });
+
+    // Add accent colors
+    accentColors.forEach(hex => {
+      if (!processedColors.has(hex)) {
+        colors.push({
+          name: getColorName(hex),
+          hex: hex,
+          usage: 'Accent'
+        });
+        processedColors.add(hex);
+      }
+    });
+
+    // Add remaining frequent colors as theme colors
+    const sortedColors = Object.entries(colorCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10);
+    
+    sortedColors.forEach(([hex, count]) => {
+      if (!processedColors.has(hex) && count > 1) {
+        colors.push({
+          name: getColorName(hex),
+          hex: hex,
+          usage: 'Theme'
+        });
+        processedColors.add(hex);
+      }
+    });
+
+    // Fallback colors if nothing found
+    if (colors.length === 0) {
+      colors.push(
+        { name: 'Primary Text', hex: '#000000', usage: 'Text' },
+        { name: 'Background', hex: '#FFFFFF', usage: 'Background' }
+      );
+    }
+
+  } catch (error) {
+    console.error('Color extraction error:', error);
+    // Return fallback colors
+    return [
+      { name: 'Primary Text', hex: '#000000', usage: 'Text' },
+      { name: 'Background', hex: '#FFFFFF', usage: 'Background' }
+    ];
   }
+
+  return colors;
+}
+
+// Helper function to generate meaningful color names
+function getColorName(hex: string): string {
+  const colorNames: Record<string, string> = {
+    '#FFFFFF': 'White',
+    '#000000': 'Black',
+    '#FF0000': 'Red',
+    '#00FF00': 'Green',
+    '#0000FF': 'Blue',
+    '#FFFF00': 'Yellow',
+    '#FF00FF': 'Magenta',
+    '#00FFFF': 'Cyan',
+    '#808080': 'Gray',
+    '#800000': 'Maroon',
+    '#008000': 'Dark Green',
+    '#000080': 'Navy',
+    '#800080': 'Purple',
+    '#008080': 'Teal',
+    '#C0C0C0': 'Silver'
+  };
+
+  const upperHex = hex.toUpperCase();
+  if (colorNames[upperHex]) {
+    return colorNames[upperHex];
+  }
+
+  // Generate name based on RGB values
+  const rgb = hexToRgb(hex);
+  if (!rgb) return 'Color';
+
+  const { r, g, b } = rgb;
+  
+  // Determine dominant color
+  if (r > g && r > b) {
+    if (r > 200) return 'Light Red';
+    if (r > 100) return 'Red';
+    return 'Dark Red';
+  } else if (g > r && g > b) {
+    if (g > 200) return 'Light Green';
+    if (g > 100) return 'Green';
+    return 'Dark Green';
+  } else if (b > r && b > g) {
+    if (b > 200) return 'Light Blue';
+    if (b > 100) return 'Blue';
+    return 'Dark Blue';
+  } else {
+    // Mixed or grayscale
+    const avg = (r + g + b) / 3;
+    if (avg > 200) return 'Light Gray';
+    if (avg > 100) return 'Gray';
+    return 'Dark Gray';
+  }
+}
+
+function hexToRgb(hex: string): {r:number;g:number;b:number} | null {
+  const match = hex.replace('#','').match(/^([0-9a-f]{3}|[0-9a-f]{6})$/i);
+  if (!match) return null;
+  let h = match[0];
+  if (h.length === 3) h = h.split('').map(c=>c+c).join('');
+  const num = parseInt(h, 16);
+  return {r:(num>>16)&255, g:(num>>8)&255, b:num&255};
 }
 
 function extractFontFamilies(html: string): string[] {
@@ -651,7 +834,7 @@ const performBasicAnalysis = async (html: string, url: string) => {
     seoScore,
     userExperienceScore: 70,
     ui: {
-      colors: buildColorObjects(extractCssColors(html)),
+      colors: buildColorObjects(html),
 
       fonts: buildFontObjects(extractFontFamilies(html)),
       images: analyzeImages(imageMatches),
@@ -685,14 +868,15 @@ const performBasicAnalysis = async (html: string, url: string) => {
 };
 
 // Helper functions
-const buildColorObjects = (colors: string[]) => {
-  if (colors.length === 0) {
+const buildColorObjects = (html: string) => {
+  const extractedColors = extractCssColors(html);
+  if (extractedColors.length === 0) {
     return [
-      { name: 'Primary', hex: '#000000', usage: 'Text content' },
+      { name: 'Primary Text', hex: '#000000', usage: 'Text' },
       { name: 'Background', hex: '#FFFFFF', usage: 'Background' },
     ];
   }
-  return colors.map((hex, index) => ({ name: `Color ${index + 1}`, hex, usage: index === 0 ? 'Primary' : 'Secondary' }));
+  return extractedColors;
 };
 
 const buildFontObjects = (fonts: string[]) => {
