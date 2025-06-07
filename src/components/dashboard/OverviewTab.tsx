@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { Box, Typography, Grid, Card, CardContent, CircularProgress, Alert } from '@mui/material';
+import { Box, Typography, Card, CardContent, CircularProgress, Alert } from '@mui/material';
+import { Grid2 as Grid } from '@mui/material';
 import { TrendingUp, Users, Clock, Star } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 
