@@ -30,6 +30,7 @@ export const useAnalysisApi = () => {
         }
       );
 
+
       console.log('Response status:', response.status);
 
       if (!response.ok) {

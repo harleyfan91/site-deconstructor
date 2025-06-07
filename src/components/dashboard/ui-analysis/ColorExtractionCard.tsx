@@ -56,22 +56,60 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
     return {r:(num>>16)&255, g:(num>>8)&255, b:num&255};
   };
 
-  // Group colors by usage category
+  // Group colors by usage category with improved handling
   const groupByUsage = (): ColorGroup[] => {
     const usageGroups: Record<string, AnalysisResponse['data']['ui']['colors']> = {};
     
     colors.forEach(color => {
-      const usage = color.usage || 'Other';
+      // Use the usage property from the backend, with fallback logic
+      let usage = color.usage || 'Other';
+      
+      // Map old generic terms to meaningful categories
+      if (usage === 'Primary' || usage === 'Secondary') {
+        // Try to infer usage based on color characteristics
+        const rgb = hexToRgb(color.hex);
+        if (rgb) {
+          const { r, g, b } = rgb;
+          const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+          
+          if (brightness > 240) {
+            usage = 'Background';
+          } else if (brightness < 50) {
+            usage = 'Text';
+          } else {
+            usage = 'Theme';
+          }
+        } else {
+          usage = 'Theme';
+        }
+      }
+      
       if (!usageGroups[usage]) {
         usageGroups[usage] = [];
       }
       usageGroups[usage].push(color);
     });
 
-    return Object.entries(usageGroups).map(([usage, colors]) => ({
-      name: usage,
-      colors: colors
-    }));
+    // Sort usage groups by importance
+    const usageOrder = ['Background', 'Text', 'Theme', 'Accent', 'Border', 'Other'];
+    const sortedGroups = usageOrder
+      .filter(usage => usageGroups[usage])
+      .map(usage => ({
+        name: usage,
+        colors: usageGroups[usage]
+      }));
+
+    // Add any remaining groups not in the predefined order
+    Object.keys(usageGroups)
+      .filter(usage => !usageOrder.includes(usage))
+      .forEach(usage => {
+        sortedGroups.push({
+          name: usage,
+          colors: usageGroups[usage]
+        });
+      });
+
+    return sortedGroups;
   };
 
   // Group colors within a usage category by color harmony
