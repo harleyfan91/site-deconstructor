@@ -101,7 +101,9 @@ supabase functions serve --env-file .env
 To enable color palette extraction with `node-vibrant`, install the optional dependency pinned to version `^4.0.3`:
 
 ```sh
-npm install node-vibrant@^4.0.3
+
+npm install node-vibrant@^4
+
 ```
 
 The library now includes its own TypeScript definitions.
