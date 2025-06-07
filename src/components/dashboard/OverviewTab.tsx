@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Box, Typography, Grid, Card, CardContent, CircularProgress, Alert } from '@mui/material';
+import { Box, Typography, Grid2 as Grid, Card, CardContent, CircularProgress, Alert } from '@mui/material';
 import { TrendingUp, Users, Clock, Star } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 
@@ -77,7 +77,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
         {metrics.map((metric, index) => {
           const IconComponent = metric.icon;
           return (
-            <Grid item xs={12} sm={6} md={3} key={index}>
+            <Grid xs={12} sm={6} md={3} key={index}>
               <Card sx={{ height: '100%', borderRadius: 2 }}>
                 <CardContent sx={{ p: 3 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
