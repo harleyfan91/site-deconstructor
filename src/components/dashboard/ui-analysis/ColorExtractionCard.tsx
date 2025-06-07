@@ -200,6 +200,7 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
                       <Typography
                         variant="subtitle2"
                         sx={{ fontWeight: 'bold', mb: 1 }}
+
                       >
                         {freqGroup.name}
                       </Typography>
