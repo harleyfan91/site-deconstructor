@@ -58,7 +58,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
 
       {/* Performance Score Section */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} md={4}>
+        <Grid xs={12} md={4}>
           <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ p: 3, textAlign: 'center' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
@@ -77,7 +77,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={4}>
+        <Grid xs={12} md={4}>
           <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ p: 3, textAlign: 'center' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
@@ -96,7 +96,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={4}>
+        <Grid xs={12} md={4}>
           <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ p: 3, textAlign: 'center' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
@@ -118,7 +118,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
 
       {/* Core Web Vitals Section */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} md={8}>
+        <Grid xs={12} md={8}>
           <Card sx={{ borderRadius: 2, height: '400px' }}>
             <CardContent sx={{ p: 3, height: '100%' }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -137,7 +137,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={4}>
+        <Grid xs={12} md={4}>
           <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -167,7 +167,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
             </Typography>
             <Grid container spacing={2}>
               {Object.entries(data.securityHeaders).map(([key, value]) => (
-                <Grid item xs={12} sm={6} md={4} key={key}>
+                <Grid xs={12} sm={6} md={4} key={key}>
                   <Box sx={{ 
                     p: 2, 
                     border: '1px solid #E0E0E0',
@@ -202,7 +202,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
             </Typography>
             <Grid container spacing={2}>
               {performance.recommendations.map((rec, index) => (
-                <Grid item xs={12} md={6} key={index}>
+                <Grid xs={12} md={6} key={index}>
                   <Box sx={{ 
                     p: 2, 
                     backgroundColor: rec.type === 'warning' ? '#FFF3E0' : rec.type === 'error' ? '#FFEBEE' : '#E8F5E8', 
