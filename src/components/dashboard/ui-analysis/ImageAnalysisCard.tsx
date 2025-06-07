@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
-import { Box, Typography, Grid, Card, CardContent } from '@mui/material';
+import { Box, Typography, Card, CardContent } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Image } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 import ExpandableImageBox from './ExpandableImageBox';
