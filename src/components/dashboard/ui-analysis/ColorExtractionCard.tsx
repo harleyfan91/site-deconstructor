@@ -199,7 +199,7 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
                     <Box key={freqIndex} sx={{ mb: 2 }}>
                       <Typography
                         variant="subtitle2"
-                        sx={{ fontWeight: 'medium', mb: 1 }}
+                        sx={{ fontWeight: 'bold', mb: 1 }}
                       >
                         {freqGroup.name}
                       </Typography>
