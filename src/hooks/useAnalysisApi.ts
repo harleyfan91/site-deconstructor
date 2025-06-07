@@ -17,13 +17,15 @@ export const useAnalysisApi = () => {
       console.log('Analyzing URL:', url);
       
       // Call the edge function directly with the URL parameter
+
       const response = await fetch(`https://sxrhpwmdslxgwpqfdmxu.supabase.co/functions/v1/analyze?url=${encodeURIComponent(url)}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY ?? ''}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+
         },
-      });
+      );
 
       console.log('Response status:', response.status);
 
