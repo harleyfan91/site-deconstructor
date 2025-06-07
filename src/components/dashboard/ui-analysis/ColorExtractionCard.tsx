@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Box, Typography, Card, CardContent, Collapse, IconButton } from '@mui/material';
 import { Palette, ChevronDown, ChevronUp } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
+import { groupByFrequency } from '@/lib/ui';
 
 interface ColorExtractionCardProps {
   colors: AnalysisResponse['data']['ui']['colors'];
@@ -11,6 +12,16 @@ interface ColorExtractionCardProps {
 interface ColorGroup {
   name: string;
   colors: AnalysisResponse['data']['ui']['colors'];
+}
+
+interface FrequencyGroup {
+  name: string;
+  colors: AnalysisResponse['data']['ui']['colors'];
+}
+
+interface UsageGroup {
+  name: string;
+  groups: FrequencyGroup[];
 }
 
 const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => {
@@ -57,7 +68,7 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
   };
 
   // Group colors by usage category with improved handling
-  const groupByUsage = (): ColorGroup[] => {
+  const groupByUsage = (): UsageGroup[] => {
     const usageGroups: Record<string, AnalysisResponse['data']['ui']['colors']> = {};
     
     colors.forEach(color => {
@@ -96,7 +107,7 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
       .filter(usage => usageGroups[usage])
       .map(usage => ({
         name: usage,
-        colors: usageGroups[usage]
+        groups: groupByFrequency(usageGroups[usage])
       }));
 
     // Add any remaining groups not in the predefined order
@@ -105,7 +116,7 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
       .forEach(usage => {
         sortedGroups.push({
           name: usage,
-          colors: usageGroups[usage]
+          groups: groupByFrequency(usageGroups[usage])
         });
       });
 
@@ -171,7 +182,7 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
                 onClick={() => toggleSection(usageGroup.name)}
               >
                 <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: '#FF6B35' }}>
-                  {usageGroup.name} ({usageGroup.colors.length})
+                  {usageGroup.name} ({usageGroup.groups.reduce((t,g)=>t+g.colors.length,0)})
                 </Typography>
                 <IconButton size="small">
                   {expandedSections[usageGroup.name] ? 
@@ -184,73 +195,80 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
               {/* Collapsible Content */}
               <Collapse in={expandedSections[usageGroup.name]}>
                 <Box sx={{ mt: 2, ml: 2 }}>
-                  {groupByColorHarmony(usageGroup.colors).map((harmonyGroup, harmonyIndex) => (
-                    <Box key={harmonyIndex} sx={{ mb: 3 }}>
-                      {/* Color Harmony Subheader */}
-                      <Typography 
-                        variant="subtitle2" 
-                        sx={{ 
-                          fontWeight: 'medium', 
-                          color: 'text.secondary',
-                          mb: 1,
-                          fontSize: '0.85rem'
-                        }}
+                  {usageGroup.groups.map((freqGroup, freqIndex) => (
+                    <Box key={freqIndex} sx={{ mb: 2 }}>
+                      <Typography
+                        variant="subtitle2"
+                        sx={{ fontWeight: 'bold', mb: 1 }}
                       >
-                        {harmonyGroup.name}
+                        {freqGroup.name}
                       </Typography>
-                      
-                      {/* Colors in this harmony group */}
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-                        {harmonyGroup.colors.map((color, colorIndex) => (
-                          <Box
-                            key={colorIndex}
+                      {groupByColorHarmony(freqGroup.colors).map((harmonyGroup, harmonyIndex) => (
+                        <Box key={harmonyIndex} sx={{ mb: 3 }}>
+                          <Typography
+                            variant="subtitle2"
                             sx={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              bgcolor: 'background.paper',
-                              border: '1px solid rgba(0,0,0,0.1)',
-                              borderRadius: 1,
-                              p: 1,
-                              minWidth: 140,
+                              fontWeight: 'medium',
+                              color: 'text.secondary',
+                              mb: 1,
+                              fontSize: '0.85rem'
                             }}
                           >
-                            <Box
-                              sx={{
-                                width: 24,
-                                height: 24,
-                                backgroundColor: color.hex,
-                                borderRadius: 0.5,
-                                mr: 1,
-                                border: '1px solid rgba(0,0,0,0.1)',
-                                flexShrink: 0,
-                              }}
-                            />
-                            <Box sx={{ flex: 1, minWidth: 0 }}>
-                              <Typography 
-                                variant="caption" 
-                                sx={{ 
-                                  fontWeight: 'bold',
-                                  display: 'block',
-                                  overflow: 'hidden',
-                                  textOverflow: 'ellipsis',
+                            {harmonyGroup.name}
+                          </Typography>
+                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+                            {harmonyGroup.colors.map((color, colorIndex) => (
+                              <Box
+                                key={colorIndex}
+                                sx={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  bgcolor: 'background.paper',
+                                  border: '1px solid rgba(0,0,0,0.1)',
+                                  borderRadius: 1,
+                                  p: 1,
+                                  minWidth: 140,
                                 }}
                               >
-                                {color.name}
-                              </Typography>
-                              <Typography 
-                                variant="caption" 
-                                color="text.secondary"
-                                sx={{ 
-                                  display: 'block',
-                                  fontSize: '0.7rem'
-                                }}
-                              >
-                                {color.hex}
-                              </Typography>
-                            </Box>
+                                <Box
+                                  sx={{
+                                    width: 24,
+                                    height: 24,
+                                    backgroundColor: color.hex,
+                                    borderRadius: 0.5,
+                                    mr: 1,
+                                    border: '1px solid rgba(0,0,0,0.1)',
+                                    flexShrink: 0,
+                                  }}
+                                />
+                                <Box sx={{ flex: 1, minWidth: 0 }}>
+                                  <Typography
+                                    variant="caption"
+                                    sx={{
+                                      fontWeight: 'bold',
+                                      display: 'block',
+                                      overflow: 'hidden',
+                                      textOverflow: 'ellipsis',
+                                    }}
+                                  >
+                                    {color.name}
+                                  </Typography>
+                                  <Typography
+                                    variant="caption"
+                                    color="text.secondary"
+                                    sx={{
+                                      display: 'block',
+                                      fontSize: '0.7rem'
+                                    }}
+                                  >
+                                    {color.hex}
+                                  </Typography>
+                                </Box>
+                              </Box>
+                            ))}
                           </Box>
-                        ))}
-                      </Box>
+                        </Box>
+                      ))}
                     </Box>
                   ))}
                 </Box>
