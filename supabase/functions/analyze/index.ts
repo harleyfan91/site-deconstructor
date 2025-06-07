@@ -49,8 +49,8 @@ function extractContrastIssues(html: string): Array<{element: string, issue: str
 }
 
 // Enhanced color extraction with usage-based categorization
-function extractCssColors(html: string): Array<{name: string, hex: string, usage: string}> {
-  const colors: Array<{name: string, hex: string, usage: string}> = [];
+function extractCssColors(html: string): Array<{name: string, hex: string, usage: string, count: number}> {
+  const colors: Array<{name: string, hex: string, usage: string, count: number}> = [];
   const colorCounts: Record<string, number> = {};
   
   try {
@@ -102,7 +102,8 @@ function extractCssColors(html: string): Array<{name: string, hex: string, usage
         colors.push({
           name: getColorName(hex),
           hex: hex,
-          usage: 'Background'
+          usage: 'Background',
+          count: colorCounts[hex] || 0
         });
         processedColors.add(hex);
       }
@@ -114,7 +115,8 @@ function extractCssColors(html: string): Array<{name: string, hex: string, usage
         colors.push({
           name: getColorName(hex),
           hex: hex,
-          usage: 'Text'
+          usage: 'Text',
+          count: colorCounts[hex] || 0
         });
         processedColors.add(hex);
       }
@@ -126,7 +128,8 @@ function extractCssColors(html: string): Array<{name: string, hex: string, usage
         colors.push({
           name: getColorName(hex),
           hex: hex,
-          usage: 'Border'
+          usage: 'Border',
+          count: colorCounts[hex] || 0
         });
         processedColors.add(hex);
       }
@@ -138,7 +141,8 @@ function extractCssColors(html: string): Array<{name: string, hex: string, usage
         colors.push({
           name: getColorName(hex),
           hex: hex,
-          usage: 'Accent'
+          usage: 'Accent',
+          count: colorCounts[hex] || 0
         });
         processedColors.add(hex);
       }
@@ -154,7 +158,8 @@ function extractCssColors(html: string): Array<{name: string, hex: string, usage
         colors.push({
           name: getColorName(hex),
           hex: hex,
-          usage: 'Theme'
+          usage: 'Theme',
+          count: colorCounts[hex] || 0
         });
         processedColors.add(hex);
       }
@@ -163,8 +168,8 @@ function extractCssColors(html: string): Array<{name: string, hex: string, usage
     // Fallback colors if nothing found
     if (colors.length === 0) {
       colors.push(
-        { name: 'Primary Text', hex: '#000000', usage: 'Text' },
-        { name: 'Background', hex: '#FFFFFF', usage: 'Background' }
+        { name: 'Primary Text', hex: '#000000', usage: 'Text', count: 0 },
+        { name: 'Background', hex: '#FFFFFF', usage: 'Background', count: 0 }
       );
     }
 
@@ -172,8 +177,8 @@ function extractCssColors(html: string): Array<{name: string, hex: string, usage
     console.error('Color extraction error:', error);
     // Return fallback colors
     return [
-      { name: 'Primary Text', hex: '#000000', usage: 'Text' },
-      { name: 'Background', hex: '#FFFFFF', usage: 'Background' }
+      { name: 'Primary Text', hex: '#000000', usage: 'Text', count: 0 },
+      { name: 'Background', hex: '#FFFFFF', usage: 'Background', count: 0 }
     ];
   }
 
@@ -740,7 +745,7 @@ const analyzeWebsite = async (url: string) => {
           userExperienceScore: 50,
         },
         ui: {
-          colors: [{ name: 'Primary', hex: '#000000', usage: 'Text content' }],
+          colors: [{ name: 'Primary', hex: '#000000', usage: 'Text content', count: 0 }],
           fonts: [{ name: 'System Font', category: 'Sans-serif', usage: 'Body text', weight: '400' }],
           images: [{ type: 'Total Images', count: 0, format: 'Mixed', totalSize: '0KB' }],
           imageAnalysis: {
@@ -872,8 +877,8 @@ const buildColorObjects = (html: string) => {
   const extractedColors = extractCssColors(html);
   if (extractedColors.length === 0) {
     return [
-      { name: 'Primary Text', hex: '#000000', usage: 'Text' },
-      { name: 'Background', hex: '#FFFFFF', usage: 'Background' },
+      { name: 'Primary Text', hex: '#000000', usage: 'Text', count: 0 },
+      { name: 'Background', hex: '#FFFFFF', usage: 'Background', count: 0 },
     ];
   }
   return extractedColors;

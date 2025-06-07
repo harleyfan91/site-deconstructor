@@ -65,6 +65,7 @@ export interface AnalysisResponse {
         name: string;
         hex: string;
         usage: string;
+        count: number;
       }>;
       fonts: Array<{
         name: string;
