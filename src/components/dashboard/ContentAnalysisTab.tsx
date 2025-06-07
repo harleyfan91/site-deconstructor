@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Box, Typography, Grid2 as Grid, Card, CardContent, LinearProgress } from '@mui/material';
+import { Box, Typography, Grid, Card, CardContent, LinearProgress } from '@mui/material';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis } from 'recharts';
 
