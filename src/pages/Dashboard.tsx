@@ -4,7 +4,6 @@ import { Box, Container } from '@mui/material';
 import AppHeader from '../components/AppHeader';
 import DashboardContent from '../components/DashboardContent';
 import URLInputForm from '../components/URLInputForm';
-import TestApiComponent from '../components/TestApiComponent';
 
 interface DashboardProps {
   darkMode: boolean;
@@ -19,7 +18,6 @@ const Dashboard = ({ darkMode, toggleDarkMode }: DashboardProps) => {
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
           <URLInputForm />
         </Box>
-        <TestApiComponent />
         <DashboardContent />
       </Container>
     </Box>
