@@ -84,7 +84,7 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
       </Typography>
 
       <Grid container spacing={3}>
-        <Grid item xs={12} md={8}>
+        <Grid xs={12} md={8}>
           <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -125,7 +125,7 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={4}>
+        <Grid xs={12} md={4}>
           <Card sx={{ borderRadius: 2, mb: 2 }}>
             <CardContent sx={{ p: 3, textAlign: 'center' }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -182,7 +182,7 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
             </Typography>
             <Grid container spacing={2}>
               {seo.recommendations.map((rec, index) => (
-                <Grid item xs={12} md={6} key={index}>
+                <Grid xs={12} md={6} key={index}>
                   <Box sx={{ 
                     p: 2, 
                     border: `1px solid ${getPriorityColor(rec.priority)}`,
