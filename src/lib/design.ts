@@ -77,6 +77,7 @@ export async function extractCssColors(
       const mod: any = await import('node-vibrant');
       vibrant = mod.default || mod;
 
+
     }
 
     const imgMatch = html.match(/<img[^>]*src=["']([^"']+)["']/i);
