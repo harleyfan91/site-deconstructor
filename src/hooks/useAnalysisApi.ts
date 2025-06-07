@@ -22,10 +22,10 @@ export const useAnalysisApi = () => {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY ?? ''}`,
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
 
         },
-      );
+      });
 
       console.log('Response status:', response.status);
 
