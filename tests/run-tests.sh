@@ -9,6 +9,7 @@ node tests/securityHeaders.test.js
 node tests/design.test.js
 node tests/social.test.js
 node tests/ui.test.js
+node tests/colorFrequency.test.js
 node tests/export.test.js
 node tests/seo.test.js
 

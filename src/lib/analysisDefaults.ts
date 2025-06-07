@@ -21,7 +21,10 @@ export function createDefaultAnalysis(url: string): AnalysisResponse {
         userExperienceScore: 0,
       },
       ui: {
-        colors: [],
+        colors: [
+          { name: 'Primary Text', hex: '#000000', usage: 'Text', count: 0 },
+          { name: 'Background', hex: '#FFFFFF', usage: 'Background', count: 0 },
+        ],
         fonts: [],
         images: [],
         imageAnalysis: {
