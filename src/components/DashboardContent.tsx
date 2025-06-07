@@ -21,7 +21,7 @@ const DashboardContent = () => {
       
       <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-6 mb-6">
+          <TabsList className="grid w-full grid-cols-6 sm:grid-cols-3 gap-2 mb-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="ui">User Interface</TabsTrigger>
             <TabsTrigger value="performance">Performance & Security</TabsTrigger>
