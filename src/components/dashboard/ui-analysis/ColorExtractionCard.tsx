@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Box, Typography, Card, CardContent, Collapse, IconButton } from '@mui/material';
+import { Box, Typography, Card, CardContent, Collapse, IconButton, Grid } from '@mui/material';
 import { Palette, ChevronDown, ChevronUp } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 import { groupByFrequency } from '@/lib/ui';
@@ -217,25 +217,24 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
                           >
                             {harmonyGroup.name}
                           </Typography>
-                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+                          <Grid container spacing={1} sx={{ mb: 2 }}>
                             {harmonyGroup.colors.map((color, colorIndex) => (
-                              <Box
-                                key={colorIndex}
-                                sx={{
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  bgcolor: 'background.paper',
-                                  border: '1px solid rgba(0,0,0,0.1)',
-                                  borderRadius: 1,
-                                  p: 1,
-                                  minWidth: 140,
-                                }}
-                              >
+                              <Grid key={colorIndex} xs={4} sm={3} md={2}>
                                 <Box
                                   sx={{
-                                    width: 24,
-                                    height: 24,
-                                    backgroundColor: color.hex,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    bgcolor: 'background.paper',
+                                    border: '1px solid rgba(0,0,0,0.1)',
+                                    borderRadius: 1,
+                                    p: 1,
+                                  }}
+                                >
+                                  <Box
+                                    sx={{
+                                      width: 24,
+                                      height: 24,
+                                      backgroundColor: color.hex,
                                     borderRadius: 0.5,
                                     mr: 1,
                                     border: '1px solid rgba(0,0,0,0.1)',
@@ -265,9 +264,10 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
                                     {color.hex}
                                   </Typography>
                                 </Box>
-                              </Box>
+                                </Box>
+                              </Grid>
                             ))}
-                          </Box>
+                          </Grid>
                         </Box>
                       ))}
                     </Box>
