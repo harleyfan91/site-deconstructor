@@ -217,49 +217,32 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
                           >
                             {harmonyGroup.name}
                           </Typography>
-                          <Box 
-                            sx={{ 
-                              display: 'grid', 
-                              gridTemplateColumns: {
-                                xs: 'repeat(3, 1fr)', // 3 columns on mobile
-                                sm: 'repeat(2, 1fr)', // 2 columns on small tablets
-                                md: 'repeat(3, 1fr)'  // 3 columns on desktop
-                              },
-                              gap: 1, 
-                              mb: 2 
-                            }}
-                          >
+                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
                             {harmonyGroup.colors.map((color, colorIndex) => (
                               <Box
                                 key={colorIndex}
                                 sx={{
                                   display: 'flex',
-                                  flexDirection: { xs: 'column', sm: 'row' },
-                                  alignItems: { xs: 'center', sm: 'center' },
+                                  alignItems: 'center',
                                   bgcolor: 'background.paper',
                                   border: '1px solid rgba(0,0,0,0.1)',
                                   borderRadius: 1,
-                                  p: { xs: 1, sm: 1 },
-                                  minHeight: { xs: 'auto', sm: 'auto' },
+                                  p: 1,
+                                  minWidth: 140,
                                 }}
                               >
                                 <Box
                                   sx={{
-                                    width: { xs: 20, sm: 24 },
-                                    height: { xs: 20, sm: 24 },
+                                    width: 24,
+                                    height: 24,
                                     backgroundColor: color.hex,
                                     borderRadius: 0.5,
-                                    mr: { xs: 0, sm: 1 },
-                                    mb: { xs: 0.5, sm: 0 },
+                                    mr: 1,
                                     border: '1px solid rgba(0,0,0,0.1)',
                                     flexShrink: 0,
                                   }}
                                 />
-                                <Box sx={{ 
-                                  flex: 1, 
-                                  minWidth: 0,
-                                  textAlign: { xs: 'center', sm: 'left' }
-                                }}>
+                                <Box sx={{ flex: 1, minWidth: 0 }}>
                                   <Typography
                                     variant="caption"
                                     sx={{
@@ -267,7 +250,6 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
                                       display: 'block',
                                       overflow: 'hidden',
                                       textOverflow: 'ellipsis',
-                                      fontSize: { xs: '0.65rem', sm: '0.75rem' }
                                     }}
                                   >
                                     {color.name}
@@ -277,7 +259,7 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
                                     color="text.secondary"
                                     sx={{
                                       display: 'block',
-                                      fontSize: { xs: '0.6rem', sm: '0.7rem' }
+                                      fontSize: '0.7rem'
                                     }}
                                   >
                                     {color.hex}

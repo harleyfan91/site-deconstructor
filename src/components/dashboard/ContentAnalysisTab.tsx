@@ -1,11 +1,11 @@
+
 import React from 'react';
 import { Box, Typography, Card, CardContent, LinearProgress } from '@mui/material';
-import { Grid } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis } from 'recharts';
 
 const ContentAnalysisTab = () => {
-  // ... keep existing code (contentTypes, readabilityData, chartConfig)
   const contentTypes = [
     { name: 'Text', value: 65, color: '#2196F3' },
     { name: 'Images', value: 20, color: '#4CAF50' },
