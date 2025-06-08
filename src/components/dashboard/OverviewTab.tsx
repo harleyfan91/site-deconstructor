@@ -137,20 +137,64 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
                 ' The page has room for improvement in several areas.'
               }
             </Typography>
-            <Typography variant="body1" paragraph>
-              <strong>Key Findings:</strong>
-            </Typography>
-            <Box component="ul" sx={{ pl: 2 }}>
-              <Typography component="li" variant="body2" sx={{ mb: 1 }}>
-                SEO Score: {data.data.overview.seoScore}/100
-              </Typography>
-              <Typography component="li" variant="body2" sx={{ mb: 1 }}>
-                Page Load Time: {data.data.overview.pageLoadTime}
-              </Typography>
-              <Typography component="li" variant="body2" sx={{ mb: 1 }}>
-                User Experience Score: {data.data.overview.userExperienceScore}/100
+          <Typography variant="body1" paragraph>
+            <strong>Key Findings:</strong>
+          </Typography>
+          <Box sx={{ mb: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+              <Typography variant="body2">Overall Score</Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontWeight: 'bold',
+                  color:
+                    data.data.overview.overallScore >= 80
+                      ? '#4CAF50'
+                      : data.data.overview.overallScore >= 60
+                      ? '#FF9800'
+                      : '#F44336'
+                }}
+              >
+                {data.data.overview.overallScore}/100
               </Typography>
             </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+              <Typography variant="body2">SEO Score</Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontWeight: 'bold',
+                  color:
+                    data.data.overview.seoScore >= 80
+                      ? '#4CAF50'
+                      : data.data.overview.seoScore >= 60
+                      ? '#FF9800'
+                      : '#F44336'
+                }}
+              >
+                {data.data.overview.seoScore}/100
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+              <Typography variant="body2">Page Load Time</Typography>
+              <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#FF9800' }}>
+                {data.data.overview.pageLoadTime}
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+              <Typography variant="body2">User Experience</Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontWeight: 'bold',
+                  color:
+                    data.data.overview.userExperienceScore >= 80 ? '#4CAF50' : '#2196F3'
+                }}
+              >
+                {data.data.overview.userExperienceScore}/100
+              </Typography>
+            </Box>
+          </Box>
           </CardContent>
         </Card>
       </Box>
