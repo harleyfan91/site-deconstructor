@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Box, Typography, Paper, Button, Menu, MenuItem } from '@mui/material';
+import { Box, Typography, Paper, Button } from '@mui/material';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import OverviewTab from './dashboard/OverviewTab';
 import PerformanceTab from './dashboard/PerformanceTab';
@@ -9,36 +9,9 @@ import TechTab from './dashboard/TechTab';
 import UIAnalysisTab from './dashboard/UIAnalysisTab';
 import ComplianceTab from './dashboard/ComplianceTab';
 import { useAnalysisContext } from '../contexts/AnalysisContext';
-import { analysisToCsv, analysisToJSON } from '@/lib/export';
-import { downloadFile } from '@/lib/utils';
 
 const DashboardContent = () => {
   const { data: analysisData, loading, error } = useAnalysisContext();
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-
-  const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  const exportCsv = () => {
-    if (analysisData) {
-      const csv = analysisToCsv(analysisData);
-      downloadFile('analysis.csv', csv, 'text/csv');
-    }
-    handleMenuClose();
-  };
-
-  const exportJson = () => {
-    if (analysisData) {
-      const json = analysisToJSON(analysisData);
-      downloadFile('analysis.json', json, 'application/json');
-    }
-    handleMenuClose();
-  };
 
   return (
     <Box>
@@ -86,7 +59,6 @@ const DashboardContent = () => {
           <Button
             variant="contained"
             size="large"
-            onClick={handleMenuOpen}
             sx={{
               width: '100%',
               maxWidth: 400,
@@ -100,10 +72,6 @@ const DashboardContent = () => {
           >
             Export Report
           </Button>
-          <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
-            <MenuItem onClick={exportCsv}>Download CSV</MenuItem>
-            <MenuItem onClick={exportJson}>Download JSON</MenuItem>
-          </Menu>
         </Box>
       </Paper>
     </Box>

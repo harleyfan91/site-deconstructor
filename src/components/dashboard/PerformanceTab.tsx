@@ -1,7 +1,6 @@
 
 import React from 'react';
-import { Box, Typography, Card, CardContent, LinearProgress, CircularProgress, Alert, Chip } from '@mui/material';
-import Grid from '@mui/material/Unstable_Grid2';
+import { Box, Typography, Grid, Card, CardContent, LinearProgress, CircularProgress, Alert, Chip } from '@mui/material';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from 'recharts';
 import { Shield, Smartphone, Zap } from 'lucide-react';
