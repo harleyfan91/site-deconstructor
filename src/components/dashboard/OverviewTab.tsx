@@ -84,13 +84,13 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
           return (
             <Grid
               item
-
               xs={6}
               sm={6}
               md={6}
               lg={6}
               key={index}
-              sx={{ display: 'flex', width: '100%' }}
+
+              sx={{ display: 'flex' }}
             >
               <Card sx={{ height: '100%', borderRadius: 2, flexGrow: 1 }}>
 
