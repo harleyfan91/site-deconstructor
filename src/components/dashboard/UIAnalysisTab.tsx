@@ -61,25 +61,33 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({
         User Interface Analysis
       </Typography>
 
+
       <Grid container spacing={3} alignItems="stretch">
         {/* Color Extraction */}
         <Grid item xs={12} sm={6} md={6} lg={6} xl={6} sx={{ display: "flex" }}>
+
           <ColorExtractionCard colors={colors} />
         </Grid>
 
         {/* Font Analysis */}
+
         <Grid item xs={12} sm={6} md={6} lg={6} xl={6} sx={{ display: "flex" }}>
+
           <FontAnalysisCard fonts={fonts} />
         </Grid>
 
         {/* Contrast Warnings */}
+
         <Grid item xs={12} sm={6} md={6} lg={6} xl={6} sx={{ display: "flex" }}>
+
           <ContrastWarningsCard issues={data.data.ui.contrastIssues} />
         </Grid>
 
         {/* Image Analysis */}
+
         <Grid item xs={12} sx={{ display: "flex" }}>
           <ImageAnalysisCard images={images} imageAnalysis={imageAnalysis} />
+
         </Grid>
       </Grid>
     </Box>
