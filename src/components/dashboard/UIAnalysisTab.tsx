@@ -61,7 +61,9 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
         </Grid>
 
         {/* Contrast Warnings */}
+
         <Grid item xs={12} md={6}>
+
           <ContrastWarningsCard issues={data.data.ui.contrastIssues} />
         </Grid>
 
