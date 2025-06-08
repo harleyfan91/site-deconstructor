@@ -51,25 +51,27 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
 
       <Grid container spacing={3}>
         {/* Color Extraction */}
-        <Grid xs={12} md={6}>
+        <Grid item xs={12} md={6}>
           <ColorExtractionCard colors={colors} />
         </Grid>
 
         {/* Font Analysis */}
-        <Grid xs={12} md={6}>
+        <Grid item xs={12} md={6}>
           <FontAnalysisCard fonts={fonts} />
         </Grid>
 
         {/* Contrast Warnings */}
-        <Grid xs={12} md={6}>
+
+        <Grid item xs={12} md={6}>
+
           <ContrastWarningsCard issues={data.data.ui.contrastIssues} />
         </Grid>
 
         {/* Image Analysis */}
-        <Grid xs={12}>
-          <ImageAnalysisCard 
-            images={images} 
-            imageAnalysis={imageAnalysis} 
+        <Grid item xs={12}>
+          <ImageAnalysisCard
+            images={images}
+            imageAnalysis={imageAnalysis}
           />
         </Grid>
       </Grid>
