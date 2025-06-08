@@ -1,34 +1,9 @@
-import React from "react";
-import {
-  Box,
-  Typography,
-  Grid,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Alert,
-} from "@mui/material";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../ui/table";
-import {
-  Shield,
-  Globe,
-  Server,
-  Database,
-  Code,
-  Layers,
-  Zap,
-  Activity,
-  BarChart,
-} from "lucide-react";
-import type { AnalysisResponse } from "@/types/analysis";
+
+import React from 'react';
+import { Box, Typography, Grid, Card, CardContent, Chip, CircularProgress, Alert } from '@mui/material';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
+import { Shield, Globe, Server, Database, Code, Layers, Zap, Activity, BarChart } from 'lucide-react';
+import type { AnalysisResponse } from '@/types/analysis';
 
 interface TechTabProps {
   data: AnalysisResponse | null;
@@ -39,18 +14,9 @@ interface TechTabProps {
 const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
   if (loading) {
     return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          py: 8,
-        }}
-      >
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
         <CircularProgress size={60} />
-        <Typography variant="h6" sx={{ ml: 2 }}>
-          Analyzing tech stack...
-        </Typography>
+        <Typography variant="h6" sx={{ ml: 2 }}>Analyzing tech stack...</Typography>
       </Box>
     );
   }
@@ -74,57 +40,57 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
   const { technical } = data.data;
 
   const iconMap: { [key: string]: any } = {
-    "Frontend Framework": Code,
-    "JavaScript frameworks": Code,
-    Framework: Code,
-    "Build Tool": Zap,
-    Styling: Layers,
-    "CSS frameworks": Layers,
-    "CSS Framework": Layers,
-    Backend: Server,
-    Database: Database,
-    Databases: Database,
-    Hosting: Globe,
-    Library: Code,
-    "JavaScript libraries": Code,
-    Markup: Code,
-    "Web servers": Server,
-    Analytics: BarChart,
-    "Tag managers": Activity,
-    CDN: Globe,
-    "Content delivery networks": Globe,
-    Widgets: Code,
-    Unknown: Code,
-    default: Server,
+    'Frontend Framework': Code,
+    'JavaScript frameworks': Code,
+    'Framework': Code,
+    'Build Tool': Zap,
+    'Styling': Layers,
+    'CSS frameworks': Layers,
+    'CSS Framework': Layers,
+    'Backend': Server,
+    'Database': Database,
+    'Databases': Database,
+    'Hosting': Globe,
+    'Library': Code,
+    'JavaScript libraries': Code,
+    'Markup': Code,
+    'Web servers': Server,
+    'Analytics': BarChart,
+    'Tag managers': Activity,
+    'CDN': Globe,
+    'Content delivery networks': Globe,
+    'Widgets': Code,
+    'Unknown': Code,
+    'default': Server
   };
 
   const getIcon = (category: string) => {
-    return iconMap[category] || iconMap["default"];
+    return iconMap[category] || iconMap['default'];
   };
 
   const getSeverityColor = (severity: string) => {
     switch (severity.toLowerCase()) {
-      case "high":
-        return "#F44336";
-      case "medium":
-        return "#FF9800";
-      case "low":
-        return "#4CAF50";
+      case 'high':
+        return '#F44336';
+      case 'medium':
+        return '#FF9800';
+      case 'low':
+        return '#4CAF50';
       default:
-        return "#757575";
+        return '#757575';
     }
   };
 
   const getHealthGradeColor = (grade: string) => {
-    if (grade.startsWith("A")) return "#4CAF50";
-    if (grade.startsWith("B")) return "#8BC34A";
-    if (grade.startsWith("C")) return "#FF9800";
-    return "#F44336";
+    if (grade.startsWith('A')) return '#4CAF50';
+    if (grade.startsWith('B')) return '#8BC34A';
+    if (grade.startsWith('C')) return '#FF9800';
+    return '#F44336';
   };
 
   return (
     <Box>
-      <Typography variant="h5" gutterBottom sx={{ fontWeight: "bold", mb: 3 }}>
+      <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
         Technical Analysis
       </Typography>
 
@@ -132,56 +98,35 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
       <Card sx={{ borderRadius: 2, mb: 3 }}>
         <CardContent sx={{ p: 3 }}>
           <Box sx={{ mb: 3 }}>
-            <Typography
-              variant="h6"
-              sx={{ fontWeight: "bold", display: "inline" }}
-            >
+            <Typography variant="h6" sx={{ fontWeight: 'bold', display: 'inline' }}>
               Tech Stack
             </Typography>
-            <Typography
-              variant="body2"
-              sx={{
-                fontSize: "0.75rem",
-                fontWeight: "normal",
-                color: "text.secondary",
-                ml: 1,
-                display: "inline",
-              }}
-            >
+            <Typography variant="body2" sx={{ fontSize: '0.75rem', fontWeight: 'normal', color: 'text.secondary', ml: 1, display: 'inline' }}>
               (Powered by Wappalyzer)
             </Typography>
           </Box>
-
+          
           <Grid container spacing={2}>
             {technical.techStack.map((tech, index) => {
               const IconComponent = getIcon(tech.category);
               return (
-                <Grid item xs={12} sm={6} md={4} key={index}>
-                  <Box
-                    sx={{
-                      p: 2,
-                      border: "1px solid #E0E0E0",
-                      borderRadius: 2,
-                      display: "flex",
-                      alignItems: "center",
-                      "&:hover": {
-                        backgroundColor: "rgba(255, 107, 53, 0.05)",
-                      },
-                    }}
-                  >
-                    <IconComponent
-                      size={20}
-                      color="#FF6B35"
-                      style={{ marginRight: 12 }}
-                    />
+                <Grid xs={12} sm={6} md={4} key={index}>
+                  <Box sx={{
+                    p: 2,
+                    border: '1px solid #E0E0E0',
+                    borderRadius: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    '&:hover': {
+                      backgroundColor: 'rgba(255, 107, 53, 0.05)'
+                    }
+                  }}>
+                    <IconComponent size={20} color="#FF6B35" style={{ marginRight: 12 }} />
                     <Box>
                       <Typography variant="body2" color="text.secondary">
                         {tech.category}
                       </Typography>
-                      <Typography
-                        variant="subtitle2"
-                        sx={{ fontWeight: "bold" }}
-                      >
+                      <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
                         {tech.technology}
                       </Typography>
                     </Box>
@@ -197,47 +142,43 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
       {data.data.adTags && (
         <Card sx={{ borderRadius: 2, mb: 3 }}>
           <CardContent sx={{ p: 3 }}>
-            <Typography
-              variant="h6"
-              gutterBottom
-              sx={{ fontWeight: "bold", mb: 3 }}
-            >
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
               Detected Ad Tags
             </Typography>
             <Grid container spacing={2}>
               {[
-                { label: "Google GAM/GPT", key: "hasGAM" },
-                { label: "AdSense/DFP", key: "hasAdSense" },
-                { label: "Prebid.js", key: "hasPrebid" },
-                { label: "Amazon Publisher Services", key: "hasAPS" },
-                { label: "Index Exchange", key: "hasIX" },
-                { label: "AppNexus/Xandr", key: "hasANX" },
-                { label: "OpenX", key: "hasOpenX" },
-                { label: "Rubicon", key: "hasRubicon" },
-                { label: "PubMatic", key: "hasPubMatic" },
-                { label: "VPAID/VMAP/IMA", key: "hasVPAID" },
-                { label: "Criteo", key: "hasCriteo" },
-                { label: "Taboola", key: "hasTaboola" },
-                { label: "Outbrain", key: "hasOutbrain" },
-                { label: "Sharethrough", key: "hasSharethrough" },
-                { label: "Teads", key: "hasTeads" },
-                { label: "Moat", key: "hasMoat" },
-                { label: "DoubleVerify", key: "hasDV" },
-                { label: "Integral Ad Science", key: "hasIAS" },
+                { label: 'Google GAM/GPT', key: 'hasGAM' },
+                { label: 'AdSense/DFP', key: 'hasAdSense' },
+                { label: 'Prebid.js', key: 'hasPrebid' },
+                { label: 'Amazon Publisher Services', key: 'hasAPS' },
+                { label: 'Index Exchange', key: 'hasIX' },
+                { label: 'AppNexus/Xandr', key: 'hasANX' },
+                { label: 'OpenX', key: 'hasOpenX' },
+                { label: 'Rubicon', key: 'hasRubicon' },
+                { label: 'PubMatic', key: 'hasPubMatic' },
+                { label: 'VPAID/VMAP/IMA', key: 'hasVPAID' },
+                { label: 'Criteo', key: 'hasCriteo' },
+                { label: 'Taboola', key: 'hasTaboola' },
+                { label: 'Outbrain', key: 'hasOutbrain' },
+                { label: 'Sharethrough', key: 'hasSharethrough' },
+                { label: 'Teads', key: 'hasTeads' },
+                { label: 'Moat', key: 'hasMoat' },
+                { label: 'DoubleVerify', key: 'hasDV' },
+                { label: 'Integral Ad Science', key: 'hasIAS' }
               ].map(({ label, key }) => (
-                <Grid item xs={6} sm={6} md={4} key={key}>
+                <Grid xs={6} sm={6} md={4} key={key}>
                   <Chip
                     label={label}
-                    color={data.data.adTags[key] ? "success" : "default"}
-                    variant={data.data.adTags[key] ? "filled" : "outlined"}
+                    color={data.data.adTags[key] ? 'success' : 'default'}
+                    variant={data.data.adTags[key] ? 'filled' : 'outlined'}
                     size="small"
                     sx={{
-                      width: "100%",
-                      justifyContent: "flex-start",
-                      "& .MuiChip-label": {
-                        width: "100%",
-                        textAlign: "left",
-                      },
+                      width: '100%',
+                      justifyContent: 'flex-start',
+                      '& .MuiChip-label': {
+                        width: '100%',
+                        textAlign: 'left'
+                      }
                     }}
                   />
                 </Grid>
@@ -250,45 +191,35 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
       {/* Detected Social Tags Section */}
       <Card sx={{ borderRadius: 2, mb: 3 }}>
         <CardContent sx={{ p: 3 }}>
-          <Typography
-            variant="h6"
-            gutterBottom
-            sx={{ fontWeight: "bold", mb: 3 }}
-          >
+          <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
             Detected Social Tags
           </Typography>
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid xs={12} sm={6} md={4}>
               <Chip
                 label="Open Graph Meta Tags"
-                color={technical.social?.hasOpenGraph ? "success" : "default"}
-                variant={technical.social?.hasOpenGraph ? "filled" : "outlined"}
+                color={technical.social?.hasOpenGraph ? 'success' : 'default'}
+                variant={technical.social?.hasOpenGraph ? 'filled' : 'outlined'}
                 size="small"
-                sx={{ width: "100%" }}
+                sx={{ width: '100%' }}
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid xs={12} sm={6} md={4}>
               <Chip
                 label="Twitter Card Meta Tags"
-                color={technical.social?.hasTwitterCard ? "success" : "default"}
-                variant={
-                  technical.social?.hasTwitterCard ? "filled" : "outlined"
-                }
+                color={technical.social?.hasTwitterCard ? 'success' : 'default'}
+                variant={technical.social?.hasTwitterCard ? 'filled' : 'outlined'}
                 size="small"
-                sx={{ width: "100%" }}
+                sx={{ width: '100%' }}
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid xs={12} sm={6} md={4}>
               <Chip
                 label="Share Buttons"
-                color={
-                  technical.social?.hasShareButtons ? "success" : "default"
-                }
-                variant={
-                  technical.social?.hasShareButtons ? "filled" : "outlined"
-                }
+                color={technical.social?.hasShareButtons ? 'success' : 'default'}
+                variant={technical.social?.hasShareButtons ? 'filled' : 'outlined'}
                 size="small"
-                sx={{ width: "100%" }}
+                sx={{ width: '100%' }}
               />
             </Grid>
           </Grid>
@@ -298,24 +229,14 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
       {/* Cookie Banner & Consent Script Section */}
       <Card sx={{ borderRadius: 2, mb: 3 }}>
         <CardContent sx={{ p: 3 }}>
-          <Typography
-            variant="h6"
-            gutterBottom
-            sx={{ fontWeight: "bold", mb: 3 }}
-          >
+          <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
             Detected Cookie Banner & Consent Script
           </Typography>
           <Grid container spacing={2}>
-            <Grid item xs={12}>
+            <Grid xs={12}>
               <Chip
-                label={
-                  technical.cookies?.hasCookieScript
-                    ? "Cookie Consent Script Detected"
-                    : "No Cookie Consent Script Found"
-                }
-                color={
-                  technical.cookies?.hasCookieScript ? "success" : "warning"
-                }
+                label={technical.cookies?.hasCookieScript ? 'Cookie Consent Script Detected' : 'No Cookie Consent Script Found'}
+                color={technical.cookies?.hasCookieScript ? 'success' : 'warning'}
                 variant="filled"
                 size="medium"
               />
@@ -327,34 +248,26 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
       {/* Minification Status Section */}
       <Card sx={{ borderRadius: 2, mb: 3 }}>
         <CardContent sx={{ p: 3 }}>
-          <Typography
-            variant="h6"
-            gutterBottom
-            sx={{ fontWeight: "bold", mb: 3 }}
-          >
+          <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
             Minification Status
           </Typography>
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
+            <Grid xs={12} sm={6}>
               <Chip
-                label={`CSS: ${technical.minification?.cssMinified ? "Minified" : "Not Minified"}`}
-                color={
-                  technical.minification?.cssMinified ? "success" : "warning"
-                }
+                label={`CSS: ${technical.minification?.cssMinified ? 'Minified' : 'Not Minified'}`}
+                color={technical.minification?.cssMinified ? 'success' : 'warning'}
                 variant="filled"
                 size="medium"
-                sx={{ width: "100%" }}
+                sx={{ width: '100%' }}
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid xs={12} sm={6}>
               <Chip
-                label={`JavaScript: ${technical.minification?.jsMinified ? "Minified" : "Not Minified"}`}
-                color={
-                  technical.minification?.jsMinified ? "success" : "warning"
-                }
+                label={`JavaScript: ${technical.minification?.jsMinified ? 'Minified' : 'Not Minified'}`}
+                color={technical.minification?.jsMinified ? 'success' : 'warning'}
                 variant="filled"
                 size="medium"
-                sx={{ width: "100%" }}
+                sx={{ width: '100%' }}
               />
             </Grid>
           </Grid>
@@ -362,10 +275,10 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
       </Card>
 
       <Grid container spacing={3}>
-        <Grid item xs={12} md={8}>
+        <Grid xs={12} md={8}>
           <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
                 Technical Issues
               </Typography>
               <Table>
@@ -389,7 +302,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                           sx={{
                             backgroundColor: `${getSeverityColor(issue.severity)}20`,
                             color: getSeverityColor(issue.severity),
-                            fontWeight: "medium",
+                            fontWeight: 'medium'
                           }}
                         />
                       </TableCell>
@@ -402,91 +315,45 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={4}>
+        <Grid xs={12} md={4}>
           <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
                 Technical Health
               </Typography>
               <Box sx={{ mb: 3 }}>
-                <Typography
-                  variant="h3"
-                  sx={{
-                    fontWeight: "bold",
-                    color: getHealthGradeColor(technical.healthGrade),
-                    textAlign: "center",
-                  }}
-                >
+                <Typography variant="h3" sx={{
+                  fontWeight: 'bold',
+                  color: getHealthGradeColor(technical.healthGrade),
+                  textAlign: 'center'
+                }}>
                   {technical.healthGrade}
                 </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ textAlign: "center" }}
-                >
+                <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
                   Technical Health Grade
                 </Typography>
               </Box>
-
+              
               <Box>
-                <Typography
-                  variant="subtitle2"
-                  sx={{ fontWeight: "bold", mb: 2 }}
-                >
+                <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 2 }}>
                   Issue Summary
                 </Typography>
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    mb: 1,
-                  }}
-                >
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                   <Typography variant="body2">High Severity</Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{ fontWeight: "bold", color: "#F44336" }}
-                  >
-                    {
-                      technical.issues.filter((i) => i.severity === "high")
-                        .length
-                    }
+                  <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#F44336' }}>
+                    {technical.issues.filter(i => i.severity === 'high').length}
                   </Typography>
                 </Box>
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    mb: 1,
-                  }}
-                >
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                   <Typography variant="body2">Medium Severity</Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{ fontWeight: "bold", color: "#FF9800" }}
-                  >
-                    {
-                      technical.issues.filter((i) => i.severity === "medium")
-                        .length
-                    }
+                  <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#FF9800' }}>
+                    {technical.issues.filter(i => i.severity === 'medium').length}
                   </Typography>
                 </Box>
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    mb: 1,
-                  }}
-                >
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                   <Typography variant="body2">Low Severity</Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{ fontWeight: "bold", color: "#4CAF50" }}
-                  >
-                    {
-                      technical.issues.filter((i) => i.severity === "low")
-                        .length
-                    }
+                  <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#4CAF50' }}>
+                    {technical.issues.filter(i => i.severity === 'low').length}
                   </Typography>
                 </Box>
               </Box>
