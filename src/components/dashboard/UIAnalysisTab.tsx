@@ -1,11 +1,10 @@
-
-import React from 'react';
-import { Box, Typography, Grid, CircularProgress, Alert } from '@mui/material';
-import type { AnalysisResponse } from '@/types/analysis';
-import ColorExtractionCard from './ui-analysis/ColorExtractionCard';
-import FontAnalysisCard from './ui-analysis/FontAnalysisCard';
-import ImageAnalysisCard from './ui-analysis/ImageAnalysisCard';
-import ContrastWarningsCard from './ui-analysis/ContrastWarningsCard';
+import React from "react";
+import { Box, Typography, Grid, CircularProgress, Alert } from "@mui/material";
+import type { AnalysisResponse } from "@/types/analysis";
+import ColorExtractionCard from "./ui-analysis/ColorExtractionCard";
+import FontAnalysisCard from "./ui-analysis/FontAnalysisCard";
+import ImageAnalysisCard from "./ui-analysis/ImageAnalysisCard";
+import ContrastWarningsCard from "./ui-analysis/ContrastWarningsCard";
 
 interface UIAnalysisTabProps {
   data: AnalysisResponse | null;
@@ -13,12 +12,25 @@ interface UIAnalysisTabProps {
   error: string | null;
 }
 
-const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) => {
+const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({
+  data,
+  loading,
+  error,
+}) => {
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          py: 8,
+        }}
+      >
         <CircularProgress size={60} />
-        <Typography variant="h6" sx={{ ml: 2 }}>Analyzing UI elements...</Typography>
+        <Typography variant="h6" sx={{ ml: 2 }}>
+          Analyzing UI elements...
+        </Typography>
       </Box>
     );
   }
@@ -40,45 +52,42 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
   }
 
   const { colors, fonts, images, imageAnalysis } = data.data.ui;
-  
-  console.log('Image analysis data:', imageAnalysis);
-  
+
+  console.log("Image analysis data:", imageAnalysis);
+
   return (
     <Box>
-      <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
+      <Typography variant="h5" gutterBottom sx={{ fontWeight: "bold", mb: 3 }}>
         User Interface Analysis
       </Typography>
 
-      <Grid container spacing={3} alignItems="stretch" columns={{ xs: 12, md: 12 }}>
-        {/* Color Extraction */}
 
-        <Grid item xs={12} md={6} lg={6} sx={{ display: 'flex' }}>
+      <Grid container spacing={3} alignItems="stretch">
+        {/* Color Extraction */}
+        <Grid item xs={12} sm={6} md={6} lg={6} xl={6} sx={{ display: "flex" }}>
 
           <ColorExtractionCard colors={colors} />
         </Grid>
 
         {/* Font Analysis */}
 
-        <Grid item xs={12} md={6} lg={6} sx={{ display: 'flex' }}>
+        <Grid item xs={12} sm={6} md={6} lg={6} xl={6} sx={{ display: "flex" }}>
 
           <FontAnalysisCard fonts={fonts} />
         </Grid>
 
         {/* Contrast Warnings */}
 
-        <Grid item xs={12} md={6} lg={6} sx={{ display: 'flex' }}>
+        <Grid item xs={12} sm={6} md={6} lg={6} xl={6} sx={{ display: "flex" }}>
 
           <ContrastWarningsCard issues={data.data.ui.contrastIssues} />
         </Grid>
 
         {/* Image Analysis */}
 
-        <Grid item xs={12} sx={{ display: 'flex' }}>
+        <Grid item xs={12} sx={{ display: "flex" }}>
+          <ImageAnalysisCard images={images} imageAnalysis={imageAnalysis} />
 
-          <ImageAnalysisCard
-            images={images}
-            imageAnalysis={imageAnalysis}
-          />
         </Grid>
       </Grid>
     </Box>
