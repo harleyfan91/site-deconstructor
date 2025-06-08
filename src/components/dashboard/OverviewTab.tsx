@@ -73,12 +73,25 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
         Website Overview - {data.url}
       </Typography>
       
-      <Grid container spacing={3}>
+      <Grid
+        container
+        spacing={3}
+        alignItems="stretch"
+        columns={{ xs: 12, sm: 12, md: 12 }}
+      >
         {metrics.map((metric, index) => {
           const IconComponent = metric.icon;
           return (
-            <Grid xs={12} sm={6} md={3} key={index}>
-              <Card sx={{ height: '100%', borderRadius: 2 }}>
+            <Grid
+              item
+              xs={12}
+              sm={6}
+              md={6}
+              lg={6}
+              key={index}
+              sx={{ display: 'flex', width: '100%' }}
+            >
+              <Card sx={{ height: '100%', borderRadius: 2, flexGrow: 1 }}>
                 <CardContent sx={{ p: 3 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     <Box
