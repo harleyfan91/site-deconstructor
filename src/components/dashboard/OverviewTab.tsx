@@ -140,7 +140,15 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
           <Typography variant="body1" paragraph>
             <strong>Key Findings:</strong>
           </Typography>
-          <Box sx={{ mb: 2 }}>
+          <Box
+            sx={{
+              mb: 2,
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, 1fr)',
+              columnGap: 2,
+              rowGap: 1
+            }}
+          >
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
               <Typography variant="body2">Overall Score</Typography>
               <Typography
