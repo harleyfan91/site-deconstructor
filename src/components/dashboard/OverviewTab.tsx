@@ -92,6 +92,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
               sx={{ display: 'flex', width: '100%' }}
             >
               <Card sx={{ height: '100%', borderRadius: 2, flexGrow: 1 }}>
+
                 <CardContent sx={{ p: 3 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     <Box
