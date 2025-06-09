@@ -49,7 +49,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
         User Interface Analysis
       </Typography>
 
-      <Grid container spacing={3} alignItems="stretch">
+      <Grid container spacing={2} alignItems="stretch">
         {/* Color Extraction */}
 
         <Grid xs={12} md={6} sx={{ display: 'flex' }}>
