@@ -52,7 +52,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
       <Grid container spacing={3} alignItems="stretch" columns={{ xs: 12, md: 12 }}>
         {/* Color Extraction */}
 
-        <Grid size={6} sx={{ display: 'flex' }}>
+        <Grid size={6} sx={{ display: 'flex', width: '100%'}}>
 
 
           <ColorExtractionCard colors={colors} />
@@ -75,7 +75,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
         </Grid>
 
         {/* Image Analysis */}
-        <Grid size={12} sx={{ display: 'flex' }}>
+        <Grid size={12} sx={{ display: 'flex', width: '100%'}}>
 
 
           <ImageAnalysisCard
