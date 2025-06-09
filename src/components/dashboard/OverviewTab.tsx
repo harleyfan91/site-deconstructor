@@ -77,11 +77,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
         {metrics.map((metric, index) => {
           const IconComponent = metric.icon;
           return (
-            <Grid
-              item xs={6} sm={6} md={6} lg={6}
-              key={index}
-              sx={{ display: 'flex', width: '100%' }}
-            >
+            <Grid size={6} key={index} sx={{ display: 'flex' }}>
               <Card sx={{ height: '100%', borderRadius: 2, flexGrow: 1 }}>
 
                 <CardContent sx={{ p: 3 }}>
