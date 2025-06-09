@@ -73,22 +73,12 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
         Website Overview - {data.url}
       </Typography>
       
-      <Grid
-        container
-        spacing={3}
-        alignItems="stretch"
-        columns={{ xs: 12, sm: 12, md: 12 }}
-      >
+      <Grid container spacing={2} alignItems="stretch">
         {metrics.map((metric, index) => {
           const IconComponent = metric.icon;
           return (
             <Grid
-              item
-
-              xs={6}
-              sm={6}
-              md={6}
-              lg={6}
+              item xs={6} sm={6} md={6} lg={6}
               key={index}
               sx={{ display: 'flex', width: '100%' }}
             >
@@ -140,16 +130,9 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
           <Typography variant="body1" paragraph>
             <strong>Key Findings:</strong>
           </Typography>
-          <Box
-            sx={{
-              mb: 2,
-              display: 'grid',
-              gridTemplateColumns: 'repeat(2, 1fr)',
-              columnGap: 2,
-              rowGap: 1
-            }}
-          >
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+          <Grid container spacing={1} sx={{ mb: 2 }}>
+            <Grid item xs={6}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
               <Typography variant="body2">Overall Score</Typography>
               <Typography
                 variant="body2"
@@ -165,8 +148,10 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
               >
                 {data.data.overview.overallScore}/100
               </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+              </Box>
+            </Grid>
+            <Grid item xs={6}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
               <Typography variant="body2">SEO Score</Typography>
               <Typography
                 variant="body2"
@@ -182,14 +167,18 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
               >
                 {data.data.overview.seoScore}/100
               </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+              </Box>
+            </Grid>
+            <Grid item xs={6}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
               <Typography variant="body2">Page Load Time</Typography>
               <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#FF9800' }}>
                 {data.data.overview.pageLoadTime}
               </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+              </Box>
+            </Grid>
+            <Grid item xs={6}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
               <Typography variant="body2">User Experience</Typography>
               <Typography
                 variant="body2"
@@ -201,8 +190,9 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
               >
                 {data.data.overview.userExperienceScore}/100
               </Typography>
-            </Box>
-          </Box>
+              </Box>
+            </Grid>
+          </Grid>
           </CardContent>
         </Card>
       </Box>
