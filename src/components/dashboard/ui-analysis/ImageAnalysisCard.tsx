@@ -49,7 +49,8 @@ const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnal
         
         <Grid container spacing={2}>
           {/* Total Images Box */}
-          <Grid xs={12} sm={4}>
+          <Grid item xs={12} sm={4}>
+
             <ExpandableImageBox
               title="Total Images"
               count={totalImagesCount}
@@ -63,7 +64,8 @@ const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnal
           </Grid>
 
           {/* Estimated Photos Box */}
-          <Grid xs={12} sm={4}>
+          <Grid item xs={12} sm={4}>
+
             <ExpandableImageBox
               title="Estimated Photos"
               count={photosCount}
@@ -77,7 +79,8 @@ const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnal
           </Grid>
 
           {/* Estimated Icons Box */}
-          <Grid xs={12} sm={4}>
+          <Grid item xs={12} sm={4}>
+
             <ExpandableImageBox
               title="Estimated Icons"
               count={iconsCount}
