@@ -49,7 +49,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
 
       <Grid container spacing={2} alignItems="stretch">
         {/* Color Extraction */}
-        <Grid size="grow" >
+        <Grid xs={12} md={6} sx={{ display: 'flex' }} size="grow" >
           <Card sx={{ borderRadius: 2, flexGrow: 1 }}>
             <CardContent sx={{ p: 3 }}>
               <ColorExtractionCard colors={colors} />
