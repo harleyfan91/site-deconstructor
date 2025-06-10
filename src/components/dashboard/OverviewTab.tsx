@@ -73,7 +73,15 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
         <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
           Website Overview
         </Typography>
-        <Link href={data.url} target="_blank" rel="noopener noreferrer" underline="hover" sx={{ wordBreak: 'break-all' }}>
+        <Link
+          href={data.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          underline="hover"
+          color="inherit"
+          variant="h5"
+          sx={{ fontWeight: 'bold', wordBreak: 'break-all' }}
+        >
           {data.url}
         </Link>
       </Box>
