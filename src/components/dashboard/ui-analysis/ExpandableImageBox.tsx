@@ -30,11 +30,13 @@ const ExpandableImageBox: React.FC<ExpandableImageBoxProps> = ({
       onClick={onToggle}
       elevation={0}
       sx={{
+
         borderRadius: 2,
         textAlign: 'center',
         cursor: 'pointer',
         bgcolor: 'rgba(255, 107, 53, 0.05)',
         boxShadow: 'none',
+
         '&:hover': {
           bgcolor: 'rgba(255, 107, 53, 0.1)',
         },
@@ -42,6 +44,7 @@ const ExpandableImageBox: React.FC<ExpandableImageBoxProps> = ({
     >
       <CardContent sx={{ p: 2 }}>
       <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#FF6B35', mb: 1 }}>
+
         {count}
       </Typography>
       <Typography
@@ -98,6 +101,7 @@ const ExpandableImageBox: React.FC<ExpandableImageBoxProps> = ({
           )}
         </Box>
       </Collapse>
+
       </CardContent>
     </Card>
   );
