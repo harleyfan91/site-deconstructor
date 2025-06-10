@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Box, Typography, Grid, Card, CardContent, CircularProgress, Alert } from '@mui/material';
+import { Box, Typography, Grid, Card, CardContent, CircularProgress, Alert, Link } from '@mui/material';
 import { TrendingUp, Users, Clock, Star } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 
@@ -69,9 +69,22 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
 
   return (
     <Box>
-      <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-        Website Overview - {data.url}
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
+          Website Overview
+        </Typography>
+        <Link
+          href={data.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          underline="hover"
+          color="inherit"
+          variant="h5"
+          sx={{ fontWeight: 'bold', wordBreak: 'break-all' }}
+        >
+          {data.url}
+        </Link>
+      </Box>
       
       <Grid container spacing={2} alignItems="stretch">
         {metrics.map((metric, index) => {
