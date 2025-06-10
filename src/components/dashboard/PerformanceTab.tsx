@@ -1,6 +1,16 @@
 
 import React from 'react';
-import { Box, Typography, Grid, Card, CardContent, LinearProgress, CircularProgress, Alert, Chip } from '@mui/material';
+import {
+  Box,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
+  LinearProgress,
+  CircularProgress,
+  Alert,
+  Chip
+} from '@mui/material';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from 'recharts';
 import { Shield, Smartphone, Zap } from 'lucide-react';
@@ -57,9 +67,9 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
       </Typography>
 
       {/* Performance Score Section */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid xs={12} md={4}>
-          <Card sx={{ borderRadius: 2 }}>
+      <Grid container spacing={2} alignItems="stretch" sx={{ mb: 4 }}>
+        <Grid xs={12} md={4} sx={{ display: 'flex' }}>
+          <Card sx={{ borderRadius: 2, flexGrow: 1 }}>
             <CardContent sx={{ p: 3, textAlign: 'center' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
                 <Zap size={24} color="#FF6B35" style={{ marginRight: 8 }} />
@@ -77,8 +87,8 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
           </Card>
         </Grid>
 
-        <Grid xs={12} md={4}>
-          <Card sx={{ borderRadius: 2 }}>
+        <Grid xs={12} md={4} sx={{ display: 'flex' }}>
+          <Card sx={{ borderRadius: 2, flexGrow: 1 }}>
             <CardContent sx={{ p: 3, textAlign: 'center' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
                 <Smartphone size={24} color="#FF6B35" style={{ marginRight: 8 }} />
@@ -96,8 +106,8 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
           </Card>
         </Grid>
 
-        <Grid xs={12} md={4}>
-          <Card sx={{ borderRadius: 2 }}>
+        <Grid xs={12} md={4} sx={{ display: 'flex' }}>
+          <Card sx={{ borderRadius: 2, flexGrow: 1 }}>
             <CardContent sx={{ p: 3, textAlign: 'center' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
                 <Shield size={24} color="#FF6B35" style={{ marginRight: 8 }} />
@@ -117,9 +127,9 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
       </Grid>
 
       {/* Core Web Vitals Section */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid xs={12} md={8}>
-          <Card sx={{ borderRadius: 2, height: '400px' }}>
+      <Grid container spacing={2} alignItems="stretch" sx={{ mb: 4 }}>
+        <Grid xs={12} md={8} sx={{ display: 'flex' }}>
+          <Card sx={{ borderRadius: 2, height: '400px', flexGrow: 1 }}>
             <CardContent sx={{ p: 3, height: '100%' }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
                 Core Web Vitals
@@ -137,8 +147,8 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
           </Card>
         </Grid>
 
-        <Grid xs={12} md={4}>
-          <Card sx={{ borderRadius: 2 }}>
+        <Grid xs={12} md={4} sx={{ display: 'flex' }}>
+          <Card sx={{ borderRadius: 2, flexGrow: 1 }}>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
                 Speed Index
