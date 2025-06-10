@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Box, Typography, Card, CardContent, Collapse, IconButton, Grid } from '@mui/material';
+import { Box, Typography, Collapse, IconButton, Grid } from '@mui/material';
 import { Palette, ChevronDown, ChevronUp } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 import { groupByFrequency } from '@/lib/ui';
@@ -153,8 +153,7 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
   }, [colors]);
 
   return (
-    <Card sx={{ borderRadius: 2, height: '100%' }}>
-      <CardContent sx={{ p: 3 }}>
+    <Box>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
           <Palette size={24} color="#FF6B35" style={{ marginRight: 8 }} />
           <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
@@ -277,8 +276,7 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
             </Box>
           ))}
         </Box>
-      </CardContent>
-    </Card>
+    </Box>
   );
 };
 

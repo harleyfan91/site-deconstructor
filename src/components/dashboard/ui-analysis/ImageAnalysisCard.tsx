@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Box, Typography, Grid, Card, CardContent } from '@mui/material';
+import { Box, Typography, Grid } from '@mui/material';
 import { Image } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 import ExpandableImageBox from './ExpandableImageBox';
@@ -22,24 +22,19 @@ const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnal
   const [expandedPhotos, setExpandedPhotos] = useState(false);
   const [expandedIcons, setExpandedIcons] = useState(false);
 
-  // Debug logging
-  console.log('ImageAnalysisCard received imageAnalysis:', imageAnalysis);
-  console.log('ImageAnalysisCard received images:', images);
 
   // Use real scraped URLs, make sure they're arrays even if undefined
   const imageUrls = imageAnalysis?.imageUrls || [];
   const photoUrls = imageAnalysis?.photoUrls || [];
   const iconUrls = imageAnalysis?.iconUrls || [];
 
-  console.log('Processed URLs:', { imageUrls: imageUrls.length, photoUrls: photoUrls.length, iconUrls: iconUrls.length });
 
   const totalImagesCount = imageAnalysis?.totalImages || images.reduce((acc, img) => acc + img.count, 0);
   const photosCount = imageAnalysis?.estimatedPhotos || images.find(img => img.type === 'Estimated Photos')?.count || 0;
   const iconsCount = imageAnalysis?.estimatedIcons || images.find(img => img.type === 'Estimated Icons')?.count || 0;
 
   return (
-    <Card sx={{ borderRadius: 2 }}>
-      <CardContent sx={{ p: 3 }}>
+    <Box>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Image size={24} color="#FF6B35" style={{ marginRight: 8 }} />
@@ -95,8 +90,7 @@ const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnal
             />
           </Grid>
         </Grid>
-      </CardContent>
-    </Card>
+    </Box>
   );
 };
 

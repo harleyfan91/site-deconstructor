@@ -24,8 +24,6 @@ const ExpandableImageBox: React.FC<ExpandableImageBoxProps> = ({
   urls,
   emptyMessage,
 }) => {
-  // Debug logging
-  console.log(`ExpandableImageBox ${title}:`, { count, urlsLength: urls?.length, urls: urls?.slice(0, 3) });
 
   return (
     <Box
