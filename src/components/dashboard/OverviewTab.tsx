@@ -78,7 +78,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
           target="_blank"
           rel="noopener noreferrer"
           underline="hover"
-          color="inherit"
+          color="#FF6B35"
           variant="h5"
           sx={{ fontWeight: 'bold', wordBreak: 'break-all' }}
         >
