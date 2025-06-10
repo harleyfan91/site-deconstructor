@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Box, Typography, List, ListItem, Link } from '@mui/material';
+import { Box, Typography, List, ListItem, Link, Card, CardContent } from '@mui/material';
 import { ChevronDown } from 'lucide-react';
 
 interface ExpandableImageBoxProps {
@@ -26,31 +26,42 @@ const ExpandableImageBox: React.FC<ExpandableImageBoxProps> = ({
 }) => {
 
   return (
-    <Box
+    <Card
       onClick={onToggle}
       sx={{
-        p: 2,
-        border: '1px solid #E0E0E0',
         borderRadius: 2,
         textAlign: 'center',
         cursor: 'pointer',
+        bgcolor: 'rgba(255, 107, 53, 0.05)',
         '&:hover': {
-          backgroundColor: 'rgba(255, 107, 53, 0.05)',
+          bgcolor: 'rgba(255, 107, 53, 0.1)',
         },
       }}
     >
-      <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
+      <CardContent sx={{ p: 2 }}>
+      <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#FF6B35', mb: 1 }}>
         {count}
       </Typography>
-      <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: isExpanded ? 'bold' : 'normal' }}>
+      <Typography
+        variant="subtitle2"
+        gutterBottom
+        sx={{
+          fontWeight: isExpanded ? 'bold' : 'normal',
+          color: '#FF6B35',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}
+      >
         {title}
-        <ChevronDown 
-          size={16} 
-          style={{ 
+        <ChevronDown
+          size={16}
+          color="#FF6B35"
+          style={{
             marginLeft: 4,
             transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
             transition: 'transform 0.2s'
-          }} 
+          }}
         />
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
@@ -85,7 +96,8 @@ const ExpandableImageBox: React.FC<ExpandableImageBoxProps> = ({
           )}
         </Box>
       )}
-    </Box>
+      </CardContent>
+    </Card>
   );
 };
 
