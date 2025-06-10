@@ -75,7 +75,6 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
           </Card>
         </Grid>
 
-      <Grid container spacing={2} alignItems="stretch">
         {/* Image Analysis */}
         <Grid xs={12} md={6} sx={{ display: 'flex' }}>
           <Card sx={{ borderRadius: 2, flexGrow: 1 }}>
@@ -88,7 +87,6 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
           </Card>
         </Grid>
       </Grid>
-        </Grid>
     </Box>
   );
 };
