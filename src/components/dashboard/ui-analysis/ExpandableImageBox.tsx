@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Box, Typography, List, ListItem, Link } from '@mui/material';
+import { Box, Typography, List, ListItem, Link, Card, CardContent } from '@mui/material';
 import { ChevronDown } from 'lucide-react';
 
 interface ExpandableImageBoxProps {
@@ -26,10 +26,9 @@ const ExpandableImageBox: React.FC<ExpandableImageBoxProps> = ({
 }) => {
 
   return (
-    <Box
+    <Card
       onClick={onToggle}
       sx={{
-        p: 2,
         border: '1px solid #E0E0E0',
         borderRadius: 2,
         textAlign: 'center',
@@ -39,6 +38,7 @@ const ExpandableImageBox: React.FC<ExpandableImageBoxProps> = ({
         },
       }}
     >
+      <CardContent sx={{ p: 2 }}>
       <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
         {count}
       </Typography>
@@ -85,7 +85,8 @@ const ExpandableImageBox: React.FC<ExpandableImageBoxProps> = ({
           )}
         </Box>
       )}
-    </Box>
+      </CardContent>
+    </Card>
   );
 };
 
