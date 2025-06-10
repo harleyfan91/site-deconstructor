@@ -88,6 +88,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
           </Card>
         </Grid>
       </Grid>
+        </Grid>
     </Box>
   );
 };
