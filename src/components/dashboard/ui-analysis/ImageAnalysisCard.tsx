@@ -36,6 +36,9 @@ const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnal
   const photoUrls = imageAnalysis?.photoUrls || [];
   const iconUrls = imageAnalysis?.iconUrls || [];
 
+  const truncateUrl = (url: string, length = 50) =>
+    url.length > length ? `${url.slice(0, length)}[...]` : url;
+
 
   const totalImagesCount = imageAnalysis?.totalImages || images.reduce((acc, img) => acc + img.count, 0);
   const photosCount = imageAnalysis?.estimatedPhotos || images.find(img => img.type === 'Estimated Photos')?.count || 0;
@@ -86,8 +89,27 @@ const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnal
                     <List dense>
                       {section.urls.map((url, idx) => (
                         <ListItem key={idx} disableGutters>
-                          <Link href={url} target="_blank" rel="noopener noreferrer" underline="hover" sx={{ wordBreak: 'break-all' }}>
-                            <Typography variant="body2">{url}</Typography>
+                          <Link
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            underline="hover"
+                            title={url}
+                            sx={{ maxWidth: '100%' }}
+                          >
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                                maxWidth: '100%',
+                                display: 'block'
+                              }}
+                            >
+                              {truncateUrl(url)}
+                            </Typography>
+
                           </Link>
                         </ListItem>
                       ))}
