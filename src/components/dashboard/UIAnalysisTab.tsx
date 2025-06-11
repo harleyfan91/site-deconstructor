@@ -58,8 +58,8 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
         </Grid>
 
         {/* Font Analysis */}
-        <Grid item xs={12} md={6} sx={{ display: 'flex' }}>
-          <Card sx={{ borderRadius: 2, flexGrow: 1 }}>
+        <Grid xs={12} md={6} sx={{ display: 'flex' }}>
+          <Card sx={{ borderRadius: 2, flexGrow: 1, width: '100%' }}>
             <CardContent sx={{ p: 3 }}>
               <FontAnalysisCard fonts={fonts} />
             </CardContent>
@@ -67,8 +67,8 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
         </Grid>
 
         {/* Contrast Warnings */}
-        <Grid item xs={12} md={6} sx={{ display: 'flex' }}>
-          <Card sx={{ borderRadius: 2, flexGrow: 1 }}>
+        <Grid xs={12} md={6} sx={{ display: 'flex' }}>
+          <Card sx={{ borderRadius: 2, flexGrow: 1, width: '100%' }}>
             <CardContent sx={{ p: 3 }}>
               <ContrastWarningsCard issues={data.data.ui.contrastIssues} />
             </CardContent>
