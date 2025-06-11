@@ -1,9 +1,8 @@
 
 import React, { useState } from 'react';
-import { Box, Typography, Grid } from '@mui/material';
-import { Image } from 'lucide-react';
+import { Box, Typography, List, ListItem, Link, Collapse, IconButton } from '@mui/material';
+import { Image, ChevronDown, ChevronUp } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
-import ExpandableImageBox from './ExpandableImageBox';
 
 interface ImageAnalysisCardProps {
   images: AnalysisResponse['data']['ui']['images'];
@@ -18,9 +17,18 @@ interface ImageAnalysisCardProps {
 }
 
 const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnalysis }) => {
-  const [expandedTotal, setExpandedTotal] = useState(false);
-  const [expandedPhotos, setExpandedPhotos] = useState(false);
-  const [expandedIcons, setExpandedIcons] = useState(false);
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+    total: false,
+    photos: false,
+    icons: false
+  });
+
+  const toggleSection = (name: string) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [name]: !prev[name]
+    }));
+  };
 
 
   // Use real scraped URLs, make sure they're arrays even if undefined
@@ -35,64 +43,65 @@ const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnal
 
   return (
     <Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Image size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-              Image Analysis
-            </Typography>
-          </Box>
-          <Typography variant="body2" color="text.secondary">
-            Total: {totalImagesCount} assets
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+          <Image size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+            Image Analysis
           </Typography>
         </Box>
-        
-        <Grid container spacing={2}>
-          {/* Total Images Box */}
-          <Grid item xs={12} sm={4}>
 
-            <ExpandableImageBox
-              title="Total Images"
-              count={totalImagesCount}
-              format="Mixed"
-              totalSize={images.find(img => img.type === 'Total Images')?.totalSize || '0KB'}
-              isExpanded={expandedTotal}
-              onToggle={() => setExpandedTotal(!expandedTotal)}
-              urls={imageUrls}
-              emptyMessage="No images found on this page."
-            />
-          </Grid>
+        <Box>
+          {[
+            { key: 'total', title: 'Total Images', count: totalImagesCount, urls: imageUrls, empty: 'No images found on this page.' },
+            { key: 'photos', title: 'Estimated Photos', count: photosCount, urls: photoUrls, empty: 'No photos found on this page.' },
+            { key: 'icons', title: 'Estimated Icons', count: iconsCount, urls: iconUrls, empty: 'No icons found on this page.' }
+          ].map(section => (
+            <Box key={section.key} sx={{ mb: 2 }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  cursor: 'pointer',
+                  p: 1,
+                  borderRadius: 1,
+                  bgcolor: 'rgba(255, 107, 53, 0.05)',
+                  '&:hover': {
+                    bgcolor: 'rgba(255, 107, 53, 0.1)',
+                  },
+                }}
+                onClick={() => toggleSection(section.key)}
+              >
+                <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: '#FF6B35' }}>
+                  {section.title} ({section.count})
+                </Typography>
+                <IconButton size="small">
+                  {expandedSections[section.key] ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                </IconButton>
+              </Box>
 
-          {/* Estimated Photos Box */}
-          <Grid item xs={12} sm={4}>
-
-            <ExpandableImageBox
-              title="Estimated Photos"
-              count={photosCount}
-              format={images.find(img => img.type === 'Estimated Photos')?.format || 'JPG/PNG'}
-              totalSize={images.find(img => img.type === 'Estimated Photos')?.totalSize || '0KB'}
-              isExpanded={expandedPhotos}
-              onToggle={() => setExpandedPhotos(!expandedPhotos)}
-              urls={photoUrls}
-              emptyMessage="No photos found on this page."
-            />
-          </Grid>
-
-          {/* Estimated Icons Box */}
-          <Grid item xs={12} sm={4}>
-
-            <ExpandableImageBox
-              title="Estimated Icons"
-              count={iconsCount}
-              format={images.find(img => img.type === 'Estimated Icons')?.format || 'SVG/PNG'}
-              totalSize={images.find(img => img.type === 'Estimated Icons')?.totalSize || '0KB'}
-              isExpanded={expandedIcons}
-              onToggle={() => setExpandedIcons(!expandedIcons)}
-              urls={iconUrls}
-              emptyMessage="No icons found on this page."
-            />
-          </Grid>
-        </Grid>
+              <Collapse in={expandedSections[section.key]}>
+                <Box sx={{ mt: 2, ml: 2 }}>
+                  {section.urls && section.urls.length > 0 ? (
+                    <List dense>
+                      {section.urls.map((url, idx) => (
+                        <ListItem key={idx} disableGutters>
+                          <Link href={url} target="_blank" rel="noopener noreferrer" underline="hover" sx={{ wordBreak: 'break-all' }}>
+                            <Typography variant="body2">{url}</Typography>
+                          </Link>
+                        </ListItem>
+                      ))}
+                    </List>
+                  ) : (
+                    <Typography variant="body2" color="text.secondary">
+                      {section.empty}
+                    </Typography>
+                  )}
+                </Box>
+              </Collapse>
+            </Box>
+          ))}
+        </Box>
     </Box>
   );
 };
