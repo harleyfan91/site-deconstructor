@@ -1,7 +1,8 @@
 
 import React from 'react';
-import { Box, Typography, Grid, Card, CardContent, CircularProgress, Alert, Link } from '@mui/material';
+import { Box, Typography, Grid, Card, CardContent, CircularProgress, Alert, Link, IconButton, Popover } from '@mui/material';
 import { TrendingUp, Users, Clock, Star } from 'lucide-react';
+import InfoOutlined from '@mui/icons-material/InfoOutlined';
 import type { AnalysisResponse } from '@/types/analysis';
 
 interface OverviewTabProps {
@@ -36,13 +37,16 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
     );
   }
 
+  const [infoAnchor, setInfoAnchor] = React.useState<HTMLElement | null>(null);
+
   const metrics = [
     {
       title: 'Overall Score',
       value: `${data.data.overview.overallScore}/100`,
       icon: Star,
       color: data.data.overview.overallScore >= 80 ? '#4CAF50' : data.data.overview.overallScore >= 60 ? '#FF9800' : '#F44336',
-      description: data.data.overview.overallScore >= 80 ? 'Excellent performance overall' : data.data.overview.overallScore >= 60 ? 'Good, could be improved' : 'Needs improvement'
+      description: data.data.overview.overallScore >= 80 ? 'Excellent performance overall' : data.data.overview.overallScore >= 60 ? 'Good, could be improved' : 'Needs improvement',
+      info: 'Overall score weights performance (40%), SEO (40%) and user experience (20%) based on the collected metrics.'
     },
     {
       title: 'Page Load Time',
@@ -112,9 +116,16 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
                       {metric.value}
                     </Typography>
                   </Box>
-                  <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'medium' }}>
-                    {metric.title}
-                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'medium' }}>
+                      {metric.title}
+                    </Typography>
+                    {metric.info && (
+                      <IconButton size="small" onClick={(e) => setInfoAnchor(e.currentTarget)}>
+                        <InfoOutlined fontSize="small" />
+                      </IconButton>
+                    )}
+                  </Box>
                   <Typography variant="body2" color="text.secondary">
                     {metric.description}
                   </Typography>
@@ -124,6 +135,20 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
           );
         })}
       </Grid>
+
+      <Popover
+        open={Boolean(infoAnchor)}
+        anchorEl={infoAnchor}
+        onClose={() => setInfoAnchor(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Box sx={{ p: 2, maxWidth: 250 }}>
+          <Typography variant="body2">
+            {metrics.find(m => m.info)?.info}
+          </Typography>
+        </Box>
+      </Popover>
 
       <Box sx={{ mt: 4 }}>
         <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
