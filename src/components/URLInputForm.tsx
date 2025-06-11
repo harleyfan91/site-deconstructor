@@ -27,7 +27,7 @@ const URLInputForm = () => {
   ];
 
   const validateUrl = (value: string) => {
-    const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+    const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/i;
     return urlPattern.test(value) || value === '';
   };
 
