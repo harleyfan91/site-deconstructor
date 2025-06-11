@@ -36,7 +36,7 @@ const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnal
   const photoUrls = imageAnalysis?.photoUrls || [];
   const iconUrls = imageAnalysis?.iconUrls || [];
 
-  const truncateUrl = (url: string, length = 50) =>
+  const truncateUrl = (url: string, length = 80) =>
     url.length > length ? `${url.slice(0, length)}[...]` : url;
 
 
