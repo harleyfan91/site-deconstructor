@@ -109,6 +109,7 @@ const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnal
                             >
                               {truncateUrl(url)}
                             </Typography>
+
                           </Link>
                         </ListItem>
                       ))}
