@@ -74,6 +74,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
               </CardContent>
             </Card>
           </Grid>
+
         </Grid>
 
         {/* Image Analysis */}
