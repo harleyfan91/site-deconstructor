@@ -38,7 +38,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
     );
   }
 
-  const { colors, fonts, images, imageAnalysis, contrastIssues } = data.data.ui;
+  const { colors, fonts, images, imageAnalysis } = data.data.ui;
 
   return (
     <Box>
@@ -48,8 +48,8 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
 
       <Grid container spacing={2} alignItems="stretch">
         {/* Color Extraction */}
-        <Grid item xs={12} sx={{ display: 'flex' }}>
-          <Card sx={{ borderRadius: 2, flexGrow: 1 }}>
+        <Grid item xs={12} sx={{ display: 'flex', width: '100%' }}>
+          <Card sx={{ borderRadius: 2, flexGrow: 1, width: '100%' }}>
             <CardContent sx={{ p: 3 }}>
               <ColorExtractionCard colors={colors} />
             </CardContent>
@@ -57,8 +57,8 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
         </Grid>
 
         {/* Font Analysis */}
-        <Grid item xs={12} sm={6} sx={{ display: 'flex' }}>
-          <Card sx={{ borderRadius: 2, flexGrow: 1 }}>
+        <Grid item xs={12} md={6} sx={{ display: 'flex', width: '100%' }}>
+          <Card sx={{ borderRadius: 2, flexGrow: 1, width: '100%' }}>
             <CardContent sx={{ p: 3 }}>
               <FontAnalysisCard fonts={fonts} />
             </CardContent>
@@ -66,17 +66,17 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
         </Grid>
 
         {/* Contrast Warnings */}
-        <Grid item xs={12} sm={6} sx={{ display: 'flex' }}>
-          <Card sx={{ borderRadius: 2, flexGrow: 1 }}>
+        <Grid item xs={12} md={6} sx={{ display: 'flex', width: '100%' }}>
+          <Card sx={{ borderRadius: 2, flexGrow: 1, width: '100%' }}>
             <CardContent sx={{ p: 3 }}>
-              <ContrastWarningsCard issues={contrastIssues} />
+              <ContrastWarningsCard issues={data.data.ui.contrastIssues} />
             </CardContent>
           </Card>
         </Grid>
 
         {/* Image Analysis */}
-        <Grid item xs={12} sx={{ display: 'flex' }}>
-          <Card sx={{ borderRadius: 2, flexGrow: 1 }}>
+        <Grid item xs={12} sx={{ display: 'flex', width: '100%' }}>
+          <Card sx={{ borderRadius: 2, flexGrow: 1, width: '100%' }}>
             <CardContent sx={{ p: 3 }}>
               <ImageAnalysisCard
                 images={images}
