@@ -1,7 +1,8 @@
 
 import React from 'react';
-import { Box, Typography, Grid, Card, CardContent, CircularProgress, Alert } from '@mui/material';
+import { Box, Typography, Grid, Card, CardContent, CircularProgress, Alert, Link, IconButton, Popover } from '@mui/material';
 import { TrendingUp, Users, Clock, Star } from 'lucide-react';
+import InfoOutlined from '@mui/icons-material/InfoOutlined';
 import type { AnalysisResponse } from '@/types/analysis';
 
 interface OverviewTabProps {
@@ -36,13 +37,16 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
     );
   }
 
+  const [infoAnchor, setInfoAnchor] = React.useState<HTMLElement | null>(null);
+
   const metrics = [
     {
       title: 'Overall Score',
       value: `${data.data.overview.overallScore}/100`,
       icon: Star,
       color: data.data.overview.overallScore >= 80 ? '#4CAF50' : data.data.overview.overallScore >= 60 ? '#FF9800' : '#F44336',
-      description: data.data.overview.overallScore >= 80 ? 'Excellent performance overall' : data.data.overview.overallScore >= 60 ? 'Good, could be improved' : 'Needs improvement'
+      description: data.data.overview.overallScore >= 80 ? 'Excellent performance overall' : data.data.overview.overallScore >= 60 ? 'Good, could be improved' : 'Needs improvement',
+      info: 'Overall score weights performance (40%), SEO (40%) and user experience (20%) based on the collected metrics.'
     },
     {
       title: 'Page Load Time',
@@ -69,16 +73,32 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
 
   return (
     <Box>
-      <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-        Website Overview - {data.url}
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
+          Website Overview
+        </Typography>
+        <Link
+          href={data.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          underline="hover"
+          color="#FF6B35"
+          variant="h5"
+          sx={{ fontWeight: 'bold', wordBreak: 'break-all' }}
+        >
+          {data.url}
+        </Link>
+      </Box>
       
-      <Grid container spacing={3}>
+      <Grid container spacing={2} alignItems="stretch">
         {metrics.map((metric, index) => {
           const IconComponent = metric.icon;
           return (
-            <Grid item xs={12} sm={6} md={3} key={index}>
-              <Card sx={{ height: '100%', borderRadius: 2 }}>
+
+            <Grid size={6} key={index} sx={{ display: 'flex' }}>
+
+              <Card sx={{ height: '100%', borderRadius: 2, flexGrow: 1 }}>
+
                 <CardContent sx={{ p: 3 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     <Box
@@ -96,9 +116,16 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
                       {metric.value}
                     </Typography>
                   </Box>
-                  <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'medium' }}>
-                    {metric.title}
-                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'medium' }}>
+                      {metric.title}
+                    </Typography>
+                    {metric.info && (
+                      <IconButton size="small" onClick={(e) => setInfoAnchor(e.currentTarget)}>
+                        <InfoOutlined fontSize="small" />
+                      </IconButton>
+                    )}
+                  </Box>
                   <Typography variant="body2" color="text.secondary">
                     {metric.description}
                   </Typography>
@@ -108,6 +135,20 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
           );
         })}
       </Grid>
+
+      <Popover
+        open={Boolean(infoAnchor)}
+        anchorEl={infoAnchor}
+        onClose={() => setInfoAnchor(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Box sx={{ p: 2, maxWidth: 250 }}>
+          <Typography variant="body2">
+            {metrics.find(m => m.info)?.info}
+          </Typography>
+        </Box>
+      </Popover>
 
       <Box sx={{ mt: 4 }}>
         <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -122,20 +163,72 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
                 ' The page has room for improvement in several areas.'
               }
             </Typography>
-            <Typography variant="body1" paragraph>
-              <strong>Key Findings:</strong>
-            </Typography>
-            <Box component="ul" sx={{ pl: 2 }}>
-              <Typography component="li" variant="body2" sx={{ mb: 1 }}>
-                SEO Score: {data.data.overview.seoScore}/100
+          <Typography variant="body1" paragraph>
+            <strong>Key Findings:</strong>
+          </Typography>
+          <Grid container spacing={1} sx={{ mb: 2 }}>
+            <Grid item xs={6}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+              <Typography variant="body2">Overall Score</Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontWeight: 'bold',
+                  color:
+                    data.data.overview.overallScore >= 80
+                      ? '#4CAF50'
+                      : data.data.overview.overallScore >= 60
+                      ? '#FF9800'
+                      : '#F44336'
+                }}
+              >
+                {data.data.overview.overallScore}/100
               </Typography>
-              <Typography component="li" variant="body2" sx={{ mb: 1 }}>
-                Page Load Time: {data.data.overview.pageLoadTime}
+              </Box>
+            </Grid>
+            <Grid item xs={6}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+              <Typography variant="body2">SEO Score</Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontWeight: 'bold',
+                  color:
+                    data.data.overview.seoScore >= 80
+                      ? '#4CAF50'
+                      : data.data.overview.seoScore >= 60
+                      ? '#FF9800'
+                      : '#F44336'
+                }}
+              >
+                {data.data.overview.seoScore}/100
               </Typography>
-              <Typography component="li" variant="body2" sx={{ mb: 1 }}>
-                User Experience Score: {data.data.overview.userExperienceScore}/100
+              </Box>
+            </Grid>
+            <Grid item xs={6}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+              <Typography variant="body2">Page Load Time</Typography>
+              <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#FF9800' }}>
+                {data.data.overview.pageLoadTime}
               </Typography>
-            </Box>
+              </Box>
+            </Grid>
+            <Grid item xs={6}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+              <Typography variant="body2">User Experience</Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontWeight: 'bold',
+                  color:
+                    data.data.overview.userExperienceScore >= 80 ? '#4CAF50' : '#2196F3'
+                }}
+              >
+                {data.data.overview.userExperienceScore}/100
+              </Typography>
+              </Box>
+            </Grid>
+          </Grid>
           </CardContent>
         </Card>
       </Box>

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Box, Typography, List, ListItem, Link } from '@mui/material';
+import { Box, Typography, List, ListItem, Link, Card, CardContent, Collapse } from '@mui/material';
 import { ChevronDown } from 'lucide-react';
 
 interface ExpandableImageBoxProps {
@@ -24,35 +24,49 @@ const ExpandableImageBox: React.FC<ExpandableImageBoxProps> = ({
   urls,
   emptyMessage,
 }) => {
-  // Debug logging
-  console.log(`ExpandableImageBox ${title}:`, { count, urlsLength: urls?.length, urls: urls?.slice(0, 3) });
 
   return (
-    <Box
+    <Card
       onClick={onToggle}
+      elevation={0}
       sx={{
-        p: 2,
-        border: '1px solid #E0E0E0',
+
         borderRadius: 2,
         textAlign: 'center',
         cursor: 'pointer',
+        bgcolor: 'rgba(255, 107, 53, 0.05)',
+        boxShadow: 'none',
+
         '&:hover': {
-          backgroundColor: 'rgba(255, 107, 53, 0.05)',
+          bgcolor: 'rgba(255, 107, 53, 0.1)',
         },
       }}
     >
-      <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
+      <CardContent sx={{ p: 2 }}>
+      <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#FF6B35', mb: 1 }}>
+
         {count}
       </Typography>
-      <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: isExpanded ? 'bold' : 'normal' }}>
+      <Typography
+        variant="subtitle2"
+        gutterBottom
+        sx={{
+          fontWeight: isExpanded ? 'bold' : 'normal',
+          color: '#FF6B35',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}
+      >
         {title}
-        <ChevronDown 
-          size={16} 
-          style={{ 
+        <ChevronDown
+          size={16}
+          color="#FF6B35"
+          style={{
             marginLeft: 4,
             transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
             transition: 'transform 0.2s'
-          }} 
+          }}
         />
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
@@ -62,7 +76,7 @@ const ExpandableImageBox: React.FC<ExpandableImageBoxProps> = ({
         {totalSize}
       </Typography>
       
-      {isExpanded && (
+      <Collapse in={isExpanded} unmountOnExit>
         <Box sx={{ width: '100%', mt: 2, textAlign: 'left' }}>
           {urls && urls.length > 0 ? (
             <List dense>
@@ -86,8 +100,10 @@ const ExpandableImageBox: React.FC<ExpandableImageBoxProps> = ({
             </Typography>
           )}
         </Box>
-      )}
-    </Box>
+      </Collapse>
+
+      </CardContent>
+    </Card>
   );
 };
 

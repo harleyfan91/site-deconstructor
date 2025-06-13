@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography, Card, CardContent } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { AlertTriangle } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 
@@ -10,8 +10,7 @@ interface ContrastWarningsCardProps {
 const ContrastWarningsCard: React.FC<ContrastWarningsCardProps> = ({ issues }) => {
   if (!issues.length) {
     return (
-      <Card sx={{ borderRadius: 2 }}>
-        <CardContent sx={{ p: 3 }}>
+      <Box>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
             <AlertTriangle size={24} color="#FF6B35" style={{ marginRight: 8 }} />
             <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
@@ -19,13 +18,11 @@ const ContrastWarningsCard: React.FC<ContrastWarningsCardProps> = ({ issues }) =
             </Typography>
           </Box>
           <Typography variant="body2">No contrast issues detected.</Typography>
-        </CardContent>
-      </Card>
+      </Box>
     );
   }
   return (
-    <Card sx={{ borderRadius: 2 }}>
-      <CardContent sx={{ p: 3 }}>
+    <Box>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <AlertTriangle size={24} color="#FF6B35" style={{ marginRight: 8 }} />
           <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
@@ -39,8 +36,7 @@ const ContrastWarningsCard: React.FC<ContrastWarningsCardProps> = ({ issues }) =
             </Typography>
           </Box>
         ))}
-      </CardContent>
-    </Card>
+    </Box>
   );
 };
 

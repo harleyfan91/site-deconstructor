@@ -50,7 +50,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
       </Typography>
 
       <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
+        <Grid xs={12} md={6}>
           <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -67,7 +67,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={6}>
+        <Grid xs={12} md={6}>
           <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -88,7 +88,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
           </Card>
         </Grid>
 
-        <Grid item xs={12}>
+        <Grid xs={12}>
           <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>

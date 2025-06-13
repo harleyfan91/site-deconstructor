@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Box, Typography, Card, CardContent, Chip } from '@mui/material';
+import { Box, Typography, Chip } from '@mui/material';
 import { Type } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 
@@ -10,8 +10,7 @@ interface FontAnalysisCardProps {
 
 const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts }) => {
   return (
-    <Card sx={{ borderRadius: 2, height: '100%' }}>
-      <CardContent sx={{ p: 3 }}>
+    <Box>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
           <Type size={24} color="#FF6B35" style={{ marginRight: 8 }} />
           <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
@@ -35,8 +34,7 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts }) => {
             </Box>
           ))}
         </Box>
-      </CardContent>
-    </Card>
+    </Box>
   );
 };
 

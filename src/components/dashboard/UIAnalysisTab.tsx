@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Box, Typography, Grid, CircularProgress, Alert } from '@mui/material';
+import { Box, Typography, Grid, Card, CardContent, CircularProgress, Alert } from '@mui/material';
 import type { AnalysisResponse } from '@/types/analysis';
 import ColorExtractionCard from './ui-analysis/ColorExtractionCard';
 import FontAnalysisCard from './ui-analysis/FontAnalysisCard';
@@ -40,37 +39,51 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
   }
 
   const { colors, fonts, images, imageAnalysis } = data.data.ui;
-  
-  console.log('Image analysis data:', imageAnalysis);
-  
+
   return (
     <Box>
       <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
         User Interface Analysis
       </Typography>
 
-      <Grid container spacing={3}>
+      <Grid container spacing={2} alignItems="stretch">
         {/* Color Extraction */}
-        <Grid item xs={12} md={6}>
-          <ColorExtractionCard colors={colors} />
+        <Grid item xs={12} sx={{ display: 'flex', width: '100%' }}>
+          <Card sx={{ borderRadius: 2, flexGrow: 1, width: '100%' }}>
+            <CardContent sx={{ p: 3 }}>
+              <ColorExtractionCard colors={colors} />
+            </CardContent>
+          </Card>
         </Grid>
 
         {/* Font Analysis */}
-        <Grid item xs={12} md={6}>
-          <FontAnalysisCard fonts={fonts} />
+        <Grid item xs={12} md={6} sx={{ display: 'flex', width: '100%' }}>
+          <Card sx={{ borderRadius: 2, flexGrow: 1, width: '100%' }}>
+            <CardContent sx={{ p: 3 }}>
+              <FontAnalysisCard fonts={fonts} />
+            </CardContent>
+          </Card>
         </Grid>
 
         {/* Contrast Warnings */}
-        <Grid item xs={12}>
-          <ContrastWarningsCard issues={data.data.ui.contrastIssues} />
+        <Grid item xs={12} md={6} sx={{ display: 'flex', width: '100%' }}>
+          <Card sx={{ borderRadius: 2, flexGrow: 1, width: '100%' }}>
+            <CardContent sx={{ p: 3 }}>
+              <ContrastWarningsCard issues={data.data.ui.contrastIssues} />
+            </CardContent>
+          </Card>
         </Grid>
 
         {/* Image Analysis */}
-        <Grid item xs={12}>
-          <ImageAnalysisCard 
-            images={images} 
-            imageAnalysis={imageAnalysis} 
-          />
+        <Grid item xs={12} sx={{ display: 'flex', width: '100%' }}>
+          <Card sx={{ borderRadius: 2, flexGrow: 1, width: '100%' }}>
+            <CardContent sx={{ p: 3 }}>
+              <ImageAnalysisCard
+                images={images}
+                imageAnalysis={imageAnalysis}
+              />
+            </CardContent>
+          </Card>
         </Grid>
       </Grid>
     </Box>

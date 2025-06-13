@@ -1,6 +1,16 @@
 
 import React from 'react';
-import { Box, Typography, Grid, Card, CardContent, LinearProgress, CircularProgress, Alert, Chip } from '@mui/material';
+import {
+  Box,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
+  LinearProgress,
+  CircularProgress,
+  Alert,
+  Chip
+} from '@mui/material';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart';
 import { BarChart, Bar, XAxis, YAxis } from 'recharts';
 import { Shield, Smartphone, Zap } from 'lucide-react';
@@ -116,9 +126,9 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
       </Grid>
 
       {/* Core Web Vitals Section */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} md={8}>
-          <Card sx={{ borderRadius: 2, height: '400px' }}>
+      <Grid container spacing={2} alignItems="stretch" sx={{ mb: 4 }}>
+        <Grid item xs={12} md={8} sx={{ display: 'flex' }}>
+          <Card sx={{ borderRadius: 2, height: '400px', flexGrow: 1 }}>
             <CardContent sx={{ p: 3, height: '100%' }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
                 Core Web Vitals
@@ -136,8 +146,8 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={4}>
-          <Card sx={{ borderRadius: 2 }}>
+        <Grid item xs={12} md={4} sx={{ display: 'flex' }}>
+          <Card sx={{ borderRadius: 2, flexGrow: 1 }}>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
                 Speed Index
@@ -167,8 +177,8 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
             <Grid container spacing={2}>
               {Object.entries(data.securityHeaders).map(([key, value]) => (
                 <Grid item xs={12} sm={6} md={4} key={key}>
-                  <Box sx={{ 
-                    p: 2, 
+                  <Box sx={{
+                    p: 2,
                     border: '1px solid #E0E0E0',
                     borderRadius: 1,
                     display: 'flex',
@@ -202,9 +212,9 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
             <Grid container spacing={2}>
               {performance.recommendations.map((rec, index) => (
                 <Grid item xs={12} md={6} key={index}>
-                  <Box sx={{ 
-                    p: 2, 
-                    backgroundColor: rec.type === 'warning' ? '#FFF3E0' : rec.type === 'error' ? '#FFEBEE' : '#E8F5E8', 
+                  <Box sx={{
+                    p: 2,
+                    backgroundColor: rec.type === 'warning' ? '#FFF3E0' : rec.type === 'error' ? '#FFEBEE' : '#E8F5E8',
                     borderRadius: 1, 
                     mb: 2 
                   }}>
