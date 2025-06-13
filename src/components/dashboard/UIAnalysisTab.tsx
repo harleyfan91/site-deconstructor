@@ -41,12 +41,12 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
   const { colors, fonts, images, imageAnalysis } = data.data.ui;
 
   return (
-    <Box>
+    <Box sx={{ width: '100%' }}>
       <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
         User Interface Analysis
       </Typography>
 
-      <Grid container spacing={2}>
+      <Grid container spacing={2} sx={{ width: '100%' }}>
         {/* Color Extraction - Full Width */}
         <Grid item xs={12}>
           <Card sx={{ borderRadius: 2, height: '100%' }}>
