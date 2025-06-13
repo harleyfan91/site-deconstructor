@@ -13,15 +13,17 @@ interface UIAnalysisTabProps {
 }
 
 const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) => {
+  // Loading state
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
         <CircularProgress size={60} />
-        <Typography variant="h6" sx={{ ml: 2 }}>Analyzing UI elements...</Typography>
+        <Typography variant="h6" sx={{ ml: 2 }}>Analyzing UI...</Typography>
       </Box>
     );
   }
 
+  // Error state
   if (error) {
     return (
       <Alert severity="error" sx={{ mt: 2 }}>
@@ -30,62 +32,55 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
     );
   }
 
+  // No data yet state
   if (!data) {
     return (
       <Alert severity="info" sx={{ mt: 2 }}>
-        Enter a URL to analyze website UI elements
+        Enter a URL to analyze UI elements
       </Alert>
     );
   }
 
-  const { colors, fonts, images, imageAnalysis } = data.data.ui;
+  // Destructure UI data
+  const { ui } = data.data;
 
   return (
     <Box>
       <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-        User Interface Analysis
+        UI Analysis
       </Typography>
 
-      <Grid container spacing={2} alignItems="stretch">
-        {/* Color Extraction */}
-        <Grid item xs={12} sx={{ display: 'flex', width: '100%' }}>
-          <Card sx={{ borderRadius: 2, flexGrow: 1, width: '100%' }}>
+      {/* Color Extraction Section */}
+      <Card sx={{ borderRadius: 2, mb: 3 }}>
+        <CardContent sx={{ p: 3 }}>
+          <ColorExtractionCard colors={ui.colors} />
+        </CardContent>
+      </Card>
+
+      {/* Font Analysis & Contrast Warnings Section */}
+      <Grid container spacing={2} sx={{ mb: 3 }}>
+        <Grid item xs={12} md={6}>
+          <Card sx={{ borderRadius: 2, height: '100%' }}>
             <CardContent sx={{ p: 3 }}>
-              <ColorExtractionCard colors={colors} />
+              <FontAnalysisCard fonts={ui.fonts} />
             </CardContent>
           </Card>
         </Grid>
-
-        {/* Font Analysis */}
-        <Grid item xs={12} md={6} sx={{ display: 'flex', width: '100%' }}>
-          <Card sx={{ borderRadius: 2, flexGrow: 1, width: '100%' }}>
+        <Grid item xs={12} md={6}>
+          <Card sx={{ borderRadius: 2, height: '100%' }}>
             <CardContent sx={{ p: 3 }}>
-              <FontAnalysisCard fonts={fonts} />
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Contrast Warnings */}
-        <Grid item xs={12} md={6} sx={{ display: 'flex', width: '100%' }}>
-          <Card sx={{ borderRadius: 2, flexGrow: 1, width: '100%' }}>
-            <CardContent sx={{ p: 3 }}>
-              <ContrastWarningsCard issues={data.data.ui.contrastIssues} />
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Image Analysis */}
-        <Grid item xs={12} sx={{ display: 'flex', width: '100%' }}>
-          <Card sx={{ borderRadius: 2, flexGrow: 1, width: '100%' }}>
-            <CardContent sx={{ p: 3 }}>
-              <ImageAnalysisCard
-                images={images}
-                imageAnalysis={imageAnalysis}
-              />
+              <ContrastWarningsCard issues={ui.contrastIssues} />
             </CardContent>
           </Card>
         </Grid>
       </Grid>
+
+      {/* Image Analysis Section */}
+      <Card sx={{ borderRadius: 2, mb: 3 }}>
+        <CardContent sx={{ p: 3 }}>
+          <ImageAnalysisCard images={ui.images} imageAnalysis={ui.imageAnalysis} />
+        </CardContent>
+      </Card>
     </Box>
   );
 };
