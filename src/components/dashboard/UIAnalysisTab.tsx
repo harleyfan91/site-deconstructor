@@ -41,7 +41,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
   const { colors, fonts, images, imageAnalysis } = data.data.ui;
 
   return (
-    <Box sx={{ width: '100%' }}>
+    <Box>
       <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
         User Interface Analysis
       </Typography>
