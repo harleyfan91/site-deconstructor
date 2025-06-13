@@ -46,37 +46,37 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
         User Interface Analysis
       </Typography>
 
-      <Grid container spacing={2} alignItems="stretch">
-        {/* Color Extraction */}
-        <Grid item xs={12} sx={{ display: 'flex', width: '100%' }}>
-          <Card sx={{ borderRadius: 2, flexGrow: 1, width: '100%' }}>
+      <Grid container spacing={2}>
+        {/* Color Extraction - Full Width */}
+        <Grid item xs={12}>
+          <Card sx={{ borderRadius: 2, height: '100%' }}>
             <CardContent sx={{ p: 3 }}>
               <ColorExtractionCard colors={colors} />
             </CardContent>
           </Card>
         </Grid>
 
-        {/* Font Analysis */}
-        <Grid item xs={12} md={6} sx={{ display: 'flex', width: '100%' }}>
-          <Card sx={{ borderRadius: 2, flexGrow: 1, width: '100%' }}>
+        {/* Font Analysis - Half Width */}
+        <Grid item xs={12} md={6}>
+          <Card sx={{ borderRadius: 2, height: '100%' }}>
             <CardContent sx={{ p: 3 }}>
               <FontAnalysisCard fonts={fonts} />
             </CardContent>
           </Card>
         </Grid>
 
-        {/* Contrast Warnings */}
-        <Grid item xs={12} md={6} sx={{ display: 'flex', width: '100%' }}>
-          <Card sx={{ borderRadius: 2, flexGrow: 1, width: '100%' }}>
+        {/* Contrast Warnings - Half Width */}
+        <Grid item xs={12} md={6}>
+          <Card sx={{ borderRadius: 2, height: '100%' }}>
             <CardContent sx={{ p: 3 }}>
               <ContrastWarningsCard issues={data.data.ui.contrastIssues} />
             </CardContent>
           </Card>
         </Grid>
 
-        {/* Image Analysis */}
-        <Grid item xs={12} sx={{ display: 'flex', width: '100%' }}>
-          <Card sx={{ borderRadius: 2, flexGrow: 1, width: '100%' }}>
+        {/* Image Analysis - Full Width */}
+        <Grid item xs={12}>
+          <Card sx={{ borderRadius: 2, height: '100%' }}>
             <CardContent sx={{ p: 3 }}>
               <ImageAnalysisCard
                 images={images}
