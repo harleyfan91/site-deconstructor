@@ -41,11 +41,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
   const { colors, fonts, images, imageAnalysis } = data.data.ui;
 
   return (
-    <Box sx={{ 
-      width: '100%',
-      border: '2px solid red', // Temporary debug border
-      minWidth: '100vw' // Force viewport width
-    }}>
+    <Box sx={{ width: '100%' }}>
       <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
         User Interface Analysis
       </Typography>
@@ -53,11 +49,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
       <Grid 
         container 
         spacing={2} 
-        sx={{ 
-          width: '100% !important',
-          maxWidth: 'none !important',
-          minWidth: '100% !important'
-        }}
+        sx={{ width: '100%' }}
       >
         {/* Color Extraction - Full Width */}
         <Grid item xs={12}>
@@ -85,6 +77,9 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
             </CardContent>
           </Card>
         </Grid>
+
+        {/* Force line break */}
+        <Grid item xs={12} sx={{ width: '100%' }} />
 
         {/* Image Analysis - Full Width */}
         <Grid item xs={12}>
