@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Box,
@@ -12,9 +11,8 @@ import {
   ListItemIcon,
   ListItemText,
   Chip,
-  Alert,
 } from '@mui/material';
-import { Check, StarBorder, Info } from '@mui/icons-material';
+import { Check, StarBorder } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 
 const PricingSection = () => {
@@ -38,6 +36,7 @@ const PricingSection = () => {
       features: [
         'Advanced Color Harmony Analysis',
         'Complete Font Loading Performance',
+        'Unlimited web page analysis',
       ],
       additionalFeatures: [
         'Tech Stack Detection (50+ Technologies)',
@@ -184,22 +183,6 @@ const PricingSection = () => {
                         <ListItemText primary={feature} />
                       </ListItem>
                     ))}
-                    {plan.title === 'Pro' && (
-                      <Box sx={{ my: 2 }}>
-                        <Alert 
-                          icon={<Info />} 
-                          severity="info" 
-                          sx={{ 
-                            textAlign: 'left',
-                            '& .MuiAlert-message': {
-                              fontSize: '0.875rem',
-                            },
-                          }}
-                        >
-                          <strong>Unlimited web page analysis</strong> - Analyze as many websites as you need!
-                        </Alert>
-                      </Box>
-                    )}
                     {plan.additionalFeatures?.map((feature, i) => (
                       <ListItem key={`additional-${i}`} disablePadding>
                         <ListItemIcon sx={{ minWidth: '30px' }}>
