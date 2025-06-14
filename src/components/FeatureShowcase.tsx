@@ -68,7 +68,7 @@ const FeatureShowcase = () => {
       sx={{
         py: { xs: 8, md: 12 },
         bgcolor: 'rgba(0, 0, 0, 0.2)',
-        // More diffused masks at top and bottom
+        // Diffused masks at top and bottom for smooth blending with Hero and Pricing
         WebkitMaskImage: `linear-gradient(
           to bottom, 
           transparent 0%, 
