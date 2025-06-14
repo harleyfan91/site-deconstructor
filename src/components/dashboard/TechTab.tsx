@@ -168,6 +168,8 @@ function TechStackGrid({ techStack }: { techStack: { category: string; technolog
                 borderBottomLeftRadius: 14,
                 borderBottomRightRadius: 14,
                 gap: 1.5,
+                borderTopLeftRadius: 14,
+                borderTopRightRadius: 14,
               }}
             >
               <IconComponent size={22} color="#FF6B35" style={{ marginRight: 10, flexShrink: 0 }} />
