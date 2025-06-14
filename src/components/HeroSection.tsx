@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Box, Typography, Container, Chip } from '@mui/material';
 import { motion } from 'framer-motion';
@@ -111,61 +112,38 @@ const HeroSection = () => {
         alignItems: 'center',
         position: 'relative',
         overflow: 'hidden',
+        background: `
+          radial-gradient(circle at 20% 50%, rgba(255, 107, 53, 0.3) 0%, transparent 50%),
+          radial-gradient(circle at 80% 20%, rgba(9, 132, 227, 0.3) 0%, transparent 50%),
+          radial-gradient(circle at 40% 80%, rgba(255, 138, 101, 0.2) 0%, transparent 50%),
+          linear-gradient(135deg, #0F0F0F 0%, #1A1A1A 100%)
+        `,
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: `
+            url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")
+          `,
+          animation: 'float 20s ease-in-out infinite',
+        },
+        '@keyframes float': {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%':      { transform: 'translateY(-20px)' },
+        },
+        // Use the same diffused mask as FeatureShowcase for a seamless section blend.
+        WebkitMaskImage: MASK_IMAGE,
+        maskImage: MASK_IMAGE,
+        maskSize: '100% 100%',
+        WebkitMaskSize: '100% 100%',
+        maskRepeat: 'no-repeat',
+        WebkitMaskRepeat: 'no-repeat',
       }}
     >
-      {/* Dedicated background/mask layer */}
-      <Box
-        aria-hidden
-        sx={{
-          zIndex: 0,
-          position: 'absolute',
-          top: 0, left: 0, right: 0, bottom: 0,
-          width: '100%',
-          height: '100%',
-          background: `
-            radial-gradient(circle at 20% 50%, rgba(255, 107, 53, 0.3) 0%, transparent 50%),
-            radial-gradient(circle at 80% 20%, rgba(9, 132, 227, 0.3) 0%, transparent 50%),
-            radial-gradient(circle at 40% 80%, rgba(255, 138, 101, 0.2) 0%, transparent 50%),
-            linear-gradient(135deg, #0F0F0F 0%, #1A1A1A 100%)
-          `,
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: `
-              url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")
-            `,
-            animation: 'float 20s ease-in-out infinite',
-          },
-          // Apply mask/gradient only to background
-          WebkitMaskImage: `linear-gradient(
-            to bottom,
-            black 0%,
-            black 62%,
-            black 75%,
-            transparent 100%
-          )`,
-          maskImage: `linear-gradient(
-            to bottom,
-            black 0%,
-            black 62%,
-            black 75%,
-            transparent 100%
-          )`,
-          maskSize: '100% 100%',
-          WebkitMaskSize: '100% 100%',
-          maskRepeat: 'no-repeat',
-          WebkitMaskRepeat: 'no-repeat',
-        }}
-      />
-
-      <Container
-        maxWidth="lg"
-        sx={{ position: 'relative', zIndex: 1 }} // ensure content above background
-      >
+      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
         <Box
           sx={{
             textAlign: 'center',
@@ -315,7 +293,7 @@ const HeroSection = () => {
         </Box>
       </Container>
 
-      {/* Floating gradient shapes for visual interest (these may remain above main background, but below foreground content) */}
+      {/* Floating gradient shapes for visual interest */}
       <motion.div
         animate={{
           y: [0, -20, 0],
