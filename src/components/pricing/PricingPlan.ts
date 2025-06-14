@@ -15,8 +15,8 @@ export const pricingPlans: PricingPlan[] = [
   {
     title: 'Basic',
     price: 'Free',
-    priceNote: 'No fee to try',
-    description: 'For individuals and small teams to get started.',
+    priceNote: '$0 to start Deconstructing',
+    description: 'For individuals and small teams to get started',
     features: [
       'Limited color palette extraction',
       'Basic font analysis',
@@ -36,7 +36,7 @@ export const pricingPlans: PricingPlan[] = [
     title: 'Pro',
     price: '$19.99',
     priceNote: 'One-time payment',
-    description: 'Advanced features for power users.',
+    description: 'Advanced features for power users',
     features: [
       'Advanced Color Harmony Analysis',
       'Complete Font Loading Performance',
