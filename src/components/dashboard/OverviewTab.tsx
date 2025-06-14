@@ -1,6 +1,6 @@
+
 import React from 'react';
 import { Box, Typography, Card, CardContent, CircularProgress, Alert, Link, IconButton, Popover } from '@mui/material';
-import { Grid2 } from '@mui/material';
 import { TrendingUp, Users, Clock, Star } from 'lucide-react';
 import InfoOutlined from '@mui/icons-material/InfoOutlined';
 import type { AnalysisResponse } from '@/types/analysis';
@@ -90,48 +90,46 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
         </Link>
       </Box>
       
-      <Grid2 container spacing={2} alignItems="stretch">
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2, alignItems: 'stretch' }}>
         {metrics.map((metric, index) => {
           const IconComponent = metric.icon;
           return (
-            <Grid2 size={6} key={index} sx={{ display: 'flex' }}>
-              <Card sx={{ height: '100%', borderRadius: 2, flexGrow: 1 }}>
-                <CardContent sx={{ p: 3 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <Box
-                      sx={{
-                        p: 1,
-                        borderRadius: 1,
-                        backgroundColor: `${metric.color}20`,
-                        color: metric.color,
-                        mr: 2
-                      }}
-                    >
-                      <IconComponent size={24} />
-                    </Box>
-                    <Typography variant="h6" component="div" sx={{ fontWeight: 'bold' }}>
-                      {metric.value}
-                    </Typography>
+            <Card key={index} sx={{ height: '100%', borderRadius: 2 }}>
+              <CardContent sx={{ p: 3 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <Box
+                    sx={{
+                      p: 1,
+                      borderRadius: 1,
+                      backgroundColor: `${metric.color}20`,
+                      color: metric.color,
+                      mr: 2
+                    }}
+                  >
+                    <IconComponent size={24} />
                   </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'medium' }}>
-                      {metric.title}
-                    </Typography>
-                    {metric.info && (
-                      <IconButton size="small" onClick={(e) => setInfoAnchor(e.currentTarget)}>
-                        <InfoOutlined fontSize="small" />
-                      </IconButton>
-                    )}
-                  </Box>
-                  <Typography variant="body2" color="text.secondary">
-                    {metric.description}
+                  <Typography variant="h6" component="div" sx={{ fontWeight: 'bold' }}>
+                    {metric.value}
                   </Typography>
-                </CardContent>
-              </Card>
-            </Grid2>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'medium' }}>
+                    {metric.title}
+                  </Typography>
+                  {metric.info && (
+                    <IconButton size="small" onClick={(e) => setInfoAnchor(e.currentTarget)}>
+                      <InfoOutlined fontSize="small" />
+                    </IconButton>
+                  )}
+                </Box>
+                <Typography variant="body2" color="text.secondary">
+                  {metric.description}
+                </Typography>
+              </CardContent>
+            </Card>
           );
         })}
-      </Grid2>
+      </Box>
 
       <Popover
         open={Boolean(infoAnchor)}
@@ -163,9 +161,8 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
           <Typography variant="body1" paragraph>
             <strong>Key Findings:</strong>
           </Typography>
-          <Grid2 container spacing={1} sx={{ mb: 2 }}>
-            <Grid2 size={6}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1, mb: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
               <Typography variant="body2">Overall Score</Typography>
               <Typography
                 variant="body2"
@@ -181,10 +178,8 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
               >
                 {data.data.overview.overallScore}/100
               </Typography>
-              </Box>
-            </Grid2>
-            <Grid2 size={6}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+            </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
               <Typography variant="body2">SEO Score</Typography>
               <Typography
                 variant="body2"
@@ -200,18 +195,14 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
               >
                 {data.data.overview.seoScore}/100
               </Typography>
-              </Box>
-            </Grid2>
-            <Grid2 size={6}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+            </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
               <Typography variant="body2">Page Load Time</Typography>
               <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#FF9800' }}>
                 {data.data.overview.pageLoadTime}
               </Typography>
-              </Box>
-            </Grid2>
-            <Grid2 size={6}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+            </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
               <Typography variant="body2">User Experience</Typography>
               <Typography
                 variant="body2"
@@ -223,9 +214,8 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
               >
                 {data.data.overview.userExperienceScore}/100
               </Typography>
-              </Box>
-            </Grid2>
-          </Grid2>
+            </Box>
+          </Box>
           </CardContent>
         </Card>
       </Box>

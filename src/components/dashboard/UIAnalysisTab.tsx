@@ -1,6 +1,6 @@
+
 import React from 'react';
 import { Box, Typography, Card, CardContent, CircularProgress, Alert } from '@mui/material';
-import { Grid2 } from '@mui/material';
 import type { AnalysisResponse } from '@/types/analysis';
 import ColorExtractionCard from './ui-analysis/ColorExtractionCard';
 import FontAnalysisCard from './ui-analysis/FontAnalysisCard';
@@ -47,46 +47,39 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
         User Interface Analysis
       </Typography>
 
-      <Grid2 container spacing={2} alignItems="stretch">
+      <Box sx={{ display: 'grid', gap: 2, alignItems: 'stretch' }}>
         {/* Color Extraction */}
-        <Grid2 size={12} sx={{ display: 'flex', width: '100%' }}>
-          <Card sx={{ borderRadius: 2, flexGrow: 1, width: '100%' }}>
-            <CardContent sx={{ p: 3 }}>
-              <ColorExtractionCard colors={colors} />
-            </CardContent>
-          </Card>
-        </Grid2>
+        <Card sx={{ borderRadius: 2, width: '100%' }}>
+          <CardContent sx={{ p: 3 }}>
+            <ColorExtractionCard colors={colors} />
+          </CardContent>
+        </Card>
 
-        {/* Font Analysis */}
-        <Grid2 size={{ xs: 12, md: 6 }} sx={{ display: 'flex', width: '100%' }}>
-          <Card sx={{ borderRadius: 2, flexGrow: 1, width: '100%' }}>
+        {/* Font Analysis and Contrast Warnings */}
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
+          <Card sx={{ borderRadius: 2, width: '100%' }}>
             <CardContent sx={{ p: 3 }}>
               <FontAnalysisCard fonts={fonts} />
             </CardContent>
           </Card>
-        </Grid2>
 
-        {/* Contrast Warnings */}
-        <Grid2 size={{ xs: 12, md: 6 }} sx={{ display: 'flex', width: '100%' }}>
-          <Card sx={{ borderRadius: 2, flexGrow: 1, width: '100%' }}>
+          <Card sx={{ borderRadius: 2, width: '100%' }}>
             <CardContent sx={{ p: 3 }}>
               <ContrastWarningsCard issues={data.data.ui.contrastIssues} />
             </CardContent>
           </Card>
-        </Grid2>
+        </Box>
 
         {/* Image Analysis */}
-        <Grid2 size={12} sx={{ display: 'flex', width: '100%' }}>
-          <Card sx={{ borderRadius: 2, flexGrow: 1, width: '100%' }}>
-            <CardContent sx={{ p: 3 }}>
-              <ImageAnalysisCard
-                images={images}
-                imageAnalysis={imageAnalysis}
-              />
-            </CardContent>
-          </Card>
-        </Grid2>
-      </Grid2>
+        <Card sx={{ borderRadius: 2, width: '100%' }}>
+          <CardContent sx={{ p: 3 }}>
+            <ImageAnalysisCard
+              images={images}
+              imageAnalysis={imageAnalysis}
+            />
+          </CardContent>
+        </Card>
+      </Box>
     </Box>
   );
 };

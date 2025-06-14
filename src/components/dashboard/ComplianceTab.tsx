@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Box, Typography, Card, CardContent, Alert, CircularProgress, Chip } from '@mui/material';
 import { Grid2 } from '@mui/material';
@@ -50,46 +51,42 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
         Compliance Audits
       </Typography>
 
-      <Grid2 container spacing={3}>
-        <Grid2 size={{ xs: 12, md: 6 }}>
-          <Card sx={{ borderRadius: 2 }}>
-            <CardContent sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-                Security Headers
-              </Typography>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
+        <Card sx={{ borderRadius: 2 }}>
+          <CardContent sx={{ p: 3 }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+              Security Headers
+            </Typography>
+            <Box component="ul" sx={{ pl: 2 }}>
+              {Object.entries(securityHeaders).map(([k, v]) => (
+                <Typography component="li" variant="body2" key={k}>
+                  <strong>{k.toUpperCase()}:</strong> {dashIfEmpty(v)}
+                </Typography>
+              ))}
+            </Box>
+          </CardContent>
+        </Card>
+
+        <Card sx={{ borderRadius: 2 }}>
+          <CardContent sx={{ p: 3 }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+              Accessibility Violations
+            </Typography>
+            {violations.length === 0 ? (
+              <Typography variant="body2">None</Typography>
+            ) : (
               <Box component="ul" sx={{ pl: 2 }}>
-                {Object.entries(securityHeaders).map(([k, v]) => (
-                  <Typography component="li" variant="body2" key={k}>
-                    <strong>{k.toUpperCase()}:</strong> {dashIfEmpty(v)}
+                {violations.map((v, i) => (
+                  <Typography component="li" variant="body2" key={i}>
+                    {v.id} {v.description ? `- ${v.description}` : ''}
                   </Typography>
                 ))}
               </Box>
-            </CardContent>
-          </Card>
-        </Grid2>
+            )}
+          </CardContent>
+        </Card>
 
-        <Grid2 size={{ xs: 12, md: 6 }}>
-          <Card sx={{ borderRadius: 2 }}>
-            <CardContent sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-                Accessibility Violations
-              </Typography>
-              {violations.length === 0 ? (
-                <Typography variant="body2">None</Typography>
-              ) : (
-                <Box component="ul" sx={{ pl: 2 }}>
-                  {violations.map((v, i) => (
-                    <Typography component="li" variant="body2" key={i}>
-                      {v.id} {v.description ? `- ${v.description}` : ''}
-                    </Typography>
-                  ))}
-                </Box>
-              )}
-            </CardContent>
-          </Card>
-        </Grid2>
-
-        <Grid2 size={12}>
+        <Box sx={{ gridColumn: { xs: '1', md: '1 / -1' } }}>
           <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -111,8 +108,8 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
               </Typography>
             </CardContent>
           </Card>
-        </Grid2>
-      </Grid2>
+        </Box>
+      </Box>
     </Box>
   );
 };

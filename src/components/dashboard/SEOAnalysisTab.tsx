@@ -1,6 +1,6 @@
+
 import React from 'react';
 import { Box, Typography, Grid, Card, CardContent, Chip, CircularProgress, Alert } from '@mui/material';
-import { Grid2 } from '@mui/material';
 import { CheckCircle, AlertCircle, XCircle } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 
@@ -83,96 +83,92 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
         SEO Analysis
       </Typography>
 
-      <Grid2 container spacing={3}>
-        <Grid2 size={{ xs: 12, md: 8 }}>
-          <Card sx={{ borderRadius: 2 }}>
-            <CardContent sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-                SEO Checklist
-              </Typography>
-              <Box>
-                {seo.checks.map((check, index) => (
-                  <Box
-                    key={index}
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      p: 2,
-                      borderBottom: index < seo.checks.length - 1 ? '1px solid #E0E0E0' : 'none',
-                    }}
-                  >
-                    <Box sx={{ mr: 2 }}>
-                      {getStatusIcon(check.status)}
-                    </Box>
-                    <Box sx={{ flexGrow: 1 }}>
-                      <Typography variant="subtitle1" sx={{ fontWeight: 'medium' }}>
-                        {check.name}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {check.description}
-                      </Typography>
-                    </Box>
-                    <Chip
-                      label={check.status}
-                      color={getStatusColor(check.status) as any}
-                      variant="outlined"
-                      size="small"
-                    />
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 3 }}>
+        <Card sx={{ borderRadius: 2 }}>
+          <CardContent sx={{ p: 3 }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+              SEO Checklist
+            </Typography>
+            <Box>
+              {seo.checks.map((check, index) => (
+                <Box
+                  key={index}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    p: 2,
+                    borderBottom: index < seo.checks.length - 1 ? '1px solid #E0E0E0' : 'none',
+                  }}
+                >
+                  <Box sx={{ mr: 2 }}>
+                    {getStatusIcon(check.status)}
                   </Box>
-                ))}
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid2>
+                  <Box sx={{ flexGrow: 1 }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 'medium' }}>
+                      {check.name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {check.description}
+                    </Typography>
+                  </Box>
+                  <Chip
+                    label={check.status}
+                    color={getStatusColor(check.status) as any}
+                    variant="outlined"
+                    size="small"
+                  />
+                </Box>
+              ))}
+            </Box>
+          </CardContent>
+        </Card>
 
-        <Grid2 size={{ xs: 12, md: 4 }}>
-          <Card sx={{ borderRadius: 2, mb: 2 }}>
-            <CardContent sx={{ p: 3, textAlign: 'center' }}>
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-                SEO Score
-              </Typography>
-              <Typography variant="h2" sx={{ 
-                fontWeight: 'bold', 
-                color: seo.score >= 80 ? '#4CAF50' : seo.score >= 60 ? '#FF9800' : '#F44336',
-                mb: 1 
-              }}>
-                {seo.score}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {seo.score >= 80 ? 'Excellent SEO' : seo.score >= 60 ? 'Good SEO' : 'Needs Improvement'}
-              </Typography>
-            </CardContent>
-          </Card>
+        <Card sx={{ borderRadius: 2, mb: 2 }}>
+          <CardContent sx={{ p: 3, textAlign: 'center' }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+              SEO Score
+            </Typography>
+            <Typography variant="h2" sx={{ 
+              fontWeight: 'bold', 
+              color: seo.score >= 80 ? '#4CAF50' : seo.score >= 60 ? '#FF9800' : '#F44336',
+              mb: 1 
+            }}>
+              {seo.score}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {seo.score >= 80 ? 'Excellent SEO' : seo.score >= 60 ? 'Good SEO' : 'Needs Improvement'}
+            </Typography>
+          </CardContent>
+        </Card>
 
-          <Card sx={{ borderRadius: 2 }}>
-            <CardContent sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-                Analysis Status
-              </Typography>
-              <Box sx={{ mb: 2 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography variant="body2">Checks Passed</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                    {seo.checks.filter(c => c.status === 'good').length}/{seo.checks.length}
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography variant="body2">Warnings</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#FF9800' }}>
-                    {seo.checks.filter(c => c.status === 'warning').length}
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography variant="body2">Errors</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#F44336' }}>
-                    {seo.checks.filter(c => c.status === 'error').length}
-                  </Typography>
-                </Box>
+        <Card sx={{ borderRadius: 2 }}>
+          <CardContent sx={{ p: 3 }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+              Analysis Status
+            </Typography>
+            <Box sx={{ mb: 2 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                <Typography variant="body2">Checks Passed</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                  {seo.checks.filter(c => c.status === 'good').length}/{seo.checks.length}
+                </Typography>
               </Box>
-            </CardContent>
-          </Card>
-        </Grid2>
-      </Grid2>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                <Typography variant="body2">Warnings</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#FF9800' }}>
+                  {seo.checks.filter(c => c.status === 'warning').length}
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                <Typography variant="body2">Errors</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#F44336' }}>
+                  {seo.checks.filter(c => c.status === 'error').length}
+                </Typography>
+              </Box>
+            </Box>
+          </CardContent>
+        </Card>
+      </Box>
 
       <Box sx={{ mt: 3 }}>
         <Card sx={{ borderRadius: 2 }}>
@@ -180,40 +176,38 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
               SEO Recommendations
             </Typography>
-            <Grid2 container spacing={2}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 2 }}>
               {seo.recommendations.map((rec, index) => (
-                <Grid2 size={{ xs: 12, md: 6 }} key={index}>
-                  <Box sx={{ 
-                    p: 2, 
-                    border: `1px solid ${getPriorityColor(rec.priority)}`,
-                    borderRadius: 1,
-                    backgroundColor: `${getPriorityColor(rec.priority)}10`
-                  }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      <Typography variant="subtitle2" sx={{ 
-                        fontWeight: 'bold', 
-                        color: getPriorityColor(rec.priority),
-                        mr: 1
-                      }}>
-                        {rec.title}
-                      </Typography>
-                      <Chip 
-                        label={rec.priority} 
-                        size="small" 
-                        sx={{ 
-                          backgroundColor: getPriorityColor(rec.priority),
-                          color: 'white',
-                          fontSize: '0.7rem'
-                        }}
-                      />
-                    </Box>
-                    <Typography variant="body2" sx={{ color: 'rgba(0, 0, 0, 0.87)' }}>
-                      {rec.description}
+                <Box key={index} sx={{ 
+                  p: 2, 
+                  border: `1px solid ${getPriorityColor(rec.priority)}`,
+                  borderRadius: 1,
+                  backgroundColor: `${getPriorityColor(rec.priority)}10`
+                }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <Typography variant="subtitle2" sx={{ 
+                      fontWeight: 'bold', 
+                      color: getPriorityColor(rec.priority),
+                      mr: 1
+                    }}>
+                      {rec.title}
                     </Typography>
+                    <Chip 
+                      label={rec.priority} 
+                      size="small" 
+                      sx={{ 
+                        backgroundColor: getPriorityColor(rec.priority),
+                        color: 'white',
+                        fontSize: '0.7rem'
+                      }}
+                    />
                   </Box>
-                </Grid2>
+                  <Typography variant="body2" sx={{ color: 'rgba(0, 0, 0, 0.87)' }}>
+                    {rec.description}
+                  </Typography>
+                </Box>
               ))}
-            </Grid2>
+            </Box>
           </CardContent>
         </Card>
       </Box>

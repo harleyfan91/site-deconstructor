@@ -1,6 +1,6 @@
+
 import React, { useState } from 'react';
 import { Box, Typography, Collapse, IconButton } from '@mui/material';
-import { Grid2 } from '@mui/material';
 import { Palette, ChevronDown, ChevronUp } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 import { groupByFrequency } from '@/lib/ui';
@@ -216,57 +216,56 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
                           >
                             {harmonyGroup.name}
                           </Typography>
-                          <Grid2 container spacing={1} sx={{ mb: 2 }}>
+                          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(3, 1fr)', sm: 'repeat(4, 1fr)', md: 'repeat(6, 1fr)' }, gap: 1, mb: 2 }}>
                             {harmonyGroup.colors.map((color, colorIndex) => (
-                              <Grid2 size={{ xs: 4, sm: 3, md: 2 }} key={colorIndex}>
+                              <Box
+                                key={colorIndex}
+                                sx={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  bgcolor: 'background.paper',
+                                  border: '1px solid rgba(0,0,0,0.1)',
+                                  borderRadius: 1,
+                                  p: 1,
+                                }}
+                              >
                                 <Box
                                   sx={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    bgcolor: 'background.paper',
-                                    border: '1px solid rgba(0,0,0,0.1)',
-                                    borderRadius: 1,
-                                    p: 1,
+                                    width: 24,
+                                    height: 24,
+                                    backgroundColor: color.hex,
+                                  borderRadius: 0.5,
+                                  mr: 1,
+                                  border: '1px solid rgba(0,0,0,0.1)',
+                                  flexShrink: 0,
+                                }}
+                              />
+                              <Box sx={{ flex: 1, minWidth: 0 }}>
+                                <Typography
+                                  variant="caption"
+                                  sx={{
+                                    fontWeight: 'bold',
+                                    display: 'block',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
                                   }}
                                 >
-                                  <Box
-                                    sx={{
-                                      width: 24,
-                                      height: 24,
-                                      backgroundColor: color.hex,
-                                    borderRadius: 0.5,
-                                    mr: 1,
-                                    border: '1px solid rgba(0,0,0,0.1)',
-                                    flexShrink: 0,
+                                  {color.name}
+                                </Typography>
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                  sx={{
+                                    display: 'block',
+                                    fontSize: '0.7rem'
                                   }}
-                                />
-                                <Box sx={{ flex: 1, minWidth: 0 }}>
-                                  <Typography
-                                    variant="caption"
-                                    sx={{
-                                      fontWeight: 'bold',
-                                      display: 'block',
-                                      overflow: 'hidden',
-                                      textOverflow: 'ellipsis',
-                                    }}
-                                  >
-                                    {color.name}
-                                  </Typography>
-                                  <Typography
-                                    variant="caption"
-                                    color="text.secondary"
-                                    sx={{
-                                      display: 'block',
-                                      fontSize: '0.7rem'
-                                    }}
-                                  >
-                                    {color.hex}
-                                  </Typography>
-                                </Box>
-                                </Box>
-                              </Grid2>
+                                >
+                                  {color.hex}
+                                </Typography>
+                              </Box>
+                              </Box>
                             ))}
-                          </Grid2>
+                          </Box>
                         </Box>
                       ))}
                     </Box>
