@@ -269,6 +269,30 @@ const HeroSection = () => {
           zIndex: 0,
         }}
       />
+      <Box
+        sx={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          width: '100%',
+          lineHeight: 0,
+          zIndex: 2,
+        }}
+      >
+        <svg
+          viewBox="0 0 1440 100"
+          width="100%"
+          height="60"
+          preserveAspectRatio="none"
+          style={{ display: 'block' }}
+        >
+          <path
+            d="M0,40 C240,120 720,-40 1440,60 L1440,100 L0,100 Z"
+            fill="#171717"
+          />
+        </svg>
+      </Box>
     </Box>
   );
 };
