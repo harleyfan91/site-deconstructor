@@ -57,7 +57,7 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts })
               <Chip label={font.usage} size="small" />
               {'isLoaded' in font && (
                 <Chip 
-                  label={font.isLoaded ? 'Loaded' : 'Not Loaded'} 
+                  label={font.isLoaded ? 'loaded' : 'not loaded'} 
                   size="small" 
                   color={font.isLoaded ? 'success' : 'error'}
                   variant="outlined"
