@@ -119,7 +119,7 @@ function TechStackGrid({ techStack }: { techStack: { category: string; technolog
               height: 120,
               overflow: 'hidden',
               boxShadow: '0 0 0 0 transparent',
-              cursor: 'pointer',
+              cursor: 'default',
             }}
           >
             {/* Top 1/3: transparent, white tech name */}
