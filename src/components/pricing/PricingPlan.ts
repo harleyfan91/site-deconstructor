@@ -16,7 +16,7 @@ export const pricingPlans: PricingPlan[] = [
     title: 'Basic',
     price: 'Free',
     priceNote: '$0 to start Deconstructing',
-    description: 'For individuals and small teams to get started',
+    description: 'For individuals and small teams',
     features: [
       'Limited color palette extraction',
       'Basic font analysis',
