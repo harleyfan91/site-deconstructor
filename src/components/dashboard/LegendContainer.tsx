@@ -5,7 +5,7 @@ import { useTheme } from '@mui/material/styles';
 
 // Use theme palette for legend meaning
 const useLegendColors = (theme: any) => [
-  { color: theme.palette.neutral?.main || '#BDBDBD', key: 'gray', label: 'Unknown/Not detected' },
+  { color: theme.palette.grey[400], key: 'gray', label: 'Unknown/Not detected' },
   { color: theme.palette.success.main, key: 'green1', label: 'Good / Secure / Passing' },
   { color: theme.palette.warning.main, key: 'orange', label: 'Warning / Needs improvement' },
   { color: theme.palette.error.main, key: 'red', label: 'Critical issue / Failing' }

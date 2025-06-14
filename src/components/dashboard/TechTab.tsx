@@ -23,7 +23,7 @@ function getSeverityColor(severity: string, theme: any): string {
     case 'high': return theme.palette.error.main;
     case 'medium': return theme.palette.warning.main;
     case 'low': return theme.palette.success.main;
-    default: return theme.palette.neutral?.main || '#757575';
+    default: return theme.palette.grey[400]; // Was theme.palette.neutral?.main
   }
 }
 
@@ -57,8 +57,8 @@ function chipStateStyle(isActive: boolean, theme: any) {
         variant: "outlined" as const,
         color: "default" as const,
         sx: {
-          borderColor: theme.palette.neutral?.main || "#BDBDBD",
-          color: theme.palette.neutral?.main || "#BDBDBD",
+          borderColor: theme.palette.grey[400], // Was theme.palette.neutral?.main
+          color: theme.palette.grey[400],
           background: "transparent",
           fontWeight: 600,
         }

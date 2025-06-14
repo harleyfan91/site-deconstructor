@@ -1,4 +1,3 @@
-
 import { createTheme } from '@mui/material/styles';
 
 export const createAppTheme = (darkMode: boolean) => createTheme({
@@ -33,13 +32,7 @@ export const createAppTheme = (darkMode: boolean) => createTheme({
       dark: '#c62828',
       contrastText: '#fff'
     },
-    // Add a neutral/gray for "Unknown/Not detected"
-    neutral: {
-      main: '#BDBDBD',
-      light: '#e0e0e0',
-      dark: '#757575',
-      contrastText: '#fff'
-    },
+    // Removed the invalid 'neutral' property here. Replace with palette.grey usage as needed.
     background: {
       default: darkMode ? '#0F0F0F' : '#FFFFFF',
       paper: darkMode ? 'rgba(45, 52, 54, 0.8)' : 'rgba(255, 255, 255, 0.9)',
@@ -128,4 +121,3 @@ export const createAppTheme = (darkMode: boolean) => createTheme({
 
 // Export default theme for backward compatibility
 export const theme = createAppTheme(true);
-
