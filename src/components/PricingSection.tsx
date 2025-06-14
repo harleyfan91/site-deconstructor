@@ -12,8 +12,9 @@ import {
   ListItemIcon,
   ListItemText,
   Chip,
+  Alert,
 } from '@mui/material';
-import { Check, StarBorder } from '@mui/icons-material';
+import { Check, StarBorder, Info } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 
 const PricingSection = () => {
@@ -37,6 +38,8 @@ const PricingSection = () => {
       features: [
         'Advanced Color Harmony Analysis',
         'Complete Font Loading Performance',
+      ],
+      additionalFeatures: [
         'Tech Stack Detection (50+ Technologies)',
         'Security Headers & Privacy Compliance',
         'SEO & Social Media Optimization',
@@ -92,7 +95,6 @@ const PricingSection = () => {
             gap: 4,
             maxWidth: 800,
             mx: 'auto',
-            // Add uniform top margin to accommodate floating chips
             mt: 2,
           }}
         >
@@ -105,7 +107,6 @@ const PricingSection = () => {
               viewport={{ once: true }}
               whileHover={{ y: -10 }}
               style={{
-                // Remove individual margin top - let the parent container handle spacing
                 height: '100%',
                 display: 'flex',
                 flexDirection: 'column',
@@ -122,7 +123,6 @@ const PricingSection = () => {
                   border: plan.recommended ? '2px solid #FF6B35' : '1px solid rgba(255, 255, 255, 0.1)',
                   position: 'relative',
                   overflow: 'visible',
-                  // Ensure equal heights by using flex
                   flex: 1,
                   '&:hover': {
                     transform: 'translateY(-8px)',
@@ -178,6 +178,30 @@ const PricingSection = () => {
                   <List sx={{ flex: 1 }}>
                     {plan.features.map((feature, i) => (
                       <ListItem key={i} disablePadding>
+                        <ListItemIcon sx={{ minWidth: '30px' }}>
+                          <Check color="primary" />
+                        </ListItemIcon>
+                        <ListItemText primary={feature} />
+                      </ListItem>
+                    ))}
+                    {plan.title === 'Pro' && (
+                      <Box sx={{ my: 2 }}>
+                        <Alert 
+                          icon={<Info />} 
+                          severity="info" 
+                          sx={{ 
+                            textAlign: 'left',
+                            '& .MuiAlert-message': {
+                              fontSize: '0.875rem',
+                            },
+                          }}
+                        >
+                          <strong>Unlimited web page analysis</strong> - Analyze as many websites as you need!
+                        </Alert>
+                      </Box>
+                    )}
+                    {plan.additionalFeatures?.map((feature, i) => (
+                      <ListItem key={`additional-${i}`} disablePadding>
                         <ListItemIcon sx={{ minWidth: '30px' }}>
                           <Check color="primary" />
                         </ListItemIcon>
