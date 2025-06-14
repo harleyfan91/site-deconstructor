@@ -186,7 +186,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
               Detected Ad Tags
             </Typography>
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 2 }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr' }, gap: 2 }}>
               {[
                 { label: 'Google GAM/GPT', key: 'hasGAM' },
                 { label: 'AdSense/DFP', key: 'hasAdSense' },
@@ -215,10 +215,11 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                   sx={{
                     ...chipStateStyle(Boolean(data.data.adTags[key])).sx,
                     width: '100%',
-                    justifyContent: 'flex-start',
+                    justifyContent: 'center',
+                    textAlign: 'center',
                     '& .MuiChip-label': {
                       width: '100%',
-                      textAlign: 'left'
+                      textAlign: 'center'
                     }
                   }}
                 />
