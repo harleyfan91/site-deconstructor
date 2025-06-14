@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Box, Typography, Container, Chip } from '@mui/material';
 import { motion } from 'framer-motion';
@@ -5,37 +6,103 @@ import { useNavigate } from 'react-router-dom';
 import URLInputForm from './URLInputForm';
 import { useAnalysisContext } from '../contexts/AnalysisContext';
 
+/**
+ * HeroSection
+ * 
+ * Landing page main hero section with animated heading, recent search shortcuts,
+ * and call-to-action input form. Uses MUI and framer-motion for responsive visuals.
+ * 
+ * Behavior and UI must NOT be changed!
+ */
+
+const recentSearches = [
+  'apple.com',
+  'stripe.com',
+  'linear.app',
+  'vercel.com',
+];
+
+/** Animation/transition helpers for motion.divs */
+const motionProps = {
+  heading: {
+    initial: { opacity: 0, y: 30 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.8 },
+  },
+  subheading: {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.8, delay: 0.2 },
+  },
+  formSection: {
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    transition: { duration: 0.6, delay: 0.6 },
+  },
+  trustedBy: {
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    transition: { duration: 0.8, delay: 0.8 },
+  },
+};
+
+/** Mask/gradient constants for easier maintenance */
+const MASK_IMAGE = `linear-gradient(
+  to bottom,
+  black 0%,
+  black 62%,
+  black 75%,
+  transparent 100%
+)`;
+
+/**
+ * Handles a click on one of the recent search shortcut chips.
+ * 
+ * @param analyzeWebsite Analysis function provided by context
+ * @param navigate React Router navigate function
+ * @param loading Prevents new analysis while running
+ * @param error Analysis error, triggers UX delay/route
+ */
+const handleRecentSearch = async ({
+  searchUrl,
+  analyzeWebsite,
+  navigate,
+  error,
+  loading,
+}: {
+  searchUrl: string,
+  analyzeWebsite: (url: string) => Promise<any>,
+  navigate: (path: string) => void,
+  error: any,
+  loading: boolean,
+}) => {
+  if (loading) return;
+  const fullUrl = `https://${searchUrl}`;
+  const result = await analyzeWebsite(fullUrl);
+  if (result && !error) {
+    // Smooth navigation to dashboard after successful analysis
+    setTimeout(() => navigate('/dashboard'), 500);
+  }
+};
+
+/**
+ * Handles successful analysis completion from the URL input form.
+ * 
+ * @param result The result of website analysis
+ * @param navigate React Router navigate function
+ * @param error Analysis error
+ */
+const handleAnalysisComplete = (
+  result: any, navigate: (path: string) => void, error: any
+) => {
+  if (result && !error) {
+    setTimeout(() => navigate('/dashboard'), 500);
+  }
+};
+
 const HeroSection = () => {
-  const { analyzeWebsite, loading, data, error } = useAnalysisContext();
+  const { analyzeWebsite, loading, error } = useAnalysisContext();
   const navigate = useNavigate();
-
-  const recentSearches = [
-    'apple.com',
-    'stripe.com',
-    'linear.app',
-    'vercel.com',
-  ];
-
-  const handleRecentSearch = async (searchUrl: string) => {
-    const fullUrl = `https://${searchUrl}`;
-    const result = await analyzeWebsite(fullUrl);
-    
-    if (result && !error) {
-      // Smooth navigation to dashboard after successful analysis
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 500); // Small delay for smooth UX
-    }
-  };
-
-  const handleAnalysisComplete = (result: any) => {
-    if (result && !error) {
-      // Smooth navigation to dashboard after successful analysis
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 500); // Small delay for smooth UX
-    }
-  };
 
   return (
     <Box
@@ -64,28 +131,12 @@ const HeroSection = () => {
           animation: 'float 20s ease-in-out infinite',
         },
         '@keyframes float': {
-          '0%, 100%': {
-            transform: 'translateY(0px)',
-          },
-          '50%': {
-            transform: 'translateY(-20px)',
-          },
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%':      { transform: 'translateY(-20px)' },
         },
-        // More diffused mask-image at bottom, matching FeatureShowcase's top mask
-        WebkitMaskImage: `linear-gradient(
-          to bottom,
-          black 0%,
-          black 62%,
-          black 75%,
-          transparent 100%
-        )`,
-        maskImage: `linear-gradient(
-          to bottom,
-          black 0%,
-          black 62%,
-          black 75%,
-          transparent 100%
-        )`,
+        // Use the same diffused mask as FeatureShowcase for a seamless section blend.
+        WebkitMaskImage: MASK_IMAGE,
+        maskImage: MASK_IMAGE,
         maskSize: '100% 100%',
         WebkitMaskSize: '100% 100%',
         maskRepeat: 'no-repeat',
@@ -102,11 +153,7 @@ const HeroSection = () => {
             alignItems: 'center',
           }}
         >
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
+          <motion.div {...motionProps.heading}>
             <Typography
               variant="h1"
               sx={{
@@ -133,11 +180,7 @@ const HeroSection = () => {
             </Typography>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
+          <motion.div {...motionProps.subheading}>
             <Typography
               variant="h6"
               color="text.secondary"
@@ -154,14 +197,12 @@ const HeroSection = () => {
             </Typography>
           </motion.div>
 
+          {/* Input & popular sites shortcuts */}
           <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center' }}>
-            <URLInputForm onAnalysisComplete={handleAnalysisComplete} />
-            
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-            >
+            <URLInputForm
+              onAnalysisComplete={result => handleAnalysisComplete(result, navigate, error)}
+            />
+            <motion.div {...motionProps.formSection}>
               <Typography
                 variant="body2"
                 color="text.secondary"
@@ -186,7 +227,15 @@ const HeroSection = () => {
                   >
                     <Chip
                       label={search}
-                      onClick={() => handleRecentSearch(search)}
+                      onClick={() =>
+                        handleRecentSearch({
+                          searchUrl: search,
+                          analyzeWebsite,
+                          navigate,
+                          error,
+                          loading,
+                        })
+                      }
                       disabled={loading}
                       sx={{
                         bgcolor: 'rgba(255, 255, 255, 0.1)',
@@ -205,15 +254,17 @@ const HeroSection = () => {
             </motion.div>
           </Box>
 
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.8 }}
-          >
+          <motion.div {...motionProps.trustedBy}>
             <Typography
               variant="body2"
               color="text.secondary"
-              sx={{ mt: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}
+              sx={{
+                mt: 4,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 1,
+              }}
             >
               Trusted by 50,000+ designers worldwide
               <Box
@@ -242,6 +293,7 @@ const HeroSection = () => {
         </Box>
       </Container>
 
+      {/* Floating gradient shapes for visual interest */}
       <motion.div
         animate={{
           y: [0, -20, 0],
@@ -264,7 +316,7 @@ const HeroSection = () => {
           zIndex: 0,
         }}
       />
-      
+
       <motion.div
         animate={{
           y: [0, 20, 0],
