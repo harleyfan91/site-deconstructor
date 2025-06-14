@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Box, Typography, Grid, Card, CardContent, LinearProgress } from '@mui/material';
-import Grid2 from '@mui/material/Grid2';
+import Grid2 from '@mui/material/Unstable_Grid2';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis } from 'recharts';
 

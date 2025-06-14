@@ -119,7 +119,7 @@ async function checkIfPublicFont(fontFamily: string): Promise<boolean> {
         for (const rule of rules) {
           if (rule instanceof CSSFontFaceRule) {
             const fontFamilyRule = rule.style.fontFamily;
-            const srcRule = rule.style.src;
+            const srcRule = rule.style.getPropertyValue('src');
             
             if (fontFamilyRule && fontFamilyRule.includes(fontFamily) && srcRule) {
               // Check if src contains external URLs (Google Fonts, etc.)
