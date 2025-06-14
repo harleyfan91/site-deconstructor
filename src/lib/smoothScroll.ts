@@ -1,7 +1,7 @@
 
 // Utility function for smooth scrolling to sections
-export const smoothScrollToSection = (sectionId: string, fast: boolean = false) => {
-  console.log('Attempting to scroll to section:', sectionId, 'Fast mode:', fast);
+export const smoothScrollToSection = (sectionId: string) => {
+  console.log('Attempting to scroll to section:', sectionId);
   
   const element = document.getElementById(sectionId);
   console.log('Found element:', element);
@@ -19,23 +19,4 @@ export const smoothScrollToSection = (sectionId: string, fast: boolean = false) 
   } else {
     console.error(`Element with id "${sectionId}" not found`);
   }
-};
-
-// Enhanced scroll function that handles cross-page navigation
-export const scrollToSectionFromAnyPage = (sectionId: string, currentPath: string) => {
-  console.log('Cross-page scroll requested for:', sectionId, 'from:', currentPath);
-  
-  // If we're already on the landing page, just scroll
-  if (currentPath === '/') {
-    smoothScrollToSection(sectionId);
-    return;
-  }
-  
-  // If we're on a different page, navigate to landing page first
-  window.location.href = '/';
-  
-  // Wait for navigation and page load, then scroll with fast animation
-  setTimeout(() => {
-    smoothScrollToSection(sectionId, true);
-  }, 300); // Shorter delay for faster UX
 };

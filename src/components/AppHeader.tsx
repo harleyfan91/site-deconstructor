@@ -7,8 +7,8 @@ import {
   useTheme,
   useMediaQuery,
 } from '@mui/material';
-import { Link, useLocation } from 'react-router-dom';
-import { scrollToSectionFromAnyPage } from '../lib/smoothScroll';
+import { Link } from 'react-router-dom';
+import { smoothScrollToSection } from '../lib/smoothScroll';
 import DesktopNavigation from './navigation/DesktopNavigation';
 import MobileDrawer from './navigation/MobileDrawer';
 import { navigationItems, NavigationItem } from './navigation/NavigationItems';
@@ -17,7 +17,6 @@ const AppHeader = ({ darkMode, toggleDarkMode }: { darkMode: boolean; toggleDark
   const [mobileOpen, setMobileOpen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const location = useLocation();
 
   const handleNavClick = (item: NavigationItem) => {
     console.log('Nav clicked for:', item, 'isMobile:', isMobile, 'mobileOpen:', mobileOpen);
@@ -29,15 +28,14 @@ const AppHeader = ({ darkMode, toggleDarkMode }: { darkMode: boolean; toggleDark
       return;
     }
 
-    // Handle scroll sections with cross-page navigation
     if (isMobile && mobileOpen) {
       setMobileOpen(false);
       setTimeout(() => {
-        console.log('Delayed cross-page scroll for mobile drawer');
-        scrollToSectionFromAnyPage(item.id, location.pathname);
+        console.log('Delayed scroll for mobile drawer');
+        smoothScrollToSection(item.id);
       }, 300);
     } else {
-      scrollToSectionFromAnyPage(item.id, location.pathname);
+      smoothScrollToSection(item.id);
       setMobileOpen(false);
     }
   };
