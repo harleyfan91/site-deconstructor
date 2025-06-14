@@ -1,7 +1,7 @@
 
-
 import React from 'react';
-import { Box, Typography, Grid, Card, CardContent, LinearProgress } from '@mui/material';
+import { Box, Typography, Card, CardContent, LinearProgress } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis } from 'recharts';
 
@@ -31,7 +31,7 @@ const ContentAnalysisTab = () => {
       </Typography>
 
       <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
+        <Grid xs={12} md={6}>
           <Card sx={{ borderRadius: 2, height: '400px' }}>
             <CardContent sx={{ p: 3, height: '100%' }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -59,7 +59,7 @@ const ContentAnalysisTab = () => {
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={6}>
+        <Grid xs={12} md={6}>
           <Card sx={{ borderRadius: 2, height: '400px' }}>
             <CardContent sx={{ p: 3, height: '100%' }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -79,7 +79,7 @@ const ContentAnalysisTab = () => {
       </Grid>
 
       <Grid container spacing={3} sx={{ mt: 1 }}>
-        <Grid item xs={12} md={8}>
+        <Grid xs={12} md={8}>
           <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -121,7 +121,7 @@ const ContentAnalysisTab = () => {
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={4}>
+        <Grid xs={12} md={4}>
           <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -161,4 +161,3 @@ const ContentAnalysisTab = () => {
 };
 
 export default ContentAnalysisTab;
-
