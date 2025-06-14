@@ -19,7 +19,7 @@ const DashboardContent = () => {
         Website Analysis Dashboard
       </Typography>
       
-      <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
+      <Paper elevation={3} sx={{ p: 2, borderRadius: 2 }}>
         <Tabs defaultValue="overview" className="w-full">
           <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 gap-1 mb-6 h-auto">
             <TabsTrigger value="overview" className="text-xs sm:text-sm">Overview</TabsTrigger>
