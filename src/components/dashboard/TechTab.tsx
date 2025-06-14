@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Box, Typography, Card, CardContent, Chip, CircularProgress, Alert } from '@mui/material';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
@@ -162,26 +163,23 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                     borderRadius: 2,
                     display: 'flex',
                     flexDirection: 'column',
-                    minHeight: 92, // at least visible split
+                    minHeight: 92,
                     height: 120,
-                    // Responsive height for better mobile experience
                     overflow: 'hidden',
                     boxShadow: '0 0 0 0 transparent',
                     '&:hover': { boxShadow: '0 2px 12px rgba(255,107,53,0.09)' },
                   }}
                 >
-                  {/* Top 2/3 section: Orange background, icon + bold category */}
+                  {/* Top 2/3 section: Orange background, icon + orange category (as bold text), not a chip */}
                   <Box
                     sx={{
                       flex: 2,
-                      minHeight: 0, // allows flex
+                      minHeight: 0,
                       px: 2,
                       py: 1.5,
                       display: 'flex',
                       alignItems: 'center',
-                      backgroundColor: '#363330', // Light orange-brown matching your image
-                      // Optional: use "#FF6B35" with opacity for paler look:
-                      // backgroundColor: 'rgba(255, 107, 53, 0.11)',
+                      backgroundColor: '#FFEFDB', // light orange like Color Extraction
                       borderTopLeftRadius: 14,
                       borderTopRightRadius: 14,
                       gap: 1.5,
@@ -189,22 +187,23 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                   >
                     <IconComponent size={22} color="#FF6B35" style={{ marginRight: 10, flexShrink: 0 }} />
                     <Typography
-                      variant="subtitle2"
+                      variant="subtitle1"
                       sx={{
                         color: '#FF6B35',
                         fontWeight: 700,
-                        fontSize: '1rem',
-                        letterSpacing: 0.1,
-                        textShadow: 'none',
+                        fontFamily: '"Inter", sans-serif',
+                        fontSize: '1.06rem',
+                        letterSpacing: 0.12,
                         lineHeight: 1.2,
                         userSelect: 'text',
                         pr: 0,
+                        // no background, no border -- just text
                       }}
                     >
                       {tech.category}
                     </Typography>
                   </Box>
-                  {/* Bottom 1/3 section: Transparent, technology name in bold white */}
+                  {/* Bottom 1/3 section: Transparent, technology name in bold white matching style */}
                   <Box
                     sx={{
                       flex: 1,
@@ -223,6 +222,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                       sx={{
                         color: '#FFF',
                         fontWeight: 700,
+                        fontFamily: '"Inter", sans-serif',
                         fontSize: '1.06rem',
                         letterSpacing: 0.12,
                         textAlign: 'left',
@@ -230,6 +230,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                         whiteSpace: 'nowrap',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
+                        lineHeight: 1.2,
                       }}
                     >
                       {tech.technology}
@@ -460,3 +461,4 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
 };
 
 export default TechTab;
+
