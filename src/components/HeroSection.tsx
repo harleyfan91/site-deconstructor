@@ -270,7 +270,7 @@ const HeroSection = () => {
         }}
       />
 
-      {/* Bottom black fade overlay */}
+      {/* Bottom dark gray fade overlay (so the colorful background blends into the section below) */}
       <Box
         sx={{
           pointerEvents: 'none',
@@ -278,10 +278,11 @@ const HeroSection = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          height: { xs: 80, md: 160 },
+          height: { xs: 100, md: 180 },
           zIndex: 2,
+          // Very soft fade, use dark gray #0F0F0F and blur more gradually
           background:
-            'linear-gradient(to bottom, rgba(0,0,0,0) 0%, #000 100%)',
+            'linear-gradient(to bottom, rgba(0,0,0,0) 0%, #181818 70%, #0F0F0F 98%, #0F0F0F 100%)',
         }}
       />
     </Box>
