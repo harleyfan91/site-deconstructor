@@ -10,6 +10,9 @@ import PricingCard from './pricing/PricingCard';
 import { pricingPlans } from './pricing/PricingPlan';
 
 const PricingSection = () => {
+  // Reverse the order so Pro comes first (left on desktop, top on mobile)
+  const plans = [...pricingPlans].reverse();
+
   return (
     <Box
       id="pricing"
@@ -94,7 +97,7 @@ const PricingSection = () => {
             position: 'relative',
           }}
         >
-          {pricingPlans.map((plan, index) => (
+          {plans.map((plan, index) => (
             <PricingCard key={index} plan={plan} index={index} />
           ))}
         </Box>
@@ -103,3 +106,4 @@ const PricingSection = () => {
   );
 };
 export default PricingSection;
+
