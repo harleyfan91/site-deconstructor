@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Box, Typography, Paper, Button } from '@mui/material';
 import { motion } from 'framer-motion';
@@ -9,15 +10,9 @@ import TechTab from './dashboard/TechTab';
 import UIAnalysisTab from './dashboard/UIAnalysisTab';
 import ComplianceTab from './dashboard/ComplianceTab';
 import { useAnalysisContext } from '../contexts/AnalysisContext';
-import ColorLegend from './dashboard/ColorLegend';
-
-const TABS_WITH_LEGEND = [
-  "ui", "performance", "seo", "tech", "compliance"
-];
 
 const DashboardContent = () => {
   const { data: analysisData, loading, error } = useAnalysisContext();
-  const [activeTab, setActiveTab] = React.useState<string>('overview');
 
   return (
     <Box>
@@ -26,11 +21,9 @@ const DashboardContent = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.1 }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold', mb: 0 }}>
-            Website Analysis Dashboard
-          </Typography>
-        </Box>
+        <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+          Website Analysis Dashboard
+        </Typography>
       </motion.div>
       
       <motion.div
@@ -39,28 +32,20 @@ const DashboardContent = () => {
         transition={{ duration: 0.8, delay: 0.3 }}
       >
         <Paper elevation={3} sx={{ p: { xs: 1.5, sm: 2 }, borderRadius: 2 }}>
-          <Tabs
-            value={activeTab}
-            onValueChange={(val: string) => setActiveTab(val)}
-            defaultValue="overview"
-            className="w-full"
-          >
+          <Tabs defaultValue="overview" className="w-full">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
             >
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-                <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 gap-1 mb-0 h-auto">
-                  <TabsTrigger value="overview" className="text-xs sm:text-sm">Overview</TabsTrigger>
-                  <TabsTrigger value="ui" className="text-xs sm:text-sm">User Interface</TabsTrigger>
-                  <TabsTrigger value="performance" className="text-xs sm:text-sm">Performance & Security</TabsTrigger>
-                  <TabsTrigger value="seo" className="text-xs sm:text-sm">SEO Analysis</TabsTrigger>
-                  <TabsTrigger value="tech" className="text-xs sm:text-sm">Tech</TabsTrigger>
-                  <TabsTrigger value="compliance" className="text-xs sm:text-sm">Compliance</TabsTrigger>
-                </TabsList>
-                {/* Removed ColorLegend from here */}
-              </Box>
+              <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 gap-1 mb-4 h-auto">
+                <TabsTrigger value="overview" className="text-xs sm:text-sm">Overview</TabsTrigger>
+                <TabsTrigger value="ui" className="text-xs sm:text-sm">User Interface</TabsTrigger>
+                <TabsTrigger value="performance" className="text-xs sm:text-sm">Performance & Security</TabsTrigger>
+                <TabsTrigger value="seo" className="text-xs sm:text-sm">SEO Analysis</TabsTrigger>
+                <TabsTrigger value="tech" className="text-xs sm:text-sm">Tech</TabsTrigger>
+                <TabsTrigger value="compliance" className="text-xs sm:text-sm">Compliance</TabsTrigger>
+              </TabsList>
             </motion.div>
             
             <motion.div

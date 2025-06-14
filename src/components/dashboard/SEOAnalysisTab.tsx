@@ -1,8 +1,8 @@
+
 import React from 'react';
 import { Box, Typography, Grid, Card, CardContent, Chip, CircularProgress, Alert } from '@mui/material';
 import { CheckCircle, AlertCircle, XCircle } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
-import ColorLegend from './ColorLegend';
 
 interface SEOAnalysisTabProps {
   data: AnalysisResponse | null;
@@ -79,12 +79,9 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-        <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 0, mr: 2 }}>
-          SEO Analysis
-        </Typography>
-        <ColorLegend />
-      </Box>
+      <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
+        SEO Analysis
+      </Typography>
 
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 3 }}>
         <Card sx={{ borderRadius: 2 }}>
@@ -217,4 +214,5 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
     </Box>
   );
 };
+
 export default SEOAnalysisTab;
