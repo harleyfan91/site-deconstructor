@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
-import { Box, Typography, Collapse, IconButton, Grid } from '@mui/material';
+import { Box, Typography, Collapse, IconButton } from '@mui/material';
+import Grid2 from '@mui/material/Grid2';
 import { Palette, ChevronDown, ChevronUp } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 import { groupByFrequency } from '@/lib/ui';
@@ -58,11 +59,11 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
     return 'Mixed Tones';
   };
 
-  const hexToRgb = (hex: string): {r:number;g:number;b:number} | null => {
-    const match = hex.replace('#','').match(/^([0-9a-f]{3}|[0-9a-f]{6})$/i);
-    if (!match)
+  const hexToRgb = (hex: string): {r:number;g:number;b:number} |
 
-null;
+null => {
+    const match = hex.replace('#','').match(/^([0-9a-f]{3}|[0-9a-f]{6})$/i);
+    if (!match) return null;
     let h = match[0];
     if (h.length === 3) h = h.split('').map(c=>c+c).join('');
     const num = parseInt(h, 16);
@@ -201,7 +202,6 @@ null;
                       <Typography
                         variant="subtitle2"
                         sx={{ fontWeight: 'bold', mb: 1 }}
-
                       >
                         {freqGroup.name}
                       </Typography>
@@ -218,9 +218,9 @@ null;
                           >
                             {harmonyGroup.name}
                           </Typography>
-                          <Grid container spacing={1} sx={{ mb: 2 }}>
+                          <Grid2 container spacing={1} sx={{ mb: 2 }}>
                             {harmonyGroup.colors.map((color, colorIndex) => (
-                              <Grid item xs={4} sm={3} md={2} key={colorIndex}>
+                              <Grid2 xs={4} sm={3} md={2} key={colorIndex}>
                                 <Box
                                   sx={{
                                     display: 'flex',
@@ -266,9 +266,9 @@ null;
                                   </Typography>
                                 </Box>
                                 </Box>
-                              </Grid>
+                              </Grid2>
                             ))}
-                          </Grid>
+                          </Grid2>
                         </Box>
                       ))}
                     </Box>
