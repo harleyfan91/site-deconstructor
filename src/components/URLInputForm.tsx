@@ -13,13 +13,11 @@ import {
 import { Search, Link as LinkIcon } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useAnalysisContext } from '../contexts/AnalysisContext';
-import { useLocation } from 'react-router-dom';
 
 const URLInputForm = () => {
   const [url, setUrl] = useState('');
   const [isValid, setIsValid] = useState(true);
   const { analyzeWebsite, loading, error } = useAnalysisContext();
-  const location = useLocation();
 
   const recentSearches = [
     'apple.com',
@@ -57,8 +55,6 @@ const URLInputForm = () => {
     await analyzeWebsite(fullUrl);
   };
 
-  const isDashboard = location.pathname === '/dashboard';
-
   return (
     <Box sx={{ width: '100%', maxWidth: 600 }}>
       {error && (
@@ -79,7 +75,7 @@ const URLInputForm = () => {
             display: 'flex',
             flexDirection: { xs: 'column', sm: 'row' },
             gap: 2,
-            mb: isDashboard ? 0 : 3,
+            mb: 3,
           }}
         >
           <TextField
@@ -152,54 +148,52 @@ const URLInputForm = () => {
         </Box>
       </motion.div>
 
-      {!isDashboard && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.6 }}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6, delay: 0.6 }}
+      >
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ mb: 2, textAlign: 'center' }}
         >
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{ mb: 2, textAlign: 'center' }}
-          >
-            Try these popular sites:
-          </Typography>
-          <Box
-            sx={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 1,
-              justifyContent: 'center',
-            }}
-          >
-            {recentSearches.map((search, index) => (
-              <motion.div
-                key={search}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3, delay: 0.7 + index * 0.1 }}
-              >
-                <Chip
-                  label={search}
-                  onClick={() => handleRecentSearch(search)}
-                  disabled={loading}
-                  sx={{
-                    bgcolor: 'rgba(255, 255, 255, 0.1)',
-                    color: 'text.primary',
-                    '&:hover': {
-                      bgcolor: 'rgba(255, 107, 53, 0.2)',
-                      transform: 'translateY(-2px)',
-                    },
-                    transition: 'all 0.3s ease',
-                    cursor: 'pointer',
-                  }}
-                />
-              </motion.div>
-            ))}
-          </Box>
-        </motion.div>
-      )}
+          Try these popular sites:
+        </Typography>
+        <Box
+          sx={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 1,
+            justifyContent: 'center',
+          }}
+        >
+          {recentSearches.map((search, index) => (
+            <motion.div
+              key={search}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3, delay: 0.7 + index * 0.1 }}
+            >
+              <Chip
+                label={search}
+                onClick={() => handleRecentSearch(search)}
+                disabled={loading}
+                sx={{
+                  bgcolor: 'rgba(255, 255, 255, 0.1)',
+                  color: 'text.primary',
+                  '&:hover': {
+                    bgcolor: 'rgba(255, 107, 53, 0.2)',
+                    transform: 'translateY(-2px)',
+                  },
+                  transition: 'all 0.3s ease',
+                  cursor: 'pointer',
+                }}
+              />
+            </motion.div>
+          ))}
+        </Box>
+      </motion.div>
     </Box>
   );
 };
