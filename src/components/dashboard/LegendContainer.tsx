@@ -16,7 +16,7 @@ const LegendContainer: React.FC = () => (
       mb: { xs: 1, md: 0 },
       mr: 0,
       ml: 'auto',
-      bgcolor: (theme) => theme.palette.background.paper // Updated to match other cards
+      // Remove bgcolor override so card inherits global theme MuiCard style
     }}
     elevation={2}
   >
