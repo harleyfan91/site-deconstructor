@@ -1,10 +1,21 @@
+
+// MUI imports
 import React from 'react';
 import { Box, Typography, Card, CardContent, Chip, CircularProgress, Alert } from '@mui/material';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
+
+// Lucide icons
 import { Shield, Globe, Server, Database, Code, Layers, Zap, Activity, BarChart } from 'lucide-react';
+// Table UI component
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
+
+// Types
 import type { AnalysisResponse } from '@/types/analysis';
 
-// Helper: Maps category name to an icon component from Lucide
+/** ===========================
+ *  Helpers and constants
+ *  =========================== */
+
+// Icon mapping by category. Used for TechStackGrid icons.
 const iconMap: { [key: string]: React.ElementType } = {
   'Frontend Framework': Code,
   'JavaScript frameworks': Code,
@@ -29,26 +40,23 @@ const iconMap: { [key: string]: React.ElementType } = {
   'Unknown': Code,
   'default': Server
 };
-// Returns the icon for a given category or a default if unknown
+
+/** Return appropriate icon for tech stack category. */
 function getIcon(category: string): React.ElementType {
   return iconMap[category] || iconMap['default'];
 }
 
-// Returns color for severity level (e.g. high/medium/low)
+/** Return color by severity (used in chips). */
 function getSeverityColor(severity: string): string {
   switch (severity.toLowerCase()) {
-    case 'high':
-      return '#F44336';
-    case 'medium':
-      return '#FF9800';
-    case 'low':
-      return '#4CAF50';
-    default:
-      return '#757575';
+    case 'high': return '#F44336';
+    case 'medium': return '#FF9800';
+    case 'low': return '#4CAF50';
+    default: return '#757575';
   }
 }
 
-// Returns filled/outlined Chip props for severity
+/** Generate Chip styling props for severity. */
 function chipSeverityStyle(severity: string) {
   const color = getSeverityColor(severity);
   return {
@@ -62,7 +70,7 @@ function chipSeverityStyle(severity: string) {
   };
 }
 
-// Returns outlined Chip props for active/inactive states (used for tag/consent chips)
+/** Generate Chip styling props for isActive state (used for active/inactive chips). */
 function chipStateStyle(isActive: boolean, color = "#4CAF50") {
   return isActive
     ? {
@@ -86,7 +94,7 @@ function chipStateStyle(isActive: boolean, color = "#4CAF50") {
       }
 }
 
-// Returns grade color (A/B/C/D/etc)
+/** Get health grade color for display. */
 function getHealthGradeColor(grade: string): string {
   if (grade.startsWith('A')) return '#4CAF50';
   if (grade.startsWith('B')) return '#8BC34A';
@@ -94,7 +102,14 @@ function getHealthGradeColor(grade: string): string {
   return '#F44336';
 }
 
-// Sub-component: Tech Stack Cards
+/** =============
+ *  Sub-components
+ *  ==============
+ */
+
+/**
+ * Render grid of tech stack cards (each with icon, technology, category).
+ */
 function TechStackGrid({ techStack }: { techStack: { category: string; technology: string }[] }) {
   return (
     <Box
@@ -122,7 +137,7 @@ function TechStackGrid({ techStack }: { techStack: { category: string; technolog
               cursor: 'default',
             }}
           >
-            {/* Top 1/3: transparent, white tech name */}
+            {/* Top section: transparent, white tech name */}
             <Box
               sx={{
                 flex: 1,
@@ -154,7 +169,7 @@ function TechStackGrid({ techStack }: { techStack: { category: string; technolog
                 {tech.technology}
               </Typography>
             </Box>
-            {/* Bottom 2/3: match Color Extraction card header color, icon and text */}
+            {/* Bottom/orange section: icon + category */}
             <Box
               className="techstack-bottom"
               sx={{
@@ -168,7 +183,7 @@ function TechStackGrid({ techStack }: { techStack: { category: string; technolog
                 borderBottomLeftRadius: 14,
                 borderBottomRightRadius: 14,
                 gap: 1.5,
-                borderTopLeftRadius: 14,
+                borderTopLeftRadius: 14, // orange section has rounded top edges
                 borderTopRightRadius: 14,
               }}
             >
@@ -196,7 +211,7 @@ function TechStackGrid({ techStack }: { techStack: { category: string; technolog
   );
 }
 
-// Sub-component: Ad Tags grid (array of tag descriptors, kept outside main for clarity)
+// Descriptor for ad tag detection chips
 const adTagDescriptors = [
   { label: 'Google GAM/GPT', key: 'hasGAM' },
   { label: 'AdSense/DFP', key: 'hasAdSense' },
@@ -218,8 +233,15 @@ const adTagDescriptors = [
   { label: 'Integral Ad Science', key: 'hasIAS' }
 ];
 
-// Sub-component: Health Grade/Issue Summary
+/**
+ * Technical health summary sidebar
+ */
 function TechnicalHealthSummary({ healthGrade, issues }: { healthGrade: string, issues: any[] }) {
+  // Count issues by severity
+  const highCount = (issues ?? []).filter(i => i.severity === 'high').length;
+  const mediumCount = (issues ?? []).filter(i => i.severity === 'medium').length;
+  const lowCount = (issues ?? []).filter(i => i.severity === 'low').length;
+
   return (
     <Card sx={{ borderRadius: 2 }}>
       <CardContent sx={{ p: 3 }}>
@@ -245,19 +267,19 @@ function TechnicalHealthSummary({ healthGrade, issues }: { healthGrade: string, 
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
             <Typography variant="body2">High Severity</Typography>
             <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#F44336' }}>
-              {(issues ?? []).filter(i => i.severity === 'high').length}
+              {highCount}
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
             <Typography variant="body2">Medium Severity</Typography>
             <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#FF9800' }}>
-              {(issues ?? []).filter(i => i.severity === 'medium').length}
+              {mediumCount}
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
             <Typography variant="body2">Low Severity</Typography>
             <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#4CAF50' }}>
-              {(issues ?? []).filter(i => i.severity === 'low').length}
+              {lowCount}
             </Typography>
           </Box>
         </Box>
@@ -266,15 +288,24 @@ function TechnicalHealthSummary({ healthGrade, issues }: { healthGrade: string, 
   );
 }
 
-// The main component
+/** ========================
+ *    MAIN COMPONENT EXPORT
+ *  ========================
+ */
+
+/** Props type for TechTab main component */
 interface TechTabProps {
   data: AnalysisResponse | null;
   loading: boolean;
   error: string | null;
 }
 
+/**
+ * Main TechTab component – renders technical analysis panels.
+ * UI & logic are unchanged.
+ */
 const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
-  // Loading state
+  // Loading: show spinner and message
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
@@ -284,7 +315,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
     );
   }
 
-  // Error state
+  // Error state: show error alert
   if (error) {
     return (
       <Alert severity="error" sx={{ mt: 2 }}>
@@ -293,7 +324,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
     );
   }
 
-  // If no data, prompt for input
+  // No data: prompt for input
   if (!data) {
     return (
       <Alert severity="info" sx={{ mt: 2 }}>
@@ -302,6 +333,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
     );
   }
 
+  // Main render
   const { technical } = data.data;
 
   return (
@@ -339,10 +371,10 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
               Detected Ad Tags
             </Typography>
-            <Box sx={{ 
+            <Box sx={{
               display: 'grid',
               gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
-              gap: 2 
+              gap: 2
             }}>
               {adTagDescriptors.map(({ label, key }) => (
                 <Chip
@@ -442,7 +474,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
         </CardContent>
       </Card>
 
-      {/* Technical Issues & Technical Health */}
+      {/* Section: Technical Issues & Health */}
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 3 }}>
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 3 }}>
@@ -489,3 +521,4 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
 };
 
 export default TechTab;
+
