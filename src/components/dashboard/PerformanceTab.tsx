@@ -94,7 +94,6 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
         <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', flexGrow: 1 }}>
           Performance & Security Analysis
         </Typography>
-        <LegendContainer />
       </Box>
       {/* Performance Score Section */}
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 3, mb: 4 }}>

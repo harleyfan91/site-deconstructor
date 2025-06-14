@@ -211,7 +211,6 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
         <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', flexGrow: 1 }}>
           Technical Analysis
         </Typography>
-        <LegendContainer />
       </Box>
       {/* Section: Tech Stack */}
       <Card sx={{ borderRadius: 2, mb: 3 }}>

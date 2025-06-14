@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { Box, Typography, Card, CardContent, Chip, CircularProgress, Alert } from '@mui/material';
 import { CheckCircle, AlertCircle, XCircle } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
-import LegendContainer from './LegendContainer';
+// import LegendContainer from './LegendContainer'; -- removed
 import { useTheme } from '@mui/material/styles';
 
 interface SEOAnalysisTabProps {
@@ -99,7 +98,7 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
         <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', flexGrow: 1 }}>
           SEO Analysis
         </Typography>
-        <LegendContainer />
+        {/* Removed <LegendContainer /> */}
       </Box>
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 3 }}>
         <Card sx={{ borderRadius: 2 }}>
