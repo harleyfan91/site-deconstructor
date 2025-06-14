@@ -1,4 +1,3 @@
-
 // MUI imports
 import React from 'react';
 import { Box, Typography, Card, CardContent, Chip, CircularProgress, Alert } from '@mui/material';
@@ -10,41 +9,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 
 // Types
 import type { AnalysisResponse } from '@/types/analysis';
+import TechStackGrid from './TechStackGrid';
 
 /** ===========================
  *  Helpers and constants
  *  =========================== */
-
-// Icon mapping by category. Used for TechStackGrid icons.
-const iconMap: { [key: string]: React.ElementType } = {
-  'Frontend Framework': Code,
-  'JavaScript frameworks': Code,
-  'Framework': Code,
-  'Build Tool': Zap,
-  'Styling': Layers,
-  'CSS frameworks': Layers,
-  'CSS Framework': Layers,
-  'Backend': Server,
-  'Database': Database,
-  'Databases': Database,
-  'Hosting': Globe,
-  'Library': Code,
-  'JavaScript libraries': Code,
-  'Markup': Code,
-  'Web servers': Server,
-  'Analytics': BarChart,
-  'Tag managers': Activity,
-  'CDN': Globe,
-  'Content delivery networks': Globe,
-  'Widgets': Code,
-  'Unknown': Code,
-  'default': Server
-};
-
-/** Return appropriate icon for tech stack category. */
-function getIcon(category: string): React.ElementType {
-  return iconMap[category] || iconMap['default'];
-}
 
 /** Return color by severity (used in chips). */
 function getSeverityColor(severity: string): string {
@@ -106,110 +75,6 @@ function getHealthGradeColor(grade: string): string {
  *  Sub-components
  *  ==============
  */
-
-/**
- * Render grid of tech stack cards (each with icon, technology, category).
- */
-function TechStackGrid({ techStack }: { techStack: { category: string; technology: string }[] }) {
-  return (
-    <Box
-      sx={{
-        display: 'grid',
-        gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
-        gap: 2,
-      }}
-    >
-      {techStack.map((tech, index) => {
-        const IconComponent = getIcon(tech.category);
-        return (
-          <Box
-            key={index}
-            sx={{
-              p: 0,
-              border: '1px solid rgba(0,0,0,0.1)',
-              borderRadius: 2,
-              display: 'flex',
-              flexDirection: 'column',
-              minHeight: 78,
-              height: 102,
-              overflow: 'hidden',
-              boxShadow: '0 0 0 0 transparent',
-              cursor: 'default',
-            }}
-          >
-            {/* Top section: transparent, white tech name */}
-            <Box
-              sx={{
-                flex: 1,
-                minHeight: 0,
-                px: 2,
-                py: 0.85,
-                display: 'flex',
-                alignItems: 'center',
-                backgroundColor: 'transparent',
-                borderTopLeftRadius: 14,
-                borderTopRightRadius: 14,
-              }}
-            >
-              <Typography
-                variant="subtitle1"
-                sx={{
-                  color: '#FFF',
-                  fontWeight: 700,
-                  fontSize: '1rem',
-                  letterSpacing: 0.1,
-                  textAlign: 'left',
-                  width: '100%',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  fontFamily: 'inherit',
-                }}
-              >
-                {tech.technology}
-              </Typography>
-            </Box>
-            {/* Bottom/orange section: icon + category */}
-            <Box
-              className="techstack-bottom"
-              sx={{
-                flex: 2,
-                minHeight: 0,
-                px: 2,
-                py: 1.1,
-                display: 'flex',
-                alignItems: 'center',
-                backgroundColor: 'rgba(255, 107, 53, 0.05)', // matches Color Extraction
-                borderBottomLeftRadius: 14,
-                borderBottomRightRadius: 14,
-                gap: 1.5,
-                borderTopLeftRadius: 14, // orange section has rounded top edges
-                borderTopRightRadius: 14,
-              }}
-            >
-              <IconComponent size={22} color="#FF6B35" style={{ marginRight: 10, flexShrink: 0 }} />
-              <Typography
-                variant="subtitle2"
-                sx={{
-                  color: '#FF6B35',
-                  fontWeight: 700,
-                  fontSize: '1rem',
-                  letterSpacing: 0.1,
-                  textShadow: 'none',
-                  lineHeight: 1.2,
-                  userSelect: 'text',
-                  pr: 0,
-                }}
-              >
-                {tech.category}
-              </Typography>
-            </Box>
-          </Box>
-        );
-      })}
-    </Box>
-  );
-}
 
 // Descriptor for ad tag detection chips
 const adTagDescriptors = [
@@ -521,4 +386,3 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
 };
 
 export default TechTab;
-
