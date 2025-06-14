@@ -51,25 +51,34 @@ const URLInputForm = ({ onAnalysisComplete }: URLInputFormProps) => {
   return (
     <Box sx={{ width: '100%', maxWidth: 600 }}>
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        </motion.div>
       )}
       
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.4 }}
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
+        sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          gap: 2,
+          mb: 3,
+        }}
       >
-        <Box
-          component="form"
-          onSubmit={handleSubmit}
-          sx={{
-            display: 'flex',
-            flexDirection: { xs: 'column', sm: 'row' },
-            gap: 2,
-            mb: 3,
-          }}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          whileHover={{ scale: 1.02 }}
+          whileFocus={{ scale: 1.02 }}
+          style={{ flex: 1 }}
         >
           <TextField
             fullWidth
@@ -103,6 +112,15 @@ const URLInputForm = ({ onAnalysisComplete }: URLInputFormProps) => {
               },
             }}
           />
+        </motion.div>
+        
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.98 }}
+        >
           <Button
             type="submit"
             variant="contained"
@@ -138,8 +156,8 @@ const URLInputForm = ({ onAnalysisComplete }: URLInputFormProps) => {
               </>
             )}
           </Button>
-        </Box>
-      </motion.div>
+        </motion.div>
+      </Box>
     </Box>
   );
 };
