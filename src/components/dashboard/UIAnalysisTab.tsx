@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { Box, Typography, Card, CardContent, CircularProgress, Alert, Unstable_Grid2 as Grid2 } from '@mui/material';
+import { Box, Typography, Card, CardContent, CircularProgress, Alert, Grid2 } from '@mui/material';
 import type { AnalysisResponse } from '@/types/analysis';
 import ColorExtractionCard from './ui-analysis/ColorExtractionCard';
 import FontAnalysisCard from './ui-analysis/FontAnalysisCard';
