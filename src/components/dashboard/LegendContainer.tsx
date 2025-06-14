@@ -7,7 +7,7 @@ const LEGEND_COLORS = [
   { color: '#BDBDBD', key: 'gray' },
   { color: '#43A047', key: 'green1' },
   { color: '#FFB300', key: 'orange' },
-  { color: '#00B894', key: 'green2' }
+  { color: '#F44336', key: 'red' } // updated to red for 4th circle
 ];
 
 const LegendContainer: React.FC = () => (
@@ -36,14 +36,17 @@ const LegendContainer: React.FC = () => (
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', mr: 1 }}>
-        {LEGEND_COLORS.map(({ color, key }) => (
+        {LEGEND_COLORS.map(({ color, key }, idx) => (
           <Circle
             key={key}
-            size={18}
+            size={12} // smaller circle
             stroke={color}
             fill="none"
             strokeWidth={2}
-            style={{ marginRight: key !== 'green2' ? 6 : 0, display: 'block' }}
+            style={{
+              marginRight: idx !== LEGEND_COLORS.length - 1 ? 4 : 0, // smaller spacing
+              display: 'block'
+            }}
           />
         ))}
       </Box>
