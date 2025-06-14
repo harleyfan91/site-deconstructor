@@ -50,7 +50,7 @@ export const pricingPlans: PricingPlan[] = [
       'Visual Asset Classification',
       'Professional Export Reports',
     ],
-    cta: 'Upgrade to Pro',
+    cta: 'Become a Pro User',
     recommended: true,
   },
 ];
