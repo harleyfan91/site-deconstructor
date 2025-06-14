@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, Typography, Box, Popover } from '@mui/material';
 import { Circle } from 'lucide-react';
@@ -57,7 +56,7 @@ const LegendContainer: React.FC = () => {
           sx={{
             display: 'flex',
             alignItems: 'center',
-            p: '6px !important'
+            p: '4px !important'
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', mr: 1 }}>
@@ -97,7 +96,7 @@ const LegendContainer: React.FC = () => {
         PaperProps={{
           sx: {
             borderRadius: 2,
-            p: 1.5,
+            p: 1,
             minWidth: 200,
             boxShadow: 4,
             backgroundColor: theme.palette.background.paper,
@@ -136,4 +135,3 @@ const LegendContainer: React.FC = () => {
 };
 
 export default LegendContainer;
-
