@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Box, Typography, Card, CardContent, CircularProgress, Alert } from '@mui/material';
 import type { AnalysisResponse } from '@/types/analysis';
@@ -37,7 +38,9 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
     );
   }
 
-  const { performance, security } = data.data;
+  const performance = data.data.performance;
+  // Security info now comes from technical
+  const { securityScore, issues } = data.data.technical;
 
   return (
     <Box>
@@ -63,7 +66,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
               Security Tips
             </Typography>
-            <SecurityTips securityData={security} />
+            <SecurityTips securityScore={securityScore} issues={issues} />
           </CardContent>
         </Card>
       </Box>

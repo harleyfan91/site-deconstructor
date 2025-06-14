@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Box, Typography, Card, CardContent, Alert, CircularProgress } from '@mui/material';
 import type { AnalysisResponse } from '@/types/analysis';
@@ -36,7 +37,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
     );
   }
 
-  const { cms, programmingLanguage, javascriptFramework, analytics, performance, hosting } = data.data.technical;
+  const { techStack, healthGrade, securityScore } = data.data.technical;
 
   return (
     <Box>
@@ -47,76 +48,43 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
         <ColorLegend />
       </Box>
 
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' }, gap: 3 }}>
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 2 }}>
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-              CMS
+              Tech Stack
             </Typography>
-            <Typography variant="body2">
-              {dashIfEmpty(cms)}
-            </Typography>
+            {techStack && techStack.length > 0 ? (
+              <ul>
+                {techStack.map((tech, i) => (
+                  <li key={i}>
+                    <strong>{tech.technology}</strong> — <span style={{ color: '#FF6B35' }}>{tech.category}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <Typography variant="body2" color="textSecondary">
+                No data available.
+              </Typography>
+            )}
           </CardContent>
         </Card>
 
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 2 }}>
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-              Programming Language
+              Health Grade
             </Typography>
-            <Typography variant="body2">
-              {dashIfEmpty(programmingLanguage)}
-            </Typography>
+            <Typography variant="body2">{dashIfEmpty(healthGrade)}</Typography>
           </CardContent>
         </Card>
 
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 2 }}>
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-              JavaScript Framework
+              Security Score
             </Typography>
-            <Typography variant="body2">
-              {dashIfEmpty(javascriptFramework)}
-            </Typography>
-          </CardContent>
-        </Card>
-
-        <Card sx={{ borderRadius: 2 }}>
-          <CardContent sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-              Analytics
-            </Typography>
-            <Typography variant="body2">
-              {dashIfEmpty(analytics)}
-            </Typography>
-          </CardContent>
-        </Card>
-
-        <Card sx={{ borderRadius: 2 }}>
-          <CardContent sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-              Performance
-            </Typography>
-            <Typography variant="body2">
-              TTFB: {dashIfEmpty(performance.ttfb)}
-            </Typography>
-            <Typography variant="body2">
-              FCP: {dashIfEmpty(performance.fcp)}
-            </Typography>
-            <Typography variant="body2">
-              LCP: {dashIfEmpty(performance.lcp)}
-            </Typography>
-          </CardContent>
-        </Card>
-
-        <Card sx={{ borderRadius: 2 }}>
-          <CardContent sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-              Hosting
-            </Typography>
-            <Typography variant="body2">
-              {dashIfEmpty(hosting)}
-            </Typography>
+            <Typography variant="body2">{dashIfEmpty(securityScore)}</Typography>
           </CardContent>
         </Card>
       </Box>
