@@ -19,9 +19,9 @@ const PricingSection = () => {
         bgcolor: 'background.default',
         overflow: 'hidden',
         minHeight: { xs: 600, md: 780 },
-        // Fade in at the top: transparent to black
-        WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 8%, black 100%)',
-        maskImage: 'linear-gradient(to bottom, transparent 0%, black 8%, black 100%)',
+        // More diffused (taller) fade in at the top
+        WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 20%, black 100%)',
+        maskImage: 'linear-gradient(to bottom, transparent 0%, black 20%, black 100%)',
         maskSize: '100% 100%',
         WebkitMaskSize: '100% 100%',
         maskRepeat: 'no-repeat',

@@ -72,8 +72,8 @@ const HeroSection = () => {
           },
         },
         // Add mask-image: fade the bottom of HeroSection to transparent (revealing FeatureShowcase underneath)
-        WebkitMaskImage: 'linear-gradient(to bottom, black 92%, transparent 100%)',
-        maskImage: 'linear-gradient(to bottom, black 92%, transparent 100%)',
+        WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)',
+        maskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)',
         maskSize: '100% 100%',
         WebkitMaskSize: '100% 100%',
         maskRepeat: 'no-repeat',
