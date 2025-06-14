@@ -67,29 +67,42 @@ const FeatureShowcase = () => {
       id="features"
       sx={{
         py: { xs: 8, md: 12 },
-        bgcolor: 'rgba(0, 0, 0, 0.2)',
-        // Diffused masks at top and bottom for smooth blending with Hero and Pricing
-        WebkitMaskImage: `linear-gradient(
-          to bottom, 
-          transparent 0%, 
-          black 18%, 
-          black 82%, 
-          transparent 100%
-        )`,
-        maskImage: `linear-gradient(
-          to bottom, 
-          transparent 0%, 
-          black 18%, 
-          black 82%, 
-          transparent 100%
-        )`,
-        maskSize: '100% 100%',
-        WebkitMaskSize: '100% 100%',
-        maskRepeat: 'no-repeat',
-        WebkitMaskRepeat: 'no-repeat',
+        bgcolor: 'transparent', // No bkg color on main Box
+        position: 'relative',
+        zIndex: 0,
+        overflow: 'hidden',
       }}
     >
-      <Container maxWidth="lg">
+      {/* Dedicated background + mask gradient layer */}
+      <Box
+        aria-hidden
+        sx={{
+          zIndex: 0,
+          pointerEvents: 'none',
+          position: 'absolute',
+          left: 0, top: 0, width: '100%', height: '100%',
+          bgcolor: 'rgba(0, 0, 0, 0.2)',
+          WebkitMaskImage: `linear-gradient(
+            to bottom, 
+            transparent 0%, 
+            black 18%, 
+            black 82%, 
+            transparent 100%
+          )`,
+          maskImage: `linear-gradient(
+            to bottom, 
+            transparent 0%, 
+            black 18%, 
+            black 82%, 
+            transparent 100%
+          )`,
+          maskSize: '100% 100%',
+          WebkitMaskSize: '100% 100%',
+          maskRepeat: 'no-repeat',
+          WebkitMaskRepeat: 'no-repeat',
+        }}
+      />
+      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
