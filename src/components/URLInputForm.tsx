@@ -6,8 +6,6 @@ import {
   Box,
   InputAdornment,
   CircularProgress,
-  Chip,
-  Typography,
   Alert,
 } from '@mui/material';
 import { Search, Link as LinkIcon } from '@mui/icons-material';
@@ -18,13 +16,6 @@ const URLInputForm = () => {
   const [url, setUrl] = useState('');
   const [isValid, setIsValid] = useState(true);
   const { analyzeWebsite, loading, error } = useAnalysisContext();
-
-  const recentSearches = [
-    'apple.com',
-    'stripe.com',
-    'linear.app',
-    'vercel.com',
-  ];
 
   const validateUrl = (value: string) => {
     const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/i;
@@ -46,13 +37,6 @@ const URLInputForm = () => {
       }
       await analyzeWebsite(fullUrl);
     }
-  };
-
-  const handleRecentSearch = async (searchUrl: string) => {
-    setUrl(searchUrl);
-    setIsValid(true);
-    const fullUrl = `https://${searchUrl}`;
-    await analyzeWebsite(fullUrl);
   };
 
   return (
@@ -145,53 +129,6 @@ const URLInputForm = () => {
               </>
             )}
           </Button>
-        </Box>
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.6 }}
-      >
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{ mb: 2, textAlign: 'center' }}
-        >
-          Try these popular sites:
-        </Typography>
-        <Box
-          sx={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: 1,
-            justifyContent: 'center',
-          }}
-        >
-          {recentSearches.map((search, index) => (
-            <motion.div
-              key={search}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3, delay: 0.7 + index * 0.1 }}
-            >
-              <Chip
-                label={search}
-                onClick={() => handleRecentSearch(search)}
-                disabled={loading}
-                sx={{
-                  bgcolor: 'rgba(255, 255, 255, 0.1)',
-                  color: 'text.primary',
-                  '&:hover': {
-                    bgcolor: 'rgba(255, 107, 53, 0.2)',
-                    transform: 'translateY(-2px)',
-                  },
-                  transition: 'all 0.3s ease',
-                  cursor: 'pointer',
-                }}
-              />
-            </motion.div>
-          ))}
         </Box>
       </motion.div>
     </Box>

@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Box, Typography, Card, CardContent, CircularProgress, Alert, Link, IconButton, Popover } from '@mui/material';
+import { Box, Typography, Card, CardContent, CircularProgress, Alert, Link, IconButton, Popover, Divider } from '@mui/material';
 import { TrendingUp, Users, Clock, Star } from 'lucide-react';
 import InfoOutlined from '@mui/icons-material/InfoOutlined';
 import type { AnalysisResponse } from '@/types/analysis';
@@ -89,6 +88,8 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
           {data.url}
         </Link>
       </Box>
+      
+      <Divider sx={{ mb: 3 }} />
       
       <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2, alignItems: 'stretch' }}>
         {metrics.map((metric, index) => {
