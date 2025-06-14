@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Box, Typography, Collapse, IconButton } from '@mui/material';
 import { Palette, ChevronDown, ChevronUp } from 'lucide-react';
@@ -241,8 +242,8 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
                               >
                                 <Box
                                   sx={{
-                                    width: 20,
-                                    height: 20,
+                                    width: { xs: 20, sm: 24 },
+                                    height: { xs: 20, sm: 24 },
                                     backgroundColor: color.hex,
                                   borderRadius: 0.5,
                                   mr: 1,
