@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, Typography, Box, Popover, useMediaQuery } from '@mui/material';
 import { Circle } from 'lucide-react';
@@ -63,6 +62,10 @@ const LegendContainer: React.FC = () => {
         role="button"
         tabIndex={0}
         aria-describedby="legend-popover"
+        ref={node => {
+          // Keep anchorEl in sync if closing due to unmount
+          if (!open && anchorEl === node) setAnchorEl(null);
+        }}
       >
         <CardContent
           sx={{
@@ -150,4 +153,3 @@ const LegendContainer: React.FC = () => {
 };
 
 export default LegendContainer;
-
