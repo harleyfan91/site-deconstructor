@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Box, Typography, Collapse, IconButton } from '@mui/material';
 import { Palette, ChevronDown, ChevronUp } from 'lucide-react';
@@ -216,7 +215,7 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
                           >
                             {harmonyGroup.name}
                           </Typography>
-                          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(3, 1fr)', sm: 'repeat(4, 1fr)', md: 'repeat(6, 1fr)' }, gap: 1, mb: 2 }}>
+                          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(3, 1fr)', md: 'repeat(6, 1fr)' }, gap: 1, mb: 2 }}>
                             {harmonyGroup.colors.map((color, colorIndex) => (
                               <Box
                                 key={colorIndex}
@@ -248,6 +247,7 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
                                     display: 'block',
                                     overflow: 'hidden',
                                     textOverflow: 'ellipsis',
+                                    fontSize: { xs: '0.65rem', sm: '0.75rem' }
                                   }}
                                 >
                                   {color.name}
@@ -257,7 +257,7 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
                                   color="text.secondary"
                                   sx={{
                                     display: 'block',
-                                    fontSize: '0.7rem'
+                                    fontSize: { xs: '0.6rem', sm: '0.7rem' }
                                   }}
                                 >
                                   {color.hex}
