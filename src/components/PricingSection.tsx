@@ -102,6 +102,10 @@ const PricingSection = () => {
               transition={{ duration: 0.6, delay: index * 0.1 }}
               viewport={{ once: true }}
               whileHover={{ y: -10 }}
+              style={{
+                // Add margin top for recommended cards to accommodate the floating chip
+                marginTop: plan.recommended ? '16px' : '0px',
+              }}
             >
               <Card
                 sx={{
@@ -113,6 +117,7 @@ const PricingSection = () => {
                   transition: 'all 0.3s ease',
                   border: plan.recommended ? '2px solid #FF6B35' : '1px solid rgba(255, 255, 255, 0.1)',
                   position: 'relative',
+                  overflow: 'visible', // Allow content to overflow for the floating chip
                   '&:hover': {
                     transform: 'translateY(-8px)',
                     boxShadow: '0 12px 40px rgba(255, 107, 53, 0.2)',
@@ -126,11 +131,12 @@ const PricingSection = () => {
                     color="primary"
                     sx={{
                       position: 'absolute',
-                      top: -12,
+                      top: -16, // Float above the card
                       left: '50%',
                       transform: 'translateX(-50%)',
                       fontWeight: 600,
-                      zIndex: 1,
+                      zIndex: 2,
+                      boxShadow: '0 4px 12px rgba(255, 107, 53, 0.3)', // Add shadow for depth
                     }}
                   />
                 )}
