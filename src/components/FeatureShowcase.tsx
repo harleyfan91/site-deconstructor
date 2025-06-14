@@ -1,11 +1,8 @@
+
+// Standard library imports
 import React from 'react';
-import {
-  Box,
-  Container,
-  Typography,
-  Card,
-  CardContent,
-} from '@mui/material';
+import { Box, Container, Typography } from '@mui/material';
+// MUI icons used for features
 import {
   Palette,
   TextFields,
@@ -17,50 +14,68 @@ import {
   CloudDownload,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
+// Refactored feature card subcomponent for clarity and reusability
+import FeatureCard from './FeatureCard';
 
+/**
+ * Static list of features to render as cards.
+ * Each feature has an icon, title, and description.
+ */
 const features = [
   {
     icon: <Palette />,
     title: 'Color Extraction',
-    description: 'Extract dominant colors, gradients, and complete color palettes with hex codes.',
+    description:
+      'Extract dominant colors, gradients, and complete color palettes with hex codes.',
   },
   {
     icon: <TextFields />,
     title: 'Font Analysis',
-    description: 'Identify fonts, typography styles, and text hierarchies used across the site.',
+    description:
+      'Identify fonts, typography styles, and text hierarchies used across the site.',
   },
   {
     icon: <Image />,
     title: 'Image Gallery',
-    description: 'Catalog all images, icons, and visual assets with download capabilities.',
+    description:
+      'Catalog all images, icons, and visual assets with download capabilities.',
   },
   {
     icon: <Code />,
     title: 'Tech Stack Detection',
-    description: 'Discover frameworks, libraries, and technologies powering the website.',
+    description:
+      'Discover frameworks, libraries, and technologies powering the website.',
   },
   {
     icon: <Speed />,
     title: 'Performance Metrics',
-    description: 'Analyze loading speeds, optimization scores, and performance insights.',
+    description:
+      'Analyze loading speeds, optimization scores, and performance insights.',
   },
   {
     icon: <Security />,
     title: 'Security Analysis',
-    description: 'Check SSL certificates, security headers, and vulnerability assessments.',
+    description:
+      'Check SSL certificates, security headers, and vulnerability assessments.',
   },
   {
     icon: <Analytics />,
     title: 'SEO Insights',
-    description: 'Meta tags, structured data, and search optimization analysis.',
+    description:
+      "Meta tags, structured data, and search optimization analysis.",
   },
   {
     icon: <CloudDownload />,
     title: 'Export Reports',
-    description: 'Download comprehensive reports in PDF, JSON, or CSV formats.',
+    description:
+      'Download comprehensive reports in PDF, JSON, or CSV formats.',
   },
 ];
 
+/**
+ * Renders the grid of feature cards with animations and introductory text.
+ * Card size and layout are fully responsive via MUI and CSS grid.
+ */
 const FeatureShowcase = () => {
   return (
     <Box
@@ -69,10 +84,10 @@ const FeatureShowcase = () => {
         position: 'relative',
         py: { xs: 8, md: 12 },
         bgcolor: 'transparent',
-        // No background here (it will be in a separate absolute Box below)
+        // Masked/gradient background is rendered as absolute below
       }}
     >
-      {/* Masked/gradient background, absolutely positioned */}
+      {/* Masked/gradient background, absolutely positioned and masked */}
       <Box
         sx={{
           position: 'absolute',
@@ -100,6 +115,7 @@ const FeatureShowcase = () => {
         }}
       />
       <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
+        {/* Title and intro, animated */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -130,6 +146,7 @@ const FeatureShowcase = () => {
             Everything you need to understand and deconstruct any website's design and technology.
           </Typography>
         </motion.div>
+        {/* Feature grid */}
         <Box
           sx={{
             display: 'grid',
@@ -141,68 +158,17 @@ const FeatureShowcase = () => {
             gap: 4,
             zIndex: 2,
             position: 'relative',
-            alignItems: 'stretch', // Make grid items (cards) stretch to match the tallest
+            alignItems: 'stretch', // Ensures all boxes fill the row
           }}
         >
           {features.map((feature, index) => (
-            <Box key={index} sx={{ zIndex: 2, position: 'relative', height: '100%' }}>
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                whileHover={{ y: -10 }}
-                style={{ height: '100%' }}
-              >
-                <Card
-                  sx={{
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'stretch',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      transform: 'translateY(-8px)',
-                      boxShadow: '0 12px 40px rgba(255, 107, 53, 0.2)',
-                      '& .feature-icon': {
-                        color: 'primary.main',
-                        transform: 'scale(1.1)',
-                      },
-                    },
-                  }}
-                >
-                  <CardContent sx={{ p: 3, textAlign: 'center', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
-                    <Box
-                      className="feature-icon"
-                      sx={{
-                        color: 'text.secondary',
-                        mb: 2,
-                        transition: 'all 0.3s ease',
-                        '& .MuiSvgIcon-root': {
-                          fontSize: '3rem',
-                        },
-                      }}
-                    >
-                      {feature.icon}
-                    </Box>
-                    <Typography
-                      variant="h6"
-                      sx={{ mb: 2, fontWeight: 600 }}
-                    >
-                      {feature.title}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{ lineHeight: 1.6, flexGrow: 1 }}
-                    >
-                      {feature.description}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            </Box>
+            <FeatureCard
+              key={feature.title}
+              icon={feature.icon}
+              title={feature.title}
+              description={feature.description}
+              hoverDelay={index}
+            />
           ))}
         </Box>
       </Container>
@@ -211,3 +177,4 @@ const FeatureShowcase = () => {
 };
 
 export default FeatureShowcase;
+
