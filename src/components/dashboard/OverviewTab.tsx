@@ -13,12 +13,13 @@ import {
 import { TrendingUp, Users, Clock, Star } from 'lucide-react';
 import InfoOutlined from '@mui/icons-material/InfoOutlined';
 import type { AnalysisResponse } from '@/types/analysis';
+import { useTheme } from '@mui/material/styles';
 
-// Helper: Returns descriptive color for a given score
-const getScoreColor = (score: number) => {
-  if (score >= 80) return '#4CAF50';
-  if (score >= 60) return '#FF9800';
-  return '#F44336';
+// Helper: Returns descriptive color for a given score using theme palette
+const useScoreColor = (theme: any) => (score: number) => {
+  if (score >= 80) return theme.palette.success.main;
+  if (score >= 60) return theme.palette.warning.main;
+  return theme.palette.error.main;
 };
 
 // Helper: Returns performance/SEO descriptions
@@ -29,12 +30,12 @@ const getScoreDescription = (score: number, excellentMsg: string, goodMsg: strin
 };
 
 // Extract metrics for easier mapping to cards
-const getMetricDefinitions = (overview: AnalysisResponse['data']['overview']) => [
+const getMetricDefinitions = (overview: AnalysisResponse['data']['overview'], theme: any) => [
   {
     title: 'Overall Score',
     value: `${overview.overallScore}/100`,
     icon: Star,
-    color: getScoreColor(overview.overallScore),
+    color: useScoreColor(theme)(overview.overallScore),
     description: getScoreDescription(
       overview.overallScore,
       'Excellent performance overall',
@@ -48,21 +49,21 @@ const getMetricDefinitions = (overview: AnalysisResponse['data']['overview']) =>
     title: 'Page Load Time',
     value: overview.pageLoadTime,
     icon: Clock,
-    color: '#FF9800',
+    color: theme.palette.warning.main,
     description: 'Page loading performance',
   },
   {
     title: 'SEO Score',
     value: `${overview.seoScore}/100`,
     icon: TrendingUp,
-    color: getScoreColor(overview.seoScore),
+    color: useScoreColor(theme)(overview.seoScore),
     description: overview.seoScore >= 80 ? 'Excellent SEO optimization' : 'SEO could be improved',
   },
   {
     title: 'User Experience',
     value: `${overview.userExperienceScore}/100`,
     icon: Users,
-    color: overview.userExperienceScore >= 80 ? '#4CAF50' : '#2196F3',
+    color: overview.userExperienceScore >= 80 ? theme.palette.success.main : theme.palette.primary.main,
     description: overview.userExperienceScore >= 80 ? 'Excellent user experience' : 'Good user experience',
   },
 ];
@@ -200,6 +201,7 @@ interface OverviewTabProps {
  * UI/UX matches previous version exactly—purely a structure/clarity refactor.
  */
 const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
+  const theme = useTheme();
   // Popover control state (for metric info)
   const [infoAnchor, setInfoAnchor] = React.useState<HTMLElement | null>(null);
   const [infoText, setInfoText] = React.useState<string | null>(null);
@@ -234,7 +236,8 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
     );
   }
 
-  const metrics = getMetricDefinitions(data.data.overview);
+  const metrics = getMetricDefinitions(data.data.overview, theme);
+  const scoreColor = useScoreColor(theme);
 
   // Handler for launching metric info popover
   const handleMetricInfo = (event: React.MouseEvent<HTMLElement>, info: string) => {
@@ -302,7 +305,40 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
               <strong>Key Findings:</strong>
             </Typography>
             {/* Summary key findings table */}
-            <KeyFindingsGrid overview={data.data.overview} />
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1, mb: 2 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                <Typography variant="body2">Overall Score</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 'bold', color: scoreColor(data.data.overview.overallScore) }}>
+                  {data.data.overview.overallScore}/100
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                <Typography variant="body2">SEO Score</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 'bold', color: scoreColor(data.data.overview.seoScore) }}>
+                  {data.data.overview.seoScore}/100
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                <Typography variant="body2">Page Load Time</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 'bold', color: theme.palette.warning.main }}>
+                  {data.data.overview.pageLoadTime}
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                <Typography variant="body2">User Experience</Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontWeight: 'bold',
+                    color: data.data.overview.userExperienceScore >= 80
+                      ? theme.palette.success.main
+                      : theme.palette.primary.main,
+                  }}
+                >
+                  {data.data.overview.userExperienceScore}/100
+                </Typography>
+              </Box>
+            </Box>
           </CardContent>
         </Card>
       </Box>

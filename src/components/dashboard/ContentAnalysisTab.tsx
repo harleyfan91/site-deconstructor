@@ -1,15 +1,17 @@
-
 import React from 'react';
 import { Box, Typography, Grid, Card, CardContent, LinearProgress } from '@mui/material';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis } from 'recharts';
+import { useTheme } from '@mui/material/styles';
 
 const ContentAnalysisTab = () => {
+  const theme = useTheme();
+  // Use theme colors for contentTypes
   const contentTypes = [
-    { name: 'Text', value: 65, color: '#2196F3' },
-    { name: 'Images', value: 20, color: '#4CAF50' },
-    { name: 'Videos', value: 10, color: '#FF9800' },
-    { name: 'Links', value: 5, color: '#9C27B0' },
+    { name: 'Text', value: 65, color: theme.palette.primary.main },
+    { name: 'Images', value: 20, color: theme.palette.success.main },
+    { name: 'Videos', value: 10, color: theme.palette.warning.main },
+    { name: 'Links', value: 5, color: theme.palette.secondary.main },
   ];
 
   const readabilityData = [
@@ -19,8 +21,9 @@ const ContentAnalysisTab = () => {
     { metric: 'Word Complexity', score: 88 },
   ];
 
+  // Use theme for chart config
   const chartConfig = {
-    score: { label: 'Score', color: '#2196F3' }
+    score: { label: 'Score', color: theme.palette.primary.main }
   };
 
   return (
@@ -42,7 +45,7 @@ const ContentAnalysisTab = () => {
                   cx="50%"
                   cy="50%"
                   outerRadius={80}
-                  fill="#8884d8"
+                  fill={theme.palette.grey[400]}
                   dataKey="value"
                   label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                 >
@@ -66,7 +69,7 @@ const ContentAnalysisTab = () => {
                 <XAxis dataKey="metric" tick={{ fontSize: 10 }} />
                 <YAxis domain={[0, 100]} />
                 <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar dataKey="score" fill="var(--color-score)" />
+                <Bar dataKey="score" fill={theme.palette.success.main} />
               </BarChart>
             </ChartContainer>
           </CardContent>
@@ -85,7 +88,7 @@ const ContentAnalysisTab = () => {
                 <Typography variant="body2">Keyword Density</Typography>
                 <Typography variant="body2">2.3%</Typography>
               </Box>
-              <LinearProgress variant="determinate" value={75} sx={{ height: 8, borderRadius: 4 }} />
+              <LinearProgress variant="determinate" value={75} sx={{ height: 8, borderRadius: 4, backgroundColor: theme.palette.grey[200], '& .MuiLinearProgress-bar': { backgroundColor: theme.palette.success.main } }} />
             </Box>
 
             <Box sx={{ mb: 3 }}>
@@ -93,7 +96,7 @@ const ContentAnalysisTab = () => {
                 <Typography variant="body2">Content Freshness</Typography>
                 <Typography variant="body2">85%</Typography>
               </Box>
-              <LinearProgress variant="determinate" value={85} sx={{ height: 8, borderRadius: 4 }} />
+              <LinearProgress variant="determinate" value={85} sx={{ height: 8, borderRadius: 4, backgroundColor: theme.palette.grey[200], '& .MuiLinearProgress-bar': { backgroundColor: theme.palette.primary.main } }} />
             </Box>
 
             <Box sx={{ mb: 3 }}>
@@ -101,7 +104,7 @@ const ContentAnalysisTab = () => {
                 <Typography variant="body2">Engagement Score</Typography>
                 <Typography variant="body2">78%</Typography>
               </Box>
-              <LinearProgress variant="determinate" value={78} sx={{ height: 8, borderRadius: 4 }} />
+              <LinearProgress variant="determinate" value={78} sx={{ height: 8, borderRadius: 4, backgroundColor: theme.palette.grey[200], '& .MuiLinearProgress-bar': { backgroundColor: theme.palette.warning.main } }} />
             </Box>
 
             <Box>
@@ -109,7 +112,7 @@ const ContentAnalysisTab = () => {
                 <Typography variant="body2">Originality</Typography>
                 <Typography variant="body2">94%</Typography>
               </Box>
-              <LinearProgress variant="determinate" value={94} sx={{ height: 8, borderRadius: 4 }} />
+              <LinearProgress variant="determinate" value={94} sx={{ height: 8, borderRadius: 4, backgroundColor: theme.palette.grey[200], '& .MuiLinearProgress-bar': { backgroundColor: theme.palette.success.main } }} />
             </Box>
           </CardContent>
         </Card>

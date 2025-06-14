@@ -1,8 +1,10 @@
+
 import React from 'react';
-import { Box, Typography, Grid, Card, CardContent, Chip, CircularProgress, Alert } from '@mui/material';
+import { Box, Typography, Card, CardContent, Chip, CircularProgress, Alert } from '@mui/material';
 import { CheckCircle, AlertCircle, XCircle } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 import LegendContainer from './LegendContainer';
+import { useTheme } from '@mui/material/styles';
 
 interface SEOAnalysisTabProps {
   data: AnalysisResponse | null;
@@ -11,6 +13,8 @@ interface SEOAnalysisTabProps {
 }
 
 const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error }) => {
+  const theme = useTheme();
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
@@ -41,13 +45,13 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'good':
-        return <CheckCircle size={20} color="#4CAF50" />;
+        return <CheckCircle size={20} color={theme.palette.success.main} />;
       case 'warning':
-        return <AlertCircle size={20} color="#FF9800" />;
+        return <AlertCircle size={20} color={theme.palette.warning.main} />;
       case 'error':
-        return <XCircle size={20} color="#F44336" />;
+        return <XCircle size={20} color={theme.palette.error.main} />;
       default:
-        return <CheckCircle size={20} color="#4CAF50" />;
+        return <CheckCircle size={20} color={theme.palette.success.main} />;
     }
   };
 
@@ -67,15 +71,27 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'high':
-        return '#F44336';
+        return theme.palette.error.main;
       case 'medium':
-        return '#FF9800';
+        return theme.palette.warning.main;
       case 'low':
-        return '#4CAF50';
+        return theme.palette.success.main;
       default:
-        return '#757575';
+        return theme.palette.grey[400];
     }
   };
+
+  const seoScore = seo.score;
+  const seoScoreColor =
+    seoScore >= 80
+      ? theme.palette.success.main
+      : seoScore >= 60
+      ? theme.palette.warning.main
+      : theme.palette.error.main;
+  const seoScoreDescription =
+    seoScore >= 80 ? 'Excellent SEO'
+    : seoScore >= 60 ? 'Good SEO'
+    : 'Needs Improvement';
 
   return (
     <Box>
@@ -132,13 +148,13 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
             </Typography>
             <Typography variant="h2" sx={{ 
               fontWeight: 'bold', 
-              color: seo.score >= 80 ? '#4CAF50' : seo.score >= 60 ? '#FF9800' : '#F44336',
+              color: seoScoreColor,
               mb: 1 
             }}>
-              {seo.score}
+              {seoScore}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              {seo.score >= 80 ? 'Excellent SEO' : seo.score >= 60 ? 'Good SEO' : 'Needs Improvement'}
+              {seoScoreDescription}
             </Typography>
           </CardContent>
         </Card>
@@ -151,19 +167,19 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
             <Box sx={{ mb: 2 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography variant="body2">Checks Passed</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="body2" sx={{ fontWeight: 'bold', color: theme.palette.success.main }}>
                   {seo.checks.filter(c => c.status === 'good').length}/{seo.checks.length}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography variant="body2">Warnings</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#FF9800' }}>
+                <Typography variant="body2" sx={{ fontWeight: 'bold', color: theme.palette.warning.main }}>
                   {seo.checks.filter(c => c.status === 'warning').length}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography variant="body2">Errors</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#F44336' }}>
+                <Typography variant="body2" sx={{ fontWeight: 'bold', color: theme.palette.error.main }}>
                   {seo.checks.filter(c => c.status === 'error').length}
                 </Typography>
               </Box>
