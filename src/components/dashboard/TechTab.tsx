@@ -223,8 +223,8 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                       sx={{
                         color: '#FFF',
                         fontWeight: 700,
-                        fontSize: '1.06rem',
-                        letterSpacing: 0.12,
+                        fontSize: '1rem',
+                        letterSpacing: 0.1,
                         textAlign: 'left',
                         width: '100%',
                         whiteSpace: 'nowrap',
