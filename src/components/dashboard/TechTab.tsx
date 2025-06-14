@@ -111,7 +111,7 @@ function TechStackGrid({ techStack }: { techStack: { category: string; technolog
             key={index}
             sx={{
               p: 0,
-              border: '1px solid #E0E0E0',
+              border: '1px solid rgba(0,0,0,0.1)',
               borderRadius: 2,
               display: 'flex',
               flexDirection: 'column',
