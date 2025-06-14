@@ -123,7 +123,39 @@ function TechStackGrid({ techStack }: { techStack: { category: string; technolog
               '&:hover': { boxShadow: '0 2px 12px rgba(255,107,53,0.09)' },
             }}
           >
-            {/* Top 2/3: Orange background, icon, and bold orange category (no chip container) */}
+            {/* Top 1/3: transparent, white tech name */}
+            <Box
+              sx={{
+                flex: 1,
+                minHeight: 0,
+                px: 2,
+                py: 1.1,
+                display: 'flex',
+                alignItems: 'center',
+                backgroundColor: 'transparent',
+                borderTopLeftRadius: 14,
+                borderTopRightRadius: 14,
+              }}
+            >
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: '#FFF',
+                  fontWeight: 700,
+                  fontSize: '1rem',
+                  letterSpacing: 0.1,
+                  textAlign: 'left',
+                  width: '100%',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  fontFamily: 'inherit',
+                }}
+              >
+                {tech.technology}
+              </Typography>
+            </Box>
+            {/* Bottom 2/3: Orange background, icon, and bold orange category (no chip container) */}
             <Box
               sx={{
                 flex: 2,
@@ -133,8 +165,8 @@ function TechStackGrid({ techStack }: { techStack: { category: string; technolog
                 display: 'flex',
                 alignItems: 'center',
                 backgroundColor: '#363330',
-                borderTopLeftRadius: 14,
-                borderTopRightRadius: 14,
+                borderBottomLeftRadius: 14,
+                borderBottomRightRadius: 14,
                 gap: 1.5,
               }}
             >
@@ -153,37 +185,6 @@ function TechStackGrid({ techStack }: { techStack: { category: string; technolog
                 }}
               >
                 {tech.category}
-              </Typography>
-            </Box>
-            {/* Bottom 1/3: transparent, white tech name */}
-            <Box
-              sx={{
-                flex: 1,
-                minHeight: 0,
-                px: 2,
-                py: 1.1,
-                display: 'flex',
-                alignItems: 'center',
-                backgroundColor: 'transparent',
-                borderBottomLeftRadius: 14,
-                borderBottomRightRadius: 14,
-              }}
-            >
-              <Typography
-                variant="subtitle1"
-                sx={{
-                  color: '#FFF',
-                  fontWeight: 700,
-                  fontSize: '1rem',
-                  letterSpacing: 0.1,
-                  textAlign: 'left',
-                  width: '100%',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                }}
-              >
-                {tech.technology}
               </Typography>
             </Box>
           </Box>
