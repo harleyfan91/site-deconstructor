@@ -1,0 +1,55 @@
+
+export interface PricingPlan {
+  title: string;
+  price: string;
+  priceNote?: string;
+  description: string;
+  features: string[];
+  unavailableFeatures?: string[];
+  additionalFeatures?: string[];
+  cta: string;
+  recommended?: boolean;
+}
+
+export const pricingPlans: PricingPlan[] = [
+  {
+    title: 'Basic',
+    price: 'Free',
+    description: 'For individuals and small teams to get started.',
+    features: [
+      'Limited color palette extraction',
+      'Basic font analysis',
+      'Up to 5 website scans per month',
+    ],
+    unavailableFeatures: [
+      'Tech Stack Detection (50+ Technologies)',
+      'Security Headers & Privacy Compliance',
+      'SEO & Social Media Optimization',
+      'Performance Benchmarking (Core Web Vitals)',
+      'Visual Asset Classification',
+      'Professional Export Reports',
+    ],
+    cta: 'Get Started',
+  },
+  {
+    title: 'Pro',
+    price: '$19.99',
+    priceNote: 'One-time payment',
+    description: 'Advanced features for designers and developers.',
+    features: [
+      'Advanced Color Harmony Analysis',
+      'Complete Font Loading Performance',
+      'Unlimited web page analysis',
+    ],
+    additionalFeatures: [
+      'Tech Stack Detection (50+ Technologies)',
+      'Security Headers & Privacy Compliance',
+      'SEO & Social Media Optimization',
+      'Performance Benchmarking (Core Web Vitals)',
+      'Visual Asset Classification',
+      'Professional Export Reports',
+    ],
+    cta: 'Upgrade to Pro',
+    recommended: true,
+  },
+];
