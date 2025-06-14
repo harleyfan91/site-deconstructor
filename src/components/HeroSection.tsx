@@ -1,9 +1,24 @@
 import React from 'react';
-import { Box, Typography, Container } from '@mui/material';
+import { Box, Typography, Container, Chip } from '@mui/material';
 import { motion } from 'framer-motion';
 import URLInputForm from './URLInputForm';
+import { useAnalysisContext } from '../contexts/AnalysisContext';
 
 const HeroSection = () => {
+  const { analyzeWebsite, loading } = useAnalysisContext();
+
+  const recentSearches = [
+    'apple.com',
+    'stripe.com',
+    'linear.app',
+    'vercel.com',
+  ];
+
+  const handleRecentSearch = async (searchUrl: string) => {
+    const fullUrl = `https://${searchUrl}`;
+    await analyzeWebsite(fullUrl);
+  };
+
   return (
     <Box
       sx={{
@@ -102,8 +117,55 @@ const HeroSection = () => {
             </Typography>
           </motion.div>
 
-          <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+          <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center' }}>
             <URLInputForm />
+            
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+            >
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ mb: 2, textAlign: 'center', mt: 3 }}
+              >
+                Try these popular sites:
+              </Typography>
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: 1,
+                  justifyContent: 'center',
+                }}
+              >
+                {recentSearches.map((search, index) => (
+                  <motion.div
+                    key={search}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3, delay: 0.7 + index * 0.1 }}
+                  >
+                    <Chip
+                      label={search}
+                      onClick={() => handleRecentSearch(search)}
+                      disabled={loading}
+                      sx={{
+                        bgcolor: 'rgba(255, 255, 255, 0.1)',
+                        color: 'text.primary',
+                        '&:hover': {
+                          bgcolor: 'rgba(255, 107, 53, 0.2)',
+                          transform: 'translateY(-2px)',
+                        },
+                        transition: 'all 0.3s ease',
+                        cursor: 'pointer',
+                      }}
+                    />
+                  </motion.div>
+                ))}
+              </Box>
+            </motion.div>
           </Box>
 
           <motion.div
@@ -143,7 +205,6 @@ const HeroSection = () => {
         </Box>
       </Container>
 
-      {/* Floating elements */}
       <motion.div
         animate={{
           y: [0, -20, 0],
