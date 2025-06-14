@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   Box,
@@ -12,7 +13,7 @@ import {
   ListItemText,
   Chip,
 } from '@mui/material';
-import { Check, StarBorder } from '@mui/icons-material';
+import { Check, StarBorder, Close } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 
 const PricingSection = () => {
@@ -25,6 +26,14 @@ const PricingSection = () => {
         'Limited color palette extraction',
         'Basic font analysis',
         'Up to 5 website scans per month',
+      ],
+      unavailableFeatures: [
+        'Tech Stack Detection (50+ Technologies)',
+        'Security Headers & Privacy Compliance',
+        'SEO & Social Media Optimization',
+        'Performance Benchmarking (Core Web Vitals)',
+        'Visual Asset Classification',
+        'Professional Export Reports',
       ],
       cta: 'Get Started',
     },
@@ -181,6 +190,22 @@ const PricingSection = () => {
                           <Check color="primary" />
                         </ListItemIcon>
                         <ListItemText primary={feature} />
+                      </ListItem>
+                    ))}
+                    {plan.unavailableFeatures?.map((feature, i) => (
+                      <ListItem key={`unavailable-${i}`} disablePadding>
+                        <ListItemIcon sx={{ minWidth: '30px' }}>
+                          <Close sx={{ color: 'text.disabled' }} />
+                        </ListItemIcon>
+                        <ListItemText 
+                          primary={feature} 
+                          sx={{ 
+                            '& .MuiListItemText-primary': { 
+                              color: 'text.disabled',
+                              textDecoration: 'line-through'
+                            } 
+                          }} 
+                        />
                       </ListItem>
                     ))}
                     {plan.additionalFeatures?.map((feature, i) => (
