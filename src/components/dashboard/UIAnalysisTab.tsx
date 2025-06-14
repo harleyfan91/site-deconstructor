@@ -1,7 +1,5 @@
-
 import React from 'react';
-import { Box, Typography, Card, CardContent, CircularProgress, Alert } from '@mui/material';
-import Grid2 from '@mui/material/Grid2';
+import { Box, Typography, Card, CardContent, CircularProgress, Alert, Unstable_Grid2 as Grid2 } from '@mui/material';
 import type { AnalysisResponse } from '@/types/analysis';
 import ColorExtractionCard from './ui-analysis/ColorExtractionCard';
 import FontAnalysisCard from './ui-analysis/FontAnalysisCard';
@@ -15,6 +13,8 @@ interface UIAnalysisTabProps {
 }
 
 const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) => {
+  
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>

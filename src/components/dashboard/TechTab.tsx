@@ -1,7 +1,5 @@
-
 import React from 'react';
-import { Box, Typography, Card, CardContent, Chip, CircularProgress, Alert } from '@mui/material';
-import Grid2 from '@mui/material/Grid2';
+import { Box, Typography, Card, CardContent, Chip, CircularProgress, Alert, Unstable_Grid2 as Grid2 } from '@mui/material';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Shield, Globe, Server, Database, Code, Layers, Zap, Activity, BarChart } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';

@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
-import { Box, Typography, Collapse, IconButton } from '@mui/material';
-import Grid2 from '@mui/material/Grid2';
+import { Box, Typography, Collapse, IconButton, Unstable_Grid2 as Grid2 } from '@mui/material';
 import { Palette, ChevronDown, ChevronUp } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 import { groupByFrequency } from '@/lib/ui';
@@ -51,7 +50,8 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
     // Determine dominant color channel
     if (r === max && r > g + 20 && r > b + 20) return 'Warm Reds';
     if (g === max && g > r + 20 && g > b + 20) return 'Cool Greens';
-    if (b === max && b > r + 20 && b > g + 20) return 'Cool Blues';
+    if (b === max && b > r +
+ 20 && b > g + 20) return 'Cool Blues';
     if (r > 200 && g > 200 && b < 100) return 'Warm Yellows';
     if (r > 150 && g < 100 && b > 150) return 'Cool Purples';
     if (r > 150 && g > 100 && b < 100) return 'Warm Oranges';
@@ -59,9 +59,7 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
     return 'Mixed Tones';
   };
 
-  const hexToRgb = (hex: string): {r:number;g:number;b:number} |
-
-null => {
+  const hexToRgb = (hex: string): {r:number;g:number;b:number} | null => {
     const match = hex.replace('#','').match(/^([0-9a-f]{3}|[0-9a-f]{6})$/i);
     if (!match) return null;
     let h = match[0];
