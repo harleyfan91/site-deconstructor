@@ -88,9 +88,15 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
           {data.url}
         </Link>
       </Box>
-      
-      <Divider sx={{ mb: 3 }} />
-      
+
+      {/* Custom Divider for style consistency */}
+      <Box
+        sx={{
+          borderBottom: '1px solid #E0E0E0',
+          mb: 3,
+        }}
+      />
+
       <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2, alignItems: 'stretch' }}>
         {metrics.map((metric, index) => {
           const IconComponent = metric.icon;
