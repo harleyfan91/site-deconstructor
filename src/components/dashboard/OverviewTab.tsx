@@ -82,11 +82,15 @@ function MetricCards({
         return (
           <Card key={index} sx={{ height: '100%', borderRadius: 2 }}>
             <CardContent sx={{ p: 3 }}>
-              {/* --- Card Title FIRST, matching "Color Extraction" --- */}
+              {/* Card Title FIRST, matching "Color Extraction" */}
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
                 <Typography
                   variant="h6"
-                  sx={{ fontWeight: 'bold', color: '#FF6B35', mb: 0 }}
+                  sx={{
+                    fontWeight: 'bold',
+                    color: '#fff',
+                    mb: 0,
+                  }}
                   data-testid="card-title"
                 >
                   {metric.title}
