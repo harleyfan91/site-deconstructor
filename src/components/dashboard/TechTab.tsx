@@ -120,7 +120,11 @@ function TechStackGrid({ techStack }: { techStack: { category: string; technolog
               height: 120,
               overflow: 'hidden',
               boxShadow: '0 0 0 0 transparent',
-              '&:hover': { boxShadow: '0 2px 12px rgba(255,107,53,0.09)' },
+              cursor: 'pointer',
+              // When the card is hovered, pass a prop to the bottom section for hover coloring
+              '&:hover .techstack-bottom': {
+                backgroundColor: 'rgba(255, 107, 53, 0.1)',
+              }
             }}
           >
             {/* Top 1/3: transparent, white tech name */}
@@ -155,8 +159,9 @@ function TechStackGrid({ techStack }: { techStack: { category: string; technolog
                 {tech.technology}
               </Typography>
             </Box>
-            {/* Bottom 2/3: Orange background, icon, and bold orange category (no chip container) */}
+            {/* Bottom 2/3: match Color Extraction card header color, icon and text */}
             <Box
+              className="techstack-bottom"
               sx={{
                 flex: 2,
                 minHeight: 0,
@@ -164,10 +169,11 @@ function TechStackGrid({ techStack }: { techStack: { category: string; technolog
                 py: 1.5,
                 display: 'flex',
                 alignItems: 'center',
-                backgroundColor: '#363330',
+                backgroundColor: 'rgba(255, 107, 53, 0.05)', // matches Color Extraction
                 borderBottomLeftRadius: 14,
                 borderBottomRightRadius: 14,
                 gap: 1.5,
+                transition: 'background 0.2s',
               }}
             >
               <IconComponent size={22} color="#FF6B35" style={{ marginRight: 10, flexShrink: 0 }} />
