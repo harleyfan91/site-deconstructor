@@ -138,66 +138,37 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
               (Powered by Wappalyzer)
             </Typography>
           </Box>
+          
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 2 }}>
-            {(data?.data.technical.techStack ?? []).map((tech, index) => {
+            {(technical.techStack ?? []).map((tech, index) => {
               const IconComponent = getIcon(tech.category);
               return (
                 <Box key={index} sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
+                  p: 2,
                   border: '1px solid #E0E0E0',
                   borderRadius: 2,
-                  p: 0,
-                  minHeight: 125,
-                  overflow: 'hidden',
-                  boxShadow: '0 1px 6px 0 rgba(0,0,0,0.04)',
-                  background: "#fff"
+                  display: 'flex',
+                  alignItems: 'center',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 107, 53, 0.05)'
+                  }
                 }}>
-                  {/* Top 2/3: Light orange background, icon + category */}
-                  <Box sx={{
-                    flex: '2 1 0',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1.5,
-                    p: 2,
-                    background: 'linear-gradient(180deg, #FFE7DA 80%, #FFF8F5 100%)',
-                  }}>
-                    <IconComponent size={28} color="#FF6B35" style={{ flexShrink: 0 }} />
-                    <Typography
-                      variant="subtitle2"
+                  <IconComponent size={20} color="#FF6B35" style={{ marginRight: 12 }} />
+                  <Box>
+                    {/* Show the category as a colored outlined Chip */}
+                    <Chip
+                      label={tech.category}
+                      {...chipStateStyle(true, "#0984E3")}
+                      size="small"
                       sx={{
-                        fontWeight: 700,
-                        fontSize: 14,
-                        color: '#FF6B35',
-                        letterSpacing: 0,
-                        textShadow: "0 1px 0 #fff8f5,0 0.5px 0 #fff8f5" // Soft highlight
+                        ...chipStateStyle(true, "#0984E3").sx,
+                        mb: 0.25,
+                        mr: 1,
+                        height: 22,
+                        fontSize: '0.75rem'
                       }}
-                    >
-                      {tech.category}
-                    </Typography>
-                  </Box>
-                  {/* Bottom 1/3: Dark orange background, tech name in white */}
-                  <Box sx={{
-                    flex: '1 1 0',
-                    background: 'linear-gradient(180deg, #FF864C 60%, #FF6B35 120%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    px: 1.5,
-                    py: 1,
-                  }}>
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        fontWeight: 700,
-                        color: '#fff',
-                        fontSize: 17,
-                        letterSpacing: 0.25,
-                        width: "100%",
-                        textAlign: "center",
-                        textShadow: "0 1px 0 rgba(0,0,0,0.12)"
-                      }}
-                    >
+                    />
+                    <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mt: 0.2 }}>
                       {tech.technology}
                     </Typography>
                   </Box>
@@ -208,6 +179,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
         </CardContent>
       </Card>
 
+      {/* Detected Ad Tags Section */}
       {data.data.adTags && (
         <Card sx={{ borderRadius: 2, mb: 3 }}>
           <CardContent sx={{ p: 3 }}>
