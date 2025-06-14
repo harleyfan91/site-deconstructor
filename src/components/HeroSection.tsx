@@ -1,11 +1,14 @@
+
 import React from 'react';
 import { Box, Typography, Container, Chip } from '@mui/material';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import URLInputForm from './URLInputForm';
 import { useAnalysisContext } from '../contexts/AnalysisContext';
 
 const HeroSection = () => {
-  const { analyzeWebsite, loading } = useAnalysisContext();
+  const { analyzeWebsite, loading, data, error } = useAnalysisContext();
+  const navigate = useNavigate();
 
   const recentSearches = [
     'apple.com',
@@ -16,7 +19,23 @@ const HeroSection = () => {
 
   const handleRecentSearch = async (searchUrl: string) => {
     const fullUrl = `https://${searchUrl}`;
-    await analyzeWebsite(fullUrl);
+    const result = await analyzeWebsite(fullUrl);
+    
+    if (result && !error) {
+      // Smooth navigation to dashboard after successful analysis
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 500); // Small delay for smooth UX
+    }
+  };
+
+  const handleAnalysisComplete = (result: any) => {
+    if (result && !error) {
+      // Smooth navigation to dashboard after successful analysis
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 500); // Small delay for smooth UX
+    }
   };
 
   return (
@@ -118,7 +137,7 @@ const HeroSection = () => {
           </motion.div>
 
           <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center' }}>
-            <URLInputForm />
+            <URLInputForm onAnalysisComplete={handleAnalysisComplete} />
             
             <motion.div
               initial={{ opacity: 0 }}

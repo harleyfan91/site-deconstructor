@@ -12,7 +12,11 @@ import { Search, Link as LinkIcon } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useAnalysisContext } from '../contexts/AnalysisContext';
 
-const URLInputForm = () => {
+interface URLInputFormProps {
+  onAnalysisComplete?: (result: any) => void;
+}
+
+const URLInputForm = ({ onAnalysisComplete }: URLInputFormProps) => {
   const [url, setUrl] = useState('');
   const [isValid, setIsValid] = useState(true);
   const { analyzeWebsite, loading, error } = useAnalysisContext();
@@ -35,7 +39,12 @@ const URLInputForm = () => {
       if (!url.startsWith('http://') && !url.startsWith('https://')) {
         fullUrl = `https://${url}`;
       }
-      await analyzeWebsite(fullUrl);
+      const result = await analyzeWebsite(fullUrl);
+      
+      // Call the callback if analysis was successful and we're on the landing page
+      if (result && !error && onAnalysisComplete) {
+        onAnalysisComplete(result);
+      }
     }
   };
 
