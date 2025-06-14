@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, Typography, Box, Popover } from '@mui/material';
 import { Circle } from 'lucide-react';
@@ -12,13 +13,18 @@ const LEGEND_COLORS = [
 
 const LegendContainer: React.FC = () => {
   const theme = useTheme();
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(anchorEl ? null : event.currentTarget);
+  // Use ref for stable anchor
+  const anchorRef = React.useRef<HTMLDivElement | null>(null);
+  const [open, setOpen] = React.useState(false);
+
+  const handleClick = () => {
+    setOpen((prev) => !prev);
   };
 
-  const open = Boolean(anchorEl);
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   return (
     <>
@@ -43,10 +49,7 @@ const LegendContainer: React.FC = () => {
         role="button"
         tabIndex={0}
         aria-describedby="legend-popover"
-        ref={node => {
-          // Keep anchorEl in sync if closing due to unmount
-          if (!open && anchorEl === node) setAnchorEl(null);
-        }}
+        ref={anchorRef}
       >
         <CardContent
           sx={{
@@ -79,8 +82,8 @@ const LegendContainer: React.FC = () => {
       <Popover
         id="legend-popover"
         open={open}
-        anchorEl={anchorEl}
-        onClose={() => setAnchorEl(null)}
+        anchorEl={anchorRef.current}
+        onClose={handleClose}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'right',
