@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { Box, Typography, Grid, Card, CardContent, CircularProgress, Alert, Link, IconButton, Popover } from '@mui/material';
 import { TrendingUp, Users, Clock, Star } from 'lucide-react';
@@ -94,11 +95,8 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
         {metrics.map((metric, index) => {
           const IconComponent = metric.icon;
           return (
-
-            <Grid size={6} key={index} sx={{ display: 'flex' }}>
-
+            <Grid item xs={6} key={index} sx={{ display: 'flex' }}>
               <Card sx={{ height: '100%', borderRadius: 2, flexGrow: 1 }}>
-
                 <CardContent sx={{ p: 3 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     <Box
@@ -237,3 +235,4 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
 };
 
 export default OverviewTab;
+

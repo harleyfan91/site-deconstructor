@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Box, Typography, Grid, Card, CardContent, Alert, CircularProgress, Chip } from '@mui/material';
 import type { AnalysisResponse } from '@/types/analysis';
@@ -50,7 +51,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
       </Typography>
 
       <Grid container spacing={3}>
-        <Grid xs={12} md={6}>
+        <Grid item xs={12} md={6}>
           <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -67,7 +68,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
           </Card>
         </Grid>
 
-        <Grid xs={12} md={6}>
+        <Grid item xs={12} md={6}>
           <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -88,7 +89,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
           </Card>
         </Grid>
 
-        <Grid xs={12}>
+        <Grid item xs={12}>
           <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
