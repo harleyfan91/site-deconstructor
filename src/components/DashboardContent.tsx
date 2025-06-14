@@ -15,13 +15,13 @@ const DashboardContent = () => {
 
   return (
     <Box>
-      <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
+      <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
         Website Analysis Dashboard
       </Typography>
       
-      <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
+      <Paper elevation={3} sx={{ p: { xs: 1.5, sm: 2 }, borderRadius: 2 }}>
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 gap-1 mb-6 h-auto">
+          <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 gap-1 mb-4 h-auto">
             <TabsTrigger value="overview" className="text-xs sm:text-sm">Overview</TabsTrigger>
             <TabsTrigger value="ui" className="text-xs sm:text-sm">User Interface</TabsTrigger>
             <TabsTrigger value="performance" className="text-xs sm:text-sm">Performance & Security</TabsTrigger>
@@ -55,7 +55,7 @@ const DashboardContent = () => {
           </TabsContent>
         </Tabs>
 
-        <Box sx={{ mt: 4, textAlign: 'center' }}>
+        <Box sx={{ mt: 3, textAlign: 'center' }}>
           <Button
             variant="contained"
             size="large"
