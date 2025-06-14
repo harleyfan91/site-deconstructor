@@ -1,5 +1,6 @@
 
 import React from 'react';
+import Grid2 from '@mui/material/Unstable_Grid2';
 import {
   Box,
   Typography,
@@ -8,8 +9,7 @@ import {
   LinearProgress,
   CircularProgress,
   Alert,
-  Chip,
-  Grid2
+  Chip
 } from '@mui/material';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart';
 import { BarChart, Bar, XAxis, YAxis } from 'recharts';
