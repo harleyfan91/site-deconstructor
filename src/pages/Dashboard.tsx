@@ -14,8 +14,8 @@ const Dashboard = ({ darkMode, toggleDarkMode }: DashboardProps) => {
   return (
     <Box>
       <AppHeader darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
-      <Container maxWidth={false} disableGutters sx={{ mt: 4, mb: 4 }}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', mb: 4 }}>
+      <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
           <URLInputForm />
         </Box>
         <DashboardContent />
