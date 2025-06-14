@@ -11,8 +11,36 @@ import { pricingPlans } from './pricing/PricingPlan';
 
 const PricingSection = () => {
   return (
-    <Box id="pricing" sx={{ py: { xs: 8, md: 12 }, bgcolor: 'background.default' }}>
-      <Container maxWidth="lg">
+    <Box
+      id="pricing"
+      sx={{
+        position: 'relative',
+        py: { xs: 8, md: 12 },
+        bgcolor: 'background.default',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Upside-down colorful background fade */}
+      <Box
+        sx={{
+          pointerEvents: 'none',
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          width: '100%',
+          height: { xs: 200, md: 340 },
+          zIndex: 1,
+          background: `
+            linear-gradient(to bottom, #000 0%, rgba(0,0,0,0.8) 10%, rgba(0,0,0,0) 38%),
+            radial-gradient(circle at 80% 80%, rgba(9, 132, 227, 0.25) 0%, transparent 55%),
+            radial-gradient(circle at 25% 70%, rgba(255, 107, 53, 0.28) 0%, transparent 55%),
+            radial-gradient(circle at 55% 30%, rgba(255, 138, 101, 0.22) 0%, transparent 65%),
+            linear-gradient(225deg, #0F0F0F 0%, #1A1A1A 100%)
+          `,
+        }}
+      />
+
+      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 2 }}>
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -68,3 +96,4 @@ const PricingSection = () => {
 };
 
 export default PricingSection;
+

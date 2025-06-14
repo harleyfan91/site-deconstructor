@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Box, Typography, Container, Chip } from '@mui/material';
 import { motion } from 'framer-motion';
@@ -268,6 +267,21 @@ const HeroSection = () => {
           borderRadius: '50%',
           opacity: 0.1,
           zIndex: 0,
+        }}
+      />
+
+      {/* Bottom black fade overlay */}
+      <Box
+        sx={{
+          pointerEvents: 'none',
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: { xs: 80, md: 160 },
+          zIndex: 2,
+          background:
+            'linear-gradient(to bottom, rgba(0,0,0,0) 0%, #000 100%)',
         }}
       />
     </Box>
