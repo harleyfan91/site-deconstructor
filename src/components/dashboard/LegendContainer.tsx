@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardContent, Typography, Box, Popover, useMediaQuery } from '@mui/material';
+import { Card, CardContent, Typography, Box, Popover } from '@mui/material';
 import { Circle } from 'lucide-react';
 import { useTheme } from '@mui/material/styles';
 
@@ -12,27 +12,10 @@ const LEGEND_COLORS = [
 
 const LegendContainer: React.FC = () => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
-  // Desktop: Show on hover; Mobile: Toggle on click
-  const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
-    if (isMobile) {
-      setAnchorEl(anchorEl ? null : event.currentTarget);
-    }
-  };
-
-  // Only for desktop: open on hover, close on mouse leave
-  const handleMouseEnter = (event: React.MouseEvent<HTMLElement>) => {
-    if (!isMobile) {
-      setAnchorEl(event.currentTarget);
-    }
-  };
-  const handleMouseLeave = () => {
-    if (!isMobile) {
-      setAnchorEl(null);
-    }
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(anchorEl ? null : event.currentTarget);
   };
 
   const open = Boolean(anchorEl);
@@ -56,9 +39,7 @@ const LegendContainer: React.FC = () => {
           userSelect: 'none'
         }}
         elevation={2}
-        onClick={isMobile ? handleOpen : undefined}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
+        onClick={handleClick}
         role="button"
         tabIndex={0}
         aria-describedby="legend-popover"
@@ -118,9 +99,6 @@ const LegendContainer: React.FC = () => {
           },
         }}
         disableRestoreFocus
-        // For desktop, open on hover/mouse leave
-        // For mobile, open/close on click
-        // This avoids focus trap issues on mobile
       >
         <Box>
           <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
