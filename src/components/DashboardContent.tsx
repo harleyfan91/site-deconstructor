@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Box, Typography, Paper, Button } from '@mui/material';
 import { motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
@@ -10,22 +10,44 @@ import TechTab from './dashboard/TechTab';
 import UIAnalysisTab from './dashboard/UIAnalysisTab';
 import ComplianceTab from './dashboard/ComplianceTab';
 import { useAnalysisContext } from '../contexts/AnalysisContext';
+import LegendContainer from './dashboard/LegendContainer';
 
 const DashboardContent = () => {
   const { data: analysisData, loading, error } = useAnalysisContext();
 
   return (
     <Box>
+      {/* HEADER ROW: Title (left), Legend (right), above nav bar */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.1 }}
       >
-        <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-          Website Analysis Dashboard
-        </Typography>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            mb: 2,
+            flexDirection: { xs: 'column', sm: 'row' },
+            gap: { xs: 1, sm: 0 }
+          }}
+        >
+          <Typography
+            variant="h4"
+            component="h1"
+            gutterBottom
+            sx={{ fontWeight: 'bold', mb: { xs: 0.5, sm: 0 } }}
+          >
+            Website Analysis Dashboard
+          </Typography>
+          <Box sx={{ ml: { xs: 0, sm: 2 }, mt: { xs: 1, sm: 0 }, alignSelf: { xs: 'stretch', sm: 'center' } }}>
+            <LegendContainer />
+          </Box>
+        </Box>
       </motion.div>
-      
+
+      {/* Main dashboard content */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -47,7 +69,7 @@ const DashboardContent = () => {
                 <TabsTrigger value="compliance" className="text-xs sm:text-sm">Compliance</TabsTrigger>
               </TabsList>
             </motion.div>
-            
+
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
