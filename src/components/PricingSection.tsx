@@ -18,9 +18,10 @@ const PricingSection = () => {
         py: { xs: 8, md: 12 },
         bgcolor: 'background.default',
         overflow: 'hidden',
+        minHeight: { xs: 600, md: 780 }, // Ensure section has enough height for full fade effect
       }}
     >
-      {/* Upside-down colorful background fade */}
+      {/* Upside-down and fully-filled colorful background fade */}
       <Box
         sx={{
           pointerEvents: 'none',
@@ -28,13 +29,13 @@ const PricingSection = () => {
           left: 0,
           top: 0,
           width: '100%',
-          height: { xs: 200, md: 340 },
+          height: '100%',
           zIndex: 1,
           background: `
-            linear-gradient(to bottom, #000 0%, rgba(0,0,0,0.8) 10%, rgba(0,0,0,0) 38%),
-            radial-gradient(circle at 80% 80%, rgba(9, 132, 227, 0.25) 0%, transparent 55%),
-            radial-gradient(circle at 25% 70%, rgba(255, 107, 53, 0.28) 0%, transparent 55%),
-            radial-gradient(circle at 55% 30%, rgba(255, 138, 101, 0.22) 0%, transparent 65%),
+            linear-gradient(to bottom, #000 0%, rgba(0,0,0,0.8) 10%, rgba(0,0,0,0.35) 30%, rgba(0,0,0,0) 60%),
+            radial-gradient(circle at 80% 80%, rgba(9, 132, 227, 0.27) 0%, transparent 68%),
+            radial-gradient(circle at 25% 70%, rgba(255, 107, 53, 0.33) 0%, transparent 68%),
+            radial-gradient(circle at 55% 30%, rgba(255, 138, 101, 0.22) 0%, transparent 80%),
             linear-gradient(225deg, #0F0F0F 0%, #1A1A1A 100%)
           `,
         }}
