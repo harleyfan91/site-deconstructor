@@ -1,9 +1,269 @@
+
 import React from 'react';
 import { Box, Typography, Card, CardContent, Chip, CircularProgress, Alert } from '@mui/material';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Shield, Globe, Server, Database, Code, Layers, Zap, Activity, BarChart } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 
+// Helper: Maps category name to an icon component from Lucide
+const iconMap: { [key: string]: React.ElementType } = {
+  'Frontend Framework': Code,
+  'JavaScript frameworks': Code,
+  'Framework': Code,
+  'Build Tool': Zap,
+  'Styling': Layers,
+  'CSS frameworks': Layers,
+  'CSS Framework': Layers,
+  'Backend': Server,
+  'Database': Database,
+  'Databases': Database,
+  'Hosting': Globe,
+  'Library': Code,
+  'JavaScript libraries': Code,
+  'Markup': Code,
+  'Web servers': Server,
+  'Analytics': BarChart,
+  'Tag managers': Activity,
+  'CDN': Globe,
+  'Content delivery networks': Globe,
+  'Widgets': Code,
+  'Unknown': Code,
+  'default': Server
+};
+// Returns the icon for a given category or a default if unknown
+function getIcon(category: string): React.ElementType {
+  return iconMap[category] || iconMap['default'];
+}
+
+// Returns color for severity level (e.g. high/medium/low)
+function getSeverityColor(severity: string): string {
+  switch (severity.toLowerCase()) {
+    case 'high':
+      return '#F44336';
+    case 'medium':
+      return '#FF9800';
+    case 'low':
+      return '#4CAF50';
+    default:
+      return '#757575';
+  }
+}
+
+// Returns filled/outlined Chip props for severity
+function chipSeverityStyle(severity: string) {
+  const color = getSeverityColor(severity);
+  return {
+    variant: "outlined" as const,
+    sx: {
+      borderColor: color,
+      color,
+      background: "transparent",
+      fontWeight: 600,
+    }
+  };
+}
+
+// Returns outlined Chip props for active/inactive states (used for tag/consent chips)
+function chipStateStyle(isActive: boolean, color = "#4CAF50") {
+  return isActive
+    ? {
+        variant: "outlined" as const,
+        sx: {
+          borderColor: color,
+          color,
+          background: "transparent",
+          fontWeight: 600,
+        }
+      }
+    : {
+        variant: "outlined" as const,
+        color: "default" as const,
+        sx: {
+          borderColor: "#BDBDBD",
+          color: "#BDBDBD",
+          background: "transparent",
+          fontWeight: 600,
+        }
+      }
+}
+
+// Returns grade color (A/B/C/D/etc)
+function getHealthGradeColor(grade: string): string {
+  if (grade.startsWith('A')) return '#4CAF50';
+  if (grade.startsWith('B')) return '#8BC34A';
+  if (grade.startsWith('C')) return '#FF9800';
+  return '#F44336';
+}
+
+// Sub-component: Tech Stack Cards
+function TechStackGrid({ techStack }: { techStack: { category: string; technology: string }[] }) {
+  return (
+    <Box
+      sx={{
+        display: 'grid',
+        gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
+        gap: 2,
+      }}
+    >
+      {techStack.map((tech, index) => {
+        const IconComponent = getIcon(tech.category);
+        return (
+          <Box
+            key={index}
+            sx={{
+              p: 0,
+              border: '1px solid #E0E0E0',
+              borderRadius: 2,
+              display: 'flex',
+              flexDirection: 'column',
+              minHeight: 92,
+              height: 120,
+              overflow: 'hidden',
+              boxShadow: '0 0 0 0 transparent',
+              '&:hover': { boxShadow: '0 2px 12px rgba(255,107,53,0.09)' },
+            }}
+          >
+            {/* Top 2/3: Orange background, icon, and bold orange category (no chip container) */}
+            <Box
+              sx={{
+                flex: 2,
+                minHeight: 0,
+                px: 2,
+                py: 1.5,
+                display: 'flex',
+                alignItems: 'center',
+                backgroundColor: '#363330',
+                borderTopLeftRadius: 14,
+                borderTopRightRadius: 14,
+                gap: 1.5,
+              }}
+            >
+              <IconComponent size={22} color="#FF6B35" style={{ marginRight: 10, flexShrink: 0 }} />
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  color: '#FF6B35',
+                  fontWeight: 700,
+                  fontSize: '1rem',
+                  letterSpacing: 0.1,
+                  textShadow: 'none',
+                  lineHeight: 1.2,
+                  userSelect: 'text',
+                  pr: 0,
+                }}
+              >
+                {tech.category}
+              </Typography>
+            </Box>
+            {/* Bottom 1/3: transparent, white tech name */}
+            <Box
+              sx={{
+                flex: 1,
+                minHeight: 0,
+                px: 2,
+                py: 1.1,
+                display: 'flex',
+                alignItems: 'center',
+                backgroundColor: 'transparent',
+                borderBottomLeftRadius: 14,
+                borderBottomRightRadius: 14,
+              }}
+            >
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: '#FFF',
+                  fontWeight: 700,
+                  fontSize: '1rem',
+                  letterSpacing: 0.1,
+                  textAlign: 'left',
+                  width: '100%',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {tech.technology}
+              </Typography>
+            </Box>
+          </Box>
+        );
+      })}
+    </Box>
+  );
+}
+
+// Sub-component: Ad Tags grid (array of tag descriptors, kept outside main for clarity)
+const adTagDescriptors = [
+  { label: 'Google GAM/GPT', key: 'hasGAM' },
+  { label: 'AdSense/DFP', key: 'hasAdSense' },
+  { label: 'Prebid.js', key: 'hasPrebid' },
+  { label: 'Amazon Publisher Services', key: 'hasAPS' },
+  { label: 'Index Exchange', key: 'hasIX' },
+  { label: 'AppNexus/Xandr', key: 'hasANX' },
+  { label: 'OpenX', key: 'hasOpenX' },
+  { label: 'Rubicon', key: 'hasRubicon' },
+  { label: 'PubMatic', key: 'hasPubMatic' },
+  { label: 'VPAID/VMAP/IMA', key: 'hasVPAID' },
+  { label: 'Criteo', key: 'hasCriteo' },
+  { label: 'Taboola', key: 'hasTaboola' },
+  { label: 'Outbrain', key: 'hasOutbrain' },
+  { label: 'Sharethrough', key: 'hasSharethrough' },
+  { label: 'Teads', key: 'hasTeads' },
+  { label: 'Moat', key: 'hasMoat' },
+  { label: 'DoubleVerify', key: 'hasDV' },
+  { label: 'Integral Ad Science', key: 'hasIAS' }
+];
+
+// Sub-component: Health Grade/Issue Summary
+function TechnicalHealthSummary({ healthGrade, issues }: { healthGrade: string, issues: any[] }) {
+  return (
+    <Card sx={{ borderRadius: 2 }}>
+      <CardContent sx={{ p: 3 }}>
+        <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+          Technical Health
+        </Typography>
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="h3" sx={{
+            fontWeight: 'bold',
+            color: getHealthGradeColor(healthGrade),
+            textAlign: 'center'
+          }}>
+            {healthGrade}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
+            Technical Health Grade
+          </Typography>
+        </Box>
+        <Box>
+          <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 2 }}>
+            Issue Summary
+          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+            <Typography variant="body2">High Severity</Typography>
+            <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#F44336' }}>
+              {(issues ?? []).filter(i => i.severity === 'high').length}
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+            <Typography variant="body2">Medium Severity</Typography>
+            <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#FF9800' }}>
+              {(issues ?? []).filter(i => i.severity === 'medium').length}
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+            <Typography variant="body2">Low Severity</Typography>
+            <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#4CAF50' }}>
+              {(issues ?? []).filter(i => i.severity === 'low').length}
+            </Typography>
+          </Box>
+        </Box>
+      </CardContent>
+    </Card>
+  );
+}
+
+// The main component
 interface TechTabProps {
   data: AnalysisResponse | null;
   loading: boolean;
@@ -11,6 +271,7 @@ interface TechTabProps {
 }
 
 const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
+  // Loading state
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
@@ -20,6 +281,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
     );
   }
 
+  // Error state
   if (error) {
     return (
       <Alert severity="error" sx={{ mt: 2 }}>
@@ -28,6 +290,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
     );
   }
 
+  // If no data, prompt for input
   if (!data) {
     return (
       <Alert severity="info" sx={{ mt: 2 }}>
@@ -38,96 +301,14 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
 
   const { technical } = data.data;
 
-  const iconMap: { [key: string]: any } = {
-    'Frontend Framework': Code,
-    'JavaScript frameworks': Code,
-    'Framework': Code,
-    'Build Tool': Zap,
-    'Styling': Layers,
-    'CSS frameworks': Layers,
-    'CSS Framework': Layers,
-    'Backend': Server,
-    'Database': Database,
-    'Databases': Database,
-    'Hosting': Globe,
-    'Library': Code,
-    'JavaScript libraries': Code,
-    'Markup': Code,
-    'Web servers': Server,
-    'Analytics': BarChart,
-    'Tag managers': Activity,
-    'CDN': Globe,
-    'Content delivery networks': Globe,
-    'Widgets': Code,
-    'Unknown': Code,
-    'default': Server
-  };
-
-  const getIcon = (category: string) => {
-    return iconMap[category] || iconMap['default'];
-  };
-
-  const getSeverityColor = (severity: string) => {
-    switch (severity.toLowerCase()) {
-      case 'high':
-        return '#F44336';
-      case 'medium':
-        return '#FF9800';
-      case 'low':
-        return '#4CAF50';
-      default:
-        return '#757575';
-    }
-  };
-
-  // Add a helper to standardize Chip props for severity/status
-  const chipSeverityStyle = (severity: string) => ({
-    variant: "outlined" as const,
-    sx: {
-      borderColor: getSeverityColor(severity),
-      color: getSeverityColor(severity),
-      background: "transparent", // ensure outlined & transparent
-      fontWeight: 600,
-    }
-  });
-
-  // For ad/social/minification/cookie, default/gray will use 'default', and 'success' (filled) becomes outlined green
-  const chipStateStyle = (isActive: boolean, color = "#4CAF50") =>
-    isActive
-      ? {
-          variant: "outlined" as const,
-          sx: {
-            borderColor: color,
-            color: color,
-            background: "transparent",
-            fontWeight: 600,
-          }
-        }
-      : {
-          variant: "outlined" as const,
-          color: "default" as const,
-          sx: {
-            borderColor: "#BDBDBD",
-            color: "#BDBDBD", // updated from #757575 to lighter gray
-            background: "transparent",
-            fontWeight: 600,
-          }
-        };
-
-  const getHealthGradeColor = (grade: string) => {
-    if (grade.startsWith('A')) return '#4CAF50';
-    if (grade.startsWith('B')) return '#8BC34A';
-    if (grade.startsWith('C')) return '#FF9800';
-    return '#F44336';
-  };
-
   return (
     <Box>
+      {/* Section: Technical Analysis */}
       <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
         Technical Analysis
       </Typography>
 
-      {/* Tech Stack Section */}
+      {/* Section: Tech Stack */}
       <Card sx={{ borderRadius: 2, mb: 3 }}>
         <CardContent sx={{ p: 3 }}>
           <Box sx={{ mb: 3 }}>
@@ -144,105 +325,11 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
               (Powered by Wappalyzer)
             </Typography>
           </Box>
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
-              gap: 2,
-            }}
-          >
-            {(technical.techStack ?? []).map((tech, index) => {
-              const IconComponent = getIcon(tech.category);
-              return (
-                <Box
-                  key={index}
-                  sx={{
-                    p: 0,
-                    border: '1px solid #E0E0E0',
-                    borderRadius: 2,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    minHeight: 92, // at least visible split
-                    height: 120,
-                    // Responsive height for better mobile experience
-                    overflow: 'hidden',
-                    boxShadow: '0 0 0 0 transparent',
-                    '&:hover': { boxShadow: '0 2px 12px rgba(255,107,53,0.09)' },
-                  }}
-                >
-                  {/* Top 2/3 section: Orange background, icon + bold category */}
-                  <Box
-                    sx={{
-                      flex: 2,
-                      minHeight: 0, // allows flex
-                      px: 2,
-                      py: 1.5,
-                      display: 'flex',
-                      alignItems: 'center',
-                      backgroundColor: '#363330', // Light orange-brown matching your image
-                      // Optional: use "#FF6B35" with opacity for paler look:
-                      // backgroundColor: 'rgba(255, 107, 53, 0.11)',
-                      borderTopLeftRadius: 14,
-                      borderTopRightRadius: 14,
-                      gap: 1.5,
-                    }}
-                  >
-                    <IconComponent size={22} color="#FF6B35" style={{ marginRight: 10, flexShrink: 0 }} />
-                    <Typography
-                      variant="subtitle2"
-                      sx={{
-                        color: '#FF6B35',
-                        fontWeight: 700,
-                        fontSize: '1rem',
-                        letterSpacing: 0.1,
-                        textShadow: 'none',
-                        lineHeight: 1.2,
-                        userSelect: 'text',
-                        pr: 0,
-                      }}
-                    >
-                      {tech.category}
-                    </Typography>
-                  </Box>
-                  {/* Bottom 1/3 section: Transparent, technology name in bold white */}
-                  <Box
-                    sx={{
-                      flex: 1,
-                      minHeight: 0,
-                      px: 2,
-                      py: 1.1,
-                      display: 'flex',
-                      alignItems: 'center',
-                      backgroundColor: 'transparent',
-                      borderBottomLeftRadius: 14,
-                      borderBottomRightRadius: 14,
-                    }}
-                  >
-                    <Typography
-                      variant="subtitle1"
-                      sx={{
-                        color: '#FFF',
-                        fontWeight: 700,
-                        fontSize: '1rem',
-                        letterSpacing: 0.1,
-                        textAlign: 'left',
-                        width: '100%',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                      }}
-                    >
-                      {tech.technology}
-                    </Typography>
-                  </Box>
-                </Box>
-              );
-            })}
-          </Box>
+          <TechStackGrid techStack={technical.techStack ?? []} />
         </CardContent>
       </Card>
 
-      {/* Detected Ad Tags Section */}
+      {/* Section: Detected Ad Tags */}
       {data.data.adTags && (
         <Card sx={{ borderRadius: 2, mb: 3 }}>
           <CardContent sx={{ p: 3 }}>
@@ -254,26 +341,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
               gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
               gap: 2 
             }}>
-              {[
-                { label: 'Google GAM/GPT', key: 'hasGAM' },
-                { label: 'AdSense/DFP', key: 'hasAdSense' },
-                { label: 'Prebid.js', key: 'hasPrebid' },
-                { label: 'Amazon Publisher Services', key: 'hasAPS' },
-                { label: 'Index Exchange', key: 'hasIX' },
-                { label: 'AppNexus/Xandr', key: 'hasANX' },
-                { label: 'OpenX', key: 'hasOpenX' },
-                { label: 'Rubicon', key: 'hasRubicon' },
-                { label: 'PubMatic', key: 'hasPubMatic' },
-                { label: 'VPAID/VMAP/IMA', key: 'hasVPAID' },
-                { label: 'Criteo', key: 'hasCriteo' },
-                { label: 'Taboola', key: 'hasTaboola' },
-                { label: 'Outbrain', key: 'hasOutbrain' },
-                { label: 'Sharethrough', key: 'hasSharethrough' },
-                { label: 'Teads', key: 'hasTeads' },
-                { label: 'Moat', key: 'hasMoat' },
-                { label: 'DoubleVerify', key: 'hasDV' },
-                { label: 'Integral Ad Science', key: 'hasIAS' }
-              ].map(({ label, key }) => (
+              {adTagDescriptors.map(({ label, key }) => (
                 <Chip
                   key={key}
                   label={label}
@@ -295,7 +363,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
         </Card>
       )}
 
-      {/* Detected Social Tags Section */}
+      {/* Section: Detected Social Tags */}
       <Card sx={{ borderRadius: 2, mb: 3 }}>
         <CardContent sx={{ p: 3 }}>
           <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
@@ -324,7 +392,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
         </CardContent>
       </Card>
 
-      {/* Cookie Banner & Consent Script Section */}
+      {/* Section: Cookie Banner & Consent Script */}
       <Card sx={{ borderRadius: 2, mb: 3 }}>
         <CardContent sx={{ p: 3 }}>
           <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
@@ -348,7 +416,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
         </CardContent>
       </Card>
 
-      {/* Minification Status Section */}
+      {/* Section: Minification Status */}
       <Card sx={{ borderRadius: 2, mb: 3 }}>
         <CardContent sx={{ p: 3 }}>
           <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
@@ -371,6 +439,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
         </CardContent>
       </Card>
 
+      {/* Technical Issues & Technical Health */}
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 3 }}>
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 3 }}>
@@ -410,53 +479,11 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
             </Table>
           </CardContent>
         </Card>
-
-        <Card sx={{ borderRadius: 2 }}>
-          <CardContent sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-              Technical Health
-            </Typography>
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="h3" sx={{
-                fontWeight: 'bold',
-                color: getHealthGradeColor(technical.healthGrade),
-                textAlign: 'center'
-              }}>
-                {technical.healthGrade}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
-                Technical Health Grade
-              </Typography>
-            </Box>
-            
-            <Box>
-              <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 2 }}>
-                Issue Summary
-              </Typography>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="body2">High Severity</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#F44336' }}>
-                  {(technical.issues ?? []).filter(i => i.severity === 'high').length}
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="body2">Medium Severity</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#FF9800' }}>
-                  {(technical.issues ?? []).filter(i => i.severity === 'medium').length}
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="body2">Low Severity</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#4CAF50' }}>
-                  {(technical.issues ?? []).filter(i => i.severity === 'low').length}
-                </Typography>
-              </Box>
-            </Box>
-          </CardContent>
-        </Card>
+        <TechnicalHealthSummary healthGrade={technical.healthGrade} issues={technical.issues ?? []} />
       </Box>
     </Box>
   );
 };
 
 export default TechTab;
+
