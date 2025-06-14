@@ -115,8 +115,8 @@ function TechStackGrid({ techStack }: { techStack: { category: string; technolog
               borderRadius: 2,
               display: 'flex',
               flexDirection: 'column',
-              minHeight: 92,
-              height: 120,
+              minHeight: 78,
+              height: 102,
               overflow: 'hidden',
               boxShadow: '0 0 0 0 transparent',
               cursor: 'default',
@@ -128,7 +128,7 @@ function TechStackGrid({ techStack }: { techStack: { category: string; technolog
                 flex: 1,
                 minHeight: 0,
                 px: 2,
-                py: 1.1,
+                py: 0.85,
                 display: 'flex',
                 alignItems: 'center',
                 backgroundColor: 'transparent',
@@ -161,14 +161,13 @@ function TechStackGrid({ techStack }: { techStack: { category: string; technolog
                 flex: 2,
                 minHeight: 0,
                 px: 2,
-                py: 1.5,
+                py: 1.1,
                 display: 'flex',
                 alignItems: 'center',
                 backgroundColor: 'rgba(255, 107, 53, 0.05)', // matches Color Extraction
                 borderBottomLeftRadius: 14,
                 borderBottomRightRadius: 14,
                 gap: 1.5,
-                transition: 'background 0.2s',
               }}
             >
               <IconComponent size={22} color="#FF6B35" style={{ marginRight: 10, flexShrink: 0 }} />
