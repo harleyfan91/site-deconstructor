@@ -20,26 +20,6 @@ const PricingSection = () => {
         minHeight: { xs: 600, md: 780 }, // Ensure section has enough height for full fade effect
       }}
     >
-      {/* Flipped and fully-filled colorful background fade (blue now on left) */}
-      <Box
-        sx={{
-          pointerEvents: 'none',
-          position: 'absolute',
-          left: 0,
-          top: 0,
-          width: '100%',
-          height: '100%',
-          zIndex: 1,
-          // Blue is now at left edge, orange at right; edges blend softly, fade is more gradual
-          background: `
-            linear-gradient(to bottom, #0F0F0F 0%, #181818 16%, rgba(15,15,15,0.92) 32%, rgba(31,31,31,0.65) 52%, rgba(31,31,31,0.21) 75%, rgba(0,0,0,0) 100%),
-            radial-gradient(circle at 18% 82%, rgba(9,132,227,0.32) 0%, transparent 72%),
-            radial-gradient(circle at 80% 75%, rgba(255,107,53,0.27) 0%, transparent 68%),
-            radial-gradient(circle at 38% 30%, rgba(255,138,101,0.19) 0%, transparent 82%),
-            linear-gradient(225deg, #0F0F0F 0%, #1A1A1A 100%)
-          `,
-        }}
-      />
       <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 2 }}>
         <motion.div
           initial={{ opacity: 0, y: 30 }}
