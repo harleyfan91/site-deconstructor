@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Box,
@@ -68,7 +67,7 @@ const getMetricDefinitions = (overview: AnalysisResponse['data']['overview']) =>
   },
 ];
 
-// Memoized metric card list for performance
+// --- Updated MetricCards: Title appears first, with matching typography ---
 function MetricCards({
   metrics,
   onInfo,
@@ -83,6 +82,22 @@ function MetricCards({
         return (
           <Card key={index} sx={{ height: '100%', borderRadius: 2 }}>
             <CardContent sx={{ p: 3 }}>
+              {/* --- Card Title FIRST, matching "Color Extraction" --- */}
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                <Typography
+                  variant="h6"
+                  sx={{ fontWeight: 'bold', color: '#FF6B35', mb: 0 }}
+                  data-testid="card-title"
+                >
+                  {metric.title}
+                </Typography>
+                {metric.info && (
+                  <IconButton size="small" aria-label="info" onClick={e => onInfo(e, metric.info!)}>
+                    <InfoOutlined fontSize="small" />
+                  </IconButton>
+                )}
+              </Box>
+              {/* Icon and Value */}
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                 <Box
                   sx={{
@@ -99,16 +114,7 @@ function MetricCards({
                   {metric.value}
                 </Typography>
               </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'medium' }}>
-                  {metric.title}
-                </Typography>
-                {metric.info && (
-                  <IconButton size="small" onClick={e => onInfo(e, metric.info!)}>
-                    <InfoOutlined fontSize="small" />
-                  </IconButton>
-                )}
-              </Box>
+              {/* Description */}
               <Typography variant="body2" color="text.secondary">
                 {metric.description}
               </Typography>
@@ -301,4 +307,3 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
 };
 
 export default OverviewTab;
-
