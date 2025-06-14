@@ -7,12 +7,11 @@ interface FeatureCardProps {
   icon: React.ReactNode;
   title: string;
   description: string;
-  hoverDelay?: number; // Used for staggered animation per index
+  hoverDelay?: number;
 }
 
 /**
- * Renders a single feature card.
- * Uses framer-motion for animation and MUI for styling.
+ * Renders a single feature card; adjusts padding/icon size for mobile readability.
  */
 const FeatureCard: React.FC<FeatureCardProps> = ({
   icon,
@@ -50,7 +49,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
       >
         <CardContent
           sx={{
-            p: 3,
+            p: { xs: 2, sm: 3 }, // Less padding on xs
             textAlign: 'center',
             height: '100%',
             display: 'flex',
@@ -65,7 +64,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
               mb: 2,
               transition: 'all 0.3s ease',
               '& .MuiSvgIcon-root': {
-                fontSize: '3rem',
+                fontSize: { xs: '2rem', sm: '3rem' }, // Smaller icon on xs
               },
             }}
           >
@@ -73,14 +72,23 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
           </Box>
           <Typography
             variant="h6"
-            sx={{ mb: 2, fontWeight: 600 }}
+            sx={{
+              mb: 2,
+              fontWeight: 600,
+              fontSize: { xs: '1rem', sm: '1.125rem' },
+              wordBreak: 'break-word',
+            }}
           >
             {title}
           </Typography>
           <Typography
             variant="body2"
             color="text.secondary"
-            sx={{ lineHeight: 1.6, flexGrow: 1 }}
+            sx={{
+              lineHeight: 1.6,
+              flexGrow: 1,
+              fontSize: { xs: '0.85rem', sm: '1rem' },
+            }}
           >
             {description}
           </Typography>
@@ -91,4 +99,3 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
 );
 
 export default FeatureCard;
-

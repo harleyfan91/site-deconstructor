@@ -1,5 +1,3 @@
-
-// Standard library imports
 import React from 'react';
 import { Box, Container, Typography } from '@mui/material';
 // MUI icons used for features
@@ -151,14 +149,17 @@ const FeatureShowcase = () => {
           sx={{
             display: 'grid',
             gridTemplateColumns: {
-              xs: '1fr',
+              xs: 'repeat(2, 1fr)',
               sm: 'repeat(2, 1fr)',
               md: 'repeat(4, 1fr)',
             },
-            gap: 4,
+            gap: {
+              xs: 2,
+              sm: 4,
+            },
             zIndex: 2,
             position: 'relative',
-            alignItems: 'stretch', // Ensures all boxes fill the row
+            alignItems: 'stretch',
           }}
         >
           {features.map((feature, index) => (
@@ -177,4 +178,3 @@ const FeatureShowcase = () => {
 };
 
 export default FeatureShowcase;
-
