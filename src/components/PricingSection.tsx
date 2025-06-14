@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   Box,
@@ -20,31 +21,6 @@ const PricingSection = () => {
         minHeight: { xs: 600, md: 780 },
       }}
     >
-      {/* SVG Wave divider at top */}
-      <Box
-        sx={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          width: '100%',
-          lineHeight: 0,
-          zIndex: 2, // above background
-        }}
-      >
-        <svg
-          viewBox="0 0 1440 100"
-          width="100%"
-          height="60"
-          preserveAspectRatio="none"
-          style={{ display: 'block', transform: 'rotate(180deg)' }}
-        >
-          <path
-            d="M0,40 C240,120 720,-40 1440,60 L1440,0 L0,0 Z"
-            fill="#171717"
-          />
-        </svg>
-      </Box>
       {/* Colorful abstract background (NO gradients/fades over page edge) */}
       <Box
         sx={{
@@ -64,7 +40,7 @@ const PricingSection = () => {
           `,
         }}
       />
-      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 3 }}>
+      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 2 }}>
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
