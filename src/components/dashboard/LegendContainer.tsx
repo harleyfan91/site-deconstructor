@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Card, CardContent, Typography, Box } from '@mui/material';
+import { Card, CardContent, Typography } from '@mui/material';
 
 const LegendContainer: React.FC = () => (
   <Card
@@ -16,7 +16,7 @@ const LegendContainer: React.FC = () => (
       mb: { xs: 1, md: 0 },
       mr: 0,
       ml: 'auto',
-      bgcolor: 'background.paper'
+      bgcolor: (theme) => theme.palette.background.paper // Updated to match other cards
     }}
     elevation={2}
   >
