@@ -116,8 +116,7 @@ const PricingCard = ({ plan, index }: PricingCardProps) => {
                   primary={feature} 
                   sx={{ 
                     '& .MuiListItemText-primary': { 
-                      color: 'text.disabled',
-                      textDecoration: 'line-through'
+                      color: 'text.disabled'
                     } 
                   }} 
                 />
