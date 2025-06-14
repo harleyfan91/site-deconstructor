@@ -15,11 +15,12 @@ export const pricingPlans: PricingPlan[] = [
   {
     title: 'Basic',
     price: 'Free',
+    priceNote: 'No fee to try',
     description: 'For individuals and small teams to get started.',
     features: [
       'Limited color palette extraction',
       'Basic font analysis',
-      'Up to 5 website scans per month',
+      'Up to 5 webpage scans per month',
     ],
     unavailableFeatures: [
       'Tech Stack Detection (50+ Technologies)',
@@ -35,7 +36,7 @@ export const pricingPlans: PricingPlan[] = [
     title: 'Pro',
     price: '$19.99',
     priceNote: 'One-time payment',
-    description: 'Advanced features for designers and developers.',
+    description: 'Advanced features for power users.',
     features: [
       'Advanced Color Harmony Analysis',
       'Complete Font Loading Performance',
