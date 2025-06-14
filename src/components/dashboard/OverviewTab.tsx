@@ -82,8 +82,11 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
           rel="noopener noreferrer"
           underline="hover"
           color="#FF6B35"
-          variant="h5"
-          sx={{ fontWeight: 'bold', wordBreak: 'break-all' }}
+          variant="body1"
+          sx={{
+            wordBreak: 'break-all',
+            fontWeight: 'normal', // Ensure not bold
+          }}
         >
           {data.url}
         </Link>
