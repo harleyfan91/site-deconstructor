@@ -50,7 +50,6 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
         <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', flexGrow: 1 }}>
           Compliance Audits
         </Typography>
-        <LegendContainer />
       </Box>
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
         <Card sx={{ borderRadius: 2 }}>

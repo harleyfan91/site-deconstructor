@@ -47,7 +47,6 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
         <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', flexGrow: 1 }}>
           User Interface Analysis
         </Typography>
-        <LegendContainer />
       </Box>
       <Box sx={{ display: 'grid', gap: 2, alignItems: 'stretch' }}>
         {/* Color Extraction */}
