@@ -185,7 +185,7 @@ const PricingSection = () => {
                       </ListItem>
                     ))}
                   </List>
-                </Box>
+                </CardContent>
                 <Box sx={{ p: 3, textAlign: 'center' }}>
                   <Button
                     variant="contained"
