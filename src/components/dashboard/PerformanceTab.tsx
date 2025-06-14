@@ -1,9 +1,9 @@
 
 import React from 'react';
-import Grid2 from '@mui/material/Unstable_Grid2';
 import {
   Box,
   Typography,
+  Grid,
   Card,
   CardContent,
   LinearProgress,
@@ -96,11 +96,11 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
       </Typography>
 
       {/* Performance Score Section */}
-      <Grid2 container spacing={3} sx={{ mb: 4 }}>
+      <Grid container spacing={3} sx={{ mb: 4 }}>
         {metrics.map((metric, index) => {
           const IconComponent = metric.icon;
           return (
-            <Grid2 xs={12} sm={6} md={4} key={index}>
+            <Grid item xs={12} sm={6} md={4} key={index}>
               <Card sx={{ height: '100%', borderRadius: 2 }}>
                 <CardContent sx={{ p: 3 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
@@ -120,14 +120,14 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
                   </Typography>
                 </CardContent>
               </Card>
-            </Grid2>
+            </Grid>
           );
         })}
-      </Grid2>
+      </Grid>
 
       {/* Core Web Vitals Section */}
-      <Grid2 container spacing={2} alignItems="stretch" sx={{ mb: 4 }}>
-        <Grid2 xs={12} md={8} sx={{ display: 'flex' }}>
+      <Grid container spacing={2} alignItems="stretch" sx={{ mb: 4 }}>
+        <Grid item xs={12} md={8} sx={{ display: 'flex' }}>
           <Card sx={{ borderRadius: 2, height: '400px', flexGrow: 1 }}>
             <CardContent sx={{ p: 3, height: '100%' }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -144,9 +144,9 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
               </ChartContainer>
             </CardContent>
           </Card>
-        </Grid2>
+        </Grid>
 
-        <Grid2 xs={12} md={4} sx={{ display: 'flex' }}>
+        <Grid item xs={12} md={4} sx={{ display: 'flex' }}>
           <Card sx={{ borderRadius: 2, flexGrow: 1 }}>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -164,8 +164,8 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
               </Typography>
             </CardContent>
           </Card>
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
 
       {/* Security Section */}
       <Box sx={{ mb: 4 }}>
@@ -174,9 +174,9 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
               Security Headers Analysis
             </Typography>
-            <Grid2 container spacing={2}>
+            <Grid container spacing={2}>
               {Object.entries(data.securityHeaders).map(([key, value]) => (
-                <Grid2 xs={12} sm={6} md={4} key={key}>
+                <Grid item xs={12} sm={6} md={4} key={key}>
                   <Box sx={{
                     p: 2,
                     border: '1px solid #E0E0E0',
@@ -195,9 +195,9 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
                       variant="outlined"
                     />
                   </Box>
-                </Grid2>
+                </Grid>
               ))}
-            </Grid2>
+            </Grid>
           </CardContent>
         </Card>
       </Box>
@@ -209,9 +209,9 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
               Performance Recommendations
             </Typography>
-            <Grid2 container spacing={2}>
+            <Grid container spacing={2}>
               {performance.recommendations.map((rec, index) => (
-                <Grid2 xs={12} md={6} key={index}>
+                <Grid item xs={12} md={6} key={index}>
                   <Box sx={{
                     p: 2,
                     backgroundColor: rec.type === 'warning' ? '#FFF3E0' : rec.type === 'error' ? '#FFEBEE' : '#E8F5E8',
@@ -229,9 +229,9 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
                       {rec.description}
                     </Typography>
                   </Box>
-                </Grid2>
+                </Grid>
               ))}
-            </Grid2>
+            </Grid>
           </CardContent>
         </Card>
       </Box>

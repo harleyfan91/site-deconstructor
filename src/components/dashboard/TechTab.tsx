@@ -1,7 +1,6 @@
 
 import React from 'react';
-import Grid2 from '@mui/material/Unstable_Grid2';
-import { Box, Typography, Card, CardContent, Chip, CircularProgress, Alert } from '@mui/material';
+import { Box, Typography, Grid, Card, CardContent, Chip, CircularProgress, Alert } from '@mui/material';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Shield, Globe, Server, Database, Code, Layers, Zap, Activity, BarChart } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
@@ -107,11 +106,11 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
             </Typography>
           </Box>
           
-          <Grid2 container spacing={2}>
+          <Grid container spacing={2}>
             {technical.techStack.map((tech, index) => {
               const IconComponent = getIcon(tech.category);
               return (
-                <Grid2 xs={12} sm={6} md={4} key={index}>
+                <Grid xs={12} sm={6} md={4} key={index}>
                   <Box sx={{
                     p: 2,
                     border: '1px solid #E0E0E0',
@@ -132,10 +131,10 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                       </Typography>
                     </Box>
                   </Box>
-                </Grid2>
+                </Grid>
               );
             })}
-          </Grid2>
+          </Grid>
         </CardContent>
       </Card>
 
@@ -146,7 +145,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
               Detected Ad Tags
             </Typography>
-            <Grid2 container spacing={2}>
+            <Grid container spacing={2}>
               {[
                 { label: 'Google GAM/GPT', key: 'hasGAM' },
                 { label: 'AdSense/DFP', key: 'hasAdSense' },
@@ -167,7 +166,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                 { label: 'DoubleVerify', key: 'hasDV' },
                 { label: 'Integral Ad Science', key: 'hasIAS' }
               ].map(({ label, key }) => (
-                <Grid2 xs={6} sm={6} md={4} key={key}>
+                <Grid xs={6} sm={6} md={4} key={key}>
                   <Chip
                     label={label}
                     color={data.data.adTags[key] ? 'success' : 'default'}
@@ -182,9 +181,9 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                       }
                     }}
                   />
-                </Grid2>
+                </Grid>
               ))}
-            </Grid2>
+            </Grid>
           </CardContent>
         </Card>
       )}
@@ -195,8 +194,8 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
           <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
             Detected Social Tags
           </Typography>
-          <Grid2 container spacing={2}>
-            <Grid2 xs={12} sm={6} md={4}>
+          <Grid container spacing={2}>
+            <Grid xs={12} sm={6} md={4}>
               <Chip
                 label="Open Graph Meta Tags"
                 color={technical.social?.hasOpenGraph ? 'success' : 'default'}
@@ -204,8 +203,8 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                 size="small"
                 sx={{ width: '100%' }}
               />
-            </Grid2>
-            <Grid2 xs={12} sm={6} md={4}>
+            </Grid>
+            <Grid xs={12} sm={6} md={4}>
               <Chip
                 label="Twitter Card Meta Tags"
                 color={technical.social?.hasTwitterCard ? 'success' : 'default'}
@@ -213,8 +212,8 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                 size="small"
                 sx={{ width: '100%' }}
               />
-            </Grid2>
-            <Grid2 xs={12} sm={6} md={4}>
+            </Grid>
+            <Grid xs={12} sm={6} md={4}>
               <Chip
                 label="Share Buttons"
                 color={technical.social?.hasShareButtons ? 'success' : 'default'}
@@ -222,8 +221,8 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                 size="small"
                 sx={{ width: '100%' }}
               />
-            </Grid2>
-          </Grid2>
+            </Grid>
+          </Grid>
         </CardContent>
       </Card>
 
@@ -233,16 +232,16 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
           <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
             Detected Cookie Banner & Consent Script
           </Typography>
-          <Grid2 container spacing={2}>
-            <Grid2 xs={12}>
+          <Grid container spacing={2}>
+            <Grid xs={12}>
               <Chip
                 label={technical.cookies?.hasCookieScript ? 'Cookie Consent Script Detected' : 'No Cookie Consent Script Found'}
                 color={technical.cookies?.hasCookieScript ? 'success' : 'warning'}
                 variant="filled"
                 size="medium"
               />
-            </Grid2>
-          </Grid2>
+            </Grid>
+          </Grid>
         </CardContent>
       </Card>
 
@@ -252,8 +251,8 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
           <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
             Minification Status
           </Typography>
-          <Grid2 container spacing={2}>
-            <Grid2 xs={12} sm={6}>
+          <Grid container spacing={2}>
+            <Grid xs={12} sm={6}>
               <Chip
                 label={`CSS: ${technical.minification?.cssMinified ? 'Minified' : 'Not Minified'}`}
                 color={technical.minification?.cssMinified ? 'success' : 'warning'}
@@ -261,8 +260,8 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                 size="medium"
                 sx={{ width: '100%' }}
               />
-            </Grid2>
-            <Grid2 xs={12} sm={6}>
+            </Grid>
+            <Grid xs={12} sm={6}>
               <Chip
                 label={`JavaScript: ${technical.minification?.jsMinified ? 'Minified' : 'Not Minified'}`}
                 color={technical.minification?.jsMinified ? 'success' : 'warning'}
@@ -270,13 +269,13 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                 size="medium"
                 sx={{ width: '100%' }}
               />
-            </Grid2>
-          </Grid2>
+            </Grid>
+          </Grid>
         </CardContent>
       </Card>
 
-      <Grid2 container spacing={3}>
-        <Grid2 xs={12} md={8}>
+      <Grid container spacing={3}>
+        <Grid xs={12} md={8}>
           <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -314,9 +313,9 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
               </Table>
             </CardContent>
           </Card>
-        </Grid2>
+        </Grid>
 
-        <Grid2 xs={12} md={4}>
+        <Grid xs={12} md={4}>
           <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -360,8 +359,8 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
               </Box>
             </CardContent>
           </Card>
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
     </Box>
   );
 };

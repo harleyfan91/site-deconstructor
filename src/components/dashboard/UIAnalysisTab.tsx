@@ -1,7 +1,5 @@
-
 import React from 'react';
-import Grid2 from '@mui/material/Unstable_Grid2';
-import { Box, Typography, Card, CardContent, CircularProgress, Alert } from '@mui/material';
+import { Box, Typography, Grid, Card, CardContent, CircularProgress, Alert } from '@mui/material';
 import type { AnalysisResponse } from '@/types/analysis';
 import ColorExtractionCard from './ui-analysis/ColorExtractionCard';
 import FontAnalysisCard from './ui-analysis/FontAnalysisCard';
@@ -15,8 +13,6 @@ interface UIAnalysisTabProps {
 }
 
 const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) => {
-  
-
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
@@ -50,36 +46,36 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
         User Interface Analysis
       </Typography>
 
-      <Grid2 container spacing={2} alignItems="stretch">
+      <Grid container spacing={2} alignItems="stretch">
         {/* Color Extraction */}
-        <Grid2 xs={12} sx={{ display: 'flex', width: '100%' }}>
+        <Grid item xs={12} sx={{ display: 'flex', width: '100%' }}>
           <Card sx={{ borderRadius: 2, flexGrow: 1, width: '100%' }}>
             <CardContent sx={{ p: 3 }}>
               <ColorExtractionCard colors={colors} />
             </CardContent>
           </Card>
-        </Grid2>
+        </Grid>
 
         {/* Font Analysis */}
-        <Grid2 xs={12} md={6} sx={{ display: 'flex', width: '100%' }}>
+        <Grid item xs={12} md={6} sx={{ display: 'flex', width: '100%' }}>
           <Card sx={{ borderRadius: 2, flexGrow: 1, width: '100%' }}>
             <CardContent sx={{ p: 3 }}>
               <FontAnalysisCard fonts={fonts} />
             </CardContent>
           </Card>
-        </Grid2>
+        </Grid>
 
         {/* Contrast Warnings */}
-        <Grid2 xs={12} md={6} sx={{ display: 'flex', width: '100%' }}>
+        <Grid item xs={12} md={6} sx={{ display: 'flex', width: '100%' }}>
           <Card sx={{ borderRadius: 2, flexGrow: 1, width: '100%' }}>
             <CardContent sx={{ p: 3 }}>
               <ContrastWarningsCard issues={data.data.ui.contrastIssues} />
             </CardContent>
           </Card>
-        </Grid2>
+        </Grid>
 
         {/* Image Analysis */}
-        <Grid2 xs={12} sx={{ display: 'flex', width: '100%' }}>
+        <Grid item xs={12} sx={{ display: 'flex', width: '100%' }}>
           <Card sx={{ borderRadius: 2, flexGrow: 1, width: '100%' }}>
             <CardContent sx={{ p: 3 }}>
               <ImageAnalysisCard
@@ -88,8 +84,8 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
               />
             </CardContent>
           </Card>
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
     </Box>
   );
 };

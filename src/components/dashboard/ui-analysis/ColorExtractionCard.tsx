@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
-import Grid2 from '@mui/material/Unstable_Grid2';
-import { Box, Typography, Collapse, IconButton } from '@mui/material';
+import { Box, Typography, Collapse, IconButton, Grid } from '@mui/material';
 import { Palette, ChevronDown, ChevronUp } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 import { groupByFrequency } from '@/lib/ui';
@@ -51,8 +50,7 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
     // Determine dominant color channel
     if (r === max && r > g + 20 && r > b + 20) return 'Warm Reds';
     if (g === max && g > r + 20 && g > b + 20) return 'Cool Greens';
-    if (b === max && b > r +
- 20 && b > g + 20) return 'Cool Blues';
+    if (b === max && b > r + 20 && b > g + 20) return 'Cool Blues';
     if (r > 200 && g > 200 && b < 100) return 'Warm Yellows';
     if (r > 150 && g < 100 && b > 150) return 'Cool Purples';
     if (r > 150 && g > 100 && b < 100) return 'Warm Oranges';
@@ -201,6 +199,7 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
                       <Typography
                         variant="subtitle2"
                         sx={{ fontWeight: 'bold', mb: 1 }}
+
                       >
                         {freqGroup.name}
                       </Typography>
@@ -217,9 +216,9 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
                           >
                             {harmonyGroup.name}
                           </Typography>
-                          <Grid2 container spacing={1} sx={{ mb: 2 }}>
+                          <Grid container spacing={1} sx={{ mb: 2 }}>
                             {harmonyGroup.colors.map((color, colorIndex) => (
-                              <Grid2 xs={4} sm={3} md={2} key={colorIndex}>
+                              <Grid key={colorIndex} xs={4} sm={3} md={2}>
                                 <Box
                                   sx={{
                                     display: 'flex',
@@ -265,9 +264,9 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
                                   </Typography>
                                 </Box>
                                 </Box>
-                              </Grid2>
+                              </Grid>
                             ))}
-                          </Grid2>
+                          </Grid>
                         </Box>
                       ))}
                     </Box>

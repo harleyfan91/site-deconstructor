@@ -1,7 +1,6 @@
 
 import React from 'react';
-import Grid2 from '@mui/material/Unstable_Grid2';
-import { Box, Typography, Card, CardContent, CircularProgress, Alert, Link, IconButton, Popover } from '@mui/material';
+import { Box, Typography, Grid, Card, CardContent, CircularProgress, Alert, Link, IconButton, Popover } from '@mui/material';
 import { TrendingUp, Users, Clock, Star } from 'lucide-react';
 import InfoOutlined from '@mui/icons-material/InfoOutlined';
 import type { AnalysisResponse } from '@/types/analysis';
@@ -91,12 +90,15 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
         </Link>
       </Box>
       
-      <Grid2 container spacing={2} alignItems="stretch">
+      <Grid container spacing={2} alignItems="stretch">
         {metrics.map((metric, index) => {
           const IconComponent = metric.icon;
           return (
-            <Grid2 xs={6} key={index} sx={{ display: 'flex' }}>
+
+            <Grid size={6} key={index} sx={{ display: 'flex' }}>
+
               <Card sx={{ height: '100%', borderRadius: 2, flexGrow: 1 }}>
+
                 <CardContent sx={{ p: 3 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     <Box
@@ -129,10 +131,10 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
                   </Typography>
                 </CardContent>
               </Card>
-            </Grid2>
+            </Grid>
           );
         })}
-      </Grid2>
+      </Grid>
 
       <Popover
         open={Boolean(infoAnchor)}
@@ -164,8 +166,8 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
           <Typography variant="body1" paragraph>
             <strong>Key Findings:</strong>
           </Typography>
-          <Grid2 container spacing={1} sx={{ mb: 2 }}>
-            <Grid2 xs={6}>
+          <Grid container spacing={1} sx={{ mb: 2 }}>
+            <Grid item xs={6}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
               <Typography variant="body2">Overall Score</Typography>
               <Typography
@@ -183,8 +185,8 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
                 {data.data.overview.overallScore}/100
               </Typography>
               </Box>
-            </Grid2>
-            <Grid2 xs={6}>
+            </Grid>
+            <Grid item xs={6}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
               <Typography variant="body2">SEO Score</Typography>
               <Typography
@@ -202,16 +204,16 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
                 {data.data.overview.seoScore}/100
               </Typography>
               </Box>
-            </Grid2>
-            <Grid2 xs={6}>
+            </Grid>
+            <Grid item xs={6}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
               <Typography variant="body2">Page Load Time</Typography>
               <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#FF9800' }}>
                 {data.data.overview.pageLoadTime}
               </Typography>
               </Box>
-            </Grid2>
-            <Grid2 xs={6}>
+            </Grid>
+            <Grid item xs={6}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
               <Typography variant="body2">User Experience</Typography>
               <Typography
@@ -225,8 +227,8 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
                 {data.data.overview.userExperienceScore}/100
               </Typography>
               </Box>
-            </Grid2>
-          </Grid2>
+            </Grid>
+          </Grid>
           </CardContent>
         </Card>
       </Box>

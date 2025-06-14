@@ -1,30 +1,27 @@
 
 import React from 'react';
-import Grid2 from '@mui/material/Unstable_Grid2';
-import { Box, Typography, Card, CardContent, LinearProgress } from '@mui/material';
+import { Box, Typography, Grid, Card, CardContent, LinearProgress } from '@mui/material';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis } from 'recharts';
 
-const contentTypes = [
-  { name: 'Text', value: 65, color: '#2196F3' },
-  { name: 'Images', value: 20, color: '#4CAF50' },
-  { name: 'Videos', value: 10, color: '#FF9800' },
-  { name: 'Links', value: 5, color: '#9C27B0' },
-];
-
-const readabilityData = [
-  { metric: 'Flesch Reading Ease', score: 78 },
-  { metric: 'Grade Level', score: 85 },
-  { metric: 'Sentence Length', score: 92 },
-  { metric: 'Word Complexity', score: 88 },
-];
-
-const chartConfig = {
-  score: { label: 'Score', color: '#2196F3' }
-};
-
 const ContentAnalysisTab = () => {
-  
+  const contentTypes = [
+    { name: 'Text', value: 65, color: '#2196F3' },
+    { name: 'Images', value: 20, color: '#4CAF50' },
+    { name: 'Videos', value: 10, color: '#FF9800' },
+    { name: 'Links', value: 5, color: '#9C27B0' },
+  ];
+
+  const readabilityData = [
+    { metric: 'Flesch Reading Ease', score: 78 },
+    { metric: 'Grade Level', score: 85 },
+    { metric: 'Sentence Length', score: 92 },
+    { metric: 'Word Complexity', score: 88 },
+  ];
+
+  const chartConfig = {
+    score: { label: 'Score', color: '#2196F3' }
+  };
 
   return (
     <Box>
@@ -32,8 +29,8 @@ const ContentAnalysisTab = () => {
         Content Analysis
       </Typography>
 
-      <Grid2 container spacing={3}>
-        <Grid2 xs={12} md={6}>
+      <Grid container spacing={3}>
+        <Grid xs={12} md={6}>
           <Card sx={{ borderRadius: 2, height: '400px' }}>
             <CardContent sx={{ p: 3, height: '100%' }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -59,9 +56,9 @@ const ContentAnalysisTab = () => {
               </ChartContainer>
             </CardContent>
           </Card>
-        </Grid2>
+        </Grid>
 
-        <Grid2 xs={12} md={6}>
+        <Grid xs={12} md={6}>
           <Card sx={{ borderRadius: 2, height: '400px' }}>
             <CardContent sx={{ p: 3, height: '100%' }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -77,11 +74,11 @@ const ContentAnalysisTab = () => {
               </ChartContainer>
             </CardContent>
           </Card>
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
 
-      <Grid2 container spacing={3} sx={{ mt: 1 }}>
-        <Grid2 xs={12} md={8}>
+      <Grid container spacing={3} sx={{ mt: 1 }}>
+        <Grid xs={12} md={8}>
           <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -121,9 +118,9 @@ const ContentAnalysisTab = () => {
               </Box>
             </CardContent>
           </Card>
-        </Grid2>
+        </Grid>
 
-        <Grid2 xs={12} md={4}>
+        <Grid xs={12} md={4}>
           <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -156,8 +153,8 @@ const ContentAnalysisTab = () => {
               </Box>
             </CardContent>
           </Card>
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
     </Box>
   );
 };
