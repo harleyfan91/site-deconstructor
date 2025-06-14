@@ -108,7 +108,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
           color: "default" as const,
           sx: {
             borderColor: "#BDBDBD",
-            color: "#757575",
+            color: "#BDBDBD", // updated from #757575 to lighter gray
             background: "transparent",
             fontWeight: 600,
           }
