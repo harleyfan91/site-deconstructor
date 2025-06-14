@@ -13,7 +13,7 @@ import {
   ListItemText,
   Chip,
 } from '@mui/material';
-import { Check, Star } from '@mui/icons-material';
+import { Check, StarBorder } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 
 const PricingSection = () => {
@@ -126,7 +126,7 @@ const PricingSection = () => {
               >
                 {plan.recommended && (
                   <Chip
-                    icon={<Star />}
+                    icon={<StarBorder />}
                     label="Recommended"
                     color="primary"
                     sx={{
