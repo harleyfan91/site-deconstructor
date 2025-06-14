@@ -269,6 +269,20 @@ const HeroSection = () => {
           zIndex: 0,
         }}
       />
+      <Box
+        sx={{
+          position: 'absolute',
+          left: 0,
+          bottom: -2,
+          width: '100%',
+          height: { xs: 80, md: 120 },
+          zIndex: 2,
+          pointerEvents: 'none',
+          background: `
+            linear-gradient(to bottom, rgba(15,15,15,0) 0%, #191C20 100%)
+          `,
+        }}
+      />
     </Box>
   );
 };

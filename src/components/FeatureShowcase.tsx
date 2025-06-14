@@ -63,8 +63,34 @@ const FeatureShowcase = () => {
   ];
 
   return (
-    <Box id="features" sx={{ py: { xs: 8, md: 12 }, bgcolor: 'rgba(0, 0, 0, 0.2)' }}>
-      <Container maxWidth="lg">
+    <Box id="features" sx={{ py: { xs: 8, md: 12 }, bgcolor: 'rgba(0, 0, 0, 0.2)', position: 'relative' }}>
+      {/* Top gradient to blend HeroSection into FeatureShowcase */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: { xs: 60, md: 100 },
+          zIndex: 1,
+          pointerEvents: 'none',
+          background: 'linear-gradient(to top, rgba(25,28,32,0) 0%, #1A1A1A 100%)',
+        }}
+      />
+      {/* Optional: Bottom gradient to blend into PricingSection */}
+      <Box
+        sx={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          width: '100%',
+          height: { xs: 60, md: 100 },
+          zIndex: 1,
+          pointerEvents: 'none',
+          background: 'linear-gradient(to bottom, rgba(25,28,32,0) 0%, #15171b 100%)',
+        }}
+      />
+      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 2 }}>
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}

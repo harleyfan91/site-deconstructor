@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Box,
@@ -40,7 +39,20 @@ const PricingSection = () => {
           `,
         }}
       />
-      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 2 }}>
+      {/* Top gradient to blend in from previous section */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: { xs: 60, md: 100 },
+          zIndex: 2,
+          pointerEvents: 'none',
+          background: 'linear-gradient(to top, rgba(26,26,26,0) 0%, #191C20 100%)',
+        }}
+      />
+      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 3 }}>
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
