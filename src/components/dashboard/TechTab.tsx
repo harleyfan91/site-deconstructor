@@ -224,12 +224,21 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
             Detected Cookie Banner & Consent Script
           </Typography>
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 2 }}>
-            <Chip
-              label={technical.cookies?.hasCookieScript ? 'Cookie Consent Script Detected' : 'No Cookie Consent Script Found'}
-              color={technical.cookies?.hasCookieScript ? 'success' : 'warning'}
-              variant="filled"
-              size="medium"
-            />
+            {technical.cookies?.hasCookieScript ? (
+              <Chip
+                label="Cookie Consent Script Detected"
+                color="success"
+                variant="filled"
+                size="medium"
+              />
+            ) : (
+              <Chip
+                label="No Cookie Consent Script Found"
+                color="default"
+                variant="outlined"
+                size="medium"
+              />
+            )}
           </Box>
         </CardContent>
       </Card>
@@ -243,15 +252,15 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 2 }}>
             <Chip
               label={`CSS: ${technical.minification?.cssMinified ? 'Minified' : 'Not Minified'}`}
-              color={technical.minification?.cssMinified ? 'success' : 'warning'}
-              variant="filled"
+              color={technical.minification?.cssMinified ? 'success' : 'default'}
+              variant={technical.minification?.cssMinified ? 'filled' : 'outlined'}
               size="medium"
               sx={{ width: '100%' }}
             />
             <Chip
               label={`JavaScript: ${technical.minification?.jsMinified ? 'Minified' : 'Not Minified'}`}
-              color={technical.minification?.jsMinified ? 'success' : 'warning'}
-              variant="filled"
+              color={technical.minification?.jsMinified ? 'success' : 'default'}
+              variant={technical.minification?.jsMinified ? 'filled' : 'outlined'}
               size="medium"
               sx={{ width: '100%' }}
             />
