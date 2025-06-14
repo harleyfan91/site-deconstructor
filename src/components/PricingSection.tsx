@@ -40,6 +40,7 @@ const PricingSection = () => {
             sx={{ mb: 8, maxWidth: 600, mx: 'auto' }}
           >
             Start for free, upgrade when you need more features.
+            <br />
             No monthly subscriptions.
           </Typography>
         </motion.div>
