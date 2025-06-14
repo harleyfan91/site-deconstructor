@@ -73,22 +73,26 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-          Website Overview
-        </Typography>
-        <Link
-          href={data.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          underline="hover"
-          color="#FF6B35"
-          variant="h5"
-          sx={{ fontWeight: 'bold', wordBreak: 'break-all' }}
-        >
-          {data.url}
-        </Link>
-      </Box>
+      <Card sx={{ mb: 3, borderRadius: 2 }}>
+        <CardContent sx={{ p: 3 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
+              Website Overview
+            </Typography>
+            <Link
+              href={data.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              underline="hover"
+              color="#FF6B35"
+              variant="h5"
+              sx={{ fontWeight: 'bold', wordBreak: 'break-all' }}
+            >
+              {data.url}
+            </Link>
+          </Box>
+        </CardContent>
+      </Card>
       
       <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2, alignItems: 'stretch' }}>
         {metrics.map((metric, index) => {
