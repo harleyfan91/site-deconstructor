@@ -150,41 +150,44 @@ const MetricInfoPopover: React.FC<{
   </Popover>
 );
 
-// Key findings table for summary section
-const KeyFindingsGrid: React.FC<{ overview: AnalysisResponse['data']['overview'] }> = ({ overview }) => (
-  <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1, mb: 2 }}>
-    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-      <Typography variant="body2">Overall Score</Typography>
-      <Typography variant="body2" sx={{ fontWeight: 'bold', color: getScoreColor(overview.overallScore) }}>
-        {overview.overallScore}/100
-      </Typography>
+// --- KeyFindingsGrid updated for useScoreColor ---
+const KeyFindingsGrid: React.FC<{ overview: AnalysisResponse['data']['overview'], theme: any }> = ({ overview, theme }) => {
+  const scoreColor = useScoreColor(theme);
+  return (
+    <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1, mb: 2 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+        <Typography variant="body2">Overall Score</Typography>
+        <Typography variant="body2" sx={{ fontWeight: 'bold', color: scoreColor(overview.overallScore) }}>
+          {overview.overallScore}/100
+        </Typography>
+      </Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+        <Typography variant="body2">SEO Score</Typography>
+        <Typography variant="body2" sx={{ fontWeight: 'bold', color: scoreColor(overview.seoScore) }}>
+          {overview.seoScore}/100
+        </Typography>
+      </Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+        <Typography variant="body2">Page Load Time</Typography>
+        <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#FF9800' }}>
+          {overview.pageLoadTime}
+        </Typography>
+      </Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+        <Typography variant="body2">User Experience</Typography>
+        <Typography
+          variant="body2"
+          sx={{
+            fontWeight: 'bold',
+            color: overview.userExperienceScore >= 80 ? '#4CAF50' : '#2196F3',
+          }}
+        >
+          {overview.userExperienceScore}/100
+        </Typography>
+      </Box>
     </Box>
-    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-      <Typography variant="body2">SEO Score</Typography>
-      <Typography variant="body2" sx={{ fontWeight: 'bold', color: getScoreColor(overview.seoScore) }}>
-        {overview.seoScore}/100
-      </Typography>
-    </Box>
-    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-      <Typography variant="body2">Page Load Time</Typography>
-      <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#FF9800' }}>
-        {overview.pageLoadTime}
-      </Typography>
-    </Box>
-    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-      <Typography variant="body2">User Experience</Typography>
-      <Typography
-        variant="body2"
-        sx={{
-          fontWeight: 'bold',
-          color: overview.userExperienceScore >= 80 ? '#4CAF50' : '#2196F3',
-        }}
-      >
-        {overview.userExperienceScore}/100
-      </Typography>
-    </Box>
-  </Box>
-);
+  );
+};
 
 // ---------- Main Component ----------
 
@@ -194,12 +197,6 @@ interface OverviewTabProps {
   error: string | null;
 }
 
-/**
- * Website OverviewTab
- * Shows high-level analysis, score, metrics, and summary for the analyzed URL.
- *
- * UI/UX matches previous version exactly—purely a structure/clarity refactor.
- */
 const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
   const theme = useTheme();
   // Popover control state (for metric info)
@@ -304,41 +301,8 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
             <Typography variant="body1" paragraph>
               <strong>Key Findings:</strong>
             </Typography>
-            {/* Summary key findings table */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1, mb: 2 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="body2">Overall Score</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 'bold', color: scoreColor(data.data.overview.overallScore) }}>
-                  {data.data.overview.overallScore}/100
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="body2">SEO Score</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 'bold', color: scoreColor(data.data.overview.seoScore) }}>
-                  {data.data.overview.seoScore}/100
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="body2">Page Load Time</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 'bold', color: theme.palette.warning.main }}>
-                  {data.data.overview.pageLoadTime}
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="body2">User Experience</Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    fontWeight: 'bold',
-                    color: data.data.overview.userExperienceScore >= 80
-                      ? theme.palette.success.main
-                      : theme.palette.primary.main,
-                  }}
-                >
-                  {data.data.overview.userExperienceScore}/100
-                </Typography>
-              </Box>
-            </Box>
+            {/* Updated: KeyFindingsGrid now uses useScoreColor properly */}
+            <KeyFindingsGrid overview={data.data.overview} theme={theme} />
           </CardContent>
         </Card>
       </Box>
