@@ -39,7 +39,8 @@ const PricingSection = () => {
             color="text.secondary"
             sx={{ mb: 8, maxWidth: 600, mx: 'auto' }}
           >
-            Start for free, upgrade when you need more features. No monthly subscriptions.
+            Start for free, upgrade when you need more features.
+            No monthly subscriptions.
           </Typography>
         </motion.div>
 
