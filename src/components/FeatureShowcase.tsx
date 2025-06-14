@@ -63,7 +63,19 @@ const FeatureShowcase = () => {
   ];
 
   return (
-    <Box id="features" sx={{ py: { xs: 8, md: 12 }, bgcolor: 'rgba(0, 0, 0, 0.2)' }}>
+    <Box
+      id="features"
+      sx={{
+        py: { xs: 8, md: 12 },
+        bgcolor: 'rgba(0, 0, 0, 0.2)',
+        WebkitMaskImage: `linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%)`,
+        maskImage: `linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%)`,
+        maskSize: '100% 100%',
+        WebkitMaskSize: '100% 100%',
+        maskRepeat: 'no-repeat',
+        WebkitMaskRepeat: 'no-repeat',
+      }}
+    >
       <Container maxWidth="lg">
         <motion.div
           initial={{ opacity: 0, y: 30 }}

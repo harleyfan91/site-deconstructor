@@ -71,6 +71,13 @@ const HeroSection = () => {
             transform: 'translateY(-20px)',
           },
         },
+        // Add mask-image: fade the bottom of HeroSection to transparent (revealing FeatureShowcase underneath)
+        WebkitMaskImage: 'linear-gradient(to bottom, black 92%, transparent 100%)',
+        maskImage: 'linear-gradient(to bottom, black 92%, transparent 100%)',
+        maskSize: '100% 100%',
+        WebkitMaskSize: '100% 100%',
+        maskRepeat: 'no-repeat',
+        WebkitMaskRepeat: 'no-repeat',
       }}
     >
       <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
