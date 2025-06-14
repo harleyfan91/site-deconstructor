@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { Box, Typography, Grid, Card, CardContent, Chip, CircularProgress, Alert } from '@mui/material';
-import Grid2 from '@mui/material/Unstable_Grid2';
+import { Grid2 } from '@mui/material';
 import { CheckCircle, AlertCircle, XCircle } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 

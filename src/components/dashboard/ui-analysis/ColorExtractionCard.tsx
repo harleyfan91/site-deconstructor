@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { Box, Typography, Collapse, IconButton } from '@mui/material';
-import Grid2 from '@mui/material/Unstable_Grid2';
+import { Grid2 } from '@mui/material';
 import { Palette, ChevronDown, ChevronUp } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 import { groupByFrequency } from '@/lib/ui';
