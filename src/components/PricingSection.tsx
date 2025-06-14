@@ -92,6 +92,8 @@ const PricingSection = () => {
             gap: 4,
             maxWidth: 800,
             mx: 'auto',
+            // Add uniform top margin to accommodate floating chips
+            mt: 2,
           }}
         >
           {pricingPlans.map((plan, index) => (
@@ -103,8 +105,10 @@ const PricingSection = () => {
               viewport={{ once: true }}
               whileHover={{ y: -10 }}
               style={{
-                // Add margin top for recommended cards to accommodate the floating chip
-                marginTop: plan.recommended ? '16px' : '0px',
+                // Remove individual margin top - let the parent container handle spacing
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
               }}
             >
               <Card
@@ -117,7 +121,9 @@ const PricingSection = () => {
                   transition: 'all 0.3s ease',
                   border: plan.recommended ? '2px solid #FF6B35' : '1px solid rgba(255, 255, 255, 0.1)',
                   position: 'relative',
-                  overflow: 'visible', // Allow content to overflow for the floating chip
+                  overflow: 'visible',
+                  // Ensure equal heights by using flex
+                  flex: 1,
                   '&:hover': {
                     transform: 'translateY(-8px)',
                     boxShadow: '0 12px 40px rgba(255, 107, 53, 0.2)',
@@ -131,16 +137,16 @@ const PricingSection = () => {
                     color="primary"
                     sx={{
                       position: 'absolute',
-                      top: -16, // Float above the card
+                      top: -16,
                       left: '50%',
                       transform: 'translateX(-50%)',
                       fontWeight: 600,
                       zIndex: 2,
-                      boxShadow: '0 4px 12px rgba(255, 107, 53, 0.3)', // Add shadow for depth
+                      boxShadow: '0 4px 12px rgba(255, 107, 53, 0.3)',
                     }}
                   />
                 )}
-                <CardContent sx={{ p: 3, textAlign: 'center' }}>
+                <CardContent sx={{ p: 3, textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column' }}>
                   <Typography
                     variant="h5"
                     sx={{ mb: 2, fontWeight: 600 }}
@@ -169,7 +175,7 @@ const PricingSection = () => {
                   >
                     {plan.description}
                   </Typography>
-                  <List>
+                  <List sx={{ flex: 1 }}>
                     {plan.features.map((feature, i) => (
                       <ListItem key={i} disablePadding>
                         <ListItemIcon sx={{ minWidth: '30px' }}>
@@ -179,7 +185,7 @@ const PricingSection = () => {
                       </ListItem>
                     ))}
                   </List>
-                </CardContent>
+                </Box>
                 <Box sx={{ p: 3, textAlign: 'center' }}>
                   <Button
                     variant="contained"
