@@ -141,20 +141,25 @@ const FeatureShowcase = () => {
             gap: 4,
             zIndex: 2,
             position: 'relative',
+            alignItems: 'stretch', // Make grid items (cards) stretch to match the tallest
           }}
         >
           {features.map((feature, index) => (
-            <Box key={index} sx={{ zIndex: 2, position: 'relative' }}>
+            <Box key={index} sx={{ zIndex: 2, position: 'relative', height: '100%' }}>
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 viewport={{ once: true }}
                 whileHover={{ y: -10 }}
+                style={{ height: '100%' }}
               >
                 <Card
                   sx={{
                     height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'stretch',
                     cursor: 'pointer',
                     transition: 'all 0.3s ease',
                     '&:hover': {
@@ -167,7 +172,7 @@ const FeatureShowcase = () => {
                     },
                   }}
                 >
-                  <CardContent sx={{ p: 3, textAlign: 'center' }}>
+                  <CardContent sx={{ p: 3, textAlign: 'center', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
                     <Box
                       className="feature-icon"
                       sx={{
@@ -190,7 +195,7 @@ const FeatureShowcase = () => {
                     <Typography
                       variant="body2"
                       color="text.secondary"
-                      sx={{ lineHeight: 1.6 }}
+                      sx={{ lineHeight: 1.6, flexGrow: 1 }}
                     >
                       {feature.description}
                     </Typography>
