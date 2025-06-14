@@ -134,41 +134,104 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
             <Typography variant="h6" sx={{ fontWeight: 'bold', display: 'inline' }}>
               Tech Stack
             </Typography>
-            <Typography variant="body2" sx={{ fontSize: '0.75rem', fontWeight: 'normal', color: 'text.secondary', ml: 1, display: 'inline' }}>
+            <Typography variant="body2" sx={{
+              fontSize: '0.75rem',
+              fontWeight: 'normal',
+              color: 'text.secondary',
+              ml: 1,
+              display: 'inline'
+            }}>
               (Powered by Wappalyzer)
             </Typography>
           </Box>
-          
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 2 }}>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
+              gap: 2,
+            }}
+          >
             {(technical.techStack ?? []).map((tech, index) => {
               const IconComponent = getIcon(tech.category);
               return (
-                <Box key={index} sx={{
-                  p: 2,
-                  border: '1px solid #E0E0E0',
-                  borderRadius: 2,
-                  display: 'flex',
-                  alignItems: 'center',
-                  '&:hover': {
-                    backgroundColor: 'rgba(255, 107, 53, 0.05)'
-                  }
-                }}>
-                  <IconComponent size={20} color="#FF6B35" style={{ marginRight: 12 }} />
-                  <Box>
-                    {/* Show the category as a colored outlined Chip */}
-                    <Chip
-                      label={tech.category}
-                      {...chipStateStyle(true, "#0984E3")}
-                      size="small"
+                <Box
+                  key={index}
+                  sx={{
+                    p: 0,
+                    border: '1px solid #E0E0E0',
+                    borderRadius: 2,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    minHeight: 92, // at least visible split
+                    height: 120,
+                    // Responsive height for better mobile experience
+                    overflow: 'hidden',
+                    boxShadow: '0 0 0 0 transparent',
+                    '&:hover': { boxShadow: '0 2px 12px rgba(255,107,53,0.09)' },
+                  }}
+                >
+                  {/* Top 2/3 section: Orange background, icon + bold category */}
+                  <Box
+                    sx={{
+                      flex: 2,
+                      minHeight: 0, // allows flex
+                      px: 2,
+                      py: 1.5,
+                      display: 'flex',
+                      alignItems: 'center',
+                      backgroundColor: '#363330', // Light orange-brown matching your image
+                      // Optional: use "#FF6B35" with opacity for paler look:
+                      // backgroundColor: 'rgba(255, 107, 53, 0.11)',
+                      borderTopLeftRadius: 14,
+                      borderTopRightRadius: 14,
+                      gap: 1.5,
+                    }}
+                  >
+                    <IconComponent size={22} color="#FF6B35" style={{ marginRight: 10, flexShrink: 0 }} />
+                    <Typography
+                      variant="subtitle2"
                       sx={{
-                        ...chipStateStyle(true, "#0984E3").sx,
-                        mb: 0.25,
-                        mr: 1,
-                        height: 22,
-                        fontSize: '0.75rem'
+                        color: '#FF6B35',
+                        fontWeight: 700,
+                        fontSize: '1rem',
+                        letterSpacing: 0.1,
+                        textShadow: 'none',
+                        lineHeight: 1.2,
+                        userSelect: 'text',
+                        pr: 0,
                       }}
-                    />
-                    <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mt: 0.2 }}>
+                    >
+                      {tech.category}
+                    </Typography>
+                  </Box>
+                  {/* Bottom 1/3 section: Transparent, technology name in bold white */}
+                  <Box
+                    sx={{
+                      flex: 1,
+                      minHeight: 0,
+                      px: 2,
+                      py: 1.1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      backgroundColor: 'transparent',
+                      borderBottomLeftRadius: 14,
+                      borderBottomRightRadius: 14,
+                    }}
+                  >
+                    <Typography
+                      variant="subtitle1"
+                      sx={{
+                        color: '#FFF',
+                        fontWeight: 700,
+                        fontSize: '1.06rem',
+                        letterSpacing: 0.12,
+                        textAlign: 'left',
+                        width: '100%',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}
+                    >
                       {tech.technology}
                     </Typography>
                   </Box>
