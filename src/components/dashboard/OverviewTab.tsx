@@ -1,7 +1,6 @@
 
 import React from 'react';
-import { Box, Typography, Card, CardContent, CircularProgress, Alert, Link, IconButton, Popover } from '@mui/material';
-import Grid from '@mui/material/Grid2';
+import { Box, Typography, Card, CardContent, CircularProgress, Alert, Link, IconButton, Popover, Grid } from '@mui/material';
 import { TrendingUp, Users, Clock, Star } from 'lucide-react';
 import InfoOutlined from '@mui/icons-material/InfoOutlined';
 import type { AnalysisResponse } from '@/types/analysis';
@@ -95,7 +94,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
         {metrics.map((metric, index) => {
           const IconComponent = metric.icon;
           return (
-            <Grid xs={6} key={index} sx={{ display: 'flex' }}>
+            <Grid item xs={6} key={index} sx={{ display: 'flex' }}>
               <Card sx={{ height: '100%', borderRadius: 2, flexGrow: 1 }}>
                 <CardContent sx={{ p: 3 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -165,7 +164,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
             <strong>Key Findings:</strong>
           </Typography>
           <Grid container spacing={1} sx={{ mb: 2 }}>
-            <Grid xs={6}>
+            <Grid item xs={6}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
               <Typography variant="body2">Overall Score</Typography>
               <Typography
@@ -184,7 +183,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
               </Typography>
               </Box>
             </Grid>
-            <Grid xs={6}>
+            <Grid item xs={6}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
               <Typography variant="body2">SEO Score</Typography>
               <Typography
@@ -203,7 +202,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
               </Typography>
               </Box>
             </Grid>
-            <Grid xs={6}>
+            <Grid item xs={6}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
               <Typography variant="body2">Page Load Time</Typography>
               <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#FF9800' }}>
@@ -211,7 +210,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
               </Typography>
               </Box>
             </Grid>
-            <Grid xs={6}>
+            <Grid item xs={6}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
               <Typography variant="body2">User Experience</Typography>
               <Typography

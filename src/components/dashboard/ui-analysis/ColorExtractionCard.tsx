@@ -60,7 +60,9 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
 
   const hexToRgb = (hex: string): {r:number;g:number;b:number} | null => {
     const match = hex.replace('#','').match(/^([0-9a-f]{3}|[0-9a-f]{6})$/i);
-    if (!match) return null;
+    if (!match)
+
+null;
     let h = match[0];
     if (h.length === 3) h = h.split('').map(c=>c+c).join('');
     const num = parseInt(h, 16);
@@ -218,7 +220,7 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
                           </Typography>
                           <Grid container spacing={1} sx={{ mb: 2 }}>
                             {harmonyGroup.colors.map((color, colorIndex) => (
-                              <Grid key={colorIndex} xs={4} sm={3} md={2}>
+                              <Grid item xs={4} sm={3} md={2} key={colorIndex}>
                                 <Box
                                   sx={{
                                     display: 'flex',
