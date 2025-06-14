@@ -107,7 +107,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
           </Box>
           
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 2 }}>
-            {technical.techStack.map((tech, index) => {
+            {(technical.techStack ?? []).map((tech, index) => {
               const IconComponent = getIcon(tech.category);
               return (
                 <Box key={index} sx={{
@@ -284,7 +284,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {technical.issues.map((issue, index) => (
+                {(technical.issues ?? []).map((issue, index) => (
                   <TableRow key={index}>
                     <TableCell>{issue.type}</TableCell>
                     <TableCell>{issue.description}</TableCell>
@@ -332,19 +332,19 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography variant="body2">High Severity</Typography>
                 <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#F44336' }}>
-                  {technical.issues.filter(i => i.severity === 'high').length}
+                  {(technical.issues ?? []).filter(i => i.severity === 'high').length}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography variant="body2">Medium Severity</Typography>
                 <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#FF9800' }}>
-                  {technical.issues.filter(i => i.severity === 'medium').length}
+                  {(technical.issues ?? []).filter(i => i.severity === 'medium').length}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography variant="body2">Low Severity</Typography>
                 <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#4CAF50' }}>
-                  {technical.issues.filter(i => i.severity === 'low').length}
+                  {(technical.issues ?? []).filter(i => i.severity === 'low').length}
                 </Typography>
               </Box>
             </Box>
