@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Box, Typography, Card, CardContent, Chip, CircularProgress, Alert } from '@mui/material';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
@@ -121,10 +120,6 @@ function TechStackGrid({ techStack }: { techStack: { category: string; technolog
               overflow: 'hidden',
               boxShadow: '0 0 0 0 transparent',
               cursor: 'pointer',
-              // When the card is hovered, pass a prop to the bottom section for hover coloring
-              '&:hover .techstack-bottom': {
-                backgroundColor: 'rgba(255, 107, 53, 0.1)',
-              }
             }}
           >
             {/* Top 1/3: transparent, white tech name */}
@@ -493,4 +488,3 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
 };
 
 export default TechTab;
-
