@@ -1,8 +1,10 @@
 
+
 import React from 'react';
 import { Box, Typography, Card, CardContent, Alert, CircularProgress, Chip } from '@mui/material';
 import type { AnalysisResponse } from '@/types/analysis';
 import { dashIfEmpty } from '../../lib/ui';
+import ColorLegend from './ColorLegend';
 
 interface ComplianceTabProps {
   data: AnalysisResponse | null;
@@ -46,9 +48,12 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
 
   return (
     <Box>
-      <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-        Compliance Audits
-      </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 0, mr: 2 }}>
+          Compliance Audits
+        </Typography>
+        <ColorLegend />
+      </Box>
 
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
         <Card sx={{ borderRadius: 2 }}>
@@ -114,3 +119,4 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
 };
 
 export default ComplianceTab;
+

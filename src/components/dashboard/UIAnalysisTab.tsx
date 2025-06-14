@@ -6,6 +6,7 @@ import ColorExtractionCard from './ui-analysis/ColorExtractionCard';
 import FontAnalysisCard from './ui-analysis/FontAnalysisCard';
 import ImageAnalysisCard from './ui-analysis/ImageAnalysisCard';
 import ContrastWarningsCard from './ui-analysis/ContrastWarningsCard';
+import ColorLegend from './ColorLegend';
 
 interface UIAnalysisTabProps {
   data: AnalysisResponse | null;
@@ -43,9 +44,12 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
 
   return (
     <Box>
-      <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-        User Interface Analysis
-      </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 0, mr: 2 }}>
+          User Interface Analysis
+        </Typography>
+        <ColorLegend />
+      </Box>
 
       <Box sx={{ display: 'grid', gap: 2, alignItems: 'stretch' }}>
         {/* Color Extraction */}

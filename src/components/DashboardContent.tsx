@@ -59,12 +59,7 @@ const DashboardContent = () => {
                   <TabsTrigger value="tech" className="text-xs sm:text-sm">Tech</TabsTrigger>
                   <TabsTrigger value="compliance" className="text-xs sm:text-sm">Compliance</TabsTrigger>
                 </TabsList>
-                {/* Legend should render for all tabs except "overview" */}
-                {TABS_WITH_LEGEND.includes(activeTab) && (
-                  <Box sx={{ ml: 2 }}>
-                    <ColorLegend />
-                  </Box>
-                )}
+                {/* Removed ColorLegend from here */}
               </Box>
             </motion.div>
             
