@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Box, Typography, Card, CardContent, Chip, CircularProgress, Alert } from '@mui/material';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
@@ -187,11 +186,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
               Detected Ad Tags
             </Typography>
-            <Box sx={{ 
-              display: 'grid', 
-              gridTemplateColumns: '1fr', // Single column so chips become full width
-              gap: 2 
-            }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 2 }}>
               {[
                 { label: 'Google GAM/GPT', key: 'hasGAM' },
                 { label: 'AdSense/DFP', key: 'hasAdSense' },
@@ -220,10 +215,10 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                   sx={{
                     ...chipStateStyle(Boolean(data.data.adTags[key])).sx,
                     width: '100%',
+                    justifyContent: 'flex-start',
                     '& .MuiChip-label': {
                       width: '100%',
-                      textAlign: 'center',
-                      display: 'block'
+                      textAlign: 'left'
                     }
                   }}
                 />
@@ -398,4 +393,3 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
 };
 
 export default TechTab;
-
