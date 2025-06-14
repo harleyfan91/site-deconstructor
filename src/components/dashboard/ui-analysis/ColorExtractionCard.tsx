@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Box, Typography, Collapse, IconButton } from '@mui/material';
 import { Palette, ChevronDown, ChevronUp } from 'lucide-react';
@@ -216,7 +215,17 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
                           >
                             {harmonyGroup.name}
                           </Typography>
-                          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(3, 1fr)', sm: 'repeat(4, 1fr)', md: 'repeat(6, 1fr)' }, gap: 1, mb: 2 }}>
+                          <Box sx={{ 
+                            display: 'grid', 
+                            gridTemplateColumns: { 
+                              xs: 'repeat(2, 1fr)', 
+                              sm: 'repeat(3, 1fr)', 
+                              md: 'repeat(4, 1fr)', 
+                              lg: 'repeat(6, 1fr)' 
+                            }, 
+                            gap: 1, 
+                            mb: 2 
+                          }}>
                             {harmonyGroup.colors.map((color, colorIndex) => (
                               <Box
                                 key={colorIndex}
@@ -227,12 +236,13 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
                                   border: '1px solid rgba(0,0,0,0.1)',
                                   borderRadius: 1,
                                   p: 1,
+                                  minWidth: 0,
                                 }}
                               >
                                 <Box
                                   sx={{
-                                    width: 24,
-                                    height: 24,
+                                    width: 20,
+                                    height: 20,
                                     backgroundColor: color.hex,
                                   borderRadius: 0.5,
                                   mr: 1,
@@ -248,6 +258,8 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
                                     display: 'block',
                                     overflow: 'hidden',
                                     textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                    fontSize: { xs: '0.65rem', sm: '0.75rem' }
                                   }}
                                 >
                                   {color.name}
@@ -257,7 +269,10 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
                                   color="text.secondary"
                                   sx={{
                                     display: 'block',
-                                    fontSize: '0.7rem'
+                                    fontSize: { xs: '0.6rem', sm: '0.7rem' },
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
                                   }}
                                 >
                                   {color.hex}
