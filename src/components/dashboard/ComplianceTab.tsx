@@ -1,7 +1,5 @@
-
 import React from 'react';
 import { Box, Typography, Card, CardContent, Alert, CircularProgress, Chip } from '@mui/material';
-import { Grid2 } from '@mui/material';
 import type { AnalysisResponse } from '@/types/analysis';
 import { dashIfEmpty } from '../../lib/ui';
 
