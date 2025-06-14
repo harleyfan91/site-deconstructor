@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Box, Typography, Collapse, IconButton } from '@mui/material';
-import Grid2 from '@mui/material/Unstable_Grid2';
+import Grid2 from '@mui/material/Grid2';
 import { Palette, ChevronDown, ChevronUp } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 import { groupByFrequency } from '@/lib/ui';
@@ -217,9 +217,9 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
                           >
                             {harmonyGroup.name}
                           </Typography>
-                          <Grid container spacing={1} sx={{ mb: 2 }}>
+                          <Grid2 container spacing={1} sx={{ mb: 2 }}>
                             {harmonyGroup.colors.map((color, colorIndex) => (
-                              <Grid key={colorIndex} xs={4} sm={3} md={2}>
+                              <Grid2 size={{ xs: 4, sm: 3, md: 2 }} key={colorIndex}>
                                 <Box
                                   sx={{
                                     display: 'flex',
@@ -265,9 +265,9 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
                                   </Typography>
                                 </Box>
                                 </Box>
-                              </Grid>
+                              </Grid2>
                             ))}
-                          </Grid>
+                          </Grid2>
                         </Box>
                       ))}
                     </Box>

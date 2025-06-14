@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { Box, Typography, Grid, Card, CardContent, Chip, CircularProgress, Alert } from '@mui/material';
-import Grid2 from '@mui/material/Unstable_Grid2';
+import Grid2 from '@mui/material/Grid2';
 import { CheckCircle, AlertCircle, XCircle } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 
@@ -83,8 +84,8 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
         SEO Analysis
       </Typography>
 
-      <Grid container spacing={3}>
-        <Grid xs={12} md={8}>
+      <Grid2 container spacing={3}>
+        <Grid2 size={{ xs: 12, md: 8 }}>
           <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -123,9 +124,9 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
               </Box>
             </CardContent>
           </Card>
-        </Grid>
+        </Grid2>
 
-        <Grid xs={12} md={4}>
+        <Grid2 size={{ xs: 12, md: 4 }}>
           <Card sx={{ borderRadius: 2, mb: 2 }}>
             <CardContent sx={{ p: 3, textAlign: 'center' }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -171,8 +172,8 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
               </Box>
             </CardContent>
           </Card>
-        </Grid>
-      </Grid>
+        </Grid2>
+      </Grid2>
 
       <Box sx={{ mt: 3 }}>
         <Card sx={{ borderRadius: 2 }}>
@@ -180,9 +181,9 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
               SEO Recommendations
             </Typography>
-            <Grid container spacing={2}>
+            <Grid2 container spacing={2}>
               {seo.recommendations.map((rec, index) => (
-                <Grid xs={12} md={6} key={index}>
+                <Grid2 size={{ xs: 12, md: 6 }} key={index}>
                   <Box sx={{ 
                     p: 2, 
                     border: `1px solid ${getPriorityColor(rec.priority)}`,
@@ -211,9 +212,9 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
                       {rec.description}
                     </Typography>
                   </Box>
-                </Grid>
+                </Grid2>
               ))}
-            </Grid>
+            </Grid2>
           </CardContent>
         </Card>
       </Box>

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Box, Typography, Card, CardContent, Alert, CircularProgress, Chip } from '@mui/material';
-import Grid2 from '@mui/material/Unstable_Grid2';
+import Grid2 from '@mui/material/Grid2';
 import type { AnalysisResponse } from '@/types/analysis';
 import { dashIfEmpty } from '../../lib/ui';
 
@@ -51,8 +51,8 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
         Compliance Audits
       </Typography>
 
-      <Grid container spacing={3}>
-        <Grid xs={12} md={6}>
+      <Grid2 container spacing={3}>
+        <Grid2 size={{ xs: 12, md: 6 }}>
           <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -67,9 +67,9 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
               </Box>
             </CardContent>
           </Card>
-        </Grid>
+        </Grid2>
 
-        <Grid xs={12} md={6}>
+        <Grid2 size={{ xs: 12, md: 6 }}>
           <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -88,9 +88,9 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
               )}
             </CardContent>
           </Card>
-        </Grid>
+        </Grid2>
 
-        <Grid xs={12}>
+        <Grid2 size={12}>
           <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -112,8 +112,8 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
               </Typography>
             </CardContent>
           </Card>
-        </Grid>
-      </Grid>
+        </Grid2>
+      </Grid2>
     </Box>
   );
 };

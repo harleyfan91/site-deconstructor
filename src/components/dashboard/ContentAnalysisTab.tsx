@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { Box, Typography, Grid, Card, CardContent, LinearProgress } from '@mui/material';
-import Grid2 from '@mui/material/Unstable_Grid2';
+import Grid2 from '@mui/material/Grid2';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis } from 'recharts';
 
@@ -29,8 +30,8 @@ const ContentAnalysisTab = () => {
         Content Analysis
       </Typography>
 
-      <Grid container spacing={3}>
-        <Grid xs={12} md={6}>
+      <Grid2 container spacing={3}>
+        <Grid2 size={{ xs: 12, md: 6 }}>
           <Card sx={{ borderRadius: 2, height: '400px' }}>
             <CardContent sx={{ p: 3, height: '100%' }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -56,9 +57,9 @@ const ContentAnalysisTab = () => {
               </ChartContainer>
             </CardContent>
           </Card>
-        </Grid>
+        </Grid2>
 
-        <Grid xs={12} md={6}>
+        <Grid2 size={{ xs: 12, md: 6 }}>
           <Card sx={{ borderRadius: 2, height: '400px' }}>
             <CardContent sx={{ p: 3, height: '100%' }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -74,11 +75,11 @@ const ContentAnalysisTab = () => {
               </ChartContainer>
             </CardContent>
           </Card>
-        </Grid>
-      </Grid>
+        </Grid2>
+      </Grid2>
 
-      <Grid container spacing={3} sx={{ mt: 1 }}>
-        <Grid xs={12} md={8}>
+      <Grid2 container spacing={3} sx={{ mt: 1 }}>
+        <Grid2 size={{ xs: 12, md: 8 }}>
           <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -118,9 +119,9 @@ const ContentAnalysisTab = () => {
               </Box>
             </CardContent>
           </Card>
-        </Grid>
+        </Grid2>
 
-        <Grid xs={12} md={4}>
+        <Grid2 size={{ xs: 12, md: 4 }}>
           <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -153,8 +154,8 @@ const ContentAnalysisTab = () => {
               </Box>
             </CardContent>
           </Card>
-        </Grid>
-      </Grid>
+        </Grid2>
+      </Grid2>
     </Box>
   );
 };

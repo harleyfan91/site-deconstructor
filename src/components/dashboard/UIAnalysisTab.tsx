@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { Box, Typography, Card, CardContent, CircularProgress, Alert } from '@mui/material';
-import Grid2 from '@mui/material/Unstable_Grid2';
+import Grid2 from '@mui/material/Grid2';
 import type { AnalysisResponse } from '@/types/analysis';
 import ColorExtractionCard from './ui-analysis/ColorExtractionCard';
 import FontAnalysisCard from './ui-analysis/FontAnalysisCard';
@@ -49,7 +50,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
 
       <Grid2 container spacing={2} alignItems="stretch">
         {/* Color Extraction */}
-        <Grid2 item xs={12} sx={{ display: 'flex', width: '100%' }}>
+        <Grid2 size={12} sx={{ display: 'flex', width: '100%' }}>
           <Card sx={{ borderRadius: 2, flexGrow: 1, width: '100%' }}>
             <CardContent sx={{ p: 3 }}>
               <ColorExtractionCard colors={colors} />
@@ -58,7 +59,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
         </Grid2>
 
         {/* Font Analysis */}
-        <Grid2 item xs={12} md={6} sx={{ display: 'flex', width: '100%' }}>
+        <Grid2 size={{ xs: 12, md: 6 }} sx={{ display: 'flex', width: '100%' }}>
           <Card sx={{ borderRadius: 2, flexGrow: 1, width: '100%' }}>
             <CardContent sx={{ p: 3 }}>
               <FontAnalysisCard fonts={fonts} />
@@ -67,7 +68,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
         </Grid2>
 
         {/* Contrast Warnings */}
-        <Grid2 item xs={12} md={6} sx={{ display: 'flex', width: '100%' }}>
+        <Grid2 size={{ xs: 12, md: 6 }} sx={{ display: 'flex', width: '100%' }}>
           <Card sx={{ borderRadius: 2, flexGrow: 1, width: '100%' }}>
             <CardContent sx={{ p: 3 }}>
               <ContrastWarningsCard issues={data.data.ui.contrastIssues} />
@@ -76,7 +77,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
         </Grid2>
 
         {/* Image Analysis */}
-        <Grid2 item xs={12} sx={{ display: 'flex', width: '100%' }}>
+        <Grid2 size={12} sx={{ display: 'flex', width: '100%' }}>
           <Card sx={{ borderRadius: 2, flexGrow: 1, width: '100%' }}>
             <CardContent sx={{ p: 3 }}>
               <ImageAnalysisCard
