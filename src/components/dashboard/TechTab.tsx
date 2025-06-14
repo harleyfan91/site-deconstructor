@@ -11,24 +11,25 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import type { AnalysisResponse } from '@/types/analysis';
 import TechStackGrid from './TechStackGrid';
 import LegendContainer from './LegendContainer';
+import { useTheme } from '@mui/material/styles';
 
 /** ===========================
  *  Helpers and constants
  *  =========================== */
 
 /** Return color by severity (used in chips). */
-function getSeverityColor(severity: string): string {
+function getSeverityColor(severity: string, theme: any): string {
   switch (severity.toLowerCase()) {
-    case 'high': return '#F44336';
-    case 'medium': return '#FF9800';
-    case 'low': return '#4CAF50';
-    default: return '#757575';
+    case 'high': return theme.palette.error.main;
+    case 'medium': return theme.palette.warning.main;
+    case 'low': return theme.palette.success.main;
+    default: return theme.palette.neutral?.main || '#757575';
   }
 }
 
 /** Generate Chip styling props for severity. */
-function chipSeverityStyle(severity: string) {
-  const color = getSeverityColor(severity);
+function chipSeverityStyle(severity: string, theme: any) {
+  const color = getSeverityColor(severity, theme);
   return {
     variant: "outlined" as const,
     sx: {
@@ -41,13 +42,13 @@ function chipSeverityStyle(severity: string) {
 }
 
 /** Generate Chip styling props for isActive state (used for active/inactive chips). */
-function chipStateStyle(isActive: boolean, color = "#4CAF50") {
+function chipStateStyle(isActive: boolean, theme: any) {
   return isActive
     ? {
         variant: "outlined" as const,
         sx: {
-          borderColor: color,
-          color,
+          borderColor: theme.palette.success.main,
+          color: theme.palette.success.main,
           background: "transparent",
           fontWeight: 600,
         }
@@ -56,8 +57,8 @@ function chipStateStyle(isActive: boolean, color = "#4CAF50") {
         variant: "outlined" as const,
         color: "default" as const,
         sx: {
-          borderColor: "#BDBDBD",
-          color: "#BDBDBD",
+          borderColor: theme.palette.neutral?.main || "#BDBDBD",
+          color: theme.palette.neutral?.main || "#BDBDBD",
           background: "transparent",
           fontWeight: 600,
         }
@@ -171,6 +172,8 @@ interface TechTabProps {
  * UI & logic are unchanged.
  */
 const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
+  const theme = useTheme();
+
   // Loading: show spinner and message
   if (loading) {
     return (
@@ -247,10 +250,10 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                 <Chip
                   key={key}
                   label={label}
-                  {...chipStateStyle(Boolean(data.data.adTags[key]))}
+                  {...chipStateStyle(Boolean(data.data.adTags[key]), theme)}
                   size="small"
                   sx={{
-                    ...chipStateStyle(Boolean(data.data.adTags[key])).sx,
+                    ...chipStateStyle(Boolean(data.data.adTags[key]), theme).sx,
                     justifyContent: 'center',
                     textAlign: 'center',
                     '& .MuiChip-label': {
@@ -274,21 +277,21 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 2 }}>
             <Chip
               label="Open Graph Meta Tags"
-              {...chipStateStyle(Boolean(technical.social?.hasOpenGraph))}
+              {...chipStateStyle(Boolean(technical.social?.hasOpenGraph), theme)}
               size="small"
-              sx={{ ...chipStateStyle(Boolean(technical.social?.hasOpenGraph)).sx, width: '100%' }}
+              sx={{ ...chipStateStyle(Boolean(technical.social?.hasOpenGraph), theme).sx, width: '100%' }}
             />
             <Chip
               label="Twitter Card Meta Tags"
-              {...chipStateStyle(Boolean(technical.social?.hasTwitterCard))}
+              {...chipStateStyle(Boolean(technical.social?.hasTwitterCard), theme)}
               size="small"
-              sx={{ ...chipStateStyle(Boolean(technical.social?.hasTwitterCard)).sx, width: '100%' }}
+              sx={{ ...chipStateStyle(Boolean(technical.social?.hasTwitterCard), theme).sx, width: '100%' }}
             />
             <Chip
               label="Share Buttons"
-              {...chipStateStyle(Boolean(technical.social?.hasShareButtons))}
+              {...chipStateStyle(Boolean(technical.social?.hasShareButtons), theme)}
               size="small"
-              sx={{ ...chipStateStyle(Boolean(technical.social?.hasShareButtons)).sx, width: '100%' }}
+              sx={{ ...chipStateStyle(Boolean(technical.social?.hasShareButtons), theme).sx, width: '100%' }}
             />
           </Box>
         </CardContent>
@@ -304,13 +307,13 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
             {technical.cookies?.hasCookieScript ? (
               <Chip
                 label="Cookie Consent Script Detected"
-                {...chipStateStyle(true)}
+                {...chipStateStyle(true, theme)}
                 size="medium"
               />
             ) : (
               <Chip
                 label="No Cookie Consent Script Found"
-                {...chipStateStyle(false)}
+                {...chipStateStyle(false, theme)}
                 size="medium"
               />
             )}
@@ -327,15 +330,15 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 2 }}>
             <Chip
               label={`CSS: ${technical.minification?.cssMinified ? 'Minified' : 'Not Minified'}`}
-              {...chipStateStyle(Boolean(technical.minification?.cssMinified))}
+              {...chipStateStyle(Boolean(technical.minification?.cssMinified), theme)}
               size="medium"
-              sx={{ ...chipStateStyle(Boolean(technical.minification?.cssMinified)).sx, width: '100%' }}
+              sx={{ ...chipStateStyle(Boolean(technical.minification?.cssMinified), theme).sx, width: '100%' }}
             />
             <Chip
               label={`JavaScript: ${technical.minification?.jsMinified ? 'Minified' : 'Not Minified'}`}
-              {...chipStateStyle(Boolean(technical.minification?.jsMinified))}
+              {...chipStateStyle(Boolean(technical.minification?.jsMinified), theme)}
               size="medium"
-              sx={{ ...chipStateStyle(Boolean(technical.minification?.jsMinified)).sx, width: '100%' }}
+              sx={{ ...chipStateStyle(Boolean(technical.minification?.jsMinified), theme).sx, width: '100%' }}
             />
           </Box>
         </CardContent>
@@ -365,10 +368,10 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                     <TableCell>
                       <Chip
                         label={issue.severity}
-                        {...chipSeverityStyle(issue.severity)}
+                        {...chipSeverityStyle(issue.severity, theme)}
                         size="small"
                         sx={{
-                          ...chipSeverityStyle(issue.severity).sx,
+                          ...chipSeverityStyle(issue.severity, theme).sx,
                           height: 22,
                           fontSize: '0.82rem'
                         }}

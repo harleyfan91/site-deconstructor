@@ -1,18 +1,19 @@
-
 import React from 'react';
 import { Card, CardContent, Typography, Box, Popover } from '@mui/material';
 import { Circle } from 'lucide-react';
 import { useTheme } from '@mui/material/styles';
 
-const LEGEND_COLORS = [
-  { color: '#BDBDBD', key: 'gray', label: 'Unknown/Not detected' },
-  { color: '#43A047', key: 'green1', label: 'Good / Secure / Passing' },
-  { color: '#FFB300', key: 'orange', label: 'Warning / Needs improvement' },
-  { color: '#F44336', key: 'red', label: 'Critical issue / Failing' }
+// Use theme palette for legend meaning
+const useLegendColors = (theme: any) => [
+  { color: theme.palette.neutral?.main || '#BDBDBD', key: 'gray', label: 'Unknown/Not detected' },
+  { color: theme.palette.success.main, key: 'green1', label: 'Good / Secure / Passing' },
+  { color: theme.palette.warning.main, key: 'orange', label: 'Warning / Needs improvement' },
+  { color: theme.palette.error.main, key: 'red', label: 'Critical issue / Failing' }
 ];
 
 const LegendContainer: React.FC = () => {
   const theme = useTheme();
+  const LEGEND_COLORS = useLegendColors(theme);
 
   // Use ref for stable anchor
   const anchorRef = React.useRef<HTMLDivElement | null>(null);

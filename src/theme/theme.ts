@@ -14,6 +14,32 @@ export const createAppTheme = (darkMode: boolean) => createTheme({
       light: '#42A5F5',
       dark: '#0D47A1',
     },
+    // Use legend colors for semantic status
+    success: {
+      main: '#43A047', // "Good / Secure / Passing"
+      light: '#66bb6a',
+      dark: '#2e7d32',
+      contrastText: '#fff'
+    },
+    warning: {
+      main: '#FFB300', // "Warning / Needs improvement"
+      light: '#FFD54F',
+      dark: '#FF8F00',
+      contrastText: '#fff'
+    },
+    error: {
+      main: '#F44336', // "Critical issue / Failing"
+      light: '#ef5350',
+      dark: '#c62828',
+      contrastText: '#fff'
+    },
+    // Add a neutral/gray for "Unknown/Not detected"
+    neutral: {
+      main: '#BDBDBD',
+      light: '#e0e0e0',
+      dark: '#757575',
+      contrastText: '#fff'
+    },
     background: {
       default: darkMode ? '#0F0F0F' : '#FFFFFF',
       paper: darkMode ? 'rgba(45, 52, 54, 0.8)' : 'rgba(255, 255, 255, 0.9)',
@@ -102,3 +128,4 @@ export const createAppTheme = (darkMode: boolean) => createTheme({
 
 // Export default theme for backward compatibility
 export const theme = createAppTheme(true);
+
