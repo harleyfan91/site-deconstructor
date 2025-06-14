@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Box,
@@ -14,6 +13,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart';
 import { BarChart, Bar, XAxis, YAxis } from 'recharts';
 import { Shield, Smartphone, Zap } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
+import LegendContainer from './LegendContainer';
 
 interface PerformanceTabProps {
   data: AnalysisResponse | null;
@@ -90,10 +90,12 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
 
   return (
     <Box>
-      <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-        Performance & Security Analysis
-      </Typography>
-
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', flexGrow: 1 }}>
+          Performance & Security Analysis
+        </Typography>
+        <LegendContainer />
+      </Box>
       {/* Performance Score Section */}
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 3, mb: 4 }}>
         {metrics.map((metric, index) => {

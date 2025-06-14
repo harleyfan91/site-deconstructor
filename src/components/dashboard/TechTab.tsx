@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 // Types
 import type { AnalysisResponse } from '@/types/analysis';
 import TechStackGrid from './TechStackGrid';
+import LegendContainer from './LegendContainer';
 
 /** ===========================
  *  Helpers and constants
@@ -203,11 +204,12 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
 
   return (
     <Box>
-      {/* Section: Technical Analysis */}
-      <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-        Technical Analysis
-      </Typography>
-
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', flexGrow: 1 }}>
+          Technical Analysis
+        </Typography>
+        <LegendContainer />
+      </Box>
       {/* Section: Tech Stack */}
       <Card sx={{ borderRadius: 2, mb: 3 }}>
         <CardContent sx={{ p: 3 }}>

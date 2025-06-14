@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Box, Typography, Card, CardContent, CircularProgress, Alert } from '@mui/material';
 import type { AnalysisResponse } from '@/types/analysis';
@@ -6,6 +5,7 @@ import ColorExtractionCard from './ui-analysis/ColorExtractionCard';
 import FontAnalysisCard from './ui-analysis/FontAnalysisCard';
 import ImageAnalysisCard from './ui-analysis/ImageAnalysisCard';
 import ContrastWarningsCard from './ui-analysis/ContrastWarningsCard';
+import LegendContainer from './LegendContainer';
 
 interface UIAnalysisTabProps {
   data: AnalysisResponse | null;
@@ -43,10 +43,12 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
 
   return (
     <Box>
-      <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-        User Interface Analysis
-      </Typography>
-
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', flexGrow: 1 }}>
+          User Interface Analysis
+        </Typography>
+        <LegendContainer />
+      </Box>
       <Box sx={{ display: 'grid', gap: 2, alignItems: 'stretch' }}>
         {/* Color Extraction */}
         <Card sx={{ borderRadius: 2, width: '100%' }}>
