@@ -16,19 +16,12 @@ const PricingSection = () => {
       sx={{
         position: 'relative',
         py: { xs: 8, md: 12 },
-        bgcolor: 'background.default',
+        bgcolor: 'transparent',
         overflow: 'hidden',
         minHeight: { xs: 600, md: 780 },
-        // More diffused (taller) fade in at the top
-        WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 20%, black 100%)',
-        maskImage: 'linear-gradient(to bottom, transparent 0%, black 20%, black 100%)',
-        maskSize: '100% 100%',
-        WebkitMaskSize: '100% 100%',
-        maskRepeat: 'no-repeat',
-        WebkitMaskRepeat: 'no-repeat',
       }}
     >
-      {/* Colorful abstract background (NO gradients/fades over page edge) */}
+      {/* Decorative background absolutely positioned with zIndex: 0 */}
       <Box
         sx={{
           pointerEvents: 'none',
@@ -37,17 +30,22 @@ const PricingSection = () => {
           top: 0,
           width: '100%',
           height: '100%',
-          zIndex: 1,
-          // Vibrant background: radial and linear blends, no fading to section edge
+          zIndex: 0,
           background: `
             radial-gradient(circle at 18% 82%, rgba(9,132,227,0.32) 0%, transparent 72%),
             radial-gradient(circle at 80% 75%, rgba(255,107,53,0.27) 0%, transparent 68%),
             radial-gradient(circle at 38% 30%, rgba(255,138,101,0.19) 0%, transparent 82%),
             linear-gradient(225deg, #0F0F0F 0%, #1A1A1A 100%)
           `,
+          WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 20%, black 100%)',
+          maskImage: 'linear-gradient(to bottom, transparent 0%, black 20%, black 100%)',
+          maskSize: '100% 100%',
+          WebkitMaskSize: '100% 100%',
+          maskRepeat: 'no-repeat',
+          WebkitMaskRepeat: 'no-repeat',
         }}
       />
-      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 2 }}>
+      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -64,6 +62,8 @@ const PricingSection = () => {
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               fontWeight: 700,
+              zIndex: 2,
+              position: 'relative',
             }}
           >
             Simple Pricing
@@ -72,14 +72,13 @@ const PricingSection = () => {
             variant="h6"
             align="center"
             color="text.secondary"
-            sx={{ mb: 8, maxWidth: 600, mx: 'auto' }}
+            sx={{ mb: 8, maxWidth: 600, mx: 'auto', zIndex: 2, position: 'relative' }}
           >
             Start for free, upgrade when you need more features.
             <br />
             No monthly subscriptions.
           </Typography>
         </motion.div>
-
         <Box
           sx={{
             display: 'grid',
@@ -91,6 +90,8 @@ const PricingSection = () => {
             maxWidth: 800,
             mx: 'auto',
             mt: 2,
+            zIndex: 2,
+            position: 'relative',
           }}
         >
           {pricingPlans.map((plan, index) => (

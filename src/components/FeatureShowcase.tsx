@@ -18,78 +18,88 @@ import {
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 
-const FeatureShowcase = () => {
-  const features = [
-    {
-      icon: <Palette />,
-      title: 'Color Extraction',
-      description: 'Extract dominant colors, gradients, and complete color palettes with hex codes.',
-    },
-    {
-      icon: <TextFields />,
-      title: 'Font Analysis',
-      description: 'Identify fonts, typography styles, and text hierarchies used across the site.',
-    },
-    {
-      icon: <Image />,
-      title: 'Image Gallery',
-      description: 'Catalog all images, icons, and visual assets with download capabilities.',
-    },
-    {
-      icon: <Code />,
-      title: 'Tech Stack Detection',
-      description: 'Discover frameworks, libraries, and technologies powering the website.',
-    },
-    {
-      icon: <Speed />,
-      title: 'Performance Metrics',
-      description: 'Analyze loading speeds, optimization scores, and performance insights.',
-    },
-    {
-      icon: <Security />,
-      title: 'Security Analysis',
-      description: 'Check SSL certificates, security headers, and vulnerability assessments.',
-    },
-    {
-      icon: <Analytics />,
-      title: 'SEO Insights',
-      description: 'Meta tags, structured data, and search optimization analysis.',
-    },
-    {
-      icon: <CloudDownload />,
-      title: 'Export Reports',
-      description: 'Download comprehensive reports in PDF, JSON, or CSV formats.',
-    },
-  ];
+const features = [
+  {
+    icon: <Palette />,
+    title: 'Color Extraction',
+    description: 'Extract dominant colors, gradients, and complete color palettes with hex codes.',
+  },
+  {
+    icon: <TextFields />,
+    title: 'Font Analysis',
+    description: 'Identify fonts, typography styles, and text hierarchies used across the site.',
+  },
+  {
+    icon: <Image />,
+    title: 'Image Gallery',
+    description: 'Catalog all images, icons, and visual assets with download capabilities.',
+  },
+  {
+    icon: <Code />,
+    title: 'Tech Stack Detection',
+    description: 'Discover frameworks, libraries, and technologies powering the website.',
+  },
+  {
+    icon: <Speed />,
+    title: 'Performance Metrics',
+    description: 'Analyze loading speeds, optimization scores, and performance insights.',
+  },
+  {
+    icon: <Security />,
+    title: 'Security Analysis',
+    description: 'Check SSL certificates, security headers, and vulnerability assessments.',
+  },
+  {
+    icon: <Analytics />,
+    title: 'SEO Insights',
+    description: 'Meta tags, structured data, and search optimization analysis.',
+  },
+  {
+    icon: <CloudDownload />,
+    title: 'Export Reports',
+    description: 'Download comprehensive reports in PDF, JSON, or CSV formats.',
+  },
+];
 
+const FeatureShowcase = () => {
   return (
     <Box
       id="features"
       sx={{
+        position: 'relative',
         py: { xs: 8, md: 12 },
-        bgcolor: 'rgba(0, 0, 0, 0.2)',
-        // Diffused masks at top and bottom for smooth blending with Hero and Pricing
-        WebkitMaskImage: `linear-gradient(
-          to bottom, 
-          transparent 0%, 
-          black 18%, 
-          black 82%, 
-          transparent 100%
-        )`,
-        maskImage: `linear-gradient(
-          to bottom, 
-          transparent 0%, 
-          black 18%, 
-          black 82%, 
-          transparent 100%
-        )`,
-        maskSize: '100% 100%',
-        WebkitMaskSize: '100% 100%',
-        maskRepeat: 'no-repeat',
-        WebkitMaskRepeat: 'no-repeat',
+        bgcolor: 'transparent',
+        // No background here (it will be in a separate absolute Box below)
       }}
     >
-      <Container maxWidth="lg">
+      {/* Masked/gradient background, absolutely positioned */}
+      <Box
+        sx={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: 0,
+          bgcolor: 'rgba(0, 0, 0, 0.2)',
+          WebkitMaskImage: `linear-gradient(
+            to bottom, 
+            transparent 0%, 
+            black 18%, 
+            black 82%, 
+            transparent 100%
+          )`,
+          maskImage: `linear-gradient(
+            to bottom, 
+            transparent 0%, 
+            black 18%, 
+            black 82%, 
+            transparent 100%
+          )`,
+          maskSize: '100% 100%',
+          WebkitMaskSize: '100% 100%',
+          maskRepeat: 'no-repeat',
+          WebkitMaskRepeat: 'no-repeat',
+        }}
+      />
+      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -105,6 +115,8 @@ const FeatureShowcase = () => {
               backgroundClip: 'text',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
+              zIndex: 2,
+              position: 'relative',
             }}
           >
             Powerful Analysis Tools
@@ -113,12 +125,11 @@ const FeatureShowcase = () => {
             variant="h6"
             align="center"
             color="text.secondary"
-            sx={{ mb: 8, maxWidth: 600, mx: 'auto' }}
+            sx={{ mb: 8, maxWidth: 600, mx: 'auto', zIndex: 2, position: 'relative' }}
           >
             Everything you need to understand and deconstruct any website's design and technology.
           </Typography>
         </motion.div>
-
         <Box
           sx={{
             display: 'grid',
@@ -128,10 +139,12 @@ const FeatureShowcase = () => {
               md: 'repeat(4, 1fr)',
             },
             gap: 4,
+            zIndex: 2,
+            position: 'relative',
           }}
         >
           {features.map((feature, index) => (
-            <Box key={index}>
+            <Box key={index} sx={{ zIndex: 2, position: 'relative' }}>
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}

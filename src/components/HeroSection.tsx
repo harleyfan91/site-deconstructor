@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Box, Typography, Container, Chip } from '@mui/material';
 import { motion } from 'framer-motion';
@@ -112,37 +111,93 @@ const HeroSection = () => {
         alignItems: 'center',
         position: 'relative',
         overflow: 'hidden',
-        background: `
-          radial-gradient(circle at 20% 50%, rgba(255, 107, 53, 0.3) 0%, transparent 50%),
-          radial-gradient(circle at 80% 20%, rgba(9, 132, 227, 0.3) 0%, transparent 50%),
-          radial-gradient(circle at 40% 80%, rgba(255, 138, 101, 0.2) 0%, transparent 50%),
-          linear-gradient(135deg, #0F0F0F 0%, #1A1A1A 100%)
-        `,
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: `
-            url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")
-          `,
-          animation: 'float 20s ease-in-out infinite',
-        },
-        '@keyframes float': {
-          '0%, 100%': { transform: 'translateY(0px)' },
-          '50%':      { transform: 'translateY(-20px)' },
-        },
-        // Use the same diffused mask as FeatureShowcase for a seamless section blend.
-        WebkitMaskImage: MASK_IMAGE,
-        maskImage: MASK_IMAGE,
-        maskSize: '100% 100%',
-        WebkitMaskSize: '100% 100%',
-        maskRepeat: 'no-repeat',
-        WebkitMaskRepeat: 'no-repeat',
+        // Remove gradients/background effects from this container—moved below ↓
       }}
     >
+      {/* Gradient + mask background applied absolutely below content */}
+      <Box
+        sx={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: 0,
+          // Same background & mask as before
+          background: `
+            radial-gradient(circle at 20% 50%, rgba(255, 107, 53, 0.3) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(9, 132, 227, 0.3) 0%, transparent 50%),
+            radial-gradient(circle at 40% 80%, rgba(255, 138, 101, 0.2) 0%, transparent 50%),
+            linear-gradient(135deg, #0F0F0F 0%, #1A1A1A 100%)
+          `,
+          WebkitMaskImage: MASK_IMAGE,
+          maskImage: MASK_IMAGE,
+          maskSize: '100% 100%',
+          WebkitMaskSize: '100% 100%',
+          maskRepeat: 'no-repeat',
+          WebkitMaskRepeat: 'no-repeat',
+          // SVG dot layer, now as a separate overlay
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 0,
+            background: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            animation: 'float 20s ease-in-out infinite',
+          },
+          '@keyframes float': {
+            '0%, 100%': { transform: 'translateY(0px)' },
+            '50%': { transform: 'translateY(-20px)' },
+          },
+        }}
+      />
+      {/* Floating decorative shapes—absolute and Z=0 */}
+      <motion.div
+        animate={{
+          y: [0, -20, 0],
+          rotate: [0, 5, 0],
+        }}
+        transition={{
+          duration: 6,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        style={{
+          position: 'absolute',
+          top: '20%',
+          left: '10%',
+          width: 60,
+          height: 60,
+          background: 'linear-gradient(45deg, #FF6B35, #FF8A65)',
+          borderRadius: '16px',
+          opacity: 0.1,
+          zIndex: 0,
+        }}
+      />
+      <motion.div
+        animate={{
+          y: [0, 20, 0],
+          rotate: [0, -5, 0],
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 2,
+        }}
+        style={{
+          position: 'absolute',
+          bottom: '20%',
+          right: '15%',
+          width: 80,
+          height: 80,
+          background: 'linear-gradient(45deg, #0984E3, #42A5F5)',
+          borderRadius: '50%',
+          opacity: 0.1,
+          zIndex: 0,
+        }}
+      />
+      {/* MAIN CONTENT: positioned relative and zIndex > 0 */}
       <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
         <Box
           sx={{
@@ -151,6 +206,8 @@ const HeroSection = () => {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
+            position: 'relative',
+            zIndex: 2,
           }}
         >
           <motion.div {...motionProps.heading}>
@@ -163,6 +220,8 @@ const HeroSection = () => {
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 textShadow: '0 4px 20px rgba(255, 107, 53, 0.3)',
+                zIndex: 2,
+                position: 'relative',
               }}
             >
               Deconstruct Any Website
@@ -179,7 +238,6 @@ const HeroSection = () => {
               </span>
             </Typography>
           </motion.div>
-
           <motion.div {...motionProps.subheading}>
             <Typography
               variant="h6"
@@ -190,15 +248,16 @@ const HeroSection = () => {
                 mx: 'auto',
                 fontSize: { xs: '1.1rem', md: '1.3rem' },
                 lineHeight: 1.6,
+                zIndex: 2,
+                position: 'relative',
               }}
             >
               Analyze colors, fonts, images, and technology stack of any website.
               Perfect for designers, developers, and digital marketers.
             </Typography>
           </motion.div>
-
           {/* Input & popular sites shortcuts */}
-          <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center' }}>
+          <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center', zIndex: 3, position: 'relative' }}>
             <URLInputForm
               onAnalysisComplete={result => handleAnalysisComplete(result, navigate, error)}
             />
@@ -206,7 +265,7 @@ const HeroSection = () => {
               <Typography
                 variant="body2"
                 color="text.secondary"
-                sx={{ mb: 2, textAlign: 'center', mt: 3 }}
+                sx={{ mb: 2, textAlign: 'center', mt: 3, zIndex: 2, position: 'relative' }}
               >
                 Try these popular sites:
               </Typography>
@@ -216,6 +275,8 @@ const HeroSection = () => {
                   flexWrap: 'wrap',
                   gap: 1,
                   justifyContent: 'center',
+                  zIndex: 3,
+                  position: 'relative',
                 }}
               >
                 {recentSearches.map((search, index) => (
@@ -246,6 +307,8 @@ const HeroSection = () => {
                         },
                         transition: 'all 0.3s ease',
                         cursor: 'pointer',
+                        zIndex: 3,
+                        position: 'relative',
                       }}
                     />
                   </motion.div>
@@ -253,7 +316,6 @@ const HeroSection = () => {
               </Box>
             </motion.div>
           </Box>
-
           <motion.div {...motionProps.trustedBy}>
             <Typography
               variant="body2"
@@ -264,6 +326,8 @@ const HeroSection = () => {
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: 1,
+                zIndex: 2,
+                position: 'relative',
               }}
             >
               Trusted by 50,000+ designers worldwide
@@ -286,60 +350,14 @@ const HeroSection = () => {
                       boxShadow: '0 0 0 0 rgba(76, 175, 80, 0)',
                     },
                   },
+                  zIndex: 2,
+                  position: 'relative',
                 }}
               />
             </Typography>
           </motion.div>
         </Box>
       </Container>
-
-      {/* Floating gradient shapes for visual interest */}
-      <motion.div
-        animate={{
-          y: [0, -20, 0],
-          rotate: [0, 5, 0],
-        }}
-        transition={{
-          duration: 6,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-        style={{
-          position: 'absolute',
-          top: '20%',
-          left: '10%',
-          width: 60,
-          height: 60,
-          background: 'linear-gradient(45deg, #FF6B35, #FF8A65)',
-          borderRadius: '16px',
-          opacity: 0.1,
-          zIndex: 0,
-        }}
-      />
-
-      <motion.div
-        animate={{
-          y: [0, 20, 0],
-          rotate: [0, -5, 0],
-        }}
-        transition={{
-          duration: 8,
-          repeat: Infinity,
-          ease: "easeInOut",
-          delay: 2,
-        }}
-        style={{
-          position: 'absolute',
-          bottom: '20%',
-          right: '15%',
-          width: 80,
-          height: 80,
-          background: 'linear-gradient(45deg, #0984E3, #42A5F5)',
-          borderRadius: '50%',
-          opacity: 0.1,
-          zIndex: 0,
-        }}
-      />
     </Box>
   );
 };
