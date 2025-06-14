@@ -95,106 +95,103 @@ const PricingSection = () => {
           }}
         >
           {pricingPlans.map((plan, index) => (
-            <Box key={index} sx={{ position: 'relative' }}>
-              {plan.recommended && (
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    top: -10,
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    zIndex: 1,
-                  }}
-                >
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
+              viewport={{ once: true }}
+              whileHover={{ y: -10 }}
+            >
+              <Card
+                sx={{
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  border: plan.recommended ? '2px solid #FF6B35' : '1px solid rgba(255, 255, 255, 0.1)',
+                  position: 'relative',
+                  '&:hover': {
+                    transform: 'translateY(-8px)',
+                    boxShadow: '0 12px 40px rgba(255, 107, 53, 0.2)',
+                  },
+                }}
+              >
+                {plan.recommended && (
                   <Chip
                     icon={<Star />}
                     label="Recommended"
                     color="primary"
-                    sx={{ fontWeight: 600 }}
+                    sx={{
+                      position: 'absolute',
+                      top: -12,
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      fontWeight: 600,
+                      zIndex: 1,
+                    }}
                   />
-                </Box>
-              )}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                whileHover={{ y: -10 }}
-              >
-                <Card
-                  sx={{
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    border: plan.recommended ? '2px solid #FF6B35' : '1px solid rgba(255, 255, 255, 0.1)',
-                    '&:hover': {
-                      transform: 'translateY(-8px)',
-                      boxShadow: '0 12px 40px rgba(255, 107, 53, 0.2)',
-                    },
-                  }}
-                >
-                  <CardContent sx={{ p: 3, textAlign: 'center' }}>
-                    <Typography
-                      variant="h5"
-                      sx={{ mb: 2, fontWeight: 600 }}
-                    >
-                      {plan.title}
-                    </Typography>
-                    <Typography
-                      variant="h3"
-                      sx={{ mb: 1, fontWeight: 700 }}
-                    >
-                      {plan.price}
-                    </Typography>
-                    {plan.priceNote && (
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{ mb: 2 }}
-                      >
-                        {plan.priceNote}
-                      </Typography>
-                    )}
+                )}
+                <CardContent sx={{ p: 3, textAlign: 'center' }}>
+                  <Typography
+                    variant="h5"
+                    sx={{ mb: 2, fontWeight: 600 }}
+                  >
+                    {plan.title}
+                  </Typography>
+                  <Typography
+                    variant="h3"
+                    sx={{ mb: 1, fontWeight: 700 }}
+                  >
+                    {plan.price}
+                  </Typography>
+                  {plan.priceNote && (
                     <Typography
                       variant="body2"
                       color="text.secondary"
-                      sx={{ mb: 3, lineHeight: 1.6 }}
+                      sx={{ mb: 2 }}
                     >
-                      {plan.description}
+                      {plan.priceNote}
                     </Typography>
-                    <List>
-                      {plan.features.map((feature, i) => (
-                        <ListItem key={i} disablePadding>
-                          <ListItemIcon sx={{ minWidth: '30px' }}>
-                            <Check color="primary" />
-                          </ListItemIcon>
-                          <ListItemText primary={feature} />
-                        </ListItem>
-                      ))}
-                    </List>
-                  </CardContent>
-                  <Box sx={{ p: 3, textAlign: 'center' }}>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      fullWidth
-                      sx={{
-                        background: 'linear-gradient(45deg, #FF6B35 30%, #FF8A65 90%)',
-                        boxShadow: '0 4px 15px rgba(255, 107, 53, 0.3)',
-                        '&:hover': {
-                          background: 'linear-gradient(45deg, #FF8A65 30%, #FF6B35 90%)',
-                        },
-                      }}
-                    >
-                      {plan.cta}
-                    </Button>
-                  </Box>
-                </Card>
-              </motion.div>
-            </Box>
+                  )}
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mb: 3, lineHeight: 1.6 }}
+                  >
+                    {plan.description}
+                  </Typography>
+                  <List>
+                    {plan.features.map((feature, i) => (
+                      <ListItem key={i} disablePadding>
+                        <ListItemIcon sx={{ minWidth: '30px' }}>
+                          <Check color="primary" />
+                        </ListItemIcon>
+                        <ListItemText primary={feature} />
+                      </ListItem>
+                    ))}
+                  </List>
+                </CardContent>
+                <Box sx={{ p: 3, textAlign: 'center' }}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    fullWidth
+                    sx={{
+                      background: 'linear-gradient(45deg, #FF6B35 30%, #FF8A65 90%)',
+                      boxShadow: '0 4px 15px rgba(255, 107, 53, 0.3)',
+                      '&:hover': {
+                        background: 'linear-gradient(45deg, #FF8A65 30%, #FF6B35 90%)',
+                      },
+                    }}
+                  >
+                    {plan.cta}
+                  </Button>
+                </Box>
+              </Card>
+            </motion.div>
           ))}
         </Box>
       </Container>
