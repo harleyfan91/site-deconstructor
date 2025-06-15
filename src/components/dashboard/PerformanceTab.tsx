@@ -290,6 +290,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
 
       {/* Security Section */}
       <Box sx={{ mb: 4 }}>
+        {/* FIX: use data.securityHeaders instead of data.data.securityHeaders */}
         <SecurityHeadersSection securityHeaders={data.securityHeaders} />
       </Box>
 
