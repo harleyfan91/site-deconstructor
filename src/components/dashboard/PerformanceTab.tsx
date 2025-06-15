@@ -105,23 +105,39 @@ function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["
   };
   return (
     <Card sx={{ borderRadius: 2, height: '400px' }}>
-      <CardContent sx={{ p: 3, height: '100%' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+      <CardContent sx={{ p: 2, height: '100%' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
           <BarChart size={24} color="#FF6B35" style={{ marginRight: 8 }} />
           <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
             Core Web Vitals
           </Typography>
         </Box>
-        <Box sx={{ overflowX: 'auto', width: '100%', pb: 1 }}>
+        <Box sx={{ 
+          position: 'relative',
+          height: 'calc(100% - 60px)',
+          overflowX: 'auto',
+          overflowY: 'hidden'
+        }}>
           <Box sx={{
             minWidth: { xs: 520, sm: 600 },
             width: { xs: 520, sm: 600, md: '100%' },
-            maxWidth: 'none'
+            height: '100%',
+            position: 'relative'
           }}>
-            <ChartContainer config={chartConfig} className="h-80">
-              <RechartsBarChart data={performance.coreWebVitals} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+            <ChartContainer config={chartConfig} className="h-full">
+              <RechartsBarChart 
+                data={performance.coreWebVitals} 
+                margin={{ top: 10, right: 10, left: 10, bottom: 10 }}
+                width={undefined}
+                height={undefined}
+              >
                 <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                <YAxis />
+                <YAxis 
+                  domain={[0, 100]}
+                  tick={{ fontSize: 12 }}
+                  tickCount={6}
+                  width={40}
+                />
                 <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
                 <Bar dataKey="value" fill="var(--color-value)" />
                 <Bar dataKey="benchmark" fill="var(--color-benchmark)" />
