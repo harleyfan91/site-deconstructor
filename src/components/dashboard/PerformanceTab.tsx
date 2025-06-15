@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import {
   Box,
   Typography,
@@ -19,6 +19,23 @@ const getScoreColor = (score: number) => {
   if (score >= 90) return '#4CAF50';
   if (score >= 70) return '#FF9800';
   return '#F44336';
+};
+
+// Custom hook to check if mobile
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+  
+  return isMobile;
 };
 
 // Renders a single metric card for performance, mobile, or security metrics
@@ -97,12 +114,118 @@ function MetricsSection({ performanceScore }: { performanceScore: number }) {
   );
 }
 
+// External Y-axis component for mobile
+function ExternalYAxis({ data, chartHeight, chartMargins }: {
+  data: any[];
+  chartHeight: number;
+  chartMargins: { top: number; bottom: number; };
+}) {
+  if (!data || data.length === 0) return null;
+  
+  // Calculate Y-axis domain from data
+  const allValues = data.flatMap(item => [item.value || 0, item.benchmark || 0]);
+  const maxValue = Math.max(...allValues);
+  const minValue = Math.min(...allValues, 0);
+  const padding = (maxValue - minValue) * 0.1;
+  const yMax = maxValue + padding;
+  const yMin = Math.max(0, minValue - padding);
+  
+  // Generate Y-axis ticks
+  const tickCount = 5;
+  const ticks = [];
+  for (let i = 0; i <= tickCount; i++) {
+    ticks.push(yMin + (yMax - yMin) * (i / tickCount));
+  }
+  
+  const plotAreaHeight = chartHeight - chartMargins.top - chartMargins.bottom;
+  
+  return (
+    <Box
+      sx={{
+        width: '50px',
+        height: `${chartHeight}px`,
+        paddingTop: `${chartMargins.top}px`,
+        paddingBottom: `${chartMargins.bottom}px`,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        alignItems: 'flex-end',
+        paddingRight: '8px',
+        borderRight: '1px solid #E0E0E0',
+        backgroundColor: 'white',
+        zIndex: 10,
+      }}
+    >
+      <Box
+        sx={{
+          height: `${plotAreaHeight}px`,
+          display: 'flex',
+          flexDirection: 'column-reverse',
+          justifyContent: 'space-between',
+          alignItems: 'flex-end',
+        }}
+      >
+        {ticks.map((tick, index) => (
+          <Typography
+            key={index}
+            variant="caption"
+            sx={{
+              fontSize: '12px',
+              color: '#666',
+              lineHeight: 1,
+              transform: 'translateY(50%)',
+            }}
+          >
+            {Math.round(tick)}
+          </Typography>
+        ))}
+      </Box>
+    </Box>
+  );
+}
+
 // Renders the main chart (Core Web Vitals) card
 function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["data"]["performance"] }) {
+  const chartRef = useRef<HTMLDivElement>(null);
+  const [chartDimensions, setChartDimensions] = useState({ height: 320, margins: { top: 20, bottom: 5 } });
+  const isMobile = useIsMobile();
+  
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (chartRef.current) {
+        const rect = chartRef.current.getBoundingClientRect();
+        setChartDimensions({
+          height: 320, // Fixed height for consistency
+          margins: { top: 20, bottom: 5 } // Match the chart margins
+        });
+      }
+    };
+    
+    updateDimensions();
+    window.addEventListener('resize', updateDimensions);
+    return () => window.removeEventListener('resize', updateDimensions);
+  }, []);
+
   const chartConfig = {
     value: { label: 'Your Site', color: '#2196F3' },
     benchmark: { label: 'Industry Average', color: '#E0E0E0' }
   };
+
+  const chartContent = (
+    <ChartContainer config={chartConfig} className="h-80">
+      <RechartsBarChart 
+        data={performance.coreWebVitals} 
+        margin={{ top: 20, right: 30, left: isMobile ? 0 : 20, bottom: 5 }}
+      >
+        <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+        {!isMobile && <YAxis />}
+        <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+        <Bar dataKey="value" fill="var(--color-value)" />
+        <Bar dataKey="benchmark" fill="var(--color-benchmark)" />
+      </RechartsBarChart>
+    </ChartContainer>
+  );
+
   return (
     <Card sx={{ borderRadius: 2, height: '400px' }}>
       <CardContent sx={{ p: 3, height: '100%' }}>
@@ -112,23 +235,44 @@ function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["
             Core Web Vitals
           </Typography>
         </Box>
-        <Box sx={{ overflowX: 'auto', width: '100%', pb: 1 }}>
-          <Box sx={{
-            minWidth: { xs: 520, sm: 600 },
-            width: { xs: 520, sm: 600, md: '100%' },
-            maxWidth: 'none'
+        
+        {isMobile ? (
+          // Mobile layout with anchored Y-axis
+          <Box sx={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'auto 1fr',
+            height: 'calc(100% - 60px)',
+            overflow: 'hidden'
           }}>
-            <ChartContainer config={chartConfig} className="h-80">
-              <RechartsBarChart data={performance.coreWebVitals} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                <YAxis />
-                <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-                <Bar dataKey="value" fill="var(--color-value)" />
-                <Bar dataKey="benchmark" fill="var(--color-benchmark)" />
-              </RechartsBarChart>
-            </ChartContainer>
+            <ExternalYAxis 
+              data={performance.coreWebVitals}
+              chartHeight={chartDimensions.height}
+              chartMargins={chartDimensions.margins}
+            />
+            <Box sx={{ overflowX: 'auto', minWidth: 0 }}>
+              <Box 
+                ref={chartRef}
+                sx={{
+                  minWidth: '520px',
+                  height: `${chartDimensions.height}px`
+                }}
+              >
+                {chartContent}
+              </Box>
+            </Box>
           </Box>
-        </Box>
+        ) : (
+          // Desktop layout (normal)
+          <Box sx={{ overflowX: 'auto', width: '100%', pb: 1 }}>
+            <Box sx={{
+              minWidth: { xs: 520, sm: 600 },
+              width: { xs: 520, sm: 600, md: '100%' },
+              maxWidth: 'none'
+            }}>
+              {chartContent}
+            </Box>
+          </Box>
+        )}
       </CardContent>
     </Card>
   );
@@ -268,8 +412,6 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
     );
   }
 
-  // Make sure we destructure the right variable!
-  // DO NOT overwrite 'data' or destructure 'data' from 'data.data'!
   const { performance } = data.data;
 
   return (
@@ -291,7 +433,6 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
 
       {/* Security Section */}
       <Box sx={{ mb: 4 }}>
-        {/* Use TOP-LEVEL data.securityHeaders here (NOT data.data.securityHeaders)! */}
         <SecurityHeadersSection securityHeaders={data.securityHeaders} />
       </Box>
 
