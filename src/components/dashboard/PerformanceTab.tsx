@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   Box,
@@ -11,7 +12,7 @@ import {
 } from '@mui/material';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart';
 import { BarChart, Bar, XAxis, YAxis } from 'recharts';
-import { Shield, Smartphone, Zap } from 'lucide-react';
+import { Shield, Smartphone, Zap, Activity, ShieldCheck } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 import LegendContainer from './LegendContainer';
 
@@ -104,7 +105,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
             <Card key={index} sx={{ height: '100%', borderRadius: 2 }}>
               <CardContent sx={{ p: 2 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <IconComponent size={24} color="#FF6B35" style={{ marginRight: 8 }} /> {/* Use orange as in UI cards */}
+                  <IconComponent size={24} color="#FF6B35" style={{ marginRight: 8 }} />
                   <Typography variant="h6" sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
                     {metric.title}
                   </Typography>
@@ -129,9 +130,12 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
         {/* --- Make the chart horizontally scrollable on mobile --- */}
         <Card sx={{ borderRadius: 2, height: '400px' }}>
           <CardContent sx={{ p: 3, height: '100%' }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-              Core Web Vitals
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <Zap size={22} color="#FF6B35" style={{ marginRight: 8 }} />
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
+                Core Web Vitals
+              </Typography>
+            </Box>
             <Box
               sx={{
                 overflowX: 'auto',
@@ -163,9 +167,12 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
 
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-              Speed Index
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <Zap size={22} color="#FF6B35" style={{ marginRight: 8 }} />
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
+                Speed Index
+              </Typography>
+            </Box>
             <Box sx={{ mb: 2 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography variant="body2">Loading Speed</Typography>
@@ -184,9 +191,12 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
       <Box sx={{ mb: 4 }}>
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-              Security Headers Analysis
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <ShieldCheck size={22} color="#FF6B35" style={{ marginRight: 8 }} />
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
+                Security Headers Analysis
+              </Typography>
+            </Box>
             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 2 }}>
               {Object.entries(data.securityHeaders).map(([key, value]) => (
                 <Box key={key} sx={{
@@ -217,9 +227,12 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
       <Box sx={{ mt: 3 }}>
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-              Performance Recommendations
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <Activity size={22} color="#FF6B35" style={{ marginRight: 8 }} />
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
+                Performance Recommendations
+              </Typography>
+            </Box>
             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 2 }}>
               {performance.recommendations.map((rec, index) => (
                 <Box key={index} sx={{
@@ -249,3 +262,4 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
 };
 
 export default PerformanceTab;
+
