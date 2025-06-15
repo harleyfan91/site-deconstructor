@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, useState } from 'react';
 import {
   Box,
@@ -115,10 +116,12 @@ function ExternalYAxis({ domain, chartHeight, chartMargins }: {
 
   const plotAreaHeight = chartHeight - chartMargins.top - chartMargins.bottom;
 
-  // Added buffer to prevent clipping of top and bottom labels
-  const labelBuffer = 16; // A buffer roughly the size of the font, increased from 12
-  const effectivePlotAreaHeight = plotAreaHeight - labelBuffer;
-  const plotAreaTopOffset = labelBuffer / 2;
+  // The label is taller than its font-size due to line-height.
+  // This buffer needs to be at least half the label's height to prevent clipping.
+  // The label's full height is used to calculate the drawable area.
+  const labelRenderHeight = 24; // Generous height for a 12px font label
+  const effectivePlotAreaHeight = plotAreaHeight - labelRenderHeight;
+  const plotAreaTopOffset = labelRenderHeight / 2;
 
   return (
     <Box
