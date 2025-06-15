@@ -181,7 +181,7 @@ function ExternalYAxis({ domain, chartHeight, chartMargins }: {
 // Renders the main chart (Core Web Vitals) card
 function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["data"]["performance"] }) {
   const chartRef = useRef<HTMLDivElement>(null);
-  const [chartDimensions, setChartDimensions] = useState({ height: 320, margins: { top: 20, bottom: 5 } });
+  const [chartDimensions, setChartDimensions] = useState({ height: 320, margins: { top: 20, bottom: 20 } });
   const isMobile = useIsMobile();
   
   useEffect(() => {
@@ -189,7 +189,7 @@ function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["
       if (chartRef.current) {
         setChartDimensions({
           height: 320,
-          margins: { top: 20, bottom: 5 }
+          margins: { top: 20, bottom: 20 }
         });
       }
     };
@@ -213,7 +213,7 @@ function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["
     <ChartContainer config={chartConfig} className="h-80">
       <RechartsBarChart 
         data={performance.coreWebVitals} 
-        margin={{ top: 20, right: 30, left: isMobile ? 0 : 20, bottom: 5 }}
+        margin={{ top: 20, right: 30, left: isMobile ? 0 : 20, bottom: 20 }}
       >
         <XAxis dataKey="name" tick={{ fontSize: 12 }} />
         <YAxis domain={yDomain} hide={isMobile} />
