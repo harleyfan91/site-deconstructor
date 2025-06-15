@@ -41,7 +41,7 @@ const DashboardContent = () => {
               fontWeight: 'bold',
               mb: { xs: 0.5, sm: 0 },
               fontSize: {
-                xs: '1.35rem', // small enough for most phones; increase if still wrapping
+                xs: '1.6rem', // slightly increased for mobile, prevents wrapping
                 sm: '2.1rem',
                 md: '2.5rem'
               },
