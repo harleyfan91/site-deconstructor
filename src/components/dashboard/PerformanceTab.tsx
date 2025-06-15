@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import {
   Box,
@@ -129,18 +130,22 @@ function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["
             <Box sx={{
               position: 'absolute',
               left: 0,
-              top: 0,
+              top: '10px',
               width: '100%',
-              height: '100%',
+              height: 'calc(100% - 20px)',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
               alignItems: 'flex-end',
-              pr: 1,
-              py: 1
+              pr: 1
             }}>
               {[100, 80, 60, 40, 20, 0].map((value) => (
-                <Typography key={value} variant="caption" sx={{ fontSize: 12, color: 'text.secondary' }}>
+                <Typography key={value} variant="caption" sx={{ 
+                  fontSize: 12, 
+                  color: 'text.secondary',
+                  lineHeight: 1,
+                  transform: 'translateY(-50%)'
+                }}>
                   {value}
                 </Typography>
               ))}
@@ -357,3 +362,4 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
 };
 
 export default PerformanceTab;
+
