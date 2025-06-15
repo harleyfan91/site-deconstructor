@@ -32,8 +32,8 @@ const LegendContainer: React.FC = () => {
     <>
       <Card
         sx={{
-          minWidth: 100,
-          maxWidth: 170,
+          minWidth: 'unset',
+          maxWidth: 'unset',
           borderRadius: 2,
           boxShadow: 2,
           display: 'flex',
@@ -44,7 +44,9 @@ const LegendContainer: React.FC = () => {
           mr: 0,
           ml: 'auto',
           cursor: 'pointer',
-          userSelect: 'none'
+          userSelect: 'none',
+          // Padding for even spacing (all sides)
+          p: 0.5,
         }}
         elevation={2}
         onClick={handleClick}
@@ -57,19 +59,27 @@ const LegendContainer: React.FC = () => {
           sx={{
             display: 'flex',
             alignItems: 'center',
-            p: '4px !important'
+            p: '0 !important',
+            // Outermost padding to balance top/bottom/left/right
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              p: 1, // even padding (all sides) around the circles
+              gap: 0.5,
+            }}
+          >
             {LEGEND_COLORS.map(({ color, key }, idx) => (
               <Circle
                 key={key}
-                size={12}
+                size={14}
                 stroke={color}
                 fill="none"
                 strokeWidth={2}
                 style={{
-                  marginRight: idx !== LEGEND_COLORS.length - 1 ? 4 : 0,
                   display: 'block'
                 }}
               />
@@ -136,4 +146,3 @@ const LegendContainer: React.FC = () => {
 };
 
 export default LegendContainer;
-
