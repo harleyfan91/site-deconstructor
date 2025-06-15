@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, Typography, Box, Popover } from '@mui/material';
 import { Circle } from 'lucide-react';
@@ -59,7 +60,7 @@ const LegendContainer: React.FC = () => {
             p: '4px !important'
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', mr: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
             {LEGEND_COLORS.map(({ color, key }, idx) => (
               <Circle
                 key={key}
@@ -74,9 +75,6 @@ const LegendContainer: React.FC = () => {
               />
             ))}
           </Box>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-            Legend
-          </Typography>
         </CardContent>
       </Card>
 
@@ -99,7 +97,10 @@ const LegendContainer: React.FC = () => {
             p: 1,
             minWidth: 200,
             boxShadow: 4,
-            backgroundColor: theme.palette.background.paper,
+            // Make popup more opaque
+            backgroundColor: theme.palette.mode === 'dark'
+              ? 'rgba(30, 32, 37, 0.98)'
+              : 'rgba(255,255,255,0.98)',
           },
         }}
         disableRestoreFocus
@@ -135,3 +136,4 @@ const LegendContainer: React.FC = () => {
 };
 
 export default LegendContainer;
+
