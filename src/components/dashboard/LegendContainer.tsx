@@ -32,8 +32,8 @@ const LegendContainer: React.FC = () => {
     <>
       <Card
         sx={{
-          minWidth: 100,
-          maxWidth: 170,
+          minWidth: 'unset',
+          maxWidth: 'unset',
           borderRadius: 2,
           boxShadow: 2,
           display: 'flex',
@@ -44,7 +44,8 @@ const LegendContainer: React.FC = () => {
           mr: 0,
           ml: 'auto',
           cursor: 'pointer',
-          userSelect: 'none'
+          userSelect: 'none',
+          p: 0.5, // Reduce all around padding
         }}
         elevation={2}
         onClick={handleClick}
@@ -57,10 +58,10 @@ const LegendContainer: React.FC = () => {
           sx={{
             display: 'flex',
             alignItems: 'center',
-            p: '4px !important'
+            p: '0 !important',
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', p: '2px 6px' }}>
             {LEGEND_COLORS.map(({ color, key }, idx) => (
               <Circle
                 key={key}
@@ -97,7 +98,6 @@ const LegendContainer: React.FC = () => {
             p: 1,
             minWidth: 200,
             boxShadow: 4,
-            // Make popup more opaque
             backgroundColor: theme.palette.mode === 'dark'
               ? 'rgba(30, 32, 37, 0.98)'
               : 'rgba(255,255,255,0.98)',
@@ -136,4 +136,3 @@ const LegendContainer: React.FC = () => {
 };
 
 export default LegendContainer;
-
