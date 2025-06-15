@@ -97,19 +97,21 @@ function MetricsSection({ performanceScore }: { performanceScore: number }) {
   );
 }
 
-// Renders the main chart (Core Web Vitals) card with anchored Y-axis
+// Renders the main chart (Core Web Vitals) card with properly aligned Y-axis
 function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["data"]["performance"] }) {
   const chartConfig = {
     value: { label: 'Your Site', color: '#2196F3' },
     benchmark: { label: 'Industry Average', color: '#E0E0E0' }
   };
 
+  // Chart dimensions and positioning
+  const chartHeight = 300;
+  const topMargin = 20;
+  const bottomMargin = 40; // Increased for X-axis labels
+  const plotAreaHeight = chartHeight - topMargin - bottomMargin;
+  
   // Y-axis values for manual positioning
   const yAxisValues = [100, 75, 50, 25, 0];
-  const chartHeight = 320; // Fixed chart height
-  const topMargin = 20;
-  const bottomMargin = 25;
-  const usableHeight = chartHeight - topMargin - bottomMargin;
 
   return (
     <Card sx={{ borderRadius: 2, height: '400px' }}>
@@ -125,7 +127,7 @@ function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["
         <Box sx={{ display: 'flex', height: `${chartHeight}px`, alignItems: 'stretch' }}>
           {/* Fixed Y-axis on the left */}
           <Box sx={{ 
-            width: '40px', 
+            width: '50px', 
             position: 'relative',
             flexShrink: 0,
             mr: 1
@@ -135,12 +137,13 @@ function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["
                 key={value}
                 sx={{
                   position: 'absolute',
-                  top: `${topMargin + (100 - value) * (usableHeight / 100)}px`,
+                  top: `${topMargin + ((100 - value) / 100) * plotAreaHeight}px`,
                   right: '8px',
                   transform: 'translateY(-50%)',
                   fontSize: '12px',
                   color: '#666',
-                  fontFamily: 'monospace'
+                  fontFamily: 'monospace',
+                  fontWeight: 500
                 }}
               >
                 {value}
@@ -173,11 +176,16 @@ function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["
               <ChartContainer config={chartConfig} className="h-full">
                 <RechartsBarChart 
                   data={performance.coreWebVitals} 
-                  margin={{ top: topMargin, right: 30, left: 0, bottom: bottomMargin }}
+                  margin={{ top: topMargin, right: 30, left: 10, bottom: bottomMargin }}
                   height={chartHeight}
                 >
-                  <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                  <YAxis hide />
+                  <XAxis 
+                    dataKey="name" 
+                    tick={{ fontSize: 12 }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis hide domain={[0, 100]} />
                   <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
                   <Bar dataKey="value" fill="var(--color-value)" />
                   <Bar dataKey="benchmark" fill="var(--color-benchmark)" />
