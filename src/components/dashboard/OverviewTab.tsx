@@ -68,7 +68,7 @@ const getMetricDefinitions = (overview: AnalysisResponse['data']['overview'], th
   },
 ];
 
-// --- Updated MetricCards: Title appears first, with matching typography ---
+// --- Updated MetricCards: Always reserve Info icon space, fixing title alignment ---
 function MetricCards({
   metrics,
   onInfo,
@@ -84,7 +84,15 @@ function MetricCards({
           <Card key={index} sx={{ height: '100%', borderRadius: 2 }}>
             <CardContent sx={{ p: 3 }}>
               {/* Card Title FIRST, now forced to 2 rows */}
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  mb: 1,
+                  minHeight: 52, // Ensure same height for all cards
+                }}
+              >
                 <Typography
                   variant="h6"
                   sx={{
@@ -93,14 +101,19 @@ function MetricCards({
                     mb: 0,
                     lineHeight: 1.15,
                     wordBreak: 'break-word',
-                    minHeight: 52, // ensures height is same for both lines even if short
                   }}
                   data-testid="card-title"
                 >
                   {metric.titleLines[0]}<br />{metric.titleLines[1]}
                 </Typography>
-                {metric.info && (
+                {/* Always render a placeholder IconButton for alignment (real or invisible) */}
+                {metric.info ? (
                   <IconButton size="small" aria-label="info" onClick={e => onInfo(e, metric.info!)}>
+                    <InfoOutlined fontSize="small" />
+                  </IconButton>
+                ) : (
+                  // Invisible IconButton to reserve space
+                  <IconButton size="small" sx={{ visibility: 'hidden' }}>
                     <InfoOutlined fontSize="small" />
                   </IconButton>
                 )}
