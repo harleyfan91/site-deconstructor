@@ -37,7 +37,19 @@ const DashboardContent = () => {
             variant="h4"
             component="h1"
             gutterBottom
-            sx={{ fontWeight: 'bold', mb: { xs: 0.5, sm: 0 } }}
+            sx={{
+              fontWeight: 'bold',
+              mb: { xs: 0.5, sm: 0 },
+              fontSize: {
+                xs: '1.35rem', // small enough for most phones; increase if still wrapping
+                sm: '2.1rem',
+                md: '2.5rem'
+              },
+              whiteSpace: { xs: 'nowrap', sm: 'normal' }, // no wrap on XS
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              maxWidth: { xs: '100vw', sm: 'none' },
+            }}
           >
             Website Analysis Dashboard
           </Typography>
