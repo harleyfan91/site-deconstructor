@@ -115,30 +115,24 @@ function MetricsSection({ performanceScore }: { performanceScore: number }) {
 }
 
 // External Y-axis component for mobile
-function ExternalYAxis({ data, chartHeight, chartMargins }: {
-  data: any[];
+function ExternalYAxis({ domain, chartHeight, chartMargins }: {
+  domain: [number, number];
   chartHeight: number;
-  chartMargins: { top: number; bottom: number; };
+  chartMargins: { top: number; bottom: number };
 }) {
-  if (!data || data.length === 0) return null;
-  
-  // Calculate Y-axis domain from data
-  const allValues = data.flatMap(item => [item.value || 0, item.benchmark || 0]);
-  const maxValue = Math.max(...allValues);
-  const minValue = Math.min(...allValues, 0);
-  const padding = (maxValue - minValue) * 0.1;
-  const yMax = maxValue + padding;
-  const yMin = Math.max(0, minValue - padding);
-  
-  // Generate Y-axis ticks
-  const tickCount = 5;
+  const [yMin, yMax] = domain;
+  if (yMax <= yMin) return null;
+
   const ticks = [];
-  for (let i = 0; i <= tickCount; i++) {
-    ticks.push(yMin + (yMax - yMin) * (i / tickCount));
+  const tickIncrement = 25;
+  for (let i = yMin; i <= yMax; i++) {
+    if (i % tickIncrement === 0) {
+      ticks.push(i);
+    }
   }
-  
+
   const plotAreaHeight = chartHeight - chartMargins.top - chartMargins.bottom;
-  
+
   return (
     <Box
       sx={{
@@ -146,43 +140,46 @@ function ExternalYAxis({ data, chartHeight, chartMargins }: {
         height: `${chartHeight}px`,
         paddingTop: `${chartMargins.top}px`,
         paddingBottom: `${chartMargins.bottom}px`,
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        alignItems: 'flex-end',
         paddingRight: '8px',
         borderRight: '1px solid #E0E0E0',
         backgroundColor: 'white',
         zIndex: 10,
+        boxSizing: 'border-box'
       }}
     >
       <Box
         sx={{
           height: `${plotAreaHeight}px`,
-          display: 'flex',
-          flexDirection: 'column-reverse',
-          justifyContent: 'space-between',
-          alignItems: 'flex-end',
+          position: 'relative',
         }}
       >
-        {ticks.map((tick, index) => (
-          <Typography
-            key={index}
-            variant="caption"
-            sx={{
-              fontSize: '12px',
-              color: '#666',
-              lineHeight: 1,
-              transform: 'translateY(50%)',
-            }}
-          >
-            {Math.round(tick)}
-          </Typography>
-        ))}
+        {ticks.map((tick, index) => {
+          const positionRatio = (tick - yMin) / (yMax - yMin);
+          const topOffset = (1 - positionRatio) * plotAreaHeight;
+
+          return (
+            <Typography
+              key={index}
+              variant="caption"
+              sx={{
+                position: 'absolute',
+                top: `${topOffset}px`,
+                right: 0,
+                transform: 'translateY(-50%)',
+                fontSize: '12px',
+                color: '#666',
+                lineHeight: 1,
+              }}
+            >
+              {Math.round(tick)}
+            </Typography>
+          );
+        })}
       </Box>
     </Box>
   );
 }
+
 
 // Renders the main chart (Core Web Vitals) card
 function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["data"]["performance"] }) {
@@ -193,10 +190,9 @@ function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["
   useEffect(() => {
     const updateDimensions = () => {
       if (chartRef.current) {
-        const rect = chartRef.current.getBoundingClientRect();
         setChartDimensions({
-          height: 320, // Fixed height for consistency
-          margins: { top: 20, bottom: 5 } // Match the chart margins
+          height: 320,
+          margins: { top: 20, bottom: 5 }
         });
       }
     };
@@ -205,6 +201,11 @@ function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["
     window.addEventListener('resize', updateDimensions);
     return () => window.removeEventListener('resize', updateDimensions);
   }, []);
+
+  const allValues = performance.coreWebVitals.flatMap(item => [item.value || 0, item.benchmark || 0]);
+  const maxValue = Math.max(...allValues, 0);
+  const yMax = Math.ceil(Math.max(100, maxValue) / 25) * 25;
+  const yDomain: [number, number] = [0, yMax];
 
   const chartConfig = {
     value: { label: 'Your Site', color: '#2196F3' },
@@ -218,7 +219,7 @@ function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["
         margin={{ top: 20, right: 30, left: isMobile ? 0 : 20, bottom: 5 }}
       >
         <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-        {!isMobile && <YAxis />}
+        <YAxis domain={yDomain} hide={isMobile} />
         <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
         <Bar dataKey="value" fill="var(--color-value)" />
         <Bar dataKey="benchmark" fill="var(--color-benchmark)" />
@@ -237,7 +238,6 @@ function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["
         </Box>
         
         {isMobile ? (
-          // Mobile layout with anchored Y-axis
           <Box sx={{ 
             display: 'grid', 
             gridTemplateColumns: 'auto 1fr',
@@ -245,7 +245,7 @@ function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["
             overflow: 'hidden'
           }}>
             <ExternalYAxis 
-              data={performance.coreWebVitals}
+              domain={yDomain}
               chartHeight={chartDimensions.height}
               chartMargins={chartDimensions.margins}
             />
@@ -262,7 +262,6 @@ function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["
             </Box>
           </Box>
         ) : (
-          // Desktop layout (normal)
           <Box sx={{ overflowX: 'auto', width: '100%', pb: 1 }}>
             <Box sx={{
               minWidth: { xs: 520, sm: 600 },
