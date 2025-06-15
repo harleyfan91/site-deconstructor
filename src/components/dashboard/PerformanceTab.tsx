@@ -96,7 +96,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
         </Typography>
       </Box>
 
-      {/* Performance Score Section - Updated: card title style matches UIAnalysis section */}
+      {/* Performance Score Section */}
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 3, mb: 4 }}>
         {metrics.map((metric, index) => {
           const IconComponent = metric.icon;
@@ -130,7 +130,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
         <Card sx={{ borderRadius: 2, height: '400px' }}>
           <CardContent sx={{ p: 3, height: '100%' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <BarChart size={22} color="#FF6B35" style={{ marginRight: 8 }} />
+              <BarChart size={24} color="#FF6B35" style={{ marginRight: 8 }} />
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
                 Core Web Vitals
               </Typography>
@@ -139,13 +139,12 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
               sx={{
                 overflowX: 'auto',
                 width: '100%',
-                // Prevent vertical overflow for chart visuals.
                 pb: 1,
               }}
             >
               <Box
                 sx={{
-                  minWidth: { xs: 520, sm: 600 },     // Ensures you see full axis & bars, adjust as needed
+                  minWidth: { xs: 520, sm: 600 },
                   width: { xs: 520, sm: 600, md: '100%' },
                   maxWidth: 'none'
                 }}
@@ -167,7 +166,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <Gauge size={22} color="#FF6B35" style={{ marginRight: 8 }} />
+              <Gauge size={24} color="#FF6B35" style={{ marginRight: 8 }} />
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
                 Speed Index
               </Typography>
@@ -191,7 +190,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <ShieldCheck size={22} color="#FF6B35" style={{ marginRight: 8 }} />
+              <ShieldCheck size={24} color="#FF6B35" style={{ marginRight: 8 }} />
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
                 Security Headers Analysis
               </Typography>
@@ -227,7 +226,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <Activity size={22} color="#FF6B35" style={{ marginRight: 8 }} />
+              <Activity size={24} color="#FF6B35" style={{ marginRight: 8 }} />
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
                 Performance Recommendations
               </Typography>
