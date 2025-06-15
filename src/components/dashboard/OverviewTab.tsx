@@ -32,7 +32,7 @@ const getScoreDescription = (score: number, excellentMsg: string, goodMsg: strin
 // Extract metrics for easier mapping to cards
 const getMetricDefinitions = (overview: AnalysisResponse['data']['overview'], theme: any) => [
   {
-    title: 'Overall Score',
+    titleLines: ['Overall', 'Score'],
     value: `${overview.overallScore}/100`,
     icon: Star,
     color: useScoreColor(theme)(overview.overallScore),
@@ -46,21 +46,21 @@ const getMetricDefinitions = (overview: AnalysisResponse['data']['overview'], th
       'Overall score weights performance (40%), SEO (40%) and user experience (20%) based on the collected metrics.',
   },
   {
-    title: 'Page Load Time',
+    titleLines: ['Page Load', 'Time'],
     value: overview.pageLoadTime,
     icon: Clock,
     color: theme.palette.warning.main,
     description: 'Page loading performance',
   },
   {
-    title: 'SEO Score',
+    titleLines: ['SEO', 'Score'],
     value: `${overview.seoScore}/100`,
     icon: TrendingUp,
     color: useScoreColor(theme)(overview.seoScore),
     description: overview.seoScore >= 80 ? 'Excellent SEO optimization' : 'SEO could be improved',
   },
   {
-    title: 'User Experience',
+    titleLines: ['User', 'Experience'],
     value: `${overview.userExperienceScore}/100`,
     icon: Users,
     color: overview.userExperienceScore >= 80 ? theme.palette.success.main : theme.palette.primary.main,
@@ -83,7 +83,7 @@ function MetricCards({
         return (
           <Card key={index} sx={{ height: '100%', borderRadius: 2 }}>
             <CardContent sx={{ p: 3 }}>
-              {/* Card Title FIRST, matching "Color Extraction" */}
+              {/* Card Title FIRST, now forced to 2 rows */}
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
                 <Typography
                   variant="h6"
@@ -91,10 +91,13 @@ function MetricCards({
                     fontWeight: 'bold',
                     color: '#fff',
                     mb: 0,
+                    lineHeight: 1.15,
+                    wordBreak: 'break-word',
+                    minHeight: 52, // ensures height is same for both lines even if short
                   }}
                   data-testid="card-title"
                 >
-                  {metric.title}
+                  {metric.titleLines[0]}<br />{metric.titleLines[1]}
                 </Typography>
                 {metric.info && (
                   <IconButton size="small" aria-label="info" onClick={e => onInfo(e, metric.info!)}>
