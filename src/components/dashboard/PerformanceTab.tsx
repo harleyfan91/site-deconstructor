@@ -105,83 +105,28 @@ function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["
   };
   return (
     <Card sx={{ borderRadius: 2, height: '400px' }}>
-      <CardContent sx={{ p: 2, height: '100%' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+      <CardContent sx={{ p: 3, height: '100%' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <BarChart size={24} color="#FF6B35" style={{ marginRight: 8 }} />
           <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
             Core Web Vitals
           </Typography>
         </Box>
-        <Box sx={{ 
-          position: 'relative',
-          height: 'calc(100% - 60px)',
-          display: 'flex'
-        }}>
-          {/* Fixed Y-axis on the left */}
+        <Box sx={{ overflowX: 'auto', width: '100%', pb: 1 }}>
           <Box sx={{
-            width: '50px',
-            height: '100%',
-            position: 'relative',
-            flexShrink: 0,
-            borderRight: '1px solid #E0E0E0'
+            minWidth: { xs: 520, sm: 600 },
+            width: { xs: 520, sm: 600, md: '100%' },
+            maxWidth: 'none'
           }}>
-            <Box sx={{
-              position: 'absolute',
-              left: 0,
-              top: '20px',
-              width: '100%',
-              height: 'calc(100% - 30px)',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              alignItems: 'flex-end',
-              pr: 1
-            }}>
-              {[100, 80, 60, 40, 20, 0].map((value) => (
-                <Typography key={value} variant="caption" sx={{ 
-                  fontSize: 12, 
-                  color: 'text.secondary',
-                  lineHeight: 1
-                }}>
-                  {value}
-                </Typography>
-              ))}
-            </Box>
-          </Box>
-          
-          {/* Scrollable chart area */}
-          <Box sx={{ 
-            flex: 1,
-            overflowX: 'auto',
-            overflowY: 'hidden'
-          }}>
-            <Box sx={{
-              minWidth: { xs: 470, sm: 550 },
-              width: { xs: 470, sm: 550, md: 'calc(100% - 50px)' },
-              height: '100%',
-              position: 'relative'
-            }}>
-              <ChartContainer config={chartConfig} className="h-full">
-                <RechartsBarChart 
-                  data={performance.coreWebVitals} 
-                  margin={{ top: 20, right: 10, left: 0, bottom: 10 }}
-                  width={undefined}
-                  height={undefined}
-                >
-                  <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                  <YAxis 
-                    domain={[0, 100]}
-                    tick={false}
-                    axisLine={false}
-                    tickLine={false}
-                    width={0}
-                  />
-                  <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-                  <Bar dataKey="value" fill="var(--color-value)" />
-                  <Bar dataKey="benchmark" fill="var(--color-benchmark)" />
-                </RechartsBarChart>
-              </ChartContainer>
-            </Box>
+            <ChartContainer config={chartConfig} className="h-80">
+              <RechartsBarChart data={performance.coreWebVitals} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                <YAxis />
+                <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                <Bar dataKey="value" fill="var(--color-value)" />
+                <Bar dataKey="benchmark" fill="var(--color-benchmark)" />
+              </RechartsBarChart>
+            </ChartContainer>
           </Box>
         </Box>
       </CardContent>
