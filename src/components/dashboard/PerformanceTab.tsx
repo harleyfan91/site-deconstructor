@@ -1,5 +1,3 @@
-
-
 import React from 'react';
 import {
   Box,
@@ -130,9 +128,9 @@ function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["
             <Box sx={{
               position: 'absolute',
               left: 0,
-              top: '10px',
+              top: '20px',
               width: '100%',
-              height: 'calc(100% - 20px)',
+              height: 'calc(100% - 30px)',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
@@ -143,8 +141,7 @@ function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["
                 <Typography key={value} variant="caption" sx={{ 
                   fontSize: 12, 
                   color: 'text.secondary',
-                  lineHeight: 1,
-                  transform: 'translateY(-50%)'
+                  lineHeight: 1
                 }}>
                   {value}
                 </Typography>
@@ -167,7 +164,7 @@ function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["
               <ChartContainer config={chartConfig} className="h-full">
                 <RechartsBarChart 
                   data={performance.coreWebVitals} 
-                  margin={{ top: 10, right: 10, left: 0, bottom: 10 }}
+                  margin={{ top: 20, right: 10, left: 0, bottom: 10 }}
                   width={undefined}
                   height={undefined}
                 >
@@ -362,4 +359,3 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
 };
 
 export default PerformanceTab;
-
