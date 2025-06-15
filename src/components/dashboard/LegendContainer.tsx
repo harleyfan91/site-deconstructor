@@ -38,7 +38,7 @@ const LegendContainer: React.FC = () => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          height: 48,
+          height: 42,
           mb: { xs: 1, md: 0 },
           mr: 0,
           ml: 'auto',
