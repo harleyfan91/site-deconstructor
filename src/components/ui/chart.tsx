@@ -12,7 +12,7 @@ export type ChartConfig = {
     icon?: React.ComponentType
   } & (
     | { color?: string; theme?: never }
-    | { color?: never; theme: Record<keyof typeof THEMES, string> }
+    | { color?: never; theme: Record<"light" | "dark", string> }
   )
 }
 
@@ -66,37 +66,38 @@ const ChartContainer = React.forwardRef<
 ChartContainer.displayName = "Chart"
 
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
+  // Now only apply color styles, ignore dark class logic
   const colorConfig = Object.entries(config).filter(
-    ([_, config]) => config.theme || config.color
-  )
+    ([_, cfg]) => cfg.theme || cfg.color
+  );
 
-  if (!colorConfig.length) {
-    return null
-  }
+  if (!colorConfig.length) return null;
 
+  // Instead of THEMES, just set variables with no dark class.
+  // Use both theme.light and theme.dark, so the user can choose in ChartConfig, but NO .dark selector!
   return (
     <style
       dangerouslySetInnerHTML={{
-        __html: Object.entries(THEMES)
-          .map(
-            ([theme, prefix]) => `
-${prefix} [data-chart=${id}] {
+        __html: `
+[data-chart=${id}] {
 ${colorConfig
   .map(([key, itemConfig]) => {
-    const color =
-      itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
-      itemConfig.color
-    return color ? `  --color-${key}: ${color};` : null
+    let color = "";
+    if (itemConfig.theme) {
+      // MUI mode detection in caller: get the current theme and pass the right color only
+      color = `var(--color-${key}: ${itemConfig.theme.light});`;
+    } else if (itemConfig.color) {
+      color = `var(--color-${key}: ${itemConfig.color});`;
+    }
+    return color;
   })
   .join("\n")}
 }
 `
-          )
-          .join("\n"),
       }}
     />
-  )
-}
+  );
+};
 
 const ChartTooltip = RechartsPrimitive.Tooltip
 
