@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   Box,
@@ -115,34 +116,70 @@ function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["
         <Box sx={{ 
           position: 'relative',
           height: 'calc(100% - 60px)',
-          overflowX: 'auto',
-          overflowY: 'hidden'
+          display: 'flex'
         }}>
+          {/* Fixed Y-axis on the left */}
           <Box sx={{
-            minWidth: { xs: 520, sm: 600 },
-            width: { xs: 520, sm: 600, md: '100%' },
+            width: '50px',
             height: '100%',
-            position: 'relative'
+            position: 'relative',
+            flexShrink: 0,
+            borderRight: '1px solid #E0E0E0'
           }}>
-            <ChartContainer config={chartConfig} className="h-full">
-              <RechartsBarChart 
-                data={performance.coreWebVitals} 
-                margin={{ top: 10, right: 10, left: 10, bottom: 10 }}
-                width={undefined}
-                height={undefined}
-              >
-                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                <YAxis 
-                  domain={[0, 100]}
-                  tick={{ fontSize: 12 }}
-                  tickCount={6}
-                  width={40}
-                />
-                <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-                <Bar dataKey="value" fill="var(--color-value)" />
-                <Bar dataKey="benchmark" fill="var(--color-benchmark)" />
-              </RechartsBarChart>
-            </ChartContainer>
+            <Box sx={{
+              position: 'absolute',
+              left: 0,
+              top: 0,
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              alignItems: 'flex-end',
+              pr: 1,
+              py: 1
+            }}>
+              {[100, 80, 60, 40, 20, 0].map((value) => (
+                <Typography key={value} variant="caption" sx={{ fontSize: 12, color: 'text.secondary' }}>
+                  {value}
+                </Typography>
+              ))}
+            </Box>
+          </Box>
+          
+          {/* Scrollable chart area */}
+          <Box sx={{ 
+            flex: 1,
+            overflowX: 'auto',
+            overflowY: 'hidden'
+          }}>
+            <Box sx={{
+              minWidth: { xs: 470, sm: 550 },
+              width: { xs: 470, sm: 550, md: 'calc(100% - 50px)' },
+              height: '100%',
+              position: 'relative'
+            }}>
+              <ChartContainer config={chartConfig} className="h-full">
+                <RechartsBarChart 
+                  data={performance.coreWebVitals} 
+                  margin={{ top: 10, right: 10, left: 0, bottom: 10 }}
+                  width={undefined}
+                  height={undefined}
+                >
+                  <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                  <YAxis 
+                    domain={[0, 100]}
+                    tick={false}
+                    axisLine={false}
+                    tickLine={false}
+                    width={0}
+                  />
+                  <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                  <Bar dataKey="value" fill="var(--color-value)" />
+                  <Bar dataKey="benchmark" fill="var(--color-benchmark)" />
+                </RechartsBarChart>
+              </ChartContainer>
+            </Box>
           </Box>
         </Box>
       </CardContent>
