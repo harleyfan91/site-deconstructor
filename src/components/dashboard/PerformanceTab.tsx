@@ -268,6 +268,8 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
     );
   }
 
+  // Make sure we destructure the right variable!
+  // DO NOT overwrite 'data' or destructure 'data' from 'data.data'!
   const { performance } = data.data;
 
   return (
@@ -289,7 +291,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
 
       {/* Security Section */}
       <Box sx={{ mb: 4 }}>
-        {/* FIX: use top-level data.securityHeaders here */}
+        {/* Use TOP-LEVEL data.securityHeaders here (NOT data.data.securityHeaders)! */}
         <SecurityHeadersSection securityHeaders={data.securityHeaders} />
       </Box>
 
