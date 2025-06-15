@@ -66,15 +66,15 @@ const ChartContainer = React.forwardRef<
 ChartContainer.displayName = "Chart"
 
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
-  // Now only apply color styles, ignore dark class logic
+  // Roll back to original color logic, using both light and dark color values if present.
   const colorConfig = Object.entries(config).filter(
     ([_, cfg]) => cfg.theme || cfg.color
   );
-
   if (!colorConfig.length) return null;
 
-  // Instead of THEMES, just set variables with no dark class.
-  // Use both theme.light and theme.dark, so the user can choose in ChartConfig, but NO .dark selector!
+  // Restore: output both light/dark variables if present in config.theme,
+  // but don't apply any Tailwind .dark class (since we only want colors set for both modes).
+  // This allows consumer to set/extract variables for both, and chart will use appropriate variable.
   return (
     <style
       dangerouslySetInnerHTML={{
@@ -82,18 +82,19 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
 [data-chart=${id}] {
 ${colorConfig
   .map(([key, itemConfig]) => {
-    let color = "";
     if (itemConfig.theme) {
-      // MUI mode detection in caller: get the current theme and pass the right color only
-      color = `var(--color-${key}: ${itemConfig.theme.light});`;
+      return [
+        `--color-${key}: ${itemConfig.theme.light};`,
+        `--color-${key}-dark: ${itemConfig.theme.dark};`,
+      ].join("\n");
     } else if (itemConfig.color) {
-      color = `var(--color-${key}: ${itemConfig.color});`;
+      return `--color-${key}: ${itemConfig.color};`;
     }
-    return color;
+    return "";
   })
   .join("\n")}
 }
-`
+        `.trim(),
       }}
     />
   );
