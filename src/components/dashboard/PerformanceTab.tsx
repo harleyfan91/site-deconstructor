@@ -161,7 +161,7 @@ function SpeedIndexSection({ performanceScore }: { performanceScore: number }) {
 }
 
 // Security headers grid
-function SecurityHeadersSection({ securityHeaders }: { securityHeaders: AnalysisResponse["data"]["securityHeaders"] }) {
+function SecurityHeadersSection({ securityHeaders }: { securityHeaders: AnalysisResponse["securityHeaders"] }) {
   return (
     <Card sx={{ borderRadius: 2 }}>
       <CardContent sx={{ p: 3 }}>
