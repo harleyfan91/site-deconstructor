@@ -13,29 +13,13 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart';
 import { BarChart as RechartsBarChart, Bar, XAxis, YAxis } from 'recharts';
 import { Shield, Smartphone, Zap, Activity, ShieldCheck, Gauge, BarChart } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 // Helper to determine score color given a numeric score
 const getScoreColor = (score: number) => {
   if (score >= 90) return '#4CAF50';
   if (score >= 70) return '#FF9800';
   return '#F44336';
-};
-
-// Custom hook to check if mobile
-const useIsMobile = () => {
-  const [isMobile, setIsMobile] = useState(false);
-  
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-  
-  return isMobile;
 };
 
 // Renders a single metric card for performance, mobile, or security metrics
@@ -132,7 +116,7 @@ function ExternalYAxis({ domain, chartHeight, chartMargins }: {
   const plotAreaHeight = chartHeight - chartMargins.top - chartMargins.bottom;
 
   // Added buffer to prevent clipping of top and bottom labels
-  const labelBuffer = 12; // A buffer roughly the size of the font
+  const labelBuffer = 16; // A buffer roughly the size of the font, increased from 12
   const effectivePlotAreaHeight = plotAreaHeight - labelBuffer;
   const plotAreaTopOffset = labelBuffer / 2;
 
