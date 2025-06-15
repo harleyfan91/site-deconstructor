@@ -125,10 +125,8 @@ function ExternalYAxis({ domain, chartHeight, chartMargins }: {
 
   const ticks = [];
   const tickIncrement = 25;
-  for (let i = yMin; i <= yMax; i++) {
-    if (i % tickIncrement === 0) {
-      ticks.push(i);
-    }
+  for (let i = yMin; i <= yMax; i += tickIncrement) {
+    ticks.push(i);
   }
 
   const plotAreaHeight = chartHeight - chartMargins.top - chartMargins.bottom;
@@ -142,7 +140,6 @@ function ExternalYAxis({ domain, chartHeight, chartMargins }: {
         paddingBottom: `${chartMargins.bottom}px`,
         paddingRight: '8px',
         borderRight: '1px solid #E0E0E0',
-        backgroundColor: 'white',
         zIndex: 10,
         boxSizing: 'border-box'
       }}
@@ -154,7 +151,7 @@ function ExternalYAxis({ domain, chartHeight, chartMargins }: {
         }}
       >
         {ticks.map((tick, index) => {
-          const positionRatio = (tick - yMin) / (yMax - yMin);
+          const positionRatio = (yMax > yMin) ? (tick - yMin) / (yMax - yMin) : 0;
           const topOffset = (1 - positionRatio) * plotAreaHeight;
 
           return (
@@ -167,7 +164,7 @@ function ExternalYAxis({ domain, chartHeight, chartMargins }: {
                 right: 0,
                 transform: 'translateY(-50%)',
                 fontSize: '12px',
-                color: '#666',
+                color: 'text.secondary', // Use theme color for better readability
                 lineHeight: 1,
               }}
             >
