@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Box,
@@ -12,7 +11,7 @@ import {
 } from '@mui/material';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart';
 import { BarChart, Bar, XAxis, YAxis } from 'recharts';
-import { Shield, Smartphone, Zap, Activity, ShieldCheck } from 'lucide-react';
+import { Shield, Smartphone, Zap, Activity, ShieldCheck, Gauge } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 import LegendContainer from './LegendContainer';
 
@@ -168,7 +167,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <Zap size={22} color="#FF6B35" style={{ marginRight: 8 }} />
+              <Gauge size={22} color="#FF6B35" style={{ marginRight: 8 }} />
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
                 Speed Index
               </Typography>
@@ -262,4 +261,3 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
 };
 
 export default PerformanceTab;
-
