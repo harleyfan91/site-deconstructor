@@ -95,22 +95,23 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
           Performance & Security Analysis
         </Typography>
       </Box>
-      {/* Performance Score Section */}
+
+      {/* Performance Score Section - Updated: card title style matches UIAnalysis section */}
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 3, mb: 4 }}>
         {metrics.map((metric, index) => {
           const IconComponent = metric.icon;
           return (
             <Card key={index} sx={{ height: '100%', borderRadius: 2 }}>
-              <CardContent sx={{ p: 3 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
-                  <IconComponent size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-                  <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+              <CardContent sx={{ p: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <IconComponent size={24} color="#FF6B35" style={{ marginRight: 8 }} /> {/* Use orange as in UI cards */}
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
                     {metric.title}
                   </Typography>
                 </Box>
                 <Typography
                   variant={metric.title === 'Performance Score' ? 'h2' : 'h3'}
-                  sx={{ fontWeight: 'bold', color: metric.color, textAlign: 'center' }}
+                  sx={{ fontWeight: 'bold', color: metric.color, textAlign: 'center', mb: 1 }}
                 >
                   {metric.value}
                 </Typography>
