@@ -125,20 +125,38 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
 
       {/* Core Web Vitals Section */}
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 2, alignItems: 'stretch', mb: 4 }}>
+        {/* --- Make the chart horizontally scrollable on mobile --- */}
         <Card sx={{ borderRadius: 2, height: '400px' }}>
           <CardContent sx={{ p: 3, height: '100%' }}>
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
               Core Web Vitals
             </Typography>
-            <ChartContainer config={chartConfig} className="h-80">
-              <BarChart data={performance.coreWebVitals} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                <YAxis />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar dataKey="value" fill="var(--color-value)" />
-                <Bar dataKey="benchmark" fill="var(--color-benchmark)" />
-              </BarChart>
-            </ChartContainer>
+            <Box
+              sx={{
+                overflowX: 'auto',
+                width: '100%',
+                // Prevent vertical overflow for chart visuals.
+                pb: 1,
+              }}
+            >
+              <Box
+                sx={{
+                  minWidth: { xs: 520, sm: 600 },     // Ensures you see full axis & bars, adjust as needed
+                  width: { xs: 520, sm: 600, md: '100%' },
+                  maxWidth: 'none'
+                }}
+              >
+                <ChartContainer config={chartConfig} className="h-80">
+                  <BarChart data={performance.coreWebVitals} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                    <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                    <YAxis />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Bar dataKey="value" fill="var(--color-value)" />
+                    <Bar dataKey="benchmark" fill="var(--color-benchmark)" />
+                  </BarChart>
+                </ChartContainer>
+              </Box>
+            </Box>
           </CardContent>
         </Card>
 
