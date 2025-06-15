@@ -150,7 +150,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
                   <BarChart data={performance.coreWebVitals} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                     <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                     <YAxis />
-                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
                     <Bar dataKey="value" fill="var(--color-value)" />
                     <Bar dataKey="benchmark" fill="var(--color-benchmark)" />
                   </BarChart>
