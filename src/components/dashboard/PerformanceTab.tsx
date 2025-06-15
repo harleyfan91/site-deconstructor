@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, useState } from 'react';
 import {
   Box,
@@ -114,7 +115,8 @@ function ExternalYAxis({ domain, chartHeight, chartMargins }: {
   }
 
   const plotAreaHeight = chartHeight - chartMargins.top - chartMargins.bottom;
-  const renderedLabelHeight = 16; // Estimated height of the label to prevent clipping
+  // A safe value for the height of the label text to prevent clipping.
+  const renderedLabelHeight = 16; 
 
   return (
     <Box
@@ -137,8 +139,8 @@ function ExternalYAxis({ domain, chartHeight, chartMargins }: {
       >
         {ticks.map((tick, index) => {
           const positionRatio = (yMax > yMin) ? (tick - yMin) / (yMax - yMin) : 0;
-          // Position the top of the label within the drawable area.
-          const topOffset = (1 - positionRatio) * (plotAreaHeight - renderedLabelHeight);
+          // Position from the bottom edge. This is more reliable for avoiding clipping at the y=0 axis.
+          const bottomOffset = positionRatio * (plotAreaHeight - renderedLabelHeight);
 
           return (
             <Typography
@@ -146,7 +148,7 @@ function ExternalYAxis({ domain, chartHeight, chartMargins }: {
               variant="caption"
               sx={{
                 position: 'absolute',
-                top: `${topOffset}px`,
+                bottom: `${bottomOffset}px`, // Use bottom positioning
                 right: 0,
                 fontSize: '12px',
                 color: 'text.secondary',
