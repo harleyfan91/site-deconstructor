@@ -131,6 +131,11 @@ function ExternalYAxis({ domain, chartHeight, chartMargins }: {
 
   const plotAreaHeight = chartHeight - chartMargins.top - chartMargins.bottom;
 
+  // Added buffer to prevent clipping of top and bottom labels
+  const labelBuffer = 12; // A buffer roughly the size of the font
+  const effectivePlotAreaHeight = plotAreaHeight - labelBuffer;
+  const plotAreaTopOffset = labelBuffer / 2;
+
   return (
     <Box
       sx={{
@@ -152,7 +157,7 @@ function ExternalYAxis({ domain, chartHeight, chartMargins }: {
       >
         {ticks.map((tick, index) => {
           const positionRatio = (yMax > yMin) ? (tick - yMin) / (yMax - yMin) : 0;
-          const topOffset = (1 - positionRatio) * plotAreaHeight;
+          const topOffset = plotAreaTopOffset + (1 - positionRatio) * effectivePlotAreaHeight;
 
           return (
             <Typography
