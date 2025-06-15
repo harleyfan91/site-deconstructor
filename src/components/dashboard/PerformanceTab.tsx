@@ -10,8 +10,8 @@ import {
   Chip
 } from '@mui/material';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart';
-import { BarChart, Bar, XAxis, YAxis } from 'recharts';
-import { Shield, Smartphone, Zap, Activity, ShieldCheck, Gauge } from 'lucide-react';
+import { BarChart as RechartsBarChart, Bar, XAxis, YAxis } from 'recharts';
+import { Shield, Smartphone, Zap, Activity, ShieldCheck, Gauge, BarChart } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 import LegendContainer from './LegendContainer';
 
@@ -130,7 +130,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
         <Card sx={{ borderRadius: 2, height: '400px' }}>
           <CardContent sx={{ p: 3, height: '100%' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <Zap size={22} color="#FF6B35" style={{ marginRight: 8 }} />
+              <BarChart size={22} color="#FF6B35" style={{ marginRight: 8 }} />
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
                 Core Web Vitals
               </Typography>
@@ -151,13 +151,13 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
                 }}
               >
                 <ChartContainer config={chartConfig} className="h-80">
-                  <BarChart data={performance.coreWebVitals} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <RechartsBarChart data={performance.coreWebVitals} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                     <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                     <YAxis />
                     <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
                     <Bar dataKey="value" fill="var(--color-value)" />
                     <Bar dataKey="benchmark" fill="var(--color-benchmark)" />
-                  </BarChart>
+                  </RechartsBarChart>
                 </ChartContainer>
               </Box>
             </Box>
