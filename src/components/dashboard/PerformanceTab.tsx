@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   Box,
@@ -23,6 +24,12 @@ const getScoreColor = (score: number) => {
 
 // Renders a single metric card for performance, mobile, or security metrics
 function MetricCard({
+  icon: IconComponent,
+  title,
+  value,
+  color,
+  description,
+}: {
   icon: React.ElementType;
   title: string;
   value: string;
