@@ -56,9 +56,17 @@ const AppHeader = ({ darkMode, toggleDarkMode }: { darkMode: boolean; toggleDark
           backgroundColor: darkMode ? 'rgba(0, 0, 0, 0.8)' : 'rgba(255, 255, 255, 0.8)',
           boxShadow: darkMode ? '0 8px 32px rgba(0, 0, 0, 0.3)' : '0 8px 32px rgba(0, 0, 0, 0.1)',
           color: darkMode ? '#FFFFFF' : '#000000',
+          // Reduce header height
+          minHeight: { xs: 48, md: 56 },
         }}
       >
-        <Toolbar>
+        <Toolbar
+          sx={{
+            // Reduce toolbar height
+            minHeight: { xs: 48, md: 56 },
+            px: { xs: 2, md: 3 },
+          }}
+        >
           <Typography
             variant="h6"
             component={Link}
@@ -71,6 +79,8 @@ const AppHeader = ({ darkMode, toggleDarkMode }: { darkMode: boolean; toggleDark
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               textDecoration: 'none',
+              // Slightly reduce font size
+              fontSize: { xs: '1.1rem', md: '1.25rem' },
             }}
           >
             SiteDeconstructor
@@ -98,7 +108,12 @@ const AppHeader = ({ darkMode, toggleDarkMode }: { darkMode: boolean; toggleDark
         </Toolbar>
       </AppBar>
 
-      <Toolbar />
+      {/* Reduce the spacing toolbar height to match the reduced header */}
+      <Toolbar 
+        sx={{
+          minHeight: { xs: 48, md: 56 },
+        }}
+      />
     </>
   );
 };
