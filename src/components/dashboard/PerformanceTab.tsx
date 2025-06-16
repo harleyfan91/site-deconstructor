@@ -174,14 +174,18 @@ function SecurityHeadersSection({ securityHeaders }: { securityHeaders: Analysis
         </Box>
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 2 }}>
           {Object.entries(securityHeaders).map(([key, value]) => (
-            <Box key={key} sx={{
-              p: 2,
-              border: '1px solid #E0E0E0',
-              borderRadius: 1,
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}>
+            <Box
+              key={key}
+              sx={{
+                p: 2,
+                border: '1px solid rgba(0,0,0,0.1)',
+                bgcolor: 'background.paper',
+                borderRadius: 1,
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}
+            >
               <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
                 {key.toUpperCase()}
               </Typography>
@@ -216,7 +220,8 @@ function RecommendationsSection({ recommendations }: { recommendations: Analysis
               p: 2,
               backgroundColor: rec.type === 'warning' ? '#FFF3E0' : rec.type === 'error' ? '#FFEBEE' : '#E8F5E8',
               borderRadius: 1,
-              mb: 2
+              mb: 2,
+              border: '1px solid rgba(0,0,0,0.1)'
             }}>
               <Typography variant="subtitle2" sx={{
                 fontWeight: 'bold',
