@@ -17,7 +17,6 @@ import {
 import { ChevronDown, ChevronUp } from 'lucide-react';  
 import type { AnalysisResponse } from '@/types/analysis';
 import { dashIfEmpty } from '../../lib/ui';
-import LegendContainer from './LegendContainer';
 
 interface ComplianceTabProps {
   data: AnalysisResponse | null;
@@ -79,8 +78,6 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
 
   const { securityHeaders } = data;
   const [showAll, setShowAll] = React.useState(false);
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const securityEntries = React.useMemo(
     () => Object.entries(securityHeaders),
