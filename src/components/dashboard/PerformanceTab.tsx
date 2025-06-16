@@ -186,6 +186,7 @@ function SecurityHeadersSection({ securityHeaders }: { securityHeaders: Analysis
                 alignItems: 'center'
               }}
             >
+             
               <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
                 {key.toUpperCase()}
               </Typography>
