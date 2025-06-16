@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Box, Typography, Container, Chip } from '@mui/material';
 import { motion } from 'framer-motion';
@@ -111,7 +112,8 @@ const HeroSection = () => {
         alignItems: 'center',
         position: 'relative',
         overflow: 'hidden',
-        // Remove gradients/background effects from this container—moved below ↓
+        // Reduce top/bottom padding to fit more content
+        py: { xs: 2, md: 4 },
       }}
     >
       {/* Gradient + mask background applied absolutely below content */}
@@ -202,7 +204,8 @@ const HeroSection = () => {
         <Box
           sx={{
             textAlign: 'center',
-            py: { xs: 8, md: 12 },
+            // Significantly reduce padding to fit more content
+            py: { xs: 4, md: 6 },
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -214,7 +217,11 @@ const HeroSection = () => {
             <Typography
               variant="h1"
               sx={{
-                mb: 3,
+                // Reduce bottom margin
+                mb: { xs: 2, md: 2.5 },
+                // Slightly reduce font sizes for better fit
+                fontSize: { xs: '2.2rem', md: '3rem', lg: '3.2rem' },
+                lineHeight: { xs: 1.1, md: 1.15 },
                 background: 'linear-gradient(135deg, #FFFFFF 0%, rgba(255, 255, 255, 0.8) 100%)',
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
@@ -243,11 +250,13 @@ const HeroSection = () => {
               variant="h6"
               color="text.secondary"
               sx={{
-                mb: 6,
+                // Reduce bottom margin significantly
+                mb: { xs: 3, md: 4 },
                 maxWidth: 600,
                 mx: 'auto',
-                fontSize: { xs: '1.1rem', md: '1.3rem' },
-                lineHeight: 1.6,
+                // Slightly reduce font size for better fit
+                fontSize: { xs: '1rem', md: '1.1rem' },
+                lineHeight: 1.5,
                 zIndex: 2,
                 position: 'relative',
               }}
@@ -265,7 +274,15 @@ const HeroSection = () => {
               <Typography
                 variant="body2"
                 color="text.secondary"
-                sx={{ mb: 2, textAlign: 'center', mt: 3, zIndex: 2, position: 'relative' }}
+                sx={{ 
+                  // Reduce margins around "Try these popular sites"
+                  mb: 1.5, 
+                  textAlign: 'center', 
+                  mt: 2, 
+                  zIndex: 2, 
+                  position: 'relative',
+                  fontSize: { xs: '0.9rem', md: '1rem' }
+                }}
               >
                 Try these popular sites:
               </Typography>
@@ -277,6 +294,8 @@ const HeroSection = () => {
                   justifyContent: 'center',
                   zIndex: 3,
                   position: 'relative',
+                  // Reduce bottom margin
+                  mb: { xs: 2, md: 3 },
                 }}
               >
                 {recentSearches.map((search, index) => (
@@ -301,6 +320,9 @@ const HeroSection = () => {
                       sx={{
                         bgcolor: 'rgba(255, 255, 255, 0.1)',
                         color: 'text.primary',
+                        // Slightly smaller chips for better fit
+                        fontSize: { xs: '0.8rem', md: '0.875rem' },
+                        height: { xs: 28, md: 32 },
                         '&:hover': {
                           bgcolor: 'rgba(255, 107, 53, 0.2)',
                           transform: 'translateY(-2px)',
@@ -321,13 +343,15 @@ const HeroSection = () => {
               variant="body2"
               color="text.secondary"
               sx={{
-                mt: 4,
+                // Reduce top margin
+                mt: { xs: 2, md: 3 },
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: 1,
                 zIndex: 2,
                 position: 'relative',
+                fontSize: { xs: '0.85rem', md: '0.9rem' },
               }}
             >
               Trusted by 50,000+ designers worldwide
