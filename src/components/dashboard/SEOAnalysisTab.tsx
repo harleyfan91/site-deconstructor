@@ -1,8 +1,8 @@
+
 import React from 'react';
-import { Box, Typography, Card, CardContent, Chip, CircularProgress, Alert } from '@mui/material';
+import { Box, Typography, Card, CardContent, Chip, CircularProgress, Alert, Tooltip } from '@mui/material';
 import { CheckCircle, AlertCircle, XCircle } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
-// import LegendContainer from './LegendContainer'; -- removed
 import { useTheme } from '@mui/material/styles';
 
 interface SEOAnalysisTabProps {
@@ -67,6 +67,19 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
     }
   };
 
+  const getStatusTooltip = (status: string) => {
+    switch (status) {
+      case 'good':
+        return 'SEO check passed - no issues found';
+      case 'warning':
+        return 'SEO warning - improvement recommended';
+      case 'error':
+        return 'SEO error - immediate attention required';
+      default:
+        return 'SEO check status unknown';
+    }
+  };
+
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'high':
@@ -77,6 +90,19 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
         return theme.palette.success.main;
       default:
         return theme.palette.grey[400];
+    }
+  };
+
+  const getPriorityTooltip = (priority: string) => {
+    switch (priority) {
+      case 'high':
+        return 'High priority - significant SEO impact';
+      case 'medium':
+        return 'Medium priority - moderate SEO impact';
+      case 'low':
+        return 'Low priority - minor SEO impact';
+      default:
+        return 'Priority level unknown';
     }
   };
 
@@ -92,13 +118,18 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
     : seoScore >= 60 ? 'Good SEO'
     : 'Needs Improvement';
 
+  const getSeoScoreTooltip = (score: number) => {
+    if (score >= 80) return 'Excellent SEO optimization (80+)';
+    if (score >= 60) return 'Good SEO with room for improvement (60-79)';
+    return 'Poor SEO - needs significant improvement (<60)';
+  };
+
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
         <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', flexGrow: 1 }}>
           SEO Analysis
         </Typography>
-        {/* Removed <LegendContainer /> */}
       </Box>
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 3 }}>
         <Card sx={{ borderRadius: 2 }}>
@@ -117,9 +148,11 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
                     borderBottom: index < seo.checks.length - 1 ? '1px solid #E0E0E0' : 'none',
                   }}
                 >
-                  <Box sx={{ mr: 2 }}>
-                    {getStatusIcon(check.status)}
-                  </Box>
+                  <Tooltip title={getStatusTooltip(check.status)}>
+                    <Box sx={{ mr: 2, cursor: 'help' }}>
+                      {getStatusIcon(check.status)}
+                    </Box>
+                  </Tooltip>
                   <Box sx={{ flexGrow: 1 }}>
                     <Typography variant="subtitle1" sx={{ fontWeight: 'medium' }}>
                       {check.name}
@@ -128,12 +161,15 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
                       {check.description}
                     </Typography>
                   </Box>
-                  <Chip
-                    label={check.status}
-                    color={getStatusColor(check.status) as any}
-                    variant="outlined"
-                    size="small"
-                  />
+                  <Tooltip title={getStatusTooltip(check.status)}>
+                    <Chip
+                      label={check.status}
+                      color={getStatusColor(check.status) as any}
+                      variant="outlined"
+                      size="small"
+                      sx={{ cursor: 'help' }}
+                    />
+                  </Tooltip>
                 </Box>
               ))}
             </Box>
@@ -145,13 +181,16 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
               SEO Score
             </Typography>
-            <Typography variant="h2" sx={{ 
-              fontWeight: 'bold', 
-              color: seoScoreColor,
-              mb: 1 
-            }}>
-              {seoScore}
-            </Typography>
+            <Tooltip title={getSeoScoreTooltip(seoScore)}>
+              <Typography variant="h2" sx={{ 
+                fontWeight: 'bold', 
+                color: seoScoreColor,
+                mb: 1,
+                cursor: 'help'
+              }}>
+                {seoScore}
+              </Typography>
+            </Tooltip>
             <Typography variant="body2" color="text.secondary">
               {seoScoreDescription}
             </Typography>
@@ -166,21 +205,27 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
             <Box sx={{ mb: 2 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography variant="body2">Checks Passed</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 'bold', color: theme.palette.success.main }}>
-                  {seo.checks.filter(c => c.status === 'good').length}/{seo.checks.length}
-                </Typography>
+                <Tooltip title="Number of SEO checks that passed">
+                  <Typography variant="body2" sx={{ fontWeight: 'bold', color: theme.palette.success.main, cursor: 'help' }}>
+                    {seo.checks.filter(c => c.status === 'good').length}/{seo.checks.length}
+                  </Typography>
+                </Tooltip>
               </Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography variant="body2">Warnings</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 'bold', color: theme.palette.warning.main }}>
-                  {seo.checks.filter(c => c.status === 'warning').length}
-                </Typography>
+                <Tooltip title="Number of SEO warnings found">
+                  <Typography variant="body2" sx={{ fontWeight: 'bold', color: theme.palette.warning.main, cursor: 'help' }}>
+                    {seo.checks.filter(c => c.status === 'warning').length}
+                  </Typography>
+                </Tooltip>
               </Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography variant="body2">Errors</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 'bold', color: theme.palette.error.main }}>
-                  {seo.checks.filter(c => c.status === 'error').length}
-                </Typography>
+                <Tooltip title="Number of SEO errors found">
+                  <Typography variant="body2" sx={{ fontWeight: 'bold', color: theme.palette.error.main, cursor: 'help' }}>
+                    {seo.checks.filter(c => c.status === 'error').length}
+                  </Typography>
+                </Tooltip>
               </Box>
             </Box>
           </CardContent>
@@ -195,34 +240,40 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
             </Typography>
             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 2 }}>
               {seo.recommendations.map((rec, index) => (
-                <Box key={index} sx={{ 
-                  p: 2, 
-                  border: `1px solid ${getPriorityColor(rec.priority)}`,
-                  borderRadius: 1,
-                  backgroundColor: `${getPriorityColor(rec.priority)}10`
-                }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <Typography variant="subtitle2" sx={{ 
-                      fontWeight: 'bold', 
-                      color: getPriorityColor(rec.priority),
-                      mr: 1
-                    }}>
-                      {rec.title}
+                <Tooltip key={index} title={getPriorityTooltip(rec.priority)}>
+                  <Box sx={{ 
+                    p: 2, 
+                    border: `1px solid ${getPriorityColor(rec.priority)}`,
+                    borderRadius: 1,
+                    backgroundColor: `${getPriorityColor(rec.priority)}10`,
+                    cursor: 'help'
+                  }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                      <Typography variant="subtitle2" sx={{ 
+                        fontWeight: 'bold', 
+                        color: getPriorityColor(rec.priority),
+                        mr: 1
+                      }}>
+                        {rec.title}
+                      </Typography>
+                      <Tooltip title={getPriorityTooltip(rec.priority)}>
+                        <Chip 
+                          label={rec.priority} 
+                          size="small" 
+                          sx={{ 
+                            backgroundColor: getPriorityColor(rec.priority),
+                            color: 'white',
+                            fontSize: '0.7rem',
+                            cursor: 'help'
+                          }}
+                        />
+                      </Tooltip>
+                    </Box>
+                    <Typography variant="body2" sx={{ color: 'rgba(0, 0, 0, 0.87)' }}>
+                      {rec.description}
                     </Typography>
-                    <Chip 
-                      label={rec.priority} 
-                      size="small" 
-                      sx={{ 
-                        backgroundColor: getPriorityColor(rec.priority),
-                        color: 'white',
-                        fontSize: '0.7rem'
-                      }}
-                    />
                   </Box>
-                  <Typography variant="body2" sx={{ color: 'rgba(0, 0, 0, 0.87)' }}>
-                    {rec.description}
-                  </Typography>
-                </Box>
+                </Tooltip>
               ))}
             </Box>
           </CardContent>

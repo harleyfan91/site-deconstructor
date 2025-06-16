@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   Box,
@@ -9,6 +10,7 @@ import {
   Link,
   IconButton,
   Popover,
+  Tooltip,
 } from '@mui/material';
 import { TrendingUp, Users, Clock, Star } from 'lucide-react';
 import InfoOutlined from '@mui/icons-material/InfoOutlined';
@@ -29,6 +31,13 @@ const getScoreDescription = (score: number, excellentMsg: string, goodMsg: strin
   return badMsg;
 };
 
+// Helper: Get score tooltip text
+const getScoreTooltip = (score: number, type: string) => {
+  const level = score >= 80 ? 'Excellent' : score >= 60 ? 'Good' : 'Poor';
+  const range = score >= 80 ? '(80+)' : score >= 60 ? '(60-79)' : '(<60)';
+  return `${level} ${type} ${range}`;
+};
+
 // Extract metrics for easier mapping to cards
 const getMetricDefinitions = (overview: AnalysisResponse['data']['overview'], theme: any) => [
   {
@@ -44,6 +53,7 @@ const getMetricDefinitions = (overview: AnalysisResponse['data']['overview'], th
     ),
     info:
       'Overall score weights performance (40%), SEO (40%) and user experience (20%) based on the collected metrics.',
+    tooltip: getScoreTooltip(overview.overallScore, 'overall performance'),
   },
   {
     titleLines: ['Page Load', 'Time'],
@@ -51,6 +61,7 @@ const getMetricDefinitions = (overview: AnalysisResponse['data']['overview'], th
     icon: Clock,
     color: theme.palette.warning.main,
     description: 'Page loading performance',
+    tooltip: 'Time taken for the page to fully load',
   },
   {
     titleLines: ['SEO', 'Score'],
@@ -58,6 +69,7 @@ const getMetricDefinitions = (overview: AnalysisResponse['data']['overview'], th
     icon: TrendingUp,
     color: useScoreColor(theme)(overview.seoScore),
     description: overview.seoScore >= 80 ? 'Excellent SEO optimization' : 'SEO could be improved',
+    tooltip: getScoreTooltip(overview.seoScore, 'SEO optimization'),
   },
   {
     titleLines: ['User', 'Experience'],
@@ -65,6 +77,7 @@ const getMetricDefinitions = (overview: AnalysisResponse['data']['overview'], th
     icon: Users,
     color: overview.userExperienceScore >= 80 ? theme.palette.success.main : theme.palette.primary.main,
     description: overview.userExperienceScore >= 80 ? 'Excellent user experience' : 'Good user experience',
+    tooltip: getScoreTooltip(overview.userExperienceScore, 'user experience'),
   },
 ];
 
@@ -131,9 +144,11 @@ function MetricCards({
                 >
                   <IconComponent size={24} />
                 </Box>
-                <Typography variant="h6" component="div" sx={{ fontWeight: 'bold' }}>
-                  {metric.value}
-                </Typography>
+                <Tooltip title={metric.tooltip}>
+                  <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', cursor: 'help' }}>
+                    {metric.value}
+                  </Typography>
+                </Tooltip>
               </Box>
               {/* Description */}
               <Typography variant="body2" color="text.secondary">
@@ -173,33 +188,42 @@ const KeyFindingsGrid: React.FC<{ overview: AnalysisResponse['data']['overview']
     <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1, mb: 2 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
         <Typography variant="body2">Overall Score</Typography>
-        <Typography variant="body2" sx={{ fontWeight: 'bold', color: scoreColor(overview.overallScore) }}>
-          {overview.overallScore}/100
-        </Typography>
+        <Tooltip title={getScoreTooltip(overview.overallScore, 'overall performance')}>
+          <Typography variant="body2" sx={{ fontWeight: 'bold', color: scoreColor(overview.overallScore), cursor: 'help' }}>
+            {overview.overallScore}/100
+          </Typography>
+        </Tooltip>
       </Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
         <Typography variant="body2">SEO Score</Typography>
-        <Typography variant="body2" sx={{ fontWeight: 'bold', color: scoreColor(overview.seoScore) }}>
-          {overview.seoScore}/100
-        </Typography>
+        <Tooltip title={getScoreTooltip(overview.seoScore, 'SEO optimization')}>
+          <Typography variant="body2" sx={{ fontWeight: 'bold', color: scoreColor(overview.seoScore), cursor: 'help' }}>
+            {overview.seoScore}/100
+          </Typography>
+        </Tooltip>
       </Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
         <Typography variant="body2">Page Load Time</Typography>
-        <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#FF9800' }}>
-          {overview.pageLoadTime}
-        </Typography>
+        <Tooltip title="Time taken for the page to fully load">
+          <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#FF9800', cursor: 'help' }}>
+            {overview.pageLoadTime}
+          </Typography>
+        </Tooltip>
       </Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
         <Typography variant="body2">User Experience</Typography>
-        <Typography
-          variant="body2"
-          sx={{
-            fontWeight: 'bold',
-            color: overview.userExperienceScore >= 80 ? '#4CAF50' : '#2196F3',
-          }}
-        >
-          {overview.userExperienceScore}/100
-        </Typography>
+        <Tooltip title={getScoreTooltip(overview.userExperienceScore, 'user experience')}>
+          <Typography
+            variant="body2"
+            sx={{
+              fontWeight: 'bold',
+              color: overview.userExperienceScore >= 80 ? '#4CAF50' : '#2196F3',
+              cursor: 'help'
+            }}
+          >
+            {overview.userExperienceScore}/100
+          </Typography>
+        </Tooltip>
       </Box>
     </Box>
   );

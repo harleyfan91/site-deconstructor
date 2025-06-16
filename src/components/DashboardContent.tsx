@@ -10,14 +10,13 @@ import TechTab from './dashboard/TechTab';
 import UIAnalysisTab from './dashboard/UIAnalysisTab';
 import ComplianceTab from './dashboard/ComplianceTab';
 import { useAnalysisContext } from '../contexts/AnalysisContext';
-import LegendContainer from './dashboard/LegendContainer';
 
 const DashboardContent = () => {
   const { data: analysisData, loading, error } = useAnalysisContext();
 
   return (
     <Box>
-      {/* HEADER ROW: Title (left), Legend (right), above nav bar */}
+      {/* HEADER ROW: Title only, legend removed */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -41,11 +40,11 @@ const DashboardContent = () => {
               fontWeight: 'bold',
               mb: { xs: 0.5, sm: 0 },
               fontSize: {
-                xs: '1.6rem', // slightly increased for mobile, prevents wrapping
+                xs: '1.6rem',
                 sm: '2.1rem',
                 md: '2.5rem'
               },
-              whiteSpace: { xs: 'nowrap', sm: 'normal' }, // no wrap on XS
+              whiteSpace: { xs: 'nowrap', sm: 'normal' },
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               maxWidth: { xs: '100vw', sm: 'none' },
@@ -53,9 +52,6 @@ const DashboardContent = () => {
           >
             Website Analysis Dashboard
           </Typography>
-          <Box sx={{ ml: { xs: 0, sm: 2 }, mt: { xs: 1, sm: 0 }, alignSelf: { xs: 'stretch', sm: 'center' } }}>
-            <LegendContainer />
-          </Box>
         </Box>
       </motion.div>
 

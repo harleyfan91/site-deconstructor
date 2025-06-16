@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Box,
@@ -9,6 +8,7 @@ import {
   CircularProgress,
   Alert,
   Chip,
+  Tooltip,
 } from '@mui/material';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart';
 import { BarChart as RechartsBarChart, Bar, XAxis, YAxis } from 'recharts';
@@ -20,6 +20,13 @@ const getScoreColor = (score: number) => {
   if (score >= 90) return '#4CAF50';
   if (score >= 70) return '#FF9800';
   return '#F44336';
+};
+
+// Helper to get score tooltip text
+const getScoreTooltip = (score: number) => {
+  if (score >= 90) return 'Excellent performance (90+)';
+  if (score >= 70) return 'Good performance (70-89)';
+  return 'Needs improvement (<70)';
 };
 
 // Renders a single metric card for performance, mobile, or security metrics
@@ -45,12 +52,14 @@ function MetricCard({
             {title}
           </Typography>
         </Box>
-        <Typography
-          variant={title === 'Performance Score' ? 'h2' : 'h3'}
-          sx={{ fontWeight: 'bold', color, textAlign: 'center', mb: 1 }}
-        >
-          {value}
-        </Typography>
+        <Tooltip title={title === 'Performance Score' ? getScoreTooltip(parseInt(value)) : description}>
+          <Typography
+            variant={title === 'Performance Score' ? 'h2' : 'h3'}
+            sx={{ fontWeight: 'bold', color, textAlign: 'center', mb: 1, cursor: 'help' }}
+          >
+            {value}
+          </Typography>
+        </Tooltip>
         <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
           {description}
         </Typography>
@@ -149,9 +158,13 @@ function SpeedIndexSection({ performanceScore }: { performanceScore: number }) {
         <Box sx={{ mb: 2 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
             <Typography variant="body2">Loading Speed</Typography>
-            <Typography variant="body2">{performanceScore}%</Typography>
+            <Tooltip title={getScoreTooltip(performanceScore)}>
+              <Typography variant="body2" sx={{ cursor: 'help' }}>{performanceScore}%</Typography>
+            </Tooltip>
           </Box>
-          <LinearProgress variant="determinate" value={performanceScore} sx={{ height: 8, borderRadius: 4 }} />
+          <Tooltip title={getScoreTooltip(performanceScore)}>
+            <LinearProgress variant="determinate" value={performanceScore} sx={{ height: 8, borderRadius: 4, cursor: 'help' }} />
+          </Tooltip>
         </Box>
         <Typography variant="body2" color="text.secondary">
           Your page loads faster than {performanceScore}% of websites
@@ -186,16 +199,18 @@ function SecurityHeadersSection({ securityHeaders }: { securityHeaders: Analysis
                 alignItems: 'center'
               }}
             >
-             
               <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
                 {key.toUpperCase()}
               </Typography>
-              <Chip
-                label={value ? 'Present' : 'Missing'}
-                color={value ? 'success' : 'error'}
-                size="small"
-                variant="outlined"
-              />
+              <Tooltip title={value ? 'Security header is present and configured' : 'Security header is missing - this may be a security risk'}>
+                <Chip
+                  label={value ? 'Present' : 'Missing'}
+                  color={value ? 'success' : 'error'}
+                  size="small"
+                  variant="outlined"
+                  sx={{ cursor: 'help' }}
+                />
+              </Tooltip>
             </Box>
           ))}
         </Box>
@@ -206,6 +221,14 @@ function SecurityHeadersSection({ securityHeaders }: { securityHeaders: Analysis
 
 // Recommendations
 function RecommendationsSection({ recommendations }: { recommendations: AnalysisResponse["data"]["performance"]["recommendations"] }) {
+  const getRecommendationTooltip = (type: string) => {
+    switch (type) {
+      case 'error': return 'Critical issue - immediate attention required';
+      case 'warning': return 'Important improvement needed';
+      default: return 'Suggested optimization';
+    }
+  };
+
   return (
     <Card sx={{ borderRadius: 2 }}>
       <CardContent sx={{ p: 3 }}>
@@ -217,24 +240,27 @@ function RecommendationsSection({ recommendations }: { recommendations: Analysis
         </Box>
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 2 }}>
           {recommendations.map((rec, index) => (
-            <Box key={index} sx={{
-              p: 2,
-              backgroundColor: rec.type === 'warning' ? '#FFF3E0' : rec.type === 'error' ? '#FFEBEE' : '#E8F5E8',
-              borderRadius: 1,
-              mb: 2,
-              border: '1px solid rgba(0,0,0,0.1)'
-            }}>
-              <Typography variant="subtitle2" sx={{
-                fontWeight: 'bold',
-                color: rec.type === 'warning' ? '#E65100' : rec.type === 'error' ? '#C62828' : '#2E7D32',
-                mb: 1
+            <Tooltip key={index} title={getRecommendationTooltip(rec.type)}>
+              <Box sx={{
+                p: 2,
+                backgroundColor: rec.type === 'warning' ? '#FFF3E0' : rec.type === 'error' ? '#FFEBEE' : '#E8F5E8',
+                borderRadius: 1,
+                mb: 2,
+                border: '1px solid rgba(0,0,0,0.1)',
+                cursor: 'help'
               }}>
-                {rec.title}
-              </Typography>
-              <Typography variant="body2" sx={{ color: 'rgba(0, 0, 0, 0.87)' }}>
-                {rec.description}
-              </Typography>
-            </Box>
+                <Typography variant="subtitle2" sx={{
+                  fontWeight: 'bold',
+                  color: rec.type === 'warning' ? '#E65100' : rec.type === 'error' ? '#C62828' : '#2E7D32',
+                  mb: 1
+                }}>
+                  {rec.title}
+                </Typography>
+                <Typography variant="body2" sx={{ color: 'rgba(0, 0, 0, 0.87)' }}>
+                  {rec.description}
+                </Typography>
+              </Box>
+            </Tooltip>
           ))}
         </Box>
       </CardContent>
