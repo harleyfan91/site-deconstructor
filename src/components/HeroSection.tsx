@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Box, Typography, Container, Chip } from '@mui/material';
 import { motion } from 'framer-motion';
@@ -113,7 +112,7 @@ const HeroSection = () => {
         position: 'relative',
         overflow: 'hidden',
         // Reduce top/bottom padding to fit more content
-        py: { xs: 2, md: 4 },
+        py: { xs: 1, md: 2 },
       }}
     >
       {/* Gradient + mask background applied absolutely below content */}
@@ -204,8 +203,9 @@ const HeroSection = () => {
         <Box
           sx={{
             textAlign: 'center',
-            // Significantly reduce padding to fit more content
-            py: { xs: 4, md: 6 },
+            // Further reduce padding, especially top padding
+            py: { xs: 2, md: 3 },
+            pt: { xs: 1, md: 2 },
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
