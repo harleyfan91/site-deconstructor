@@ -52,7 +52,11 @@ function MetricCard({
             {title}
           </Typography>
         </Box>
-        <Tooltip title={title === 'Performance Score' ? getScoreTooltip(parseInt(value)) : description}>
+        <Tooltip 
+          title={title === 'Performance Score' ? getScoreTooltip(parseInt(value)) : description}
+          enterDelay={300}
+          enterTouchDelay={300}
+        >
           <Typography
             variant={title === 'Performance Score' ? 'h2' : 'h3'}
             sx={{ fontWeight: 'bold', color, textAlign: 'center', mb: 1, cursor: 'help' }}
@@ -158,11 +162,19 @@ function SpeedIndexSection({ performanceScore }: { performanceScore: number }) {
         <Box sx={{ mb: 2 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
             <Typography variant="body2">Loading Speed</Typography>
-            <Tooltip title={getScoreTooltip(performanceScore)}>
+            <Tooltip 
+              title={getScoreTooltip(performanceScore)}
+              enterDelay={300}
+              enterTouchDelay={300}
+            >
               <Typography variant="body2" sx={{ cursor: 'help' }}>{performanceScore}%</Typography>
             </Tooltip>
           </Box>
-          <Tooltip title={getScoreTooltip(performanceScore)}>
+          <Tooltip 
+            title={getScoreTooltip(performanceScore)}
+            enterDelay={300}
+            enterTouchDelay={300}
+          >
             <LinearProgress variant="determinate" value={performanceScore} sx={{ height: 8, borderRadius: 4, cursor: 'help' }} />
           </Tooltip>
         </Box>
@@ -202,7 +214,11 @@ function SecurityHeadersSection({ securityHeaders }: { securityHeaders: Analysis
               <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
                 {key.toUpperCase()}
               </Typography>
-              <Tooltip title={value ? 'Security header is present and configured' : 'Security header is missing - this may be a security risk'}>
+              <Tooltip 
+                title={value ? 'Security header is present and configured' : 'Security header is missing - this may be a security risk'}
+                enterDelay={300}
+                enterTouchDelay={300}
+              >
                 <Chip
                   label={value ? 'Present' : 'Missing'}
                   color={value ? 'success' : 'error'}
@@ -240,7 +256,12 @@ function RecommendationsSection({ recommendations }: { recommendations: Analysis
         </Box>
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 2 }}>
           {recommendations.map((rec, index) => (
-            <Tooltip key={index} title={getRecommendationTooltip(rec.type)}>
+            <Tooltip 
+              key={index} 
+              title={getRecommendationTooltip(rec.type)}
+              enterDelay={300}
+              enterTouchDelay={300}
+            >
               <Box sx={{
                 p: 2,
                 backgroundColor: rec.type === 'warning' ? '#FFF3E0' : rec.type === 'error' ? '#FFEBEE' : '#E8F5E8',

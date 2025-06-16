@@ -148,7 +148,11 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
                     borderBottom: index < seo.checks.length - 1 ? '1px solid #E0E0E0' : 'none',
                   }}
                 >
-                  <Tooltip title={getStatusTooltip(check.status)}>
+                  <Tooltip 
+                    title={getStatusTooltip(check.status)}
+                    enterDelay={300}
+                    enterTouchDelay={300}
+                  >
                     <Box sx={{ mr: 2, cursor: 'help' }}>
                       {getStatusIcon(check.status)}
                     </Box>
@@ -161,7 +165,11 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
                       {check.description}
                     </Typography>
                   </Box>
-                  <Tooltip title={getStatusTooltip(check.status)}>
+                  <Tooltip 
+                    title={getStatusTooltip(check.status)}
+                    enterDelay={300}
+                    enterTouchDelay={300}
+                  >
                     <Chip
                       label={check.status}
                       color={getStatusColor(check.status) as any}
@@ -181,7 +189,11 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
               SEO Score
             </Typography>
-            <Tooltip title={getSeoScoreTooltip(seoScore)}>
+            <Tooltip 
+              title={getSeoScoreTooltip(seoScore)}
+              enterDelay={300}
+              enterTouchDelay={300}
+            >
               <Typography variant="h2" sx={{ 
                 fontWeight: 'bold', 
                 color: seoScoreColor,
@@ -205,7 +217,11 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
             <Box sx={{ mb: 2 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography variant="body2">Checks Passed</Typography>
-                <Tooltip title="Number of SEO checks that passed">
+                <Tooltip 
+                  title="Number of SEO checks that passed"
+                  enterDelay={300}
+                  enterTouchDelay={300}
+                >
                   <Typography variant="body2" sx={{ fontWeight: 'bold', color: theme.palette.success.main, cursor: 'help' }}>
                     {seo.checks.filter(c => c.status === 'good').length}/{seo.checks.length}
                   </Typography>
@@ -213,7 +229,11 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
               </Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography variant="body2">Warnings</Typography>
-                <Tooltip title="Number of SEO warnings found">
+                <Tooltip 
+                  title="Number of SEO warnings found"
+                  enterDelay={300}
+                  enterTouchDelay={300}
+                >
                   <Typography variant="body2" sx={{ fontWeight: 'bold', color: theme.palette.warning.main, cursor: 'help' }}>
                     {seo.checks.filter(c => c.status === 'warning').length}
                   </Typography>
@@ -221,7 +241,11 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
               </Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography variant="body2">Errors</Typography>
-                <Tooltip title="Number of SEO errors found">
+                <Tooltip 
+                  title="Number of SEO errors found"
+                  enterDelay={300}
+                  enterTouchDelay={300}
+                >
                   <Typography variant="body2" sx={{ fontWeight: 'bold', color: theme.palette.error.main, cursor: 'help' }}>
                     {seo.checks.filter(c => c.status === 'error').length}
                   </Typography>
@@ -240,7 +264,12 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
             </Typography>
             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 2 }}>
               {seo.recommendations.map((rec, index) => (
-                <Tooltip key={index} title={getPriorityTooltip(rec.priority)}>
+                <Tooltip 
+                  key={index} 
+                  title={getPriorityTooltip(rec.priority)}
+                  enterDelay={300}
+                  enterTouchDelay={300}
+                >
                   <Box sx={{ 
                     p: 2, 
                     border: `1px solid ${getPriorityColor(rec.priority)}`,
@@ -256,7 +285,11 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
                       }}>
                         {rec.title}
                       </Typography>
-                      <Tooltip title={getPriorityTooltip(rec.priority)}>
+                      <Tooltip 
+                        title={getPriorityTooltip(rec.priority)}
+                        enterDelay={300}
+                        enterTouchDelay={300}
+                      >
                         <Chip 
                           label={rec.priority} 
                           size="small" 

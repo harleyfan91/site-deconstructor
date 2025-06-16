@@ -144,7 +144,11 @@ function MetricCards({
                 >
                   <IconComponent size={24} />
                 </Box>
-                <Tooltip title={metric.tooltip}>
+                <Tooltip 
+                  title={metric.tooltip}
+                  enterDelay={300}
+                  enterTouchDelay={300}
+                >
                   <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', cursor: 'help' }}>
                     {metric.value}
                   </Typography>
@@ -188,7 +192,11 @@ const KeyFindingsGrid: React.FC<{ overview: AnalysisResponse['data']['overview']
     <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1, mb: 2 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
         <Typography variant="body2">Overall Score</Typography>
-        <Tooltip title={getScoreTooltip(overview.overallScore, 'overall performance')}>
+        <Tooltip 
+          title={getScoreTooltip(overview.overallScore, 'overall performance')}
+          enterDelay={300}
+          enterTouchDelay={300}
+        >
           <Typography variant="body2" sx={{ fontWeight: 'bold', color: scoreColor(overview.overallScore), cursor: 'help' }}>
             {overview.overallScore}/100
           </Typography>
@@ -196,7 +204,11 @@ const KeyFindingsGrid: React.FC<{ overview: AnalysisResponse['data']['overview']
       </Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
         <Typography variant="body2">SEO Score</Typography>
-        <Tooltip title={getScoreTooltip(overview.seoScore, 'SEO optimization')}>
+        <Tooltip 
+          title={getScoreTooltip(overview.seoScore, 'SEO optimization')}
+          enterDelay={300}
+          enterTouchDelay={300}
+        >
           <Typography variant="body2" sx={{ fontWeight: 'bold', color: scoreColor(overview.seoScore), cursor: 'help' }}>
             {overview.seoScore}/100
           </Typography>
@@ -204,7 +216,11 @@ const KeyFindingsGrid: React.FC<{ overview: AnalysisResponse['data']['overview']
       </Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
         <Typography variant="body2">Page Load Time</Typography>
-        <Tooltip title="Time taken for the page to fully load">
+        <Tooltip 
+          title="Time taken for the page to fully load"
+          enterDelay={300}
+          enterTouchDelay={300}
+        >
           <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#FF9800', cursor: 'help' }}>
             {overview.pageLoadTime}
           </Typography>
@@ -212,7 +228,11 @@ const KeyFindingsGrid: React.FC<{ overview: AnalysisResponse['data']['overview']
       </Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
         <Typography variant="body2">User Experience</Typography>
-        <Tooltip title={getScoreTooltip(overview.userExperienceScore, 'user experience')}>
+        <Tooltip 
+          title={getScoreTooltip(overview.userExperienceScore, 'user experience')}
+          enterDelay={300}
+          enterTouchDelay={300}
+        >
           <Typography
             variant="body2"
             sx={{
