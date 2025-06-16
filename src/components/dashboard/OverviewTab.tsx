@@ -331,7 +331,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
           <Typography
             variant="caption"
             sx={{
-              fontSize: { xs: '0.7rem', sm: '0.75rem' },
+              fontSize: { xs: '0.8rem', sm: '0.85rem' },
               color: 'text.secondary',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
