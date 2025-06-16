@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   Box,
@@ -11,6 +12,7 @@ import {
   IconButton,
   useTheme,
   useMediaQuery,
+  Tooltip,
 } from '@mui/material';
 import { ChevronDown, ChevronUp } from 'lucide-react';  
 import type { AnalysisResponse } from '@/types/analysis';
@@ -48,6 +50,8 @@ function chipStateStyle(isActive: boolean, theme: any) {
 
 const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) => {
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
@@ -75,8 +79,6 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
 
   const { securityHeaders } = data;
   const [showAll, setShowAll] = React.useState(false);
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const tech = data.data.technical;
   const violations = tech.accessibility.violations;
   const social = tech.social || { hasOpenGraph: false, hasTwitterCard: false, hasShareButtons: false };
