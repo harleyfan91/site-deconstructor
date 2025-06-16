@@ -1,5 +1,18 @@
 import React from 'react';
-import { Box, Typography, Card, CardContent, Alert, CircularProgress, Chip } from '@mui/material';
+import {
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  Alert,
+  CircularProgress,
+  Chip,
+  Collapse,
+  IconButton,
+  useTheme,
+  useMediaQuery,
+} from '@mui/material';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 import { dashIfEmpty } from '../../lib/ui';
 import LegendContainer from './LegendContainer';
@@ -37,6 +50,17 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
   }
 
   const { securityHeaders } = data;
+  const [showAll, setShowAll] = React.useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+  const securityEntries = React.useMemo(
+    () => Object.entries(securityHeaders),
+    [securityHeaders]
+  );
+  const visibleCount = isMobile ? 5 : 10;
+  const visibleEntries = securityEntries.slice(0, visibleCount);
+  const hiddenEntries = securityEntries.slice(visibleCount);
   const tech = data.data.technical;
   const violations = tech.accessibility.violations;
   const social = tech.social || { hasOpenGraph: false, hasTwitterCard: false, hasShareButtons: false };
@@ -58,12 +82,50 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
               Security Headers
             </Typography>
             <Box component="ul" sx={{ pl: 2 }}>
-              {Object.entries(securityHeaders).map(([k, v]) => (
+              {visibleEntries.map(([k, v]) => (
                 <Typography component="li" variant="body2" key={k}>
                   <strong>{k.toUpperCase()}:</strong> {dashIfEmpty(v)}
                 </Typography>
               ))}
             </Box>
+            {hiddenEntries.length > 0 && (
+              <Box sx={{ mt: 1 }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    cursor: 'pointer',
+                    p: 1,
+                    borderRadius: 1,
+                    bgcolor: 'rgba(255, 107, 53, 0.05)',
+                    '&:hover': {
+                      bgcolor: 'rgba(255, 107, 53, 0.1)',
+                    },
+                  }}
+                  onClick={() => setShowAll((prev) => !prev)}
+                >
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 'bold', color: '#FF6B35' }}
+                  >
+                    All
+                  </Typography>
+                  <IconButton size="small">
+                    {showAll ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                  </IconButton>
+                </Box>
+                <Collapse in={showAll}>
+                  <Box component="ul" sx={{ pl: 2, mt: 1 }}>
+                    {hiddenEntries.map(([k, v]) => (
+                      <Typography component="li" variant="body2" key={k}>
+                        <strong>{k.toUpperCase()}:</strong> {dashIfEmpty(v)}
+                      </Typography>
+                    ))}
+                  </Box>
+                </Collapse>
+              </Box>
+            )}
           </CardContent>
         </Card>
 
