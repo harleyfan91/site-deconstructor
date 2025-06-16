@@ -120,7 +120,7 @@ function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["
             maxWidth: 'none'
           }}>
             <ChartContainer config={chartConfig} className="h-80">
-              <RechartsBarChart data={performance.coreWebVitals} margin={{ top: 20, right: 30, left: 2, bottom: 5 }} barGap={2}>
+              <RechartsBarChart data={performance.coreWebVitals} margin={{ top: 20, right: 30, left: 2, bottom: 5 }} categoryGap="10%">
                 <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                 <YAxis />
                 <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
