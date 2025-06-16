@@ -310,26 +310,43 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
 
   return (
     <Box>
-      {/* Header with title and URL */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      {/* Header with title and styled URL box */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, gap: 2 }}>
         <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
           Website Overview
         </Typography>
-        <Link
-          href={data.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          underline="hover"
-          color="#FF6B35"
-          variant="h6"
+        <Box
           sx={{
-            wordBreak: 'break-all',
-            fontWeight: 400, // Not bold
-            lineHeight: 1.3,
+            display: 'flex',
+            alignItems: 'center',
+            bgcolor: 'background.paper',
+            border: '1px solid rgba(0,0,0,0.1)',
+            borderRadius: 1,
+            px: 2,
+            py: 1,
+            maxWidth: { xs: '50%', sm: '40%', md: '30%' },
+            minWidth: 0,
           }}
         >
-          {data.url}
-        </Link>
+          <Typography
+            variant="caption"
+            sx={{
+              fontSize: { xs: '0.7rem', sm: '0.75rem' },
+              color: 'text.secondary',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              cursor: 'pointer',
+            }}
+            component={Link}
+            href={data.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            underline="hover"
+          >
+            {data.url}
+          </Typography>
+        </Box>
       </Box>
 
       {/* Styled divider matching Font Analysis and SEO Checklist */}
