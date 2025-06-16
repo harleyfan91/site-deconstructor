@@ -23,12 +23,6 @@ const getScoreColor = (score: number) => {
 
 // Renders a single metric card for performance, mobile, or security metrics
 function MetricCard({
-  icon: IconComponent,
-  title,
-  value,
-  color,
-  description,
-}: {
   icon: React.ElementType;
   title: string;
   value: string;
@@ -119,12 +113,12 @@ function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["
             maxWidth: 'none'
           }}>
             <ChartContainer config={chartConfig} className="h-80">
-              <RechartsBarChart data={performance.coreWebVitals} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+              <RechartsBarChart data={performance.coreWebVitals} margin={{ top: 20, right: 30, left: 5, bottom: 5 }} barCategoryGap="20%">
                 <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                 <YAxis />
                 <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-                <Bar dataKey="value" fill="var(--color-value)" />
-                <Bar dataKey="benchmark" fill="var(--color-benchmark)" />
+                <Bar dataKey="value" fill="var(--color-value)" maxBarSize={40} />
+                <Bar dataKey="benchmark" fill="var(--color-benchmark)" maxBarSize={40} />
               </RechartsBarChart>
             </ChartContainer>
           </Box>
