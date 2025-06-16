@@ -14,7 +14,7 @@ import {
   useMediaQuery,
   Tooltip,
 } from '@mui/material';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, ChevronUp } from 'lucide-react';  
 import type { AnalysisResponse } from '@/types/analysis';
 import { dashIfEmpty } from '../../lib/ui';
 
@@ -47,15 +47,9 @@ function chipStateStyle(isActive: boolean, theme: any) {
       };
 }
 
-// Helper function to truncate long header values
-function truncateHeaderValue(value: string, maxLength: number = 100): string {
-  if (!value || value.length <= maxLength) return value;
-  return value.substring(0, maxLength) + '...';
-}
-
 const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) => {
   const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   
   if (loading) {
     return (
@@ -83,19 +77,15 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
   }
 
   const { securityHeaders } = data;
-  const [showAllHeaders, setShowAllHeaders] = React.useState(false);
+  const [showAll, setShowAll] = React.useState(false);
 
   const securityEntries = React.useMemo(
     () => Object.entries(securityHeaders),
     [securityHeaders]
   );
-  
-  // Always show limited headers initially, with expand option if there are any headers
-  const initialDisplayCount = isSmallScreen ? 3 : 5;
-  const visibleEntries = securityEntries.slice(0, initialDisplayCount);
-  const hiddenEntries = securityEntries.slice(initialDisplayCount);
-  const hasHiddenEntries = hiddenEntries.length > 0;
-  
+  const visibleCount = isMobile ? 5 : 10;
+  const visibleEntries = securityEntries.slice(0, visibleCount);
+  const hiddenEntries = securityEntries.slice(visibleCount);
   const tech = data.data.technical;
   const violations = tech.accessibility.violations;
   const social = tech.social || { hasOpenGraph: false, hasTwitterCard: false, hasShareButtons: false };
@@ -116,14 +106,14 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
               Security Headers
             </Typography>
-            <Box component="ul" sx={{ pl: 2, mb: hasHiddenEntries ? 1 : 0 }}>
+            <Box component="ul" sx={{ pl: 2 }}>
               {visibleEntries.map(([k, v]) => (
-                <Typography component="li" variant="body2" key={k} sx={{ mb: 0.5, wordBreak: 'break-word' }}>
-                  <strong>{k.toUpperCase()}:</strong> {dashIfEmpty(truncateHeaderValue(v))}
+                <Typography component="li" variant="body2" key={k}>
+                  <strong>{k.toUpperCase()}:</strong> {dashIfEmpty(v)}
                 </Typography>
               ))}
             </Box>
-            {hasHiddenEntries && (
+            {hiddenEntries.length > 0 && (
               <Box sx={{ mt: 1 }}>
                 <Box
                   sx={{
@@ -138,28 +128,22 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
                       bgcolor: 'rgba(255, 107, 53, 0.1)',
                     },
                   }}
-                  onClick={() => setShowAllHeaders((prev) => !prev)}
+                  onClick={() => setShowAll((prev) => !prev)}
                 >
                   <Typography
                     variant="subtitle1"
                     sx={{ fontWeight: 'bold', color: '#FF6B35' }}
                   >
-                    {showAllHeaders ? 'Show Less' : `Show All (${hiddenEntries.length} more)`}
+                    All
                   </Typography>
-                  <IconButton size="small" sx={{ color: '#FF6B35' }}>
-                    <ChevronDown
-                      size={20}
-                      style={{
-                        transform: showAllHeaders ? 'rotate(180deg)' : 'rotate(0deg)',
-                        transition: 'transform 0.2s',
-                      }}
-                    />
+                  <IconButton size="small">
+                    {showAll ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                   </IconButton>
                 </Box>
-                <Collapse in={showAllHeaders} unmountOnExit>
+                <Collapse in={showAll}>
                   <Box component="ul" sx={{ pl: 2, mt: 1 }}>
                     {hiddenEntries.map(([k, v]) => (
-                      <Typography component="li" variant="body2" key={k} sx={{ mb: 0.5, wordBreak: 'break-word' }}>
+                      <Typography component="li" variant="body2" key={k}>
                         <strong>{k.toUpperCase()}:</strong> {dashIfEmpty(v)}
                       </Typography>
                     ))}
