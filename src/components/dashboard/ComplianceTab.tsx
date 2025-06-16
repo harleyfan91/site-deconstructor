@@ -14,7 +14,7 @@ import {
   useMediaQuery,
   Tooltip,
 } from '@mui/material';
-import { ChevronDown, ChevronUp } from 'lucide-react';  
+import { ChevronDown } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 import { dashIfEmpty } from '../../lib/ui';
 
@@ -49,7 +49,7 @@ function chipStateStyle(isActive: boolean, theme: any) {
 
 const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
   
   if (loading) {
     return (
@@ -83,7 +83,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
     () => Object.entries(securityHeaders),
     [securityHeaders]
   );
-  const visibleCount = isMobile ? 5 : 10;
+  const visibleCount = isSmallScreen ? 5 : 10;
   const visibleEntries = securityEntries.slice(0, visibleCount);
   const hiddenEntries = securityEntries.slice(visibleCount);
   const tech = data.data.technical;
@@ -136,11 +136,17 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
                   >
                     All
                   </Typography>
-                  <IconButton size="small">
-                    {showAll ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                  <IconButton size="small" sx={{ color: '#FF6B35' }}>
+                    <ChevronDown
+                      size={20}
+                      style={{
+                        transform: showAll ? 'rotate(180deg)' : 'rotate(0deg)',
+                        transition: 'transform 0.2s',
+                      }}
+                    />
                   </IconButton>
                 </Box>
-                <Collapse in={showAll}>
+                <Collapse in={showAll} unmountOnExit>
                   <Box component="ul" sx={{ pl: 2, mt: 1 }}>
                     {hiddenEntries.map(([k, v]) => (
                       <Typography component="li" variant="body2" key={k}>
