@@ -324,7 +324,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
             borderRadius: 1,
             px: 2,
             py: 1,
-            maxWidth: { xs: '50%', sm: '40%', md: '30%' },
+            width: '50%',
             minWidth: 0,
           }}
         >
