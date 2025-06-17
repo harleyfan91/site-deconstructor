@@ -324,7 +324,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
             borderRadius: 1,
             px: 2,
             py: 1,
-            width: '50%',
+            width: '47%',
             minWidth: 0,
           }}
         >
@@ -337,6 +337,9 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
               cursor: 'pointer',
+              fontWeight: 'bold',
+              textAlign: 'justify',
+              width: '100%',
             }}
             component={Link}
             href={data.url}
