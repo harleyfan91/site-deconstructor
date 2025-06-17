@@ -26,6 +26,12 @@ interface UsageGroup {
 const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
 
+  // Delay (ms) before non-background sections collapse
+  const AUTO_COLLAPSE_DELAY = 2500;
+
+  // Slightly slower collapse animation to match dashboard scroll smoothness
+  const COLLAPSE_DURATION = 600;
+
   const toggleSection = (sectionName: string) => {
     setExpandedSections(prev => ({
       ...prev,
@@ -142,13 +148,28 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
 
   const usageGroups = groupByUsage();
 
-  // Initialize all sections as expanded
+  // Initialize all sections as expanded, then auto-collapse
   React.useEffect(() => {
     const initialExpanded: Record<string, boolean> = {};
     usageGroups.forEach(group => {
       initialExpanded[group.name] = true;
     });
     setExpandedSections(initialExpanded);
+
+    // Collapse sections other than "Background" after a delay
+    const timer = setTimeout(() => {
+      setExpandedSections(prev => {
+        const updated: Record<string, boolean> = { ...prev };
+        Object.keys(updated).forEach(name => {
+          if (name !== 'Background') {
+            updated[name] = false;
+          }
+        });
+        return updated;
+      });
+    }, AUTO_COLLAPSE_DELAY);
+
+    return () => clearTimeout(timer);
   }, [colors]);
 
   return (
@@ -191,7 +212,11 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
               </Box>
 
               {/* Collapsible Content */}
-              <Collapse in={expandedSections[usageGroup.name]}>
+              <Collapse
+                in={expandedSections[usageGroup.name]}
+                timeout={COLLAPSE_DURATION}
+                sx={{ transitionTimingFunction: 'ease-in-out' }}
+              >
                 <Box sx={{ mt: 2, ml: 2 }}>
                   {usageGroup.groups.map((freqGroup, freqIndex) => (
                     <Box key={freqIndex} sx={{ mb: 2 }}>
