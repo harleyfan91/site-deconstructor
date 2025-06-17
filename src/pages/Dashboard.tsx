@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Box, Container } from '@mui/material';
 import { motion } from 'framer-motion';
 import AppHeader from '../components/AppHeader';
@@ -12,6 +12,19 @@ interface DashboardProps {
 }
 
 const Dashboard = ({ darkMode, toggleDarkMode }: DashboardProps) => {
+  useEffect(() => {
+    // Auto-scroll to hide URL input after landing on dashboard
+    const timer = setTimeout(() => {
+      const urlInputHeight = 120; // Approximate height of URL input section
+      window.scrollTo({
+        top: urlInputHeight,
+        behavior: 'smooth'
+      });
+    }, 800); // Delay to let the page load animations complete
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <Box>
       <motion.div

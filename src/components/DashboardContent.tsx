@@ -63,20 +63,35 @@ const DashboardContent = () => {
       >
         <Paper elevation={3} sx={{ p: { xs: 1.5, sm: 2 }, borderRadius: 2 }}>
           <Tabs defaultValue="overview" className="w-full">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
+            {/* Sticky navigation container */}
+            <Box
+              sx={{
+                position: 'sticky',
+                top: { xs: 40, md: 48 }, // Account for fixed header height
+                zIndex: 10,
+                backgroundColor: 'background.paper',
+                pt: 1,
+                pb: 2,
+                mb: 2,
+                borderBottom: '1px solid',
+                borderColor: 'divider',
+              }}
             >
-              <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 gap-1 mb-4 h-auto">
-                <TabsTrigger value="overview" className="text-xs sm:text-sm">Overview</TabsTrigger>
-                <TabsTrigger value="ui" className="text-xs sm:text-sm">User Interface</TabsTrigger>
-                <TabsTrigger value="performance" className="text-xs sm:text-sm">Performance & Security</TabsTrigger>
-                <TabsTrigger value="seo" className="text-xs sm:text-sm">SEO Analysis</TabsTrigger>
-                <TabsTrigger value="tech" className="text-xs sm:text-sm">Tech</TabsTrigger>
-                <TabsTrigger value="compliance" className="text-xs sm:text-sm">Compliance</TabsTrigger>
-              </TabsList>
-            </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+              >
+                <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 gap-1 h-auto">
+                  <TabsTrigger value="overview" className="text-xs sm:text-sm">Overview</TabsTrigger>
+                  <TabsTrigger value="ui" className="text-xs sm:text-sm">User Interface</TabsTrigger>
+                  <TabsTrigger value="performance" className="text-xs sm:text-sm">Performance & Security</TabsTrigger>
+                  <TabsTrigger value="seo" className="text-xs sm:text-sm">SEO Analysis</TabsTrigger>
+                  <TabsTrigger value="tech" className="text-xs sm:text-sm">Tech</TabsTrigger>
+                  <TabsTrigger value="compliance" className="text-xs sm:text-sm">Compliance</TabsTrigger>
+                </TabsList>
+              </motion.div>
+            </Box>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
