@@ -149,6 +149,21 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
       initialExpanded[group.name] = true;
     });
     setExpandedSections(initialExpanded);
+
+    // Collapse sections other than "Background" after a delay
+    const timer = setTimeout(() => {
+      setExpandedSections(prev => {
+        const updated: Record<string, boolean> = { ...prev };
+        Object.keys(updated).forEach(name => {
+          if (name !== 'Background') {
+            updated[name] = false;
+          }
+        });
+        return updated;
+      });
+    }, 2500);
+
+    return () => clearTimeout(timer);
   }, [colors]);
 
   return (
