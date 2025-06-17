@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Box, Typography, Collapse, IconButton } from '@mui/material';
 import { Palette, ChevronDown, ChevronUp } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 import { groupByFrequency } from '@/lib/ui';
+import { usePersistentState } from '@/hooks/usePersistentState';
 
 interface ColorExtractionCardProps {
   colors: AnalysisResponse['data']['ui']['colors'];
@@ -24,7 +25,10 @@ interface UsageGroup {
 }
 
 const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => {
-  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
+  const [expandedSections, setExpandedSections] = usePersistentState<Record<string, boolean>>(
+    'ui-color-extraction-expanded',
+    {}
+  );
 
   const toggleSection = (sectionName: string) => {
     setExpandedSections(prev => ({
@@ -142,28 +146,39 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
 
   const usageGroups = groupByUsage();
 
-  // Initialize all sections as expanded
+  // Initialize sections when colors change, but respect any stored state
   React.useEffect(() => {
-    const initialExpanded: Record<string, boolean> = {};
-    usageGroups.forEach(group => {
-      initialExpanded[group.name] = true;
-    });
-    setExpandedSections(initialExpanded);
-
-    // Collapse sections other than "Background" after a delay
-    const timer = setTimeout(() => {
-      setExpandedSections(prev => {
-        const updated: Record<string, boolean> = { ...prev };
-        Object.keys(updated).forEach(name => {
-          if (name !== 'Background') {
-            updated[name] = false;
-          }
-        });
-        return updated;
+    const hadStoredState = Object.keys(expandedSections).length > 0;
+    let hasNewSection = false;
+    setExpandedSections(prev => {
+      const updated = { ...prev };
+      usageGroups.forEach(group => {
+        if (!(group.name in updated)) {
+          updated[group.name] = true;
+          hasNewSection = true;
+        }
       });
-    }, 2500);
+      return updated;
+    });
 
-    return () => clearTimeout(timer);
+    let timer: NodeJS.Timeout | undefined;
+    if (!hadStoredState && hasNewSection) {
+      timer = setTimeout(() => {
+        setExpandedSections(prev => {
+          const updated: Record<string, boolean> = { ...prev };
+          Object.keys(updated).forEach(name => {
+            if (name !== 'Background') {
+              updated[name] = false;
+            }
+          });
+          return updated;
+        });
+      }, 2500);
+    }
+
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
   }, [colors]);
 
   return (
