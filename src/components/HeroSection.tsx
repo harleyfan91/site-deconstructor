@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Box, Typography, Container, Chip } from '@mui/material';
 import { KeyboardArrowDown } from '@mui/icons-material';
@@ -368,7 +367,7 @@ const HeroSection = () => {
                 });
               }}
             >
-              Scroll down to see what SiteDeconstructor can do
+              See what SiteDeconstructor can do
               <motion.div
                 animate={{
                   y: [0, 4, 0],
@@ -382,6 +381,7 @@ const HeroSection = () => {
                 <KeyboardArrowDown 
                   sx={{ 
                     fontSize: 20,
+                    color: '#4CAF50', // Green color that matches the previous glowing dot
                     zIndex: 2,
                     position: 'relative',
                   }} 
