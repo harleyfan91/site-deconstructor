@@ -30,6 +30,12 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
     {}
   );
 
+  // Delay (ms) before non-background sections collapse
+  const AUTO_COLLAPSE_DELAY = 2500;
+
+  // Slightly slower collapse animation to match dashboard scroll smoothness
+  const COLLAPSE_DURATION = 600;
+
   const toggleSection = (sectionName: string) => {
     setExpandedSections(prev => ({
       ...prev,
@@ -173,8 +179,8 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
           });
           return updated;
         });
-      }, 2500);
-    }
+
+    }, AUTO_COLLAPSE_DELAY);
 
     return () => {
       if (timer) clearTimeout(timer);
@@ -221,7 +227,11 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
               </Box>
 
               {/* Collapsible Content */}
-              <Collapse in={expandedSections[usageGroup.name]}>
+              <Collapse
+                in={expandedSections[usageGroup.name]}
+                timeout={COLLAPSE_DURATION}
+                sx={{ transitionTimingFunction: 'ease-in-out' }}
+              >
                 <Box sx={{ mt: 2, ml: 2 }}>
                   {usageGroup.groups.map((freqGroup, freqIndex) => (
                     <Box key={freqIndex} sx={{ mb: 2 }}>
