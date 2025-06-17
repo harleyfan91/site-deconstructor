@@ -1,5 +1,7 @@
+
 import React from 'react';
 import { Box, Typography, Container, Chip } from '@mui/material';
+import { KeyboardArrowDown } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import URLInputForm from './URLInputForm';
@@ -38,7 +40,7 @@ const motionProps = {
     animate: { opacity: 1 },
     transition: { duration: 0.6, delay: 0.6 },
   },
-  trustedBy: {
+  scrollIndicator: {
     initial: { opacity: 0 },
     animate: { opacity: 1 },
     transition: { duration: 0.8, delay: 0.8 },
@@ -339,7 +341,7 @@ const HeroSection = () => {
               </Box>
             </motion.div>
           </Box>
-          <motion.div {...motionProps.trustedBy}>
+          <motion.div {...motionProps.scrollIndicator}>
             <Typography
               variant="body2"
               color="text.secondary"
@@ -353,32 +355,38 @@ const HeroSection = () => {
                 zIndex: 2,
                 position: 'relative',
                 fontSize: { xs: '0.85rem', md: '0.9rem' },
+                cursor: 'pointer',
+                '&:hover': {
+                  color: 'text.primary',
+                },
+                transition: 'color 0.3s ease',
+              }}
+              onClick={() => {
+                window.scrollTo({
+                  top: window.innerHeight,
+                  behavior: 'smooth'
+                });
               }}
             >
-              Trusted by 50,000+ designers worldwide
-              <Box
-                component="span"
-                sx={{
-                  width: 8,
-                  height: 8,
-                  bgcolor: 'success.main',
-                  borderRadius: '50%',
-                  animation: 'pulse 2s infinite',
-                  '@keyframes pulse': {
-                    '0%': {
-                      boxShadow: '0 0 0 0 rgba(76, 175, 80, 0.7)',
-                    },
-                    '70%': {
-                      boxShadow: '0 0 0 10px rgba(76, 175, 80, 0)',
-                    },
-                    '100%': {
-                      boxShadow: '0 0 0 0 rgba(76, 175, 80, 0)',
-                    },
-                  },
-                  zIndex: 2,
-                  position: 'relative',
+              Scroll down to see what SiteDeconstructor can do
+              <motion.div
+                animate={{
+                  y: [0, 4, 0],
                 }}
-              />
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              >
+                <KeyboardArrowDown 
+                  sx={{ 
+                    fontSize: 20,
+                    zIndex: 2,
+                    position: 'relative',
+                  }} 
+                />
+              </motion.div>
             </Typography>
           </motion.div>
         </Box>
