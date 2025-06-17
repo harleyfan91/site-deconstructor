@@ -1,8 +1,9 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Box, Typography, List, ListItem, Link, Collapse, IconButton } from '@mui/material';
 import { Image, ChevronDown, ChevronUp } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
+import { usePersistentState } from '@/hooks/usePersistentState';
 
 interface ImageAnalysisCardProps {
   images: AnalysisResponse['data']['ui']['images'];
@@ -17,11 +18,14 @@ interface ImageAnalysisCardProps {
 }
 
 const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnalysis }) => {
-  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
-    total: false,
-    photos: false,
-    icons: false
-  });
+  const [expandedSections, setExpandedSections] = usePersistentState<Record<string, boolean>>(
+    'ui-image-analysis-expanded',
+    {
+      total: false,
+      photos: false,
+      icons: false
+    }
+  );
 
   const toggleSection = (name: string) => {
     setExpandedSections(prev => ({
