@@ -15,12 +15,13 @@ const Dashboard = ({ darkMode, toggleDarkMode }: DashboardProps) => {
   useEffect(() => {
     // Auto-scroll to hide URL input after landing on dashboard
     const timer = setTimeout(() => {
-      const urlInputHeight = 120; // Approximate height of URL input section
+      // Increase height to account for mobile button layout and ensure it's hidden
+      const urlInputHeight = 160; // Increased from 120 to account for mobile analyze button
       window.scrollTo({
         top: urlInputHeight,
         behavior: 'smooth'
       });
-    }, 800); // Delay to let the page load animations complete
+    }, 1500); // Increased from 800ms to 1500ms for better timing
 
     return () => clearTimeout(timer);
   }, []);
