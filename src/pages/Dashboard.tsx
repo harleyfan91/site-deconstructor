@@ -1,10 +1,10 @@
-
 import React, { useEffect } from 'react';
 import { Box, Container } from '@mui/material';
 import { motion } from 'framer-motion';
 import AppHeader from '../components/AppHeader';
 import DashboardContent from '../components/DashboardContent';
 import URLInputForm from '../components/URLInputForm';
+import { useIsMobile } from '../hooks/use-mobile';
 
 interface DashboardProps {
   darkMode: boolean;
@@ -12,11 +12,13 @@ interface DashboardProps {
 }
 
 const Dashboard = ({ darkMode, toggleDarkMode }: DashboardProps) => {
+  const isMobile = useIsMobile();
+
   useEffect(() => {
     // Auto-scroll to hide URL input after landing on dashboard
     const timer = setTimeout(() => {
-      // Increase height to account for mobile button layout and ensure it's hidden
-      const urlInputHeight = 160; // Increased from 120 to account for mobile analyze button
+      // Different scroll distances for mobile vs desktop
+      const urlInputHeight = isMobile ? 160 : 120; // Mobile: 160px, Desktop: 120px
       window.scrollTo({
         top: urlInputHeight,
         behavior: 'smooth'
@@ -24,7 +26,7 @@ const Dashboard = ({ darkMode, toggleDarkMode }: DashboardProps) => {
     }, 1500); // Increased from 800ms to 1500ms for better timing
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [isMobile]);
 
   return (
     <Box>

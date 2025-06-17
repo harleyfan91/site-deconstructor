@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   TextField,
@@ -49,7 +48,32 @@ const URLInputForm = ({ onAnalysisComplete }: URLInputFormProps) => {
   };
 
   return (
-    <Box sx={{ width: '100%', maxWidth: 600 }}>
+    <Box 
+      sx={{ 
+        width: '100%', 
+        maxWidth: 600,
+        // Add custom CSS for slower scroll animation
+        '& *': {
+          scrollBehavior: 'smooth !important',
+        }
+      }}
+    >
+      {/* Add custom styles for slower scroll */}
+      <style>
+        {`
+          html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 0;
+          }
+          
+          @media (prefers-reduced-motion: no-preference) {
+            html {
+              scroll-behavior: smooth;
+            }
+          }
+        `}
+      </style>
+      
       {error && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
