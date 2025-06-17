@@ -18,7 +18,7 @@ const Dashboard = ({ darkMode, toggleDarkMode }: DashboardProps) => {
     // Auto-scroll to hide URL input after landing on dashboard
     const timer = setTimeout(() => {
       // Different scroll distances for mobile vs desktop
-      const urlInputHeight = isMobile ? 160 : 120; // Mobile: 160px, Desktop: 120px
+      const urlInputHeight = isMobile ? 160 : 110; // Mobile: 160px, Desktop: 110px
       window.scrollTo({
         top: urlInputHeight,
         behavior: 'smooth'
