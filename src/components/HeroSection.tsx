@@ -111,8 +111,9 @@ const HeroSection = () => {
         alignItems: 'center',
         position: 'relative',
         overflow: 'hidden',
-        // Reduce top/bottom padding to fit more content
-        py: { xs: 1, md: 2 },
+        // Reduce top padding further so the hero sits higher
+        pt: { xs: 0.5, sm: 0.75, md: 1, lg: 1.25 },
+        pb: { xs: 1, sm: 1.5, md: 2, lg: 2.5 },
       }}
     >
       {/* Gradient + mask background applied absolutely below content */}
@@ -203,9 +204,9 @@ const HeroSection = () => {
         <Box
           sx={{
             textAlign: 'center',
-            // Further reduce padding, especially top padding
-            py: { xs: 2, md: 3 },
-            pt: { xs: 1, md: 2 },
+            // Move content higher by cutting the top padding in half
+            pb: { xs: 2, sm: 2.5, md: 3, lg: 3.5 },
+            pt: { xs: 0.5, sm: 0.75, md: 1, lg: 1.25 },
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
