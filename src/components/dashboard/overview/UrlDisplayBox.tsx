@@ -17,7 +17,7 @@ const UrlDisplayBox: React.FC<UrlDisplayBoxProps> = ({ url }) => {
         borderRadius: 1,
         px: 2,
         py: 1,
-        width: '48%',
+        width: '49%',
         minWidth: 0,
       }}
     >
@@ -31,7 +31,7 @@ const UrlDisplayBox: React.FC<UrlDisplayBoxProps> = ({ url }) => {
           whiteSpace: 'nowrap',
           cursor: 'pointer',
           fontWeight: 'bold',
-          textAlign: 'right',
+          textAlign: 'center',
           width: '100%',
         }}
         component={Link}
