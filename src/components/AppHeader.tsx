@@ -56,14 +56,14 @@ const AppHeader = ({ darkMode, toggleDarkMode }: { darkMode: boolean; toggleDark
           backgroundColor: darkMode ? 'rgba(0, 0, 0, 0.8)' : 'rgba(255, 255, 255, 0.8)',
           boxShadow: darkMode ? '0 8px 32px rgba(0, 0, 0, 0.3)' : '0 8px 32px rgba(0, 0, 0, 0.1)',
           color: darkMode ? '#FFFFFF' : '#000000',
-          // Reduce header height
-          minHeight: { xs: 48, md: 56 },
+          // Further reduce header height so hero content can sit higher
+          minHeight: { xs: 40, md: 48 },
         }}
       >
         <Toolbar
           sx={{
-            // Reduce toolbar height
-            minHeight: { xs: 48, md: 56 },
+            // Reduce toolbar height to match the smaller header
+            minHeight: { xs: 40, md: 48 },
             px: { xs: 2, md: 3 },
           }}
         >
@@ -108,10 +108,10 @@ const AppHeader = ({ darkMode, toggleDarkMode }: { darkMode: boolean; toggleDark
         </Toolbar>
       </AppBar>
 
-      {/* Reduce the spacing toolbar height to match the reduced header */}
-      <Toolbar 
+      {/* Reduce the spacing toolbar height to match the further reduced header */}
+      <Toolbar
         sx={{
-          minHeight: { xs: 48, md: 56 },
+          minHeight: { xs: 40, md: 48 },
         }}
       />
     </>
