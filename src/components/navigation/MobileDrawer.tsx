@@ -10,7 +10,7 @@ import {
   ListItemText,
   ListItemButton,
 } from '@mui/material';
-import { Close, DarkMode, LightMode } from '@mui/icons-material';
+import { Close, DarkMode, LightMode, AccountCircle } from '@mui/icons-material';
 import { Link } from 'react-router-dom';
 import { NavigationItem } from './NavigationItems';
 
@@ -21,15 +21,17 @@ interface MobileDrawerProps {
   toggleDarkMode: () => void;
   onDrawerToggle: () => void;
   onNavClick: (item: NavigationItem) => void;
+  showUserIcon?: boolean;
 }
 
-const MobileDrawer = ({ 
-  navigationItems, 
-  mobileOpen, 
-  darkMode, 
-  toggleDarkMode, 
-  onDrawerToggle, 
-  onNavClick 
+const MobileDrawer = ({
+  navigationItems,
+  mobileOpen,
+  darkMode,
+  toggleDarkMode,
+  onDrawerToggle,
+  onNavClick,
+  showUserIcon
 }: MobileDrawerProps) => {
   const drawer = (
     <Box sx={{ width: 250, pt: 2 }}>
@@ -83,19 +85,25 @@ const MobileDrawer = ({
           </ListItem>
         ))}
         <ListItem>
-          <Button
-            variant="contained"
-            fullWidth
-            sx={{
-              background: 'linear-gradient(45deg, #FF6B35 30%, #FF8A65 90%)',
-              boxShadow: '0 4px 15px rgba(255, 107, 53, 0.3)',
-              '&:hover': {
-                background: 'linear-gradient(45deg, #FF8A65 30%, #FF6B35 90%)',
-              },
-            }}
-          >
-            Get Started
-          </Button>
+          {showUserIcon ? (
+            <IconButton color="inherit">
+              <AccountCircle />
+            </IconButton>
+          ) : (
+            <Button
+              variant="contained"
+              fullWidth
+              sx={{
+                background: 'linear-gradient(45deg, #FF6B35 30%, #FF8A65 90%)',
+                boxShadow: '0 4px 15px rgba(255, 107, 53, 0.3)',
+                '&:hover': {
+                  background: 'linear-gradient(45deg, #FF8A65 30%, #FF6B35 90%)',
+                },
+              }}
+            >
+              Get Started
+            </Button>
+          )
         </ListItem>
       </List>
     </Box>
