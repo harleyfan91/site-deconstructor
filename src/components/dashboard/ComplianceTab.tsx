@@ -107,92 +107,58 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
       </Box>
       
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3, mb: 3 }}>
-        {/* Other Checks - moved to top-left */}
+        {/* Security Headers - back to top-left position */}
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-              Other Checks
-            </Typography>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-              <Tooltip
-                title={social.hasOpenGraph ? 'Open Graph tags detected' : 'Open Graph tags missing'}
-                enterDelay={300}
-                enterTouchDelay={300}
-              >
-                <Chip
-                  label="Open Graph"
-                  {...chipStateStyle(Boolean(social.hasOpenGraph), theme)}
-                  size="small"
-                  sx={{ cursor: 'help', ...chipStateStyle(Boolean(social.hasOpenGraph), theme).sx }}
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                cursor: 'pointer',
+              }}
+              onClick={() => setSecurityHeadersExpanded(!securityHeadersExpanded)}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Shield size={20} />
+                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                  Security Headers
+                </Typography>
+                <Badge
+                  badgeContent={headersDetected}
+                  color="primary"
+                  sx={{
+                    '& .MuiBadge-badge': {
+                      backgroundColor: getSecurityScoreColor(securityScore),
+                    },
+                  }}
                 />
-              </Tooltip>
-              <Tooltip
-                title={social.hasTwitterCard ? 'Twitter card tags detected' : 'Twitter card tags missing'}
-                enterDelay={300}
-                enterTouchDelay={300}
-              >
                 <Chip
-                  label="Twitter Card"
-                  {...chipStateStyle(Boolean(social.hasTwitterCard), theme)}
+                  label={`${securityScore}%`}
                   size="small"
-                  sx={{ cursor: 'help', ...chipStateStyle(Boolean(social.hasTwitterCard), theme).sx }}
+                  sx={{
+                    backgroundColor: getSecurityScoreColor(securityScore),
+                    color: 'white',
+                    fontWeight: 600,
+                  }}
                 />
-              </Tooltip>
-              <Tooltip
-                title={social.hasShareButtons ? 'Share buttons found' : 'Share buttons not found'}
-                enterDelay={300}
-                enterTouchDelay={300}
-              >
-                <Chip
-                  label="Share Buttons"
-                  {...chipStateStyle(Boolean(social.hasShareButtons), theme)}
-                  size="small"
-                  sx={{ cursor: 'help', ...chipStateStyle(Boolean(social.hasShareButtons), theme).sx }}
-                />
-              </Tooltip>
-              <Tooltip
-                title={cookies.hasCookieScript ? 'Cookie consent script detected' : 'No cookie script found'}
-                enterDelay={300}
-                enterTouchDelay={300}
-              >
-                <Chip
-                  label="Cookie Script"
-                  {...chipStateStyle(Boolean(cookies.hasCookieScript), theme)}
-                  size="small"
-                  sx={{ cursor: 'help', ...chipStateStyle(Boolean(cookies.hasCookieScript), theme).sx }}
-                />
-              </Tooltip>
-              <Tooltip
-                title={minify.cssMinified ? 'CSS files are minified' : 'CSS files are not minified'}
-                enterDelay={300}
-                enterTouchDelay={300}
-              >
-                <Chip
-                  label="CSS Minified"
-                  {...chipStateStyle(Boolean(minify.cssMinified), theme)}
-                  size="small"
-                  sx={{ cursor: 'help', ...chipStateStyle(Boolean(minify.cssMinified), theme).sx }}
-                />
-              </Tooltip>
-              <Tooltip
-                title={minify.jsMinified ? 'JavaScript files are minified' : 'JavaScript files are not minified'}
-                enterDelay={300}
-                enterTouchDelay={300}
-              >
-                <Chip
-                  label="JS Minified"
-                  {...chipStateStyle(Boolean(minify.jsMinified), theme)}
-                  size="small"
-                  sx={{ cursor: 'help', ...chipStateStyle(Boolean(minify.jsMinified), theme).sx }}
-                />
-              </Tooltip>
+              </Box>
+              <IconButton size="small">
+                {securityHeadersExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+              </IconButton>
             </Box>
-            <Typography variant="body2">
-              <strong>Broken Links:</strong> {links.brokenLinks.length || 0}
-            </Typography>
-            <Typography variant="body2">
-              <strong>Mixed Content Links:</strong> {links.mixedContentLinks.length || 0}
-            </Typography>
+            
+            <Collapse in={securityHeadersExpanded} timeout="auto">
+              <Box sx={{ mt: 2 }}>
+                <Box component="ul" sx={{ pl: 2 }}>
+                  {securityEntries.map(([k, v]) => (
+                    <Typography component="li" variant="body2" key={k}>
+                      <strong>{k.toUpperCase()}:</strong> {dashIfEmpty(v)}
+                    </Typography>
+                  ))}
+                </Box>
+              </Box>
+            </Collapse>
           </CardContent>
         </Card>
 
@@ -217,58 +183,92 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
         </Card>
       </Box>
 
-      {/* Security Headers - moved to bottom, full-width, collapsible */}
+      {/* Other Checks - back to bottom, full-width */}
       <Card sx={{ borderRadius: 2 }}>
         <CardContent sx={{ p: 2 }}>
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              cursor: 'pointer',
-            }}
-            onClick={() => setSecurityHeadersExpanded(!securityHeadersExpanded)}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Shield size={20} />
-              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                Security Headers
-              </Typography>
-              <Badge
-                badgeContent={headersDetected}
-                color="primary"
-                sx={{
-                  '& .MuiBadge-badge': {
-                    backgroundColor: getSecurityScoreColor(securityScore),
-                  },
-                }}
-              />
+          <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+            Other Checks
+          </Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+            <Tooltip
+              title={social.hasOpenGraph ? 'Open Graph tags detected' : 'Open Graph tags missing'}
+              enterDelay={300}
+              enterTouchDelay={300}
+            >
               <Chip
-                label={`${securityScore}%`}
+                label="Open Graph"
+                {...chipStateStyle(Boolean(social.hasOpenGraph), theme)}
                 size="small"
-                sx={{
-                  backgroundColor: getSecurityScoreColor(securityScore),
-                  color: 'white',
-                  fontWeight: 600,
-                }}
+                sx={{ cursor: 'help', ...chipStateStyle(Boolean(social.hasOpenGraph), theme).sx }}
               />
-            </Box>
-            <IconButton size="small">
-              {securityHeadersExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-            </IconButton>
+            </Tooltip>
+            <Tooltip
+              title={social.hasTwitterCard ? 'Twitter card tags detected' : 'Twitter card tags missing'}
+              enterDelay={300}
+              enterTouchDelay={300}
+            >
+              <Chip
+                label="Twitter Card"
+                {...chipStateStyle(Boolean(social.hasTwitterCard), theme)}
+                size="small"
+                sx={{ cursor: 'help', ...chipStateStyle(Boolean(social.hasTwitterCard), theme).sx }}
+              />
+            </Tooltip>
+            <Tooltip
+              title={social.hasShareButtons ? 'Share buttons found' : 'Share buttons not found'}
+              enterDelay={300}
+              enterTouchDelay={300}
+            >
+              <Chip
+                label="Share Buttons"
+                {...chipStateStyle(Boolean(social.hasShareButtons), theme)}
+                size="small"
+                sx={{ cursor: 'help', ...chipStateStyle(Boolean(social.hasShareButtons), theme).sx }}
+              />
+            </Tooltip>
+            <Tooltip
+              title={cookies.hasCookieScript ? 'Cookie consent script detected' : 'No cookie script found'}
+              enterDelay={300}
+              enterTouchDelay={300}
+            >
+              <Chip
+                label="Cookie Script"
+                {...chipStateStyle(Boolean(cookies.hasCookieScript), theme)}
+                size="small"
+                sx={{ cursor: 'help', ...chipStateStyle(Boolean(cookies.hasCookieScript), theme).sx }}
+              />
+            </Tooltip>
+            <Tooltip
+              title={minify.cssMinified ? 'CSS files are minified' : 'CSS files are not minified'}
+              enterDelay={300}
+              enterTouchDelay={300}
+            >
+              <Chip
+                label="CSS Minified"
+                {...chipStateStyle(Boolean(minify.cssMinified), theme)}
+                size="small"
+                sx={{ cursor: 'help', ...chipStateStyle(Boolean(minify.cssMinified), theme).sx }}
+              />
+            </Tooltip>
+            <Tooltip
+              title={minify.jsMinified ? 'JavaScript files are minified' : 'JavaScript files are not minified'}
+              enterDelay={300}
+              enterTouchDelay={300}
+            >
+              <Chip
+                label="JS Minified"
+                {...chipStateStyle(Boolean(minify.jsMinified), theme)}
+                size="small"
+                sx={{ cursor: 'help', ...chipStateStyle(Boolean(minify.jsMinified), theme).sx }}
+              />
+            </Tooltip>
           </Box>
-          
-          <Collapse in={securityHeadersExpanded} timeout="auto">
-            <Box sx={{ mt: 2 }}>
-              <Box component="ul" sx={{ pl: 2 }}>
-                {securityEntries.map(([k, v]) => (
-                  <Typography component="li" variant="body2" key={k}>
-                    <strong>{k.toUpperCase()}:</strong> {dashIfEmpty(v)}
-                  </Typography>
-                ))}
-              </Box>
-            </Box>
-          </Collapse>
+          <Typography variant="body2">
+            <strong>Broken Links:</strong> {links.brokenLinks.length || 0}
+          </Typography>
+          <Typography variant="body2">
+            <strong>Mixed Content Links:</strong> {links.mixedContentLinks.length || 0}
+          </Typography>
         </CardContent>
       </Card>
     </Box>
