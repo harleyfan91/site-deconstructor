@@ -3,7 +3,7 @@ import React from 'react';
 import { Box, Typography, List, ListItem, Link, Collapse, IconButton } from '@mui/material';
 import { Image, ChevronDown, ChevronUp } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
-import { usePersistentState } from '@/hooks/usePersistentState';
+import { useSessionState } from '@/hooks/useSessionState';
 
 interface ImageAnalysisCardProps {
   images: AnalysisResponse['data']['ui']['images'];
@@ -18,7 +18,7 @@ interface ImageAnalysisCardProps {
 }
 
 const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnalysis }) => {
-  const [expandedSections, setExpandedSections] = usePersistentState<Record<string, boolean>>(
+  const [expandedSections, setExpandedSections] = useSessionState<Record<string, boolean>>(
     'ui-image-analysis-expanded',
     {
       total: false,

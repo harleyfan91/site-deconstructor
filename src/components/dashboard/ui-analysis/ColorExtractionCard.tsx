@@ -3,7 +3,7 @@ import { Box, Typography, Collapse, IconButton } from '@mui/material';
 import { Palette, ChevronDown, ChevronUp } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 import { groupByFrequency } from '@/lib/ui';
-import { usePersistentState } from '@/hooks/usePersistentState';
+import { useSessionState } from '@/hooks/useSessionState';
 
 interface ColorExtractionCardProps {
   colors: AnalysisResponse['data']['ui']['colors'];
@@ -25,7 +25,7 @@ interface UsageGroup {
 }
 
 const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => {
-  const [expandedSections, setExpandedSections] = usePersistentState<Record<string, boolean>>(
+  const [expandedSections, setExpandedSections] = useSessionState<Record<string, boolean>>(
     'ui-color-extraction-expanded',
     {}
   );
