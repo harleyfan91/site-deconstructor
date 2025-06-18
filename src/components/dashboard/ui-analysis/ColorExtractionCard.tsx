@@ -30,6 +30,9 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
     {}
   );
 
+  // Track if we've already applied first-time logic
+  const [hasAppliedFirstTimeLogic, setHasAppliedFirstTimeLogic] = React.useState(false);
+
   const toggleSection = (sectionName: string) => {
     setExpandedSections(prev => ({
       ...prev,
@@ -146,27 +149,37 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
 
   const usageGroups = groupByUsage();
 
-  // Initialize sections when colors change, but respect any stored state
+  // Handle first-time initialization and auto-collapse behavior
   React.useEffect(() => {
-    const hadStoredState = Object.keys(expandedSections).length > 0;
-    let hasNewSection = false;
+    if (hasAppliedFirstTimeLogic) return;
+    
+    // Check if there's any stored state in localStorage
+    const storedState = typeof window !== 'undefined' 
+      ? window.localStorage.getItem('ui-color-extraction-expanded')
+      : null;
+    
+    const isFirstTime = !storedState;
+    
+    // Initialize sections
     setExpandedSections(prev => {
       const updated = { ...prev };
       usageGroups.forEach(group => {
         if (!(group.name in updated)) {
-          updated[group.name] = true;
-          hasNewSection = true;
+          // On first time, all sections start expanded
+          // On subsequent visits, respect stored state (which defaults to false)
+          updated[group.name] = isFirstTime;
         }
       });
       return updated;
     });
 
-    let timer: NodeJS.Timeout | undefined;
-    if (!hadStoredState && hasNewSection) {
-      timer = setTimeout(() => {
+    // Set up auto-collapse for first-time users only
+    if (isFirstTime) {
+      const timer = setTimeout(() => {
         setExpandedSections(prev => {
           const updated: Record<string, boolean> = { ...prev };
           Object.keys(updated).forEach(name => {
+            // Keep Background expanded, collapse others
             if (name !== 'Background') {
               updated[name] = false;
             }
@@ -174,12 +187,13 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
           return updated;
         });
       }, 2500);
-    }
 
-    return () => {
-      if (timer) clearTimeout(timer);
-    };
-  }, [colors]);
+      setHasAppliedFirstTimeLogic(true);
+      return () => clearTimeout(timer);
+    } else {
+      setHasAppliedFirstTimeLogic(true);
+    }
+  }, [colors, hasAppliedFirstTimeLogic, usageGroups]);
 
   return (
     <Box>
