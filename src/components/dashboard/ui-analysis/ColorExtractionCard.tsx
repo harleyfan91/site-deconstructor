@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Box, Typography, Collapse, IconButton } from '@mui/material';
 import { Palette, ChevronDown, ChevronUp } from 'lucide-react';
@@ -153,12 +154,22 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
   React.useEffect(() => {
     if (hasAppliedFirstTimeLogic) return;
     
-    // Check if there's any stored state in localStorage
+    // Check if there's meaningful stored state in localStorage
     const storedState = typeof window !== 'undefined' 
       ? window.localStorage.getItem('ui-color-extraction-expanded')
       : null;
     
-    const isFirstTime = !storedState;
+    // Check if stored state is meaningful (not just an empty object)
+    let isFirstTime = true;
+    if (storedState) {
+      try {
+        const parsed = JSON.parse(storedState);
+        // If there are any actual section states stored, it's not first time
+        isFirstTime = Object.keys(parsed).length === 0;
+      } catch {
+        isFirstTime = true;
+      }
+    }
     
     // Initialize sections
     setExpandedSections(prev => {
