@@ -11,6 +11,8 @@ import {
   Chip,
   Typography,
   Box,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
 import { Check, StarBorder, Close } from '@mui/icons-material';
 import { motion } from 'framer-motion';
@@ -22,13 +24,16 @@ interface PricingCardProps {
 }
 
 const PricingCard = ({ plan, index }: PricingCardProps) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay: index * 0.1 }}
       viewport={{ once: true }}
-      whileHover={{ y: -10 }}
+      {...(!isMobile && { whileHover: { y: -10 } })}
       style={{
         height: '100%',
         display: 'flex',
@@ -47,10 +52,12 @@ const PricingCard = ({ plan, index }: PricingCardProps) => {
           position: 'relative',
           overflow: 'visible',
           flex: 1,
-          '&:hover': {
-            transform: 'translateY(-8px)',
-            boxShadow: '0 12px 40px rgba(255, 107, 53, 0.2)',
-          },
+          '&:hover': isMobile
+            ? {}
+            : {
+                transform: 'translateY(-8px)',
+                boxShadow: '0 12px 40px rgba(255, 107, 53, 0.2)',
+              },
         }}
       >
         {plan.recommended && (
