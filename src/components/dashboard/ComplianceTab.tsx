@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   Box,
@@ -119,11 +120,13 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
               }}
               onClick={() => setSecurityHeadersExpanded(!securityHeadersExpanded)}
             >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1, minWidth: 0 }}>
                 <Shield size={20} />
-                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h6" sx={{ fontWeight: 'bold', flex: 1, minWidth: 0 }}>
                   Security Headers
                 </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 2 }}>
                 <Badge
                   badgeContent={headersDetected}
                   color="primary"
@@ -135,17 +138,19 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
                 />
                 <Chip
                   label={`${securityScore}%`}
+                  variant="outlined"
                   size="small"
                   sx={{
-                    backgroundColor: getSecurityScoreColor(securityScore),
-                    color: 'white',
+                    borderColor: getSecurityScoreColor(securityScore),
+                    color: getSecurityScoreColor(securityScore),
+                    backgroundColor: `${getSecurityScoreColor(securityScore)}20`,
                     fontWeight: 600,
                   }}
                 />
+                <IconButton size="small">
+                  {securityHeadersExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                </IconButton>
               </Box>
-              <IconButton size="small">
-                {securityHeadersExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-              </IconButton>
             </Box>
             
             <Collapse in={securityHeadersExpanded} timeout="auto">
