@@ -12,6 +12,7 @@ import { smoothScrollToSection, navigateAndScroll } from '../lib/smoothScroll';
 import DesktopNavigation from './navigation/DesktopNavigation';
 import MobileDrawer from './navigation/MobileDrawer';
 import { navigationItems, NavigationItem } from './navigation/NavigationItems';
+import { useAnalysisContext } from '../contexts/AnalysisContext';
 
 const AppHeader = ({ darkMode, toggleDarkMode }: { darkMode: boolean; toggleDarkMode: () => void }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -19,6 +20,7 @@ const AppHeader = ({ darkMode, toggleDarkMode }: { darkMode: boolean; toggleDark
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
   const location = useLocation();
+  const { data: analysisData } = useAnalysisContext();
 
   const handleNavClick = (item: NavigationItem) => {
     console.log('Nav clicked for:', item, 'isMobile:', isMobile, 'mobileOpen:', mobileOpen);
@@ -46,6 +48,8 @@ const AppHeader = ({ darkMode, toggleDarkMode }: { darkMode: boolean; toggleDark
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
+
+  const showUserIcon = !!analysisData;
 
   return (
     <>
@@ -92,6 +96,7 @@ const AppHeader = ({ darkMode, toggleDarkMode }: { darkMode: boolean; toggleDark
               darkMode={darkMode}
               toggleDarkMode={toggleDarkMode}
               onNavClick={handleNavClick}
+              showUserIcon={showUserIcon}
             />
           )}
 
@@ -103,6 +108,7 @@ const AppHeader = ({ darkMode, toggleDarkMode }: { darkMode: boolean; toggleDark
               toggleDarkMode={toggleDarkMode}
               onDrawerToggle={handleDrawerToggle}
               onNavClick={handleNavClick}
+              showUserIcon={showUserIcon}
             />
           )}
         </Toolbar>
