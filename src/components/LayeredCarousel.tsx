@@ -1,14 +1,14 @@
+
 import React from 'react';
 import SwipeableViews from 'react-swipeable-views';
+import { virtualize } from 'react-swipeable-views-utils';
 import {
   Box,
   Card,
   Container,
-  MobileStepper,
-  Button,
-  useTheme,
 } from '@mui/material';
-import { KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material';
+
+const VirtualizeSwipeableViews = virtualize(SwipeableViews);
 
 const screenshots = [
   'https://via.placeholder.com/400x300?text=Screenshot+1',
@@ -18,20 +18,88 @@ const screenshots = [
 ];
 
 const LayeredCarousel = () => {
-  const theme = useTheme();
   const [activeStep, setActiveStep] = React.useState(0);
-  const maxSteps = screenshots.length;
-
-  const handleNext = () => {
-    setActiveStep((prev) => (prev + 1) % maxSteps);
-  };
-
-  const handleBack = () => {
-    setActiveStep((prev) => (prev - 1 + maxSteps) % maxSteps);
-  };
 
   const handleStepChange = (step: number) => {
-    setActiveStep(step);
+    setActiveStep(step % screenshots.length);
+  };
+
+  const slideRenderer = ({ index, key }: { index: number; key: string }) => {
+    const screenshotIndex = index % screenshots.length;
+    return (
+      <Box
+        key={key}
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '500px',
+          position: 'relative',
+        }}
+      >
+        {/* Render all screenshots with layered effect */}
+        {screenshots.map((src, imgIndex) => {
+          const offset = (imgIndex - screenshotIndex + screenshots.length) % screenshots.length;
+          const isActive = offset === 0;
+          const zIndex = screenshots.length - offset;
+          
+          return (
+            <Card
+              key={imgIndex}
+              sx={{
+                position: 'absolute',
+                width: 350,
+                height: 400,
+                transition: 'all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                transform: `
+                  translateY(${offset * -15}px) 
+                  translateX(${offset * 8}px)
+                  scale(${1 - offset * 0.05})
+                  rotateX(${offset * 2}deg)
+                `,
+                transformOrigin: 'center bottom',
+                zIndex,
+                opacity: offset > 2 ? 0 : 1 - offset * 0.2,
+                boxShadow: `0 ${8 + offset * 4}px ${24 + offset * 8}px rgba(0, 0, 0, ${0.15 + offset * 0.1})`,
+                borderRadius: 3,
+                overflow: 'hidden',
+                cursor: offset === 0 ? 'default' : 'pointer',
+                '&:hover': {
+                  transform: offset === 0 ? `
+                    translateY(${offset * -15}px) 
+                    translateX(${offset * 8}px)
+                    scale(${1 - offset * 0.05})
+                    rotateX(${offset * 2}deg)
+                  ` : `
+                    translateY(${offset * -15 - 5}px) 
+                    translateX(${offset * 8}px)
+                    scale(${1 - offset * 0.05 + 0.02})
+                    rotateX(${offset * 2}deg)
+                  `,
+                },
+              }}
+              onClick={() => {
+                if (offset > 0) {
+                  setActiveStep(imgIndex);
+                }
+              }}
+            >
+              <Box
+                component="img"
+                src={src}
+                alt={`Screenshot ${imgIndex + 1}`}
+                sx={{ 
+                  width: '100%', 
+                  height: '100%', 
+                  display: 'block',
+                  objectFit: 'cover',
+                }}
+              />
+            </Card>
+          );
+        })}
+      </Box>
+    );
   };
 
   return (
@@ -40,68 +108,27 @@ const LayeredCarousel = () => {
         position: 'relative',
         py: { xs: 8, md: 12 },
         bgcolor: 'transparent',
+        overflow: 'hidden',
       }}
     >
       <Container maxWidth="lg" sx={{ position: 'relative' }}>
-        <Box sx={{ overflow: 'visible' }}>
-          <SwipeableViews
+        <Box sx={{ overflow: 'visible', height: '500px' }}>
+          <VirtualizeSwipeableViews
             index={activeStep}
             onChangeIndex={handleStepChange}
             enableMouseEvents
-            containerStyle={{ overflow: 'visible' }}
-            slideStyle={{ paddingLeft: '10%', paddingRight: '10%' }}
-          >
-            {screenshots.map((src, index) => (
-              <Box
-                key={src}
-                sx={{ display: 'flex', justifyContent: 'center', py: 1 }}
-              >
-                <Card
-                  sx={{
-                    width: '100%',
-                    maxWidth: 400,
-                    transition: 'transform 0.4s ease, opacity 0.4s ease',
-                    transform: activeStep === index ? 'scale(1)' : 'scale(0.9)',
-                    opacity: activeStep === index ? 1 : 0.5,
-                  }}
-                >
-                  <Box
-                    component="img"
-                    src={src}
-                    alt={`Screenshot ${index + 1}`}
-                    sx={{ width: '100%', height: '100%', display: 'block' }}
-                  />
-                </Card>
-              </Box>
-            ))}
-          </SwipeableViews>
+            axis="y"
+            slideRenderer={slideRenderer}
+            containerStyle={{ 
+              height: '500px',
+              overflow: 'visible',
+            }}
+            slideStyle={{ 
+              height: '500px',
+              overflow: 'visible',
+            }}
+          />
         </Box>
-        <MobileStepper
-          steps={maxSteps}
-          position="static"
-          activeStep={activeStep}
-          sx={{ justifyContent: 'center', bgcolor: 'transparent', mt: 2 }}
-          nextButton={
-            <Button size="small" onClick={handleNext}>
-              Next
-              {theme.direction === 'rtl' ? (
-                <KeyboardArrowLeft />
-              ) : (
-                <KeyboardArrowRight />
-              )}
-            </Button>
-          }
-          backButton={
-            <Button size="small" onClick={handleBack}>
-              {theme.direction === 'rtl' ? (
-                <KeyboardArrowRight />
-              ) : (
-                <KeyboardArrowLeft />
-              )}
-              Back
-            </Button>
-          }
-        />
       </Container>
     </Box>
   );
