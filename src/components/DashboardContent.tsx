@@ -75,7 +75,7 @@ const DashboardContent = () => {
                 mb: 2,
                 borderBottom: '1px solid',
                 borderColor: 'divider',
-                borderRadius: '12px', // Add rounded corners to match navigation bar curvature
+                borderRadius: '8px', // Match the navigation bar's more subtle curvature
               }}
             >
               <motion.div
