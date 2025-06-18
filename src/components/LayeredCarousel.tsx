@@ -60,6 +60,7 @@ const LayeredCarousel = () => {
                   sx={{
                     width: '100%',
                     maxWidth: 400,
+                    height: 250,
                     transition: 'transform 0.4s ease, opacity 0.4s ease',
                     transform: activeStep === index ? 'scale(1)' : 'scale(0.9)',
                     opacity: activeStep === index ? 1 : 0.5,
@@ -69,7 +70,7 @@ const LayeredCarousel = () => {
                     component="img"
                     src={src}
                     alt={`Screenshot ${index + 1}`}
-                    sx={{ width: '100%', height: '100%', display: 'block' }}
+                    sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                   />
                 </Card>
               </Box>
