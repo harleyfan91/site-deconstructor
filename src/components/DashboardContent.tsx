@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Box, Typography, Paper, Button } from '@mui/material';
 import { motion } from 'framer-motion';
@@ -70,11 +71,10 @@ const DashboardContent = () => {
                 zIndex: 10,
                 backgroundColor: 'background.paper',
                 pt: 1,
-                pb: 1, // Reduced from 2 to 1 to center the box vertically
+                pb: 2,
                 mb: 2,
                 borderBottom: '1px solid',
                 borderColor: 'divider',
-                borderRadius: '7px', // Match the navigation bar's more subtle curvature
               }}
             >
               <motion.div

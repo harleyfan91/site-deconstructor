@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Box, Typography, Collapse, IconButton } from '@mui/material';
 import { Palette, ChevronDown, ChevronUp } from 'lucide-react';
@@ -30,9 +29,6 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
     'ui-color-extraction-expanded',
     {}
   );
-
-  // Track if we've already applied first-time logic
-  const [hasAppliedFirstTimeLogic, setHasAppliedFirstTimeLogic] = React.useState(false);
 
   const toggleSection = (sectionName: string) => {
     setExpandedSections(prev => ({
@@ -150,47 +146,27 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
 
   const usageGroups = groupByUsage();
 
-  // Handle first-time initialization and auto-collapse behavior
+  // Initialize sections when colors change, but respect any stored state
   React.useEffect(() => {
-    if (hasAppliedFirstTimeLogic) return;
-    
-    // Check if there's meaningful stored state in localStorage
-    const storedState = typeof window !== 'undefined' 
-      ? window.localStorage.getItem('ui-color-extraction-expanded')
-      : null;
-    
-    // Check if stored state is meaningful (not just an empty object)
-    let isFirstTime = true;
-    if (storedState) {
-      try {
-        const parsed = JSON.parse(storedState);
-        // If there are any actual section states stored, it's not first time
-        isFirstTime = Object.keys(parsed).length === 0;
-      } catch {
-        isFirstTime = true;
-      }
-    }
-    
-    // Initialize sections
+    const hadStoredState = Object.keys(expandedSections).length > 0;
+    let hasNewSection = false;
     setExpandedSections(prev => {
       const updated = { ...prev };
       usageGroups.forEach(group => {
         if (!(group.name in updated)) {
-          // On first time, all sections start expanded
-          // On subsequent visits, respect stored state (which defaults to false)
-          updated[group.name] = isFirstTime;
+          updated[group.name] = true;
+          hasNewSection = true;
         }
       });
       return updated;
     });
 
-    // Set up auto-collapse for first-time users only
-    if (isFirstTime) {
-      const timer = setTimeout(() => {
+    let timer: NodeJS.Timeout | undefined;
+    if (!hadStoredState && hasNewSection) {
+      timer = setTimeout(() => {
         setExpandedSections(prev => {
           const updated: Record<string, boolean> = { ...prev };
           Object.keys(updated).forEach(name => {
-            // Keep Background expanded, collapse others
             if (name !== 'Background') {
               updated[name] = false;
             }
@@ -198,13 +174,12 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
           return updated;
         });
       }, 2500);
-
-      setHasAppliedFirstTimeLogic(true);
-      return () => clearTimeout(timer);
-    } else {
-      setHasAppliedFirstTimeLogic(true);
     }
-  }, [colors, hasAppliedFirstTimeLogic, usageGroups]);
+
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [colors]);
 
   return (
     <Box>
