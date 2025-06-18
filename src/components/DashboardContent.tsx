@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Box, Typography, Paper, Button } from '@mui/material';
 import { motion } from 'framer-motion';
@@ -71,7 +70,7 @@ const DashboardContent = () => {
                 zIndex: 10,
                 backgroundColor: 'background.paper',
                 pt: 1,
-                pb: 2,
+                pb: 1, // Reduced from 2 to 1 to center the box vertically
                 mb: 2,
                 borderBottom: '1px solid',
                 borderColor: 'divider',
