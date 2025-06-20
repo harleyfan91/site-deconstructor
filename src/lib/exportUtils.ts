@@ -82,256 +82,97 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string): Promis
   const pdf = new jsPDF();
   const margin = 20;
   let yPosition = margin;
-  const pageWidth = pdf.internal.pageSize.width;
-  const pageHeight = pdf.internal.pageSize.height;
 
-  // Colors matching the dashboard theme
-  const primaryColor = '#FF6B35';
-  const successColor = '#4CAF50';
-  const warningColor = '#FF9800';
-  const errorColor = '#F44336';
-  const textColor = '#333333';
-  const lightGray = '#F5F5F5';
-
-  // Helper function to add a new page if needed
-  const checkNewPage = (additionalHeight: number = 20): void => {
-    if (yPosition + additionalHeight > pageHeight - margin) {
+  // Helper function to add text with word wrapping
+  const addText = (text: string, fontSize: number = 10, isBold: boolean = false): void => {
+    pdf.setFontSize(fontSize);
+    if (isBold) {
+      pdf.setFont(undefined, 'bold');
+    } else {
+      pdf.setFont(undefined, 'normal');
+    }
+    
+    const lines = pdf.splitTextToSize(text, 170);
+    pdf.text(lines, margin, yPosition);
+    yPosition += lines.length * (fontSize * 0.4) + 5;
+    
+    // Add new page if needed
+    if (yPosition > 270) {
       pdf.addPage();
       yPosition = margin;
     }
   };
 
-  // Helper function to add styled text
-  const addText = (text: string, fontSize: number = 10, isBold: boolean = false, color: string = textColor): void => {
-    pdf.setFontSize(fontSize);
-    pdf.setTextColor(color);
-    if (isBold) {
-      pdf.setFont('helvetica', 'bold');
+  const addSection = (title: string, content: any): void => {
+    addText(title, 14, true);
+    yPosition += 5;
+    
+    if (typeof content === 'object') {
+      addText(JSON.stringify(content, null, 2), 9);
     } else {
-      pdf.setFont('helvetica', 'normal');
+      addText(String(content), 10);
     }
-    
-    const lines = pdf.splitTextToSize(text, pageWidth - (margin * 2));
-    checkNewPage(lines.length * (fontSize * 0.4) + 5);
-    pdf.text(lines, margin, yPosition);
-    yPosition += lines.length * (fontSize * 0.4) + 5;
+    yPosition += 10;
   };
 
-  // Helper function to add a section header with background
-  const addSectionHeader = (title: string): void => {
-    checkNewPage(25);
-    
-    // Add colored background rectangle
-    pdf.setFillColor(primaryColor);
-    pdf.rect(margin, yPosition - 5, pageWidth - (margin * 2), 20, 'F');
-    
-    // Add white text on colored background
-    pdf.setTextColor('#FFFFFF');
-    pdf.setFontSize(14);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text(title, margin + 5, yPosition + 8);
-    
-    yPosition += 25;
-    pdf.setTextColor(textColor); // Reset color
-  };
-
-  // Helper function to add metric cards
-  const addMetricCard = (label: string, value: string, description: string, color: string = textColor): void => {
-    checkNewPage(30);
-    
-    // Draw card background
-    pdf.setFillColor(lightGray);
-    pdf.rect(margin, yPosition, pageWidth - (margin * 2), 25, 'F');
-    
-    // Add metric label
-    pdf.setFontSize(10);
-    pdf.setFont('helvetica', 'bold');
-    pdf.setTextColor(textColor);
-    pdf.text(label, margin + 5, yPosition + 8);
-    
-    // Add metric value
-    pdf.setFontSize(16);
-    pdf.setFont('helvetica', 'bold');
-    pdf.setTextColor(color);
-    pdf.text(value, margin + 5, yPosition + 16);
-    
-    // Add description
-    pdf.setFontSize(8);
-    pdf.setFont('helvetica', 'normal');
-    pdf.setTextColor('#666666');
-    pdf.text(description, margin + 5, yPosition + 22);
-    
-    yPosition += 30;
-  };
-
-  // Helper function to add checklist items
-  const addChecklistItem = (name: string, status: string, description: string): void => {
-    checkNewPage(15);
-    
-    const statusColor = status === 'good' ? successColor : status === 'warning' ? warningColor : errorColor;
-    const statusIcon = status === 'good' ? '✓' : status === 'warning' ? '⚠' : '✗';
-    
-    // Status icon
-    pdf.setTextColor(statusColor);
-    pdf.setFontSize(12);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text(statusIcon, margin, yPosition);
-    
-    // Check name
-    pdf.setTextColor(textColor);
-    pdf.setFontSize(10);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text(name, margin + 10, yPosition);
-    
-    // Description
-    pdf.setFontSize(8);
-    pdf.setFont('helvetica', 'normal');
-    pdf.setTextColor('#666666');
-    const descLines = pdf.splitTextToSize(description, pageWidth - margin - 15);
-    pdf.text(descLines, margin + 10, yPosition + 8);
-    
-    yPosition += Math.max(15, descLines.length * 4 + 8);
-  };
-
-  // Main title and header
-  pdf.setFillColor(primaryColor);
-  pdf.rect(0, 0, pageWidth, 40, 'F');
-  
-  pdf.setTextColor('#FFFFFF');
-  pdf.setFontSize(24);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('Website Analysis Report', margin, 25);
-  
-  yPosition = 50;
-  
-  // URL and timestamp
-  addText(`URL: ${data.url}`, 12, true);
+  // Title
+  addText('Website Analysis Report', 20, true);
+  addText(`URL: ${data.url}`, 12);
   addText(`Generated: ${new Date(data.timestamp).toLocaleString()}`, 10);
   yPosition += 10;
 
   // Overview Section
   if (data.data.overview) {
-    addSectionHeader('Overview');
-    
-    const overview = data.data.overview;
-    addMetricCard(
-      'Overall Score',
-      `${overview.overallScore}/100`,
-      overview.overallScore >= 80 ? 'Excellent performance' : overview.overallScore >= 60 ? 'Good performance' : 'Needs improvement',
-      overview.overallScore >= 80 ? successColor : overview.overallScore >= 60 ? warningColor : errorColor
-    );
-    
-    addMetricCard('Page Load Time', overview.pageLoadTime, 'Page loading performance');
-    addMetricCard(
-      'SEO Score',
-      `${overview.seoScore}/100`,
-      overview.seoScore >= 80 ? 'Excellent SEO' : 'Could be improved',
-      overview.seoScore >= 80 ? successColor : warningColor
-    );
-    
-    addMetricCard(
-      'User Experience',
-      `${overview.userExperienceScore}/100`,
-      overview.userExperienceScore >= 80 ? 'Excellent UX' : 'Good UX',
-      overview.userExperienceScore >= 80 ? successColor : '#2196F3'
-    );
+    addSection('Overview', {
+      'Overall Score': data.data.overview.overallScore,
+      'Page Load Time': data.data.overview.pageLoadTime,
+      'SEO Score': data.data.overview.seoScore,
+      'User Experience Score': data.data.overview.userExperienceScore
+    });
   }
 
   // Core Web Vitals
   if (data.coreWebVitals) {
-    addSectionHeader('Core Web Vitals');
-    addText(`LCP (Largest Contentful Paint): ${data.coreWebVitals.lcp}s`, 10);
-    addText(`FID (First Input Delay): ${data.coreWebVitals.fid}ms`, 10);
-    addText(`CLS (Cumulative Layout Shift): ${data.coreWebVitals.cls}`, 10);
-    yPosition += 10;
+    addSection('Core Web Vitals', {
+      'LCP (Largest Contentful Paint)': `${data.coreWebVitals.lcp}s`,
+      'FID (First Input Delay)': `${data.coreWebVitals.fid}ms`,
+      'CLS (Cumulative Layout Shift)': data.coreWebVitals.cls
+    });
   }
 
   // Performance Section
   if (data.data.performance) {
-    addSectionHeader('Performance Analysis');
-    const performance = data.data.performance;
-    
-    addMetricCard(
-      'Performance Score',
-      `${performance.performanceScore}/100`,
-      performance.performanceScore >= 90 ? 'Excellent' : performance.performanceScore >= 70 ? 'Good' : 'Needs improvement',
-      performance.performanceScore >= 90 ? successColor : performance.performanceScore >= 70 ? warningColor : errorColor
-    );
-    
-    addText(`Mobile Responsive: ${performance.mobileResponsive ? 'Yes' : 'No'}`, 10);
-    yPosition += 5;
-    
-    if (performance.recommendations && performance.recommendations.length > 0) {
-      addText('Key Recommendations:', 12, true);
-      performance.recommendations.slice(0, 3).forEach(rec => {
-        addText(`• ${rec.title}: ${rec.description}`, 9);
-      });
-    }
+    addSection('Performance Analysis', {
+      'Performance Score': data.data.performance.performanceScore,
+      'Mobile Responsive': data.data.performance.mobileResponsive ? 'Yes' : 'No',
+      'Recommendations Count': data.data.performance.recommendations?.length || 0
+    });
   }
 
   // SEO Section
   if (data.data.seo) {
-    addSectionHeader('SEO Analysis');
-    const seo = data.data.seo;
-    
-    addMetricCard(
-      'SEO Score',
-      `${seo.score}/100`,
-      seo.score >= 80 ? 'Excellent SEO' : seo.score >= 60 ? 'Good SEO' : 'Needs improvement',
-      seo.score >= 80 ? successColor : seo.score >= 60 ? warningColor : errorColor
-    );
-    
-    if (seo.checks && seo.checks.length > 0) {
-      addText('SEO Checklist:', 12, true);
-      seo.checks.forEach(check => {
-        addChecklistItem(check.name, check.status, check.description);
-      });
-    }
+    addSection('SEO Analysis', {
+      'SEO Score': data.data.seo.score,
+      'Meta Tags': Object.keys(data.data.seo.metaTags || {}).length,
+      'Checks Passed': data.data.seo.checks?.filter(c => c.status === 'good').length || 0,
+      'Issues Found': data.data.seo.checks?.filter(c => c.status === 'error').length || 0
+    });
   }
 
   // Technical Section
   if (data.data.technical) {
-    addSectionHeader('Technical Analysis');
-    const technical = data.data.technical;
-    
-    addText(`Health Grade: ${technical.healthGrade}`, 10, true);
-    addText(`Security Score: ${technical.securityScore}/100`, 10, true);
-    yPosition += 5;
-    
-    if (technical.techStack && technical.techStack.length > 0) {
-      addText('Technologies Detected:', 12, true);
-      technical.techStack.slice(0, 10).forEach(tech => {
-        addText(`• ${tech.category}: ${tech.technology}`, 9);
-      });
-    }
-    
-    if (technical.issues && technical.issues.length > 0) {
-      yPosition += 10;
-      addText('Critical Issues:', 12, true);
-      technical.issues.filter(issue => issue.severity === 'high').slice(0, 5).forEach(issue => {
-        addText(`• ${issue.type}: ${issue.description}`, 9);
-      });
-    }
+    addSection('Technical Analysis', {
+      'Health Grade': data.data.technical.healthGrade,
+      'Security Score': data.data.technical.securityScore,
+      'Technologies Detected': data.data.technical.techStack?.length || 0,
+      'Critical Issues': data.data.technical.issues?.filter(i => i.severity === 'high').length || 0
+    });
   }
 
   // Security Headers
   if (data.securityHeaders) {
-    addSectionHeader('Security Headers');
-    Object.entries(data.securityHeaders).forEach(([key, value]) => {
-      const status = value ? 'Present' : 'Missing';
-      const statusColor = value ? successColor : errorColor;
-      addText(`${key.toUpperCase()}: ${status}`, 10, false, statusColor);
-    });
+    addSection('Security Headers', data.securityHeaders);
   }
-
-  // Footer
-  checkNewPage(20);
-  pdf.setFillColor('#F5F5F5');
-  pdf.rect(0, pageHeight - 25, pageWidth, 25, 'F');
-  pdf.setTextColor('#666666');
-  pdf.setFontSize(8);
-  pdf.text('Generated by Website Analysis Tool', margin, pageHeight - 10);
-  pdf.text(`Page ${pdf.internal.getNumberOfPages()}`, pageWidth - margin - 20, pageHeight - 10);
 
   // Save the PDF
   pdf.save(`${baseFileName}.pdf`);
