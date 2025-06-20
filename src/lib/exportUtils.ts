@@ -241,7 +241,7 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string): Promis
     addMetricCard(
       'Largest Contentful Paint (LCP)', 
       `${data.coreWebVitals.lcp}s`,
-      parseFloat(data.coreWebVitals.lcp) <= 2.5 ? colors.success : colors.warning,
+      data.coreWebVitals.lcp <= 2.5 ? colors.success : colors.warning,
       'Loading performance - measures when the largest content element becomes visible'
     );
     
@@ -282,7 +282,7 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string): Promis
     if (perf.recommendations && perf.recommendations.length > 0) {
       addSubtitle('Performance Recommendations:');
       perf.recommendations.forEach((rec, index) => {
-        addText(`${index + 1}. ${rec}`, 10, colors.text, 10);
+        addText(`${index + 1}. ${rec.title || rec.description}`, 10, colors.text, 10);
       });
     }
   }
@@ -344,7 +344,7 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string): Promis
     if (tech.techStack && tech.techStack.length > 0) {
       addSubtitle('Technologies Detected:');
       tech.techStack.forEach(tech => {
-        addText(`• ${tech.name} ${tech.version ? `(${tech.version})` : ''}`, 10, colors.text, 10);
+        addText(`• ${tech.technology} (${tech.category})`, 10, colors.text, 10);
       });
     }
     
@@ -367,7 +367,7 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string): Promis
     if (ui.colors && ui.colors.length > 0) {
       addSubtitle('Color Palette:');
       ui.colors.forEach(color => {
-        addText(`• ${color.hex} (${color.frequency} occurrences)`, 10, colors.text, 10);
+        addText(`• ${color.hex} (${color.count} occurrences)`, 10, colors.text, 10);
       });
     }
     
@@ -378,11 +378,20 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string): Promis
       });
     }
     
-    if (ui.images) {
+    if (ui.images && ui.images.length > 0) {
       addSubtitle('Image Analysis:');
-      addText(`Total Images: ${ui.images.total}`, 10, colors.text, 10);
-      addText(`Optimized: ${ui.images.optimized}`, 10, colors.success, 10);
-      addText(`Needs Optimization: ${ui.images.total - ui.images.optimized}`, 10, colors.warning, 10);
+      const totalImages = ui.images.reduce((sum, img) => sum + img.count, 0);
+      addText(`Total Images: ${totalImages}`, 10, colors.text, 10);
+      ui.images.forEach(imageType => {
+        addText(`${imageType.type}: ${imageType.count} (${imageType.format})`, 10, colors.text, 10);
+      });
+    }
+    
+    if (ui.imageAnalysis) {
+      addSubtitle('Image Details:');
+      addText(`Total Images: ${ui.imageAnalysis.totalImages}`, 10, colors.text, 10);
+      addText(`Estimated Photos: ${ui.imageAnalysis.estimatedPhotos}`, 10, colors.text, 10);
+      addText(`Estimated Icons: ${ui.imageAnalysis.estimatedIcons}`, 10, colors.text, 10);
     }
   }
 
@@ -402,7 +411,10 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string): Promis
   pdf.setFontSize(8);
   pdf.setTextColor(colors.darkGray);
   pdf.text(`Report generated on ${new Date().toLocaleString()}`, margin, yPosition);
-  pdf.text(`Page ${pdf.internal.getNumberOfPages()}`, pageWidth - margin - 20, yPosition);
+  
+  // Get current page number manually since getNumberOfPages doesn't exist
+  const currentPage = (pdf as any).internal.pages.length - 1;
+  pdf.text(`Page ${currentPage}`, pageWidth - margin - 20, yPosition);
 
   // Save the PDF
   pdf.save(`${baseFileName}.pdf`);
