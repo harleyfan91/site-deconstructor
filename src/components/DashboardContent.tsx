@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Box, Typography, Paper, Button } from '@mui/material';
 import { motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
@@ -9,10 +9,16 @@ import SEOAnalysisTab from './dashboard/SEOAnalysisTab';
 import TechTab from './dashboard/TechTab';
 import UIAnalysisTab from './dashboard/UIAnalysisTab';
 import ComplianceTab from './dashboard/ComplianceTab';
+import ExportModal from './export/ExportModal';
 import { useAnalysisContext } from '../contexts/AnalysisContext';
 
 const DashboardContent = () => {
   const { data: analysisData, loading, error } = useAnalysisContext();
+  const [exportModalOpen, setExportModalOpen] = useState(false);
+
+  const handleExportClick = () => {
+    setExportModalOpen(true);
+  };
 
   return (
     <Box>
@@ -133,6 +139,8 @@ const DashboardContent = () => {
               <Button
                 variant="contained"
                 size="large"
+                onClick={handleExportClick}
+                disabled={!analysisData || loading}
                 sx={{
                   width: '100%',
                   maxWidth: 400,
@@ -142,6 +150,10 @@ const DashboardContent = () => {
                   '&:hover': {
                     background: 'linear-gradient(45deg, #FF8A65 30%, #FF6B35 90%)',
                   },
+                  '&:disabled': {
+                    background: 'rgba(0, 0, 0, 0.12)',
+                    boxShadow: 'none',
+                  },
                 }}
               >
                 Export Report
@@ -150,6 +162,12 @@ const DashboardContent = () => {
           </motion.div>
         </Paper>
       </motion.div>
+
+      <ExportModal
+        open={exportModalOpen}
+        onClose={() => setExportModalOpen(false)}
+        data={analysisData}
+      />
     </Box>
   );
 };
