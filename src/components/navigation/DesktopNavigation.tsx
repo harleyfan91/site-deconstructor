@@ -13,7 +13,7 @@ interface DesktopNavigationProps {
   showUserIcon?: boolean;
 }
 
-const DesktopNavigation = ({ navigationItems, darkMode, toggleDarkMode, onNavClick, showUserIcon }: DesktopNavigationProps) => {
+const DesktopNavigation: React.FC<DesktopNavigationProps> = ({ navigationItems, darkMode, toggleDarkMode, onNavClick, showUserIcon }) => {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
       {navigationItems.map((item) => (
@@ -66,7 +66,7 @@ const DesktopNavigation = ({ navigationItems, darkMode, toggleDarkMode, onNavCli
         >
           Get Started
         </Button>
-      )
+      )}
     </Box>
   );
 };

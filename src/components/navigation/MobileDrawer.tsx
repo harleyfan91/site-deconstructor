@@ -24,7 +24,7 @@ interface MobileDrawerProps {
   showUserIcon?: boolean;
 }
 
-const MobileDrawer = ({
+const MobileDrawer: React.FC<MobileDrawerProps> = ({
   navigationItems,
   mobileOpen,
   darkMode,
@@ -32,7 +32,7 @@ const MobileDrawer = ({
   onDrawerToggle,
   onNavClick,
   showUserIcon
-}: MobileDrawerProps) => {
+}) => {
   const drawer = (
     <Box sx={{ width: 250, pt: 2 }}>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', pr: 2, pb: 2 }}>
@@ -103,7 +103,7 @@ const MobileDrawer = ({
             >
               Get Started
             </Button>
-          )
+          )}
         </ListItem>
       </List>
     </Box>
