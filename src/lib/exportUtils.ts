@@ -291,7 +291,7 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string): Promis
   yPosition += 15;
 
   // URL and timestamp
-  addText(`Website: ${data.url}`, 12, colors.primary);
+  addText(`URL: ${data.url}`, 12, colors.primary);
   addText(`Analysis Date: ${new Date(data.timestamp).toLocaleString()}`, 10, colors.darkGray);
   yPosition += 10;
 
