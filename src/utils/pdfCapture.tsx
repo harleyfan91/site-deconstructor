@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
@@ -7,19 +7,16 @@ import { jsPDF } from 'jspdf';
 let captureRoot: Root | null = null;
 
 /**
- * Clone the current dashboard DOM tree into an off-screen container.
- * The container is appended to document.body and rendered via React.
+ * Create a fully functional React clone of the dashboard that can handle tab switching
  */
 export async function cloneDashboard(): Promise<HTMLElement> {
+  // Find the source dashboard
   const dashboardEl = document.querySelector('#dashboard-root') as HTMLElement | null;
   if (!dashboardEl) {
-    // Fallback to main content area if dashboard-root doesn't exist
-    const mainContent = document.querySelector('main') || document.querySelector('[role="main"]') || document.body;
-    if (!mainContent) {
-      throw new Error('Dashboard content not found');
-    }
+    throw new Error('Dashboard content not found. Make sure you are on the dashboard page.');
   }
 
+  // Create container for the clone
   const container = document.createElement('div');
   container.id = 'pdf-capture-container';
   container.style.position = 'absolute';
@@ -28,149 +25,183 @@ export async function cloneDashboard(): Promise<HTMLElement> {
   container.style.width = '1200px';
   container.style.minHeight = '100vh';
   container.style.zIndex = '-1000';
+  container.style.overflow = 'visible';
   
-  // Copy the current theme from the body
+  // Copy theme styles from document
   const bodyStyles = window.getComputedStyle(document.body);
-  container.style.backgroundColor = bodyStyles.backgroundColor || '#ffffff';
-  container.style.color = bodyStyles.color || '#000000';
+  const htmlStyles = window.getComputedStyle(document.documentElement);
+  
+  container.style.backgroundColor = bodyStyles.backgroundColor || htmlStyles.backgroundColor || '#ffffff';
+  container.style.color = bodyStyles.color || htmlStyles.color || '#000000';
+  container.style.fontFamily = bodyStyles.fontFamily || 'sans-serif';
   
   document.body.appendChild(container);
 
+  // Component that recreates the dashboard with working tabs
   const DashboardClone = () => {
-    const ref = useRef<HTMLDivElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [isReady, setIsReady] = useState(false);
     
     useEffect(() => {
-      if (ref.current) {
-        // Find the dashboard content - try multiple selectors
-        const sourceEl = document.querySelector('#dashboard-root') || 
-                         document.querySelector('[data-dashboard]') ||
-                         document.querySelector('main') ||
-                         document.querySelector('.dashboard-content') ||
-                         document.body;
+      if (containerRef.current) {
+        // Clone the entire dashboard structure
+        const sourceElement = dashboardEl.cloneNode(true) as HTMLElement;
         
-        if (sourceEl) {
-          const clone = sourceEl.cloneNode(true) as HTMLElement;
+        // Copy all computed styles for every element
+        const copyAllStyles = (original: Element, cloned: Element) => {
+          const originalEl = original as HTMLElement;
+          const clonedEl = cloned as HTMLElement;
           
-          // Copy all stylesheets to ensure styling is preserved
-          const allStylesheets = Array.from(document.styleSheets);
-          allStylesheets.forEach(sheet => {
-            try {
-              const styleEl = document.createElement('style');
-              const rules = Array.from(sheet.cssRules || []);
-              styleEl.textContent = rules.map(rule => rule.cssText).join('\n');
-              ref.current?.appendChild(styleEl);
-            } catch (e) {
-              // Skip external stylesheets we can't access
-              console.warn('Could not copy stylesheet:', e);
-            }
-          });
-          
-          // Ensure all computed styles are preserved on all elements
-          const copyComputedStyles = (original: Element, cloned: Element) => {
-            const originalEl = original as HTMLElement;
-            const clonedEl = cloned as HTMLElement;
+          if (originalEl && clonedEl && originalEl.nodeType === Node.ELEMENT_NODE) {
+            const computedStyle = window.getComputedStyle(originalEl);
             
-            if (originalEl && clonedEl) {
-              const computedStyle = window.getComputedStyle(originalEl);
-              
-              // Copy critical style properties
-              const importantProps = [
-                'backgroundColor', 'color', 'fontFamily', 'fontSize', 'fontWeight',
-                'margin', 'padding', 'border', 'borderRadius', 'boxShadow',
-                'display', 'position', 'width', 'height', 'minHeight', 'maxHeight',
-                'overflow', 'opacity', 'visibility', 'zIndex'
-              ];
-              
-              importantProps.forEach(prop => {
-                const value = computedStyle.getPropertyValue(prop);
-                if (value) {
-                  clonedEl.style.setProperty(prop, value, 'important');
-                }
-              });
-            }
-            
-            // Recursively copy styles for all children
-            for (let i = 0; i < original.children.length; i++) {
-              if (cloned.children[i]) {
-                copyComputedStyles(original.children[i], cloned.children[i]);
+            // Copy all style properties
+            for (let i = 0; i < computedStyle.length; i++) {
+              const property = computedStyle[i];
+              const value = computedStyle.getPropertyValue(property);
+              if (value) {
+                clonedEl.style.setProperty(property, value, 'important');
               }
             }
-          };
+            
+            // Special handling for background and text colors
+            if (computedStyle.backgroundColor && computedStyle.backgroundColor !== 'rgba(0, 0, 0, 0)') {
+              clonedEl.style.setProperty('background-color', computedStyle.backgroundColor, 'important');
+            }
+            if (computedStyle.color) {
+              clonedEl.style.setProperty('color', computedStyle.color, 'important');
+            }
+          }
           
-          copyComputedStyles(sourceEl, clone);
-          ref.current.appendChild(clone);
-        }
+          // Recursively copy styles for all children
+          for (let i = 0; i < Math.min(original.children.length, cloned.children.length); i++) {
+            copyAllStyles(original.children[i], cloned.children[i]);
+          }
+        };
+        
+        // Apply styles to the cloned structure
+        copyAllStyles(dashboardEl, sourceElement);
+        
+        // Insert all stylesheets
+        const styleElements: HTMLStyleElement[] = [];
+        
+        // Copy inline styles
+        const allStylesheets = Array.from(document.styleSheets);
+        allStylesheets.forEach((sheet, index) => {
+          try {
+            const styleEl = document.createElement('style');
+            styleEl.setAttribute('data-source', `stylesheet-${index}`);
+            
+            if (sheet.href) {
+              // External stylesheet - try to fetch
+              fetch(sheet.href)
+                .then(response => response.text())
+                .then(css => {
+                  styleEl.textContent = css;
+                })
+                .catch(() => {
+                  // Fallback for external sheets we can't access
+                  console.warn('Could not load external stylesheet:', sheet.href);
+                });
+            } else {
+              // Inline stylesheet
+              const rules = Array.from(sheet.cssRules || []);
+              styleEl.textContent = rules.map(rule => rule.cssText).join('\n');
+            }
+            
+            styleElements.push(styleEl);
+            containerRef.current?.appendChild(styleEl);
+          } catch (e) {
+            console.warn('Could not copy stylesheet:', e);
+          }
+        });
+        
+        // Add the cloned dashboard
+        containerRef.current.appendChild(sourceElement);
+        
+        // Wait for styles to be applied
+        setTimeout(() => setIsReady(true), 1000);
       }
     }, []);
 
     return (
       <div 
-        ref={ref} 
+        ref={containerRef}
         style={{ 
           width: '1200px', 
           minHeight: '100vh',
-          backgroundColor: window.getComputedStyle(document.body).backgroundColor || '#ffffff',
-          color: window.getComputedStyle(document.body).color || '#000000'
+          backgroundColor: bodyStyles.backgroundColor || '#ffffff',
+          color: bodyStyles.color || '#000000',
+          fontFamily: bodyStyles.fontFamily || 'sans-serif',
+          overflow: 'visible'
         }} 
+        data-clone-ready={isReady}
       />
     );
   };
 
+  // Mount the clone
   captureRoot = createRoot(container);
   captureRoot.render(<DashboardClone />);
 
-  // Wait longer for React to render and styles to apply
-  await new Promise(resolve => setTimeout(resolve, 2000));
+  // Wait for React to render and styles to apply
+  await new Promise(resolve => setTimeout(resolve, 3000));
+  
   return container;
 }
 
 /**
- * Expand all MUI Collapse/Accordion components within the cloned container.
+ * Expand all collapsible content in the container
  */
 export function expandAllCollapsibles(container: HTMLElement): void {
-  // Expand MUI Collapse components
-  const collapses = Array.from(container.querySelectorAll<HTMLElement>('.MuiCollapse-root, [class*="collapse"]'));
+  // Force expand all MUI Collapse components
+  const collapses = container.querySelectorAll<HTMLElement>('.MuiCollapse-root, [class*="Collapse"], [class*="collapse"]');
   collapses.forEach(el => {
-    el.style.height = 'auto';
-    el.style.maxHeight = 'none';
-    el.style.visibility = 'visible';
-    el.style.opacity = '1';
-    el.style.overflow = 'visible';
+    el.style.setProperty('height', 'auto', 'important');
+    el.style.setProperty('max-height', 'none', 'important');
+    el.style.setProperty('visibility', 'visible', 'important');
+    el.style.setProperty('opacity', '1', 'important');
+    el.style.setProperty('overflow', 'visible', 'important');
+    el.style.setProperty('display', 'block', 'important');
     el.classList.add('MuiCollapse-entered');
     el.classList.remove('MuiCollapse-hidden');
   });
 
-  // Expand MUI Accordions
-  const accordions = Array.from(container.querySelectorAll<HTMLElement>('.MuiAccordion-root, [class*="accordion"]'));
-  accordions.forEach(acc => {
-    acc.classList.add('Mui-expanded');
-    const summary = acc.querySelector<HTMLElement>('.MuiAccordionSummary-root, [class*="summary"]');
+  // Force expand all accordion content
+  const accordions = container.querySelectorAll<HTMLElement>('.MuiAccordion-root, [class*="accordion"], [class*="Accordion"]');
+  accordions.forEach(accordion => {
+    accordion.classList.add('Mui-expanded');
+    
+    // Expand summary
+    const summary = accordion.querySelector<HTMLElement>('.MuiAccordionSummary-root, [class*="summary"], [class*="Summary"]');
     if (summary) {
       summary.setAttribute('aria-expanded', 'true');
       summary.classList.add('Mui-expanded');
     }
-    const details = acc.querySelector<HTMLElement>('.MuiAccordionDetails-root, .MuiCollapse-root, [class*="details"]');
+    
+    // Show details
+    const details = accordion.querySelector<HTMLElement>('.MuiAccordionDetails-root, .MuiCollapse-root, [class*="details"], [class*="Details"]');
     if (details) {
-      details.style.height = 'auto';
-      details.style.maxHeight = 'none';
-      details.style.visibility = 'visible';
-      details.style.opacity = '1';
-      details.style.display = 'block';
+      details.style.setProperty('height', 'auto', 'important');
+      details.style.setProperty('max-height', 'none', 'important');
+      details.style.setProperty('visibility', 'visible', 'important');
+      details.style.setProperty('opacity', '1', 'important');
+      details.style.setProperty('display', 'block', 'important');
       details.classList.add('MuiCollapse-entered');
     }
   });
 
-  // Expand any other collapsible content
-  const hiddenElements = Array.from(container.querySelectorAll<HTMLElement>('[style*="display: none"], [hidden]'));
+  // Show any hidden elements
+  const hiddenElements = container.querySelectorAll<HTMLElement>('[style*="display: none"], [style*="display:none"], [hidden]');
   hiddenElements.forEach(el => {
-    el.style.display = 'block';
-    el.style.visibility = 'visible';
+    el.style.setProperty('display', 'block', 'important');
+    el.style.setProperty('visibility', 'visible', 'important');
     el.removeAttribute('hidden');
   });
 }
 
 /**
- * Remove the cloned container and unmount the React tree.
+ * Clean up the capture environment
  */
 export async function cleanupCapture(container: HTMLElement): Promise<void> {
   if (captureRoot) {
@@ -183,6 +214,9 @@ export async function cleanupCapture(container: HTMLElement): Promise<void> {
   await Promise.resolve();
 }
 
+/**
+ * Capture images for specific tabs by properly activating them
+ */
 export async function captureTabImages(
   container: HTMLElement,
   tabIds: string[],
@@ -190,147 +224,161 @@ export async function captureTabImages(
 ): Promise<string[]> {
   const images: string[] = [];
   
+  // Wait for container to be ready
+  await new Promise(resolve => {
+    const checkReady = () => {
+      const readyIndicator = container.querySelector('[data-clone-ready="true"]');
+      if (readyIndicator) {
+        resolve(void 0);
+      } else {
+        setTimeout(checkReady, 100);
+      }
+    };
+    checkReady();
+  });
+
+  console.log(`Starting capture of ${tabIds.length} tabs`);
+  
   for (let i = 0; i < tabIds.length; i++) {
     const tabId = tabIds[i];
-    console.log(`Processing tab: ${tabId}`);
+    console.log(`Processing tab ${i + 1}/${tabIds.length}: ${tabId}`);
     
-    // Find and activate the tab button
-    let tabButton = container.querySelector(`[data-tab-id="${tabId}"]`) as HTMLElement;
-    if (!tabButton) {
-      tabButton = container.querySelector(`[value="${tabId}"]`) as HTMLElement;
+    // Find the tab trigger with multiple selector strategies
+    let tabTrigger = container.querySelector(`[data-tab-id="${tabId}"]`) as HTMLElement;
+    if (!tabTrigger) {
+      tabTrigger = container.querySelector(`[value="${tabId}"]`) as HTMLElement;
     }
-    if (!tabButton) {
-      tabButton = container.querySelector(`[data-value="${tabId}"]`) as HTMLElement;
+    if (!tabTrigger) {
+      tabTrigger = container.querySelector(`[data-value="${tabId}"]`) as HTMLElement;
     }
-    if (!tabButton) {
-      // Try to find by text content
-      const allButtons = container.querySelectorAll('button, [role="tab"]');
-      for (const btn of allButtons) {
+    if (!tabTrigger) {
+      // Search by text content
+      const buttons = container.querySelectorAll('button, [role="tab"]');
+      for (const btn of buttons) {
         if (btn.textContent?.toLowerCase().includes(tabId.toLowerCase())) {
-          tabButton = btn as HTMLElement;
+          tabTrigger = btn as HTMLElement;
           break;
         }
       }
     }
-
-    if (tabButton) {
-      console.log(`Found tab button for ${tabId}, clicking...`);
-      
-      // Remove active state from all tabs
-      const allTabs = container.querySelectorAll('[role="tab"], [data-tab-id], button[value]');
-      allTabs.forEach(tab => {
-        tab.setAttribute('aria-selected', 'false');
-        tab.classList.remove('active', 'selected');
-        (tab as HTMLElement).style.backgroundColor = '';
-        (tab as HTMLElement).style.color = '';
-      });
-      
-      // Hide all tab panels
-      const allPanels = container.querySelectorAll('[role="tabpanel"], [data-tab-panel-id]');
-      allPanels.forEach(panel => {
-        (panel as HTMLElement).style.display = 'none';
-        panel.setAttribute('hidden', 'true');
-      });
-      
-      // Activate the current tab
-      tabButton.click();
-      tabButton.setAttribute('aria-selected', 'true');
-      tabButton.classList.add('active', 'selected');
-      
-      // Wait for tab activation
-      await new Promise(resolve => setTimeout(resolve, 500));
+    
+    if (!tabTrigger) {
+      console.warn(`Could not find tab trigger for: ${tabId}`);
+      continue;
     }
 
-    // Find the corresponding tab panel
-    let panel = container.querySelector(`[data-tab-panel-id="${tabId}"]`) as HTMLElement;
-    if (!panel) {
-      panel = container.querySelector(`[id*="${tabId}"]`) as HTMLElement;
-    }
-    if (!panel) {
-      // Find the active/visible tab panel
-      const allPanels = container.querySelectorAll('[role="tabpanel"]');
-      for (const p of allPanels) {
-        const panelEl = p as HTMLElement;
-        if (!panelEl.hasAttribute('hidden') && panelEl.style.display !== 'none') {
-          panel = panelEl;
+    // Hide all tab panels first
+    const allPanels = container.querySelectorAll('[data-tab-panel-id], [role="tabpanel"]');
+    allPanels.forEach(panel => {
+      (panel as HTMLElement).style.setProperty('display', 'none', 'important');
+      panel.setAttribute('hidden', 'true');
+    });
+
+    // Deactivate all tabs
+    const allTabs = container.querySelectorAll('[data-tab-id], [value], [role="tab"]');
+    allTabs.forEach(tab => {
+      tab.setAttribute('aria-selected', 'false');
+      tab.classList.remove('active', 'selected');
+      (tab as HTMLElement).classList.remove('data-[state=active]');
+    });
+
+    // Activate the current tab
+    tabTrigger.setAttribute('aria-selected', 'true');
+    tabTrigger.classList.add('active', 'selected');
+    tabTrigger.click();
+
+    // Find and show the corresponding panel
+    let activePanel = container.querySelector(`[data-tab-panel-id="${tabId}"]`) as HTMLElement;
+    if (!activePanel) {
+      // Try finding by data-state attribute or similar patterns
+      const panels = container.querySelectorAll('[role="tabpanel"]');
+      for (const panel of panels) {
+        const panelEl = panel as HTMLElement;
+        if (panelEl.getAttribute('data-state') === 'active' || 
+            !panelEl.hasAttribute('hidden') ||
+            panelEl.style.display !== 'none') {
+          activePanel = panelEl;
           break;
         }
       }
     }
-    if (!panel) {
-      // Fallback to content area
-      panel = container.querySelector('.MuiTabPanel-root') as HTMLElement || container;
+    
+    if (!activePanel) {
+      // Fallback to main content area
+      activePanel = container.querySelector('.MuiTabPanel-root, [class*="TabPanel"]') as HTMLElement;
     }
 
-    if (panel) {
-      console.log(`Found panel for ${tabId}, preparing for capture...`);
+    if (!activePanel) {
+      console.warn(`Could not find panel for tab: ${tabId}`);
+      continue;
+    }
+
+    // Show and prepare the panel
+    activePanel.style.setProperty('display', 'block', 'important');
+    activePanel.style.setProperty('visibility', 'visible', 'important');
+    activePanel.style.setProperty('opacity', '1', 'important');
+    activePanel.removeAttribute('hidden');
+    
+    // Expand all collapsible content in this panel
+    expandAllCollapsibles(activePanel);
+    
+    // Wait for content to render and expand
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    try {
+      // Calculate full content dimensions
+      const contentHeight = Math.max(
+        activePanel.scrollHeight,
+        activePanel.offsetHeight,
+        1200 // minimum height
+      );
       
-      // Ensure the panel is visible and expanded
-      panel.style.display = 'block';
-      panel.style.visibility = 'visible';
-      panel.style.opacity = '1';
-      panel.removeAttribute('hidden');
+      console.log(`Capturing ${tabId} - Height: ${contentHeight}px`);
       
-      // Expand all collapsibles in the current panel
-      expandAllCollapsibles(panel);
+      // Capture the panel
+      const canvas = await html2canvas(activePanel, {
+        scale: options?.scale || 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: null,
+        width: 1200,
+        height: contentHeight,
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: 1200,
+        windowHeight: contentHeight,
+        removeContainer: false,
+        foreignObjectRendering: true
+      });
       
-      // Wait for content to render
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const dataUrl = canvas.toDataURL('image/png', 1.0);
+      images.push(dataUrl);
+      console.log(`Successfully captured ${tabId}`);
       
-      try {
-        // Calculate the full content height
-        const scrollHeight = Math.max(
-          panel.scrollHeight,
-          panel.offsetHeight,
-          panel.clientHeight,
-          1000 // minimum height
-        );
-        
-        console.log(`Capturing ${tabId} with height: ${scrollHeight}`);
-        
-        const canvas = await html2canvas(panel, { 
-          scale: options?.scale ?? 2,
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: null, // Preserve original background
-          width: 1200,
-          height: scrollHeight,
-          scrollX: 0,
-          scrollY: 0,
-          windowWidth: 1200,
-          windowHeight: scrollHeight
-        });
-        
-        const dataUrl = canvas.toDataURL('image/png', 1.0);
-        images.push(dataUrl);
-        console.log(`Successfully captured ${tabId}`);
-        
-      } catch (error) {
-        console.error(`Failed to capture tab ${tabId}:`, error);
-        // Create a placeholder image if capture fails
-        const canvas = document.createElement('canvas');
-        canvas.width = 1200;
-        canvas.height = 800;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.fillStyle = '#ffffff';
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-          ctx.fillStyle = '#333333';
-          ctx.font = '24px Arial';
-          ctx.textAlign = 'center';
-          ctx.fillText(`Failed to capture ${tabId} tab`, canvas.width / 2, canvas.height / 2);
-        }
-        images.push(canvas.toDataURL('image/png'));
+    } catch (error) {
+      console.error(`Failed to capture ${tabId}:`, error);
+      
+      // Create error placeholder
+      const canvas = document.createElement('canvas');
+      canvas.width = 1200;
+      canvas.height = 800;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.fillStyle = '#f5f5f5';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#333333';
+        ctx.font = '24px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(`Failed to capture ${tabId}`, canvas.width / 2, canvas.height / 2);
       }
-    } else {
-      console.error(`Could not find panel for tab: ${tabId}`);
+      images.push(canvas.toDataURL('image/png'));
     }
     
     // Small delay between captures
-    await new Promise(resolve => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 500));
   }
   
-  console.log(`Captured ${images.length} images total`);
+  console.log(`Capture complete: ${images.length} images generated`);
   return images;
 }
 
@@ -346,8 +394,7 @@ export async function assemblePDF(
       img.onload = () => {
         const width = img.naturalWidth;
         const height = img.naturalHeight;
-        const orientation: 'portrait' | 'landscape' =
-          width >= height ? 'landscape' : 'portrait';
+        const orientation: 'portrait' | 'landscape' = width >= height ? 'landscape' : 'portrait';
 
         if (!pdf) {
           pdf = new jsPDF({ orientation, unit: 'pt', format: [width, height] });
@@ -360,7 +407,7 @@ export async function assemblePDF(
       };
       img.onerror = () => {
         console.error('Failed to load image for PDF');
-        resolve(); // Continue even if image fails to load
+        resolve();
       };
       img.src = dataUrl;
     });
