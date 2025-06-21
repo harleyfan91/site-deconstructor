@@ -178,13 +178,16 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string): Promis
       const x = margin + col * cellWidth;
       const y = yPosition;
       pdf.setFillColor(hex);
-      pdf.rect(x, y, 10, 10, 'F');
       pdf.setDrawColor(0);
-      pdf.rect(x, y, 10, 10);
+      pdf.setLineWidth(0.25);
+      pdf.rect(x, y, 10, 5, 'F');
+      pdf.rect(x, y, 10, 5);
+      pdf.setLineWidth(0.5);
       pdf.setFontSize(9);
       pdf.setFont('helvetica', 'normal');
       pdf.setTextColor(colors.text);
-      pdf.text(hex, x + 12, y + 7);
+      pdf.text(hex, x + 12, y + 4);
+
       col++;
       if (col === columns) {
         col = 0;
