@@ -132,6 +132,70 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string): Promis
     yPosition += (lines.length * fontSize * 0.4) + 5;
   };
 
+  const hexToRgb = (hex: string): { r: number; g: number; b: number } | null => {
+    const match = hex.replace('#', '').match(/^([0-9a-f]{3}|[0-9a-f]{6})$/i);
+    if (!match) return null;
+    let h = match[0];
+    if (h.length === 3) h = h.split('').map(c => c + c).join('');
+    const num = parseInt(h, 16);
+    return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
+  };
+
+  const groupColorsForExport = (
+    palette: AnalysisResponse['data']['ui']['colors']
+  ): { name: string; colors: string[] }[] => {
+    const groups: Record<string, string[]> = {};
+    palette.forEach(color => {
+      let usage = color.usage || 'Theme';
+      if (usage === 'Primary' || usage === 'Secondary') {
+        const rgb = hexToRgb(color.hex);
+        if (rgb) {
+          const brightness = (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000;
+          if (brightness > 240) usage = 'Background';
+          else if (brightness < 50) usage = 'Text';
+          else usage = 'Theme';
+        } else {
+          usage = 'Theme';
+        }
+      }
+      if (!['Background', 'Text', 'Theme'].includes(usage)) usage = 'Theme';
+      if (!groups[usage]) groups[usage] = [];
+      groups[usage].push(color.hex);
+    });
+    const order = ['Background', 'Text', 'Theme'];
+    return order
+      .map(name => ({ name, colors: groups[name] || [] }))
+      .filter(g => g.colors.length > 0);
+  };
+
+  const addColorTable = (hexes: string[]) => {
+    const columns = 3;
+    const cellWidth = (pageWidth - margin * 2) / columns;
+    const cellHeight = 15;
+    let col = 0;
+    hexes.forEach(hex => {
+      addNewPageIfNeeded(cellHeight);
+      const x = margin + col * cellWidth;
+      const y = yPosition;
+      pdf.setFillColor(hex);
+      pdf.setDrawColor(0);
+      pdf.setLineWidth(0.25);
+      pdf.rect(x, y, 10, 5, 'F');
+      pdf.rect(x, y, 10, 5);
+      pdf.setLineWidth(0.5);
+      pdf.setFontSize(9);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(colors.text);
+      pdf.text(hex, x + 12, y + 4);
+      col++;
+      if (col === columns) {
+        col = 0;
+        yPosition += cellHeight;
+      }
+    });
+    if (col !== 0) yPosition += cellHeight;
+  };
+
   const addMetricCard = (title: string, value: string, color: string, description?: string) => {
     addNewPageIfNeeded(40);
     
@@ -366,8 +430,10 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string): Promis
     
     if (ui.colors && ui.colors.length > 0) {
       addSubtitle('Color Palette:');
-      ui.colors.forEach(color => {
-        addText(`• ${color.hex} (${color.count} occurrences)`, 10, colors.text, 10);
+      const usageGroups = groupColorsForExport(ui.colors);
+      usageGroups.forEach(group => {
+        addText(group.name + ':', 10, colors.text, 10);
+        addColorTable(group.colors);
       });
     }
     
