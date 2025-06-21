@@ -31,16 +31,16 @@ export async function cloneDashboard(): Promise<HTMLElement> {
 
   const DashboardClone = () => {
     const ref = useRef<HTMLDivElement>(null);
-    
+
     useEffect(() => {
       if (ref.current) {
         // Find the dashboard content - try multiple selectors
-        const sourceEl = document.querySelector('#dashboard-root') || 
+        const sourceEl = document.querySelector('#dashboard-root') ||
                          document.querySelector('[data-dashboard]') ||
                          document.querySelector('main') ||
                          document.querySelector('.dashboard-content') ||
                          document.body;
-        
+
         if (sourceEl) {
           const clone = sourceEl.cloneNode(true) as HTMLElement;
           
@@ -55,6 +55,7 @@ export async function cloneDashboard(): Promise<HTMLElement> {
           });
           
           ref.current.appendChild(clone);
+          (window as any).__PDF_CLONE_READY = true;
         }
       }
     }, []);
@@ -65,8 +66,18 @@ export async function cloneDashboard(): Promise<HTMLElement> {
   captureRoot = createRoot(container);
   captureRoot.render(<DashboardClone />);
 
-  // Wait longer for React to render and styles to apply
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  // Wait for the clone to signal readiness
+  await new Promise<void>(resolve => {
+    const checkReady = () => {
+      if ((window as any).__PDF_CLONE_READY) {
+        (window as any).__PDF_CLONE_READY = false;
+        resolve();
+      } else {
+        setTimeout(checkReady, 100);
+      }
+    };
+    checkReady();
+  });
   return container;
 }
 
@@ -74,6 +85,29 @@ export async function cloneDashboard(): Promise<HTMLElement> {
  * Expand all MUI Collapse/Accordion components within the cloned container.
  */
 export function expandAllCollapsibles(container: HTMLElement): void {
+  const details = Array.from(container.querySelectorAll<HTMLElement>('.MuiAccordionDetails-root'));
+  details.forEach(el => {
+    el.style.display = 'block';
+    el.style.height = 'auto';
+    el.style.maxHeight = 'none';
+    el.style.visibility = 'visible';
+    el.style.opacity = '1';
+  });
+
+  const wrappers = Array.from(container.querySelectorAll<HTMLElement>('.MuiCollapse-wrapper, .MuiCollapse-container'));
+  wrappers.forEach(el => {
+    el.style.height = 'auto';
+    el.style.maxHeight = 'none';
+    el.style.overflow = 'visible';
+    el.style.visibility = 'visible';
+    el.style.opacity = '1';
+  });
+
+  const summaries = Array.from(container.querySelectorAll<HTMLElement>('.MuiAccordionSummary-root'));
+  summaries.forEach(el => {
+    el.setAttribute('aria-expanded', 'true');
+  });
+
   // Expand MUI Collapse components
   const collapses = Array.from(container.querySelectorAll<HTMLElement>('.MuiCollapse-root, [class*="collapse"]'));
   collapses.forEach(el => {
