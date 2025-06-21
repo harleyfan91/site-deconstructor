@@ -456,6 +456,7 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string): Promis
       addText(`Estimated Icons: ${ui.imageAnalysis.estimatedIcons}`, 10, colors.text, 10);
       if (ui.imageAnalysis.iconUrls && ui.imageAnalysis.iconUrls.length > 0) {
         ui.imageAnalysis.iconUrls.forEach(url => {
+
           addText(`• ${url}`, 9, colors.text, 15);
         });
       }
