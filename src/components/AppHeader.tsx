@@ -78,16 +78,21 @@ const AppHeader = ({ darkMode, toggleDarkMode }: { darkMode: boolean; toggleDark
             sx={{
               flexGrow: 1,
               fontWeight: 700,
-              background: 'linear-gradient(45deg, #FF6B35 30%, #0984E3 90%)',
-              backgroundClip: 'text',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
               textDecoration: 'none',
               // Slightly reduce font size
               fontSize: { xs: '1.1rem', md: '1.25rem' },
             }}
           >
-            SiteDeconstructor
+            <span
+              style={{
+                background: 'linear-gradient(45deg, #FF6B35 30%, #0984E3 90%)',
+                WebkitBackgroundClip: 'text',
+                color: 'transparent',
+                display: 'inline-block',
+              }}
+            >
+              SiteDeconstructor
+            </span>
           </Typography>
 
           {!isMobile && (
