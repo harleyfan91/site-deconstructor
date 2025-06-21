@@ -185,7 +185,14 @@ export async function captureTabImages(
     const controls = tabButton.getAttribute('aria-controls');
     let panel: HTMLElement | null = null;
     if (controls) {
-      panel = container.querySelector<HTMLElement>(`#${controls}`);
+      try {
+        // CSS.escape ensures the ID is a valid selector even if it contains characters like ':'
+        const escaped = (window.CSS && CSS.escape) ? CSS.escape(controls) : controls.replace(/([\.\#\:\[\]])/g, '\\$1');
+        panel = container.querySelector<HTMLElement>(`#${escaped}`);
+      } catch {
+        // Fallback to attribute selector if CSS.escape is unavailable or fails
+        panel = container.querySelector<HTMLElement>(`[id="${controls}"]`);
+      }
     }
     if (!panel) {
       panel = container.querySelector<HTMLElement>('[role="tabpanel"]:not([hidden])');
