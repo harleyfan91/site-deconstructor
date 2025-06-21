@@ -245,20 +245,56 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string): Promis
     yPosition += 15;
   };
 
+  const addGradientText = (
+    text: string,
+    start: string,
+    end: string,
+    x: number,
+    y: number,
+    fontSize = 20,
+  ) => {
+    pdf.setFontSize(fontSize);
+    pdf.setFont('helvetica', 'bold');
+    const startRgb = hexToRgb(start);
+    const endRgb = hexToRgb(end);
+    if (!startRgb || !endRgb) {
+      pdf.setTextColor(start);
+      pdf.text(text, x, y);
+      return;
+    }
+    const letters = text.split('');
+    let currentX = x;
+    letters.forEach((letter, idx) => {
+      const ratio = letters.length === 1 ? 0 : idx / (letters.length - 1);
+      const r = Math.round(startRgb.r + (endRgb.r - startRgb.r) * ratio);
+      const g = Math.round(startRgb.g + (endRgb.g - startRgb.g) * ratio);
+      const b = Math.round(startRgb.b + (endRgb.b - startRgb.b) * ratio);
+      pdf.setTextColor(r, g, b);
+      pdf.text(letter, currentX, y);
+      currentX += pdf.getTextWidth(letter);
+    });
+  };
+
   // Header
-  pdf.setFillColor(255, 107, 53);
-  pdf.rect(0, 0, pageWidth, 50, 'F');
-  
+  const headerHeight = 30;
+  pdf.setFillColor(15, 15, 15);
+  pdf.rect(0, 0, pageWidth, headerHeight, 'F');
+
+  addGradientText('SiteDeconstructor', '#FF6B35', '#0984E3', margin, 20, 16);
+
+  yPosition = headerHeight + 20;
+
   pdf.setFontSize(20);
   pdf.setFont('helvetica', 'bold');
-  pdf.setTextColor(255, 255, 255);
-  pdf.text('Website Analysis Report', margin, 25);
-  
+  pdf.setTextColor(colors.text);
+  pdf.text('Website Analysis Report', margin, yPosition);
+  yPosition += 15;
+
   pdf.setFontSize(12);
   pdf.setFont('helvetica', 'normal');
-  pdf.text(`Generated: ${new Date().toLocaleDateString()}`, margin, 40);
-  
-  yPosition = 70;
+  pdf.setTextColor(colors.text);
+  pdf.text(`Generated: ${new Date().toLocaleDateString()}`, margin, yPosition);
+  yPosition += 20;
 
   // URL and timestamp
   addText(`Website: ${data.url}`, 12, colors.primary);
