@@ -112,7 +112,6 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose, data }) => {
       }
 
       setCurrentStep('Capturing screenshots...');
-      const resolution: 'standard' | 'high' = 'standard';
       const images: string[] = [];
       
       for (let i = 0; i < tabIds.length; i++) {
@@ -121,7 +120,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose, data }) => {
         
         try {
           const tabImages = await captureTabImages(container, [tabId], { 
-            scale: resolution === 'high' ? 2 : 1 
+            scale: 2 // Fixed scale value instead of conditional
           });
           
           if (tabImages.length > 0) {
@@ -143,7 +142,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose, data }) => {
       }
 
       setCurrentStep('Assembling PDF...');
-      const pdf = await assemblePDF(images, { resolution });
+      const pdf = await assemblePDF(images);
       
       setCurrentStep('Downloading...');
       await cleanupCapture(container);
