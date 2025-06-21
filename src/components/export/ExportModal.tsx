@@ -112,30 +112,8 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose, data }) => {
       }
 
       setCurrentStep('Capturing screenshots...');
-      const images: string[] = [];
-      
-      for (let i = 0; i < tabIds.length; i++) {
-        const tabId = tabIds[i];
-        setCurrentStep(`Capturing ${tabId} tab...`);
-        
-        try {
-          const tabImages = await captureTabImages(container, [tabId], { 
-            scale: 2 // Fixed scale value instead of conditional
-          });
-          
-          if (tabImages.length > 0) {
-            images.push(tabImages[0]);
-          }
-          
-          setPdfProgress(i + 1);
-        } catch (error) {
-          console.error(`Failed to capture ${tabId}:`, error);
-          // Continue with other tabs even if one fails
-        }
-        
-        // Small delay between captures
-        await new Promise(resolve => setTimeout(resolve, 200));
-      }
+      const images = await captureTabImages(container, tabIds, { scale: 2 });
+      setPdfProgress(tabIds.length);
       
       if (images.length === 0) {
         throw new Error('No images were captured. Please try again.');
