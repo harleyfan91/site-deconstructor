@@ -445,12 +445,18 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string): Promis
     if (ui.imageAnalysis) {
       addSubtitle('Image Analysis:');
       addText(`Total Images: ${ui.imageAnalysis.totalImages}`, 10, colors.text, 10);
-      addText(`Estimated Photos: ${ui.imageAnalysis.estimatedPhotos}`, 10, colors.text, 10);
-      addText(`Estimated Icons: ${ui.imageAnalysis.estimatedIcons}`, 10, colors.text, 10);
 
-      if (ui.imageAnalysis.imageUrls && ui.imageAnalysis.imageUrls.length > 0) {
-        addText('Image Links:', 10, colors.text, 10);
-        ui.imageAnalysis.imageUrls.forEach(url => {
+      addText(`Estimated Photos: ${ui.imageAnalysis.estimatedPhotos}`, 10, colors.text, 10);
+      if (ui.imageAnalysis.photoUrls && ui.imageAnalysis.photoUrls.length > 0) {
+        ui.imageAnalysis.photoUrls.forEach(url => {
+          addText(`• ${url}`, 9, colors.text, 15);
+        });
+      }
+
+      addText(`Estimated Icons: ${ui.imageAnalysis.estimatedIcons}`, 10, colors.text, 10);
+      if (ui.imageAnalysis.iconUrls && ui.imageAnalysis.iconUrls.length > 0) {
+        ui.imageAnalysis.iconUrls.forEach(url => {
+
           addText(`• ${url}`, 9, colors.text, 15);
         });
       }
