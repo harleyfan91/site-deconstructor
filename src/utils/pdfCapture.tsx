@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { createRoot, Root } from 'react-dom/client';
+import html2canvas from 'html2canvas';
 
 let captureRoot: Root | null = null;
 
@@ -79,4 +80,22 @@ export async function cleanupCapture(container: HTMLElement): Promise<void> {
     container.parentNode.removeChild(container);
   }
   await Promise.resolve();
+}
+
+export async function captureTabImages(
+  container: HTMLElement,
+  tabIds: string[],
+  options?: { scale?: number }
+): Promise<string[]> {
+  const images: string[] = [];
+  for (const id of tabIds) {
+    const tabButton = container.querySelector(`[role="tab"][data-tab-id="${id}"]`) as HTMLElement;
+    tabButton.click();
+    await Promise.resolve();
+    expandAllCollapsibles(container);
+    const panel = container.querySelector(`[data-tab-panel-id="${id}"]`) as HTMLElement;
+    const canvas = await html2canvas(panel, { scale: options?.scale ?? 2 });
+    images.push(canvas.toDataURL('image/png'));
+  }
+  return images;
 }
