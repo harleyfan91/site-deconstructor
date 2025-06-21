@@ -57,6 +57,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose, data }) => {
   const [pdfProgress, setPdfProgress] = useState<number>(0);
   const [isExportingPdf, setIsExportingPdf] = useState<boolean>(false);
   const [totalTabs, setTotalTabs] = useState<number>(0);
+  const [currentStep, setCurrentStep] = useState<string>('');
 
   const handleFormatChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setOptions(prev => ({ ...prev, format: event.target.value as 'csv' | 'json' | 'pdf' }));
@@ -73,33 +74,101 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose, data }) => {
     if (!data) return;
 
     setIsExportingPdf(true);
-    const container = await cloneDashboard();
-    const sectionMap: Record<keyof ExportOptions['sections'], string> = {
-      overview: 'overview',
-      ui: 'ui',
-      performance: 'performance',
-      seo: 'seo',
-      technical: 'tech',
-      compliance: 'compliance'
-    };
-    const tabIds = (Object.keys(options.sections) as Array<keyof ExportOptions['sections']>)
-      .filter(key => options.sections[key])
-      .map(key => sectionMap[key]);
+    setPdfProgress(0);
+    setCurrentStep('Preparing dashboard...');
 
-    setTotalTabs(tabIds.length);
+    try {
+      // Add dashboard-root ID to the main content if it doesn't exist
+      let dashboardRoot = document.querySelector('#dashboard-root');
+      if (!dashboardRoot) {
+        const mainContent = document.querySelector('main') || document.querySelector('[data-dashboard]');
+        if (mainContent) {
+          mainContent.id = 'dashboard-root';
+          dashboardRoot = mainContent;
+        }
+      }
 
-    const resolution: 'standard' | 'high' = 'standard';
-    const images: string[] = [];
-    for (let i = 0; i < tabIds.length; i++) {
-      const dataUrl = (await captureTabImages(container, [tabIds[i]], { scale: resolution === 'high' ? 2 : 1 }))[0];
-      images.push(dataUrl);
-      setPdfProgress(i + 1);
+      setCurrentStep('Cloning dashboard...');
+      const container = await cloneDashboard();
+      
+      // Map sections to actual tab identifiers
+      const sectionMap: Record<keyof ExportOptions['sections'], string> = {
+        overview: 'overview',
+        ui: 'ui', 
+        performance: 'performance',
+        seo: 'seo',
+        technical: 'tech',
+        compliance: 'compliance'
+      };
+      
+      const selectedSections = (Object.keys(options.sections) as Array<keyof ExportOptions['sections']>)
+        .filter(key => options.sections[key]);
+      
+      const tabIds = selectedSections.map(key => sectionMap[key]);
+      setTotalTabs(tabIds.length);
+
+      if (tabIds.length === 0) {
+        throw new Error('No sections selected for export');
+      }
+
+      setCurrentStep('Capturing screenshots...');
+      const resolution: 'standard' | 'high' = 'standard';
+      const images: string[] = [];
+      
+      for (let i = 0; i < tabIds.length; i++) {
+        const tabId = tabIds[i];
+        setCurrentStep(`Capturing ${tabId} tab...`);
+        
+        try {
+          const tabImages = await captureTabImages(container, [tabId], { 
+            scale: resolution === 'high' ? 2 : 1 
+          });
+          
+          if (tabImages.length > 0) {
+            images.push(tabImages[0]);
+          }
+          
+          setPdfProgress(i + 1);
+        } catch (error) {
+          console.error(`Failed to capture ${tabId}:`, error);
+          // Continue with other tabs even if one fails
+        }
+        
+        // Small delay between captures
+        await new Promise(resolve => setTimeout(resolve, 200));
+      }
+      
+      if (images.length === 0) {
+        throw new Error('No images were captured. Please try again.');
+      }
+
+      setCurrentStep('Assembling PDF...');
+      const pdf = await assemblePDF(images, { resolution });
+      
+      setCurrentStep('Downloading...');
+      await cleanupCapture(container);
+      
+      const fileName = `dashboard-report-${new Date().toISOString().split('T')[0]}.pdf`;
+      pdf.save(fileName);
+      
+      setCurrentStep('Complete!');
+    } catch (error) {
+      console.error('PDF export failed:', error);
+      setCurrentStep(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      
+      // Clean up on error
+      const container = document.querySelector('#pdf-capture-container');
+      if (container) {
+        await cleanupCapture(container as HTMLElement);
+      }
+    } finally {
+      setTimeout(() => {
+        setIsExportingPdf(false);
+        setPdfProgress(0);
+        setCurrentStep('');
+        onClose();
+      }, 1500);
     }
-    const pdf = await assemblePDF(images, { resolution });
-    await cleanupCapture(container);
-    pdf.save('dashboard-report.pdf');
-    setIsExportingPdf(false);
-    onClose();
   };
 
   const handleExport = async () => {
@@ -202,14 +271,18 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose, data }) => {
 
           {options.format === 'pdf' && (
             <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-              PDF export includes visual charts and formatted layout for professional reporting.
+              PDF export captures visual screenshots of each dashboard tab for professional reporting.
             </Typography>
           )}
+          
           {isExportingPdf && (
-            <Box sx={{ mb: 2 }}>
-              <LinearProgress variant="determinate" value={(pdfProgress / totalTabs) * 100} />
-              <Typography variant="caption" align="center">
-                Capturing tab {pdfProgress} of {totalTabs}…
+            <Box sx={{ mt: 2, mb: 2 }}>
+              <LinearProgress 
+                variant="determinate" 
+                value={totalTabs > 0 ? (pdfProgress / totalTabs) * 100 : 0} 
+              />
+              <Typography variant="caption" sx={{ display: 'block', mt: 1, textAlign: 'center' }}>
+                {currentStep || `Capturing tab ${pdfProgress} of ${totalTabs}...`}
               </Typography>
             </Box>
           )}

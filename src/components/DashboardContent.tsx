@@ -21,7 +21,7 @@ const DashboardContent = () => {
   };
 
   return (
-    <Box>
+    <Box id="dashboard-root" data-dashboard="true">
       {/* HEADER ROW: Title only, legend removed */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -89,12 +89,12 @@ const DashboardContent = () => {
                 transition={{ duration: 0.6, delay: 0.4 }}
               >
                 <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 gap-1 h-auto">
-                  <TabsTrigger value="overview" className="text-xs sm:text-sm">Overview</TabsTrigger>
-                  <TabsTrigger value="ui" className="text-xs sm:text-sm">User Interface</TabsTrigger>
-                  <TabsTrigger value="performance" className="text-xs sm:text-sm">Performance & Security</TabsTrigger>
-                  <TabsTrigger value="seo" className="text-xs sm:text-sm">SEO Analysis</TabsTrigger>
-                  <TabsTrigger value="tech" className="text-xs sm:text-sm">Tech</TabsTrigger>
-                  <TabsTrigger value="compliance" className="text-xs sm:text-sm">Compliance</TabsTrigger>
+                  <TabsTrigger value="overview" className="text-xs sm:text-sm" data-tab-id="overview">Overview</TabsTrigger>
+                  <TabsTrigger value="ui" className="text-xs sm:text-sm" data-tab-id="ui">User Interface</TabsTrigger>
+                  <TabsTrigger value="performance" className="text-xs sm:text-sm" data-tab-id="performance">Performance & Security</TabsTrigger>
+                  <TabsTrigger value="seo" className="text-xs sm:text-sm" data-tab-id="seo">SEO Analysis</TabsTrigger>
+                  <TabsTrigger value="tech" className="text-xs sm:text-sm" data-tab-id="tech">Tech</TabsTrigger>
+                  <TabsTrigger value="compliance" className="text-xs sm:text-sm" data-tab-id="compliance">Compliance</TabsTrigger>
                 </TabsList>
               </motion.div>
             </Box>
@@ -104,27 +104,27 @@ const DashboardContent = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.5 }}
             >
-              <TabsContent value="overview">
+              <TabsContent value="overview" data-tab-panel-id="overview">
                 <OverviewTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
               
-              <TabsContent value="ui">
+              <TabsContent value="ui" data-tab-panel-id="ui">
                 <UIAnalysisTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
               
-              <TabsContent value="performance">
+              <TabsContent value="performance" data-tab-panel-id="performance">
                 <PerformanceTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
               
-              <TabsContent value="seo">
+              <TabsContent value="seo" data-tab-panel-id="seo">
                 <SEOAnalysisTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
               
-              <TabsContent value="tech">
+              <TabsContent value="tech" data-tab-panel-id="tech">
                 <TechTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
 
-              <TabsContent value="compliance">
+              <TabsContent value="compliance" data-tab-panel-id="compliance">
                 <ComplianceTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
             </motion.div>
