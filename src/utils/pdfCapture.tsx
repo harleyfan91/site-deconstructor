@@ -231,18 +231,30 @@ export async function captureTabImages(
 }
 
 export function assemblePDF(images: string[]): jsPDF {
+  if (images.length === 0) {
+    throw new Error('No images provided');
+  }
+
   const [first, ...rest] = images;
-  const img = new Image();
-  img.src = first;
+  const props = jsPDF.getImageProperties(first);
+  const orientation: 'portrait' | 'landscape' =
+    props.width >= props.height ? 'landscape' : 'portrait';
+
   const pdf = new jsPDF({
-    orientation: 'landscape',
-    unit:        'px',
-    format:      [img.width, img.height],
+    orientation,
+    unit:   'px',
+    format: [props.width, props.height],
   });
-  pdf.addImage(first, 'PNG', 0, 0, img.width, img.height);
+
+  pdf.addImage(first, 'PNG', 0, 0, props.width, props.height);
+
   rest.forEach(dataUrl => {
-    pdf.addPage();
-    pdf.addImage(dataUrl, 'PNG', 0, 0, img.width, img.height);
+    const p = jsPDF.getImageProperties(dataUrl);
+    const orient: 'portrait' | 'landscape' =
+      p.width >= p.height ? 'landscape' : 'portrait';
+    pdf.addPage([p.width, p.height], orient);
+    pdf.addImage(dataUrl, 'PNG', 0, 0, p.width, p.height);
   });
+
   return pdf;
 }
