@@ -169,7 +169,7 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string): Promis
   };
 
   const addColorTable = (hexes: string[]) => {
-    const columns = 3;
+    const columns = 4;
     const cellWidth = (pageWidth - margin * 2) / columns;
     const cellHeight = 15;
     let col = 0;
