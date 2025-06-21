@@ -290,12 +290,6 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string): Promis
   pdf.text('Website Analysis Report', margin, yPosition);
   yPosition += 15;
 
-  pdf.setFontSize(12);
-  pdf.setFont('helvetica', 'normal');
-  pdf.setTextColor(colors.text);
-  pdf.text(`Generated: ${new Date().toLocaleDateString()}`, margin, yPosition);
-  yPosition += 20;
-
   // URL and timestamp
   addText(`Website: ${data.url}`, 12, colors.primary);
   addText(`Analysis Date: ${new Date(data.timestamp).toLocaleString()}`, 10, colors.darkGray);
