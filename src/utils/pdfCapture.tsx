@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import html2canvas from 'html2canvas';
@@ -7,26 +6,97 @@ import { jsPDF } from 'jspdf';
 let captureRoot: Root | null = null;
 
 /**
- * Clone the current dashboard DOM tree into an off-screen container.
- * The container is appended to document.body and rendered via React.
+ * Deep clone element with all computed styles preserved
+ */
+function deepCloneWithStyles(sourceElement: Element, targetElement: Element): void {
+  const computedStyle = window.getComputedStyle(sourceElement);
+  const targetEl = targetElement as HTMLElement;
+  
+  // Copy all computed styles
+  for (let i = 0; i < computedStyle.length; i++) {
+    const prop = computedStyle[i];
+    const value = computedStyle.getPropertyValue(prop);
+    targetEl.style.setProperty(prop, value, computedStyle.getPropertyPriority(prop));
+  }
+  
+  // Handle special attributes
+  if (sourceElement.hasAttribute('aria-expanded')) {
+    targetElement.setAttribute('aria-expanded', sourceElement.getAttribute('aria-expanded')!);
+  }
+  if (sourceElement.hasAttribute('aria-selected')) {
+    targetElement.setAttribute('aria-selected', sourceElement.getAttribute('aria-selected')!);
+  }
+  
+  // Recursively clone children
+  for (let i = 0; i < sourceElement.children.length; i++) {
+    if (targetElement.children[i]) {
+      deepCloneWithStyles(sourceElement.children[i], targetElement.children[i]);
+    }
+  }
+}
+
+/**
+ * Force show all tab panels and their content
+ */
+function forceShowAllTabContent(container: HTMLElement): void {
+  // Show all tab panels
+  const tabPanels = container.querySelectorAll<HTMLElement>('[role="tabpanel"], .MuiTabPanel-root, [class*="tabpanel"], [class*="TabPanel"]');
+  tabPanels.forEach(panel => {
+    panel.style.display = 'block !important';
+    panel.style.visibility = 'visible !important';
+    panel.style.opacity = '1 !important';
+    panel.style.height = 'auto !important';
+    panel.style.maxHeight = 'none !important';
+    panel.style.overflow = 'visible !important';
+    panel.removeAttribute('hidden');
+    panel.setAttribute('aria-hidden', 'false');
+  });
+
+  // Make sure all tabs appear active for styling purposes
+  const tabButtons = container.querySelectorAll<HTMLElement>('[role="tab"], .MuiTab-root, [class*="tab-button"]');
+  tabButtons.forEach(tab => {
+    tab.setAttribute('aria-selected', 'true');
+    tab.classList.add('Mui-selected', 'active', 'selected');
+  });
+}
+
+/**
+ * Clone the dashboard with proper style preservation and theme detection
  */
 export async function cloneDashboard(): Promise<HTMLElement> {
   const dashboardEl = document.querySelector('#dashboard-root') as HTMLElement | null;
   if (!dashboardEl) {
-    // Fallback to main content area if dashboard-root doesn't exist
     const mainContent = document.querySelector('main') || document.querySelector('[role="main"]') || document.body;
     if (!mainContent) {
       throw new Error('Dashboard content not found');
     }
   }
 
+  // Detect current theme
+  const isDarkTheme = document.documentElement.classList.contains('dark') ||
+                     document.body.classList.contains('dark') ||
+                     window.getComputedStyle(document.body).backgroundColor.includes('rgb(0, 0, 0)') ||
+                     window.getComputedStyle(document.body).backgroundColor.includes('rgb(33, 33, 33)') ||
+                     window.getComputedStyle(document.documentElement).colorScheme === 'dark';
+
   const container = document.createElement('div');
   container.id = 'pdf-capture-container';
   container.style.position = 'absolute';
   container.style.top = '-9999px';
   container.style.left = '-9999px';
-  container.style.width = '1200px'; // Fixed width for consistent rendering
-  container.style.backgroundColor = 'white';
+  container.style.width = '1200px';
+  container.style.minHeight = '100vh';
+  
+  // Preserve theme
+  if (isDarkTheme) {
+    container.style.backgroundColor = '#1a1a1a'; // Dark background
+    container.style.color = '#ffffff';
+    container.classList.add('dark');
+  } else {
+    container.style.backgroundColor = '#ffffff';
+    container.style.color = '#000000';
+  }
+  
   document.body.appendChild(container);
 
   const DashboardClone = () => {
@@ -34,7 +104,6 @@ export async function cloneDashboard(): Promise<HTMLElement> {
     
     useEffect(() => {
       if (ref.current) {
-        // Find the dashboard content - try multiple selectors
         const sourceEl = document.querySelector('#dashboard-root') || 
                          document.querySelector('[data-dashboard]') ||
                          document.querySelector('main') ||
@@ -44,80 +113,121 @@ export async function cloneDashboard(): Promise<HTMLElement> {
         if (sourceEl) {
           const clone = sourceEl.cloneNode(true) as HTMLElement;
           
-          // Ensure all styles are preserved
-          const allElements = clone.querySelectorAll('*');
-          allElements.forEach((el, index) => {
-            const originalEl = sourceEl.querySelectorAll('*')[index];
-            if (originalEl) {
-              const computedStyle = window.getComputedStyle(originalEl);
-              (el as HTMLElement).style.cssText = computedStyle.cssText;
-            }
-          });
+          // Copy theme classes to clone
+          if (isDarkTheme) {
+            clone.classList.add('dark');
+            clone.style.backgroundColor = '#1a1a1a';
+            clone.style.color = '#ffffff';
+          }
+          
+          // Deep clone with styles
+          deepCloneWithStyles(sourceEl, clone);
+          
+          // Force show all content
+          forceShowAllTabContent(clone);
+          expandAllCollapsibles(clone);
           
           ref.current.appendChild(clone);
         }
       }
     }, []);
 
-    return <div ref={ref} style={{ width: '1200px', backgroundColor: 'white' }} />;
+    const containerStyle: React.CSSProperties = {
+      width: '1200px',
+      minHeight: '100vh',
+      backgroundColor: isDarkTheme ? '#1a1a1a' : '#ffffff',
+      color: isDarkTheme ? '#ffffff' : '#000000'
+    };
+
+    if (isDarkTheme) {
+      containerStyle.colorScheme = 'dark';
+    }
+
+    return <div ref={ref} style={containerStyle} className={isDarkTheme ? 'dark' : ''} />;
   };
 
   captureRoot = createRoot(container);
   captureRoot.render(<DashboardClone />);
 
-  // Wait longer for React to render and styles to apply
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  // Wait longer for React to render and all dynamic content to load
+  await new Promise(resolve => setTimeout(resolve, 2000));
   return container;
 }
 
 /**
- * Expand all MUI Collapse/Accordion components within the cloned container.
+ * Enhanced expand all collapsibles function
  */
 export function expandAllCollapsibles(container: HTMLElement): void {
   // Expand MUI Collapse components
-  const collapses = Array.from(container.querySelectorAll<HTMLElement>('.MuiCollapse-root, [class*="collapse"]'));
+  const collapses = Array.from(container.querySelectorAll<HTMLElement>(
+    '.MuiCollapse-root, [class*="collapse"], .MuiCollapse-wrapper, .MuiCollapse-wrapperInner'
+  ));
   collapses.forEach(el => {
-    el.style.height = 'auto';
-    el.style.maxHeight = 'none';
-    el.style.visibility = 'visible';
-    el.style.opacity = '1';
-    el.style.overflow = 'visible';
+    el.style.height = 'auto !important';
+    el.style.maxHeight = 'none !important';
+    el.style.visibility = 'visible !important';
+    el.style.opacity = '1 !important';
+    el.style.overflow = 'visible !important';
+    el.style.display = 'block !important';
     el.classList.add('MuiCollapse-entered');
-    el.classList.remove('MuiCollapse-hidden');
+    el.classList.remove('MuiCollapse-hidden', 'MuiCollapse-hiddenStart', 'MuiCollapse-hiddenSize');
   });
 
   // Expand MUI Accordions
-  const accordions = Array.from(container.querySelectorAll<HTMLElement>('.MuiAccordion-root, [class*="accordion"]'));
+  const accordions = Array.from(container.querySelectorAll<HTMLElement>(
+    '.MuiAccordion-root, [class*="accordion"], .MuiExpansionPanel-root'
+  ));
   accordions.forEach(acc => {
     acc.classList.add('Mui-expanded');
-    const summary = acc.querySelector<HTMLElement>('.MuiAccordionSummary-root, [class*="summary"]');
+    acc.setAttribute('aria-expanded', 'true');
+    
+    const summary = acc.querySelector<HTMLElement>(
+      '.MuiAccordionSummary-root, .MuiExpansionPanelSummary-root, [class*="summary"]'
+    );
     if (summary) {
       summary.setAttribute('aria-expanded', 'true');
       summary.classList.add('Mui-expanded');
     }
-    const details = acc.querySelector<HTMLElement>('.MuiAccordionDetails-root, .MuiCollapse-root, [class*="details"]');
+    
+    const details = acc.querySelector<HTMLElement>(
+      '.MuiAccordionDetails-root, .MuiExpansionPanelDetails-root, .MuiCollapse-root, [class*="details"]'
+    );
     if (details) {
-      details.style.height = 'auto';
-      details.style.maxHeight = 'none';
-      details.style.visibility = 'visible';
-      details.style.opacity = '1';
-      details.style.display = 'block';
+      details.style.height = 'auto !important';
+      details.style.maxHeight = 'none !important';
+      details.style.visibility = 'visible !important';
+      details.style.opacity = '1 !important';
+      details.style.display = 'block !important';
+      details.style.overflow = 'visible !important';
       details.classList.add('MuiCollapse-entered');
+      details.removeAttribute('hidden');
     }
   });
 
-  // Expand any other collapsible content
-  const hiddenElements = Array.from(container.querySelectorAll<HTMLElement>('[style*="display: none"], [hidden]'));
+  // Show all hidden elements
+  const hiddenElements = Array.from(container.querySelectorAll<HTMLElement>(
+    '[style*="display: none"], [style*="display:none"], [hidden], [aria-hidden="true"]'
+  ));
   hiddenElements.forEach(el => {
-    el.style.display = 'block';
-    el.style.visibility = 'visible';
+    el.style.display = 'block !important';
+    el.style.visibility = 'visible !important';
+    el.style.opacity = '1 !important';
     el.removeAttribute('hidden');
+    el.setAttribute('aria-hidden', 'false');
+  });
+
+  // Force show any elements with zero height/width
+  const collapsedElements = Array.from(container.querySelectorAll<HTMLElement>('*')).filter(el => {
+    const style = window.getComputedStyle(el);
+    return style.height === '0px' || style.maxHeight === '0px';
+  });
+  collapsedElements.forEach(el => {
+    el.style.height = 'auto !important';
+    el.style.maxHeight = 'none !important';
+    el.style.minHeight = 'auto !important';
   });
 }
 
-/**
- * Remove the cloned container and unmount the React tree.
- */
 export async function cleanupCapture(container: HTMLElement): Promise<void> {
   if (captureRoot) {
     captureRoot.unmount();
@@ -129,6 +239,9 @@ export async function cleanupCapture(container: HTMLElement): Promise<void> {
   await Promise.resolve();
 }
 
+/**
+ * Enhanced tab capture that properly handles all tab content
+ */
 export async function captureTabImages(
   container: HTMLElement,
   tabIds: string[],
@@ -136,91 +249,80 @@ export async function captureTabImages(
 ): Promise<string[]> {
   const images: string[] = [];
   
-  // Find the tabs container - try multiple selectors
-  const tabsContainer = container.querySelector('[role="tablist"]') || 
-                       container.querySelector('.MuiTabs-root') ||
-                       container.querySelector('[class*="tab"]') ||
-                       container;
-
-  for (let i = 0; i < tabIds.length; i++) {
-    const tabId = tabIds[i];
-    
-    // Try multiple ways to find and activate the tab
-    let tabButton = container.querySelector(`[data-tab-id="${tabId}"]`) as HTMLElement;
-    if (!tabButton) {
-      tabButton = container.querySelector(`[value="${tabId}"]`) as HTMLElement;
-    }
-    if (!tabButton) {
-      tabButton = container.querySelector(`[data-value="${tabId}"]`) as HTMLElement;
-    }
-    if (!tabButton) {
-      // Try to find by text content
-      const allButtons = container.querySelectorAll('button, [role="tab"]');
-      for (const btn of allButtons) {
-        if (btn.textContent?.toLowerCase().includes(tabId.toLowerCase())) {
-          tabButton = btn as HTMLElement;
-          break;
+  // Since we've already forced all tab content to be visible,
+  // we can capture each tab panel directly
+  for (const tabId of tabIds) {
+    try {
+      // Find the specific tab panel for this tab
+      let panel = container.querySelector(`[data-tab-panel-id="${tabId}"]`) as HTMLElement;
+      if (!panel) {
+        panel = container.querySelector(`[id*="${tabId}"][role="tabpanel"]`) as HTMLElement;
+      }
+      if (!panel) {
+        panel = container.querySelector(`[aria-labelledby*="${tabId}"]`) as HTMLElement;
+      }
+      if (!panel) {
+        // Try to find by matching tab button and then finding associated panel
+        const tabButton = container.querySelector(`[data-tab-id="${tabId}"], [value="${tabId}"], [data-value="${tabId}"]`);
+        if (tabButton) {
+          const controls = tabButton.getAttribute('aria-controls');
+          if (controls) {
+            panel = container.querySelector(`#${controls}`) as HTMLElement;
+          }
         }
       }
-    }
-
-    if (tabButton) {
-      // Simulate tab activation
-      tabButton.click();
-      tabButton.setAttribute('aria-selected', 'true');
-      tabButton.classList.add('active', 'selected');
       
-      // Wait for tab content to render
-      await new Promise(resolve => setTimeout(resolve, 500));
-    }
+      // If we still can't find a specific panel, capture the entire visible content
+      if (!panel) {
+        console.warn(`Could not find specific panel for tab ${tabId}, capturing full content`);
+        panel = container;
+      }
 
-    // Expand all collapsibles in the current view
-    expandAllCollapsibles(container);
-    
-    // Find the tab panel content
-    let panel = container.querySelector(`[data-tab-panel-id="${tabId}"]`) as HTMLElement;
-    if (!panel) {
-      panel = container.querySelector(`[id*="${tabId}"]`) as HTMLElement;
-    }
-    if (!panel) {
-      panel = container.querySelector('[role="tabpanel"]:not([hidden])') as HTMLElement;
-    }
-    if (!panel) {
-      // Fallback to the entire visible content area
-      panel = container.querySelector('.MuiTabPanel-root') as HTMLElement || container;
-    }
-
-    try {
-      // Ensure the panel is visible and has content
+      // Ensure the panel and all its content is visible
       if (panel) {
-        panel.style.display = 'block';
-        panel.style.visibility = 'visible';
-        panel.style.opacity = '1';
+        panel.style.display = 'block !important';
+        panel.style.visibility = 'visible !important';
+        panel.style.opacity = '1 !important';
+        panel.style.position = 'relative';
         
-        // Wait a bit more for rendering
-        await new Promise(resolve => setTimeout(resolve, 300));
+        // Expand any remaining collapsibles in this panel
+        expandAllCollapsibles(panel);
+        
+        // Wait for any dynamic content to render
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Get the computed background color for proper theme handling
+        const computedStyle = window.getComputedStyle(panel);
+        const backgroundColor = computedStyle.backgroundColor || 
+                              (container.classList.contains('dark') ? '#1a1a1a' : '#ffffff');
         
         const canvas = await html2canvas(panel, { 
           scale: options?.scale ?? 2,
           useCORS: true,
           allowTaint: true,
-          backgroundColor: '#ffffff',
+          backgroundColor: backgroundColor,
           width: 1200,
-          height: Math.max(panel.scrollHeight, 800)
+          height: Math.max(panel.scrollHeight, 800),
+          ignoreElements: (element) => {
+            // Skip elements that are explicitly hidden
+            const style = window.getComputedStyle(element);
+            return style.display === 'none' && !element.closest('[role="tabpanel"]');
+          }
         });
         images.push(canvas.toDataURL('image/png'));
       }
     } catch (error) {
       console.error(`Failed to capture tab ${tabId}:`, error);
-      // Create a placeholder image if capture fails
+      // Create a themed placeholder image if capture fails
       const canvas = document.createElement('canvas');
       canvas.width = 1200;
       canvas.height = 800;
       const ctx = canvas.getContext('2d');
       if (ctx) {
-        ctx.fillStyle = '#ffffff';
+        const isDark = container.classList.contains('dark');
+        ctx.fillStyle = isDark ? '#1a1a1a' : '#ffffff';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = '#333333';
+        ctx.fillStyle = isDark ? '#ffffff' : '#333333';
         ctx.font = '24px Arial';
         ctx.textAlign = 'center';
         ctx.fillText(`Failed to capture ${tabId} tab`, canvas.width / 2, canvas.height / 2);
@@ -248,7 +350,12 @@ export async function assemblePDF(
           width >= height ? 'landscape' : 'portrait';
 
         if (!pdf) {
-          pdf = new jsPDF({ orientation, unit: 'pt', format: [width, height] });
+          pdf = new jsPDF({ 
+            orientation, 
+            unit: 'pt', 
+            format: [width, height],
+            compress: options?.resolution === 'standard'
+          });
           pdf.addImage(dataUrl, 'PNG', 0, 0, width, height);
         } else {
           pdf.addPage([width, height], orientation);
@@ -258,7 +365,7 @@ export async function assemblePDF(
       };
       img.onerror = () => {
         console.error('Failed to load image for PDF');
-        resolve(); // Continue even if image fails to load
+        resolve();
       };
       img.src = dataUrl;
     });
