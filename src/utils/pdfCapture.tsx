@@ -230,9 +230,38 @@ export async function captureTabImages(
   return images;
 }
 
-export function assemblePDF(images: string[]): jsPDF {
+export async function assemblePDF(images: string[]): Promise<jsPDF> {
   if (images.length === 0) {
     throw new Error('No images provided');
+  }
+
+  let pdf: jsPDF | null = null;
+
+  for (const dataUrl of images) {
+    await new Promise<void>(resolve => {
+      const img = new Image();
+      img.onload = () => {
+        const width = img.naturalWidth;
+        const height = img.naturalHeight;
+        const orientation: 'portrait' | 'landscape' =
+          width >= height ? 'landscape' : 'portrait';
+
+        if (!pdf) {
+          pdf = new jsPDF({ orientation, unit: 'px', format: [width, height] });
+          pdf.addImage(dataUrl, 'PNG', 0, 0, width, height);
+        } else {
+          pdf.addPage([width, height], orientation);
+          pdf.addImage(dataUrl, 'PNG', 0, 0, width, height);
+        }
+        resolve();
+      };
+      img.onerror = () => {
+        console.error('Failed to load image for PDF');
+        resolve();
+      };
+      img.src = dataUrl;
+    });
+
   }
 
   const [first, ...rest] = images;
