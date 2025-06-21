@@ -36,17 +36,95 @@ function deepCloneWithStyles(sourceElement: Element, targetElement: Element): vo
 }
 
 /**
- * Clone the dashboard with proper style preservation and theme detection
+ * Activate a specific tab in the live dashboard
  */
-export async function cloneDashboard(): Promise<HTMLElement> {
-  const dashboardEl = document.querySelector('#dashboard-root') as HTMLElement | null;
-  if (!dashboardEl) {
-    const mainContent = document.querySelector('main') || document.querySelector('[role="main"]') || document.body;
-    if (!mainContent) {
-      throw new Error('Dashboard content not found');
+async function activateTab(tabId: string): Promise<boolean> {
+  console.log(`Attempting to activate tab: ${tabId}`);
+  
+  // Try multiple selectors to find the tab button
+  const selectors = [
+    `[data-tab-id="${tabId}"]`,
+    `[value="${tabId}"]`,
+    `[data-value="${tabId}"]`,
+    `[aria-controls="${tabId}"]`,
+    `button[role="tab"][aria-controls*="${tabId}"]`,
+    `.MuiTab-root[data-testid*="${tabId}"]`,
+    `button:has-text("${tabId}")` // This won't work but shows intent
+  ];
+  
+  let tabButton: HTMLElement | null = null;
+  
+  for (const selector of selectors) {
+    try {
+      tabButton = document.querySelector(selector) as HTMLElement;
+      if (tabButton) {
+        console.log(`Found tab button with selector: ${selector}`);
+        break;
+      }
+    } catch (e) {
+      // Selector might not be valid, continue
     }
   }
+  
+  // If we can't find by specific selectors, try to find by text content
+  if (!tabButton) {
+    const allTabs = document.querySelectorAll('[role="tab"], .MuiTab-root, button[class*="tab"]');
+    for (const tab of allTabs) {
+      const text = tab.textContent?.toLowerCase().trim();
+      if (text && (text.includes(tabId.toLowerCase()) || tabId.toLowerCase().includes(text))) {
+        tabButton = tab as HTMLElement;
+        console.log(`Found tab button by text content: ${text}`);
+        break;
+      }
+    }
+  }
+  
+  if (tabButton) {
+    // Scroll into view
+    tabButton.scrollIntoView({ behavior: 'instant', block: 'center' });
+    
+    // Multiple ways to trigger the tab
+    tabButton.focus();
+    
+    // Dispatch mouse events
+    const mouseEvents = ['mousedown', 'click', 'mouseup'];
+    mouseEvents.forEach(eventType => {
+      const event = new MouseEvent(eventType, {
+        bubbles: true,
+        cancelable: true,
+        view: window
+      });
+      tabButton!.dispatchEvent(event);
+    });
+    
+    // Dispatch keyboard event (Enter key)
+    const keyEvent = new KeyboardEvent('keydown', {
+      bubbles: true,
+      cancelable: true,
+      key: 'Enter',
+      code: 'Enter'
+    });
+    tabButton.dispatchEvent(keyEvent);
+    
+    // If it's a React component, try to trigger change events
+    const changeEvent = new Event('change', { bubbles: true });
+    tabButton.dispatchEvent(changeEvent);
+    
+    // Wait for the tab to activate and content to render
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    console.log(`Tab ${tabId} activation attempted`);
+    return true;
+  }
+  
+  console.warn(`Could not find tab button for: ${tabId}`);
+  return false;
+}
 
+/**
+ * Clone the current state of the dashboard
+ */
+export async function cloneDashboardState(): Promise<HTMLElement> {
   // Detect current theme
   const isDarkTheme = document.documentElement.classList.contains('dark') ||
                      document.body.classList.contains('dark') ||
@@ -98,7 +176,7 @@ export async function cloneDashboard(): Promise<HTMLElement> {
           // Deep clone with styles
           deepCloneWithStyles(sourceEl, clone);
           
-          // Expand all collapsibles first
+          // Expand all collapsibles
           expandAllCollapsibles(clone);
           
           ref.current.appendChild(clone);
@@ -123,9 +201,16 @@ export async function cloneDashboard(): Promise<HTMLElement> {
   captureRoot = createRoot(container);
   captureRoot.render(<DashboardClone />);
 
-  // Wait for React to render and all dynamic content to load
-  await new Promise(resolve => setTimeout(resolve, 2000));
+  // Wait for React to render
+  await new Promise(resolve => setTimeout(resolve, 1500));
   return container;
+}
+
+/**
+ * Legacy function - now just calls cloneDashboardState
+ */
+export async function cloneDashboard(): Promise<HTMLElement> {
+  return cloneDashboardState();
 }
 
 /**
@@ -214,97 +299,46 @@ export async function cleanupCapture(container: HTMLElement): Promise<void> {
 }
 
 /**
- * Capture individual tab by temporarily isolating its content
+ * New approach: Activate each tab in the live dashboard, then capture the entire dashboard
  */
 export async function captureTabImages(
-  container: HTMLElement,
+  container: HTMLElement, // This parameter is now ignored - we'll capture from live dashboard
   tabIds: string[],
   options?: { scale?: number }
 ): Promise<string[]> {
   const images: string[] = [];
   
+  console.log('Starting tab capture process...');
+  
   for (const tabId of tabIds) {
     try {
-      // Create a temporary container for this specific tab
-      const tempContainer = document.createElement('div');
-      tempContainer.style.position = 'absolute';
-      tempContainer.style.top = '-9999px';
-      tempContainer.style.left = '-9999px';
-      tempContainer.style.width = '1200px';
-      tempContainer.style.backgroundColor = container.style.backgroundColor;
-      tempContainer.style.color = container.style.color;
-      if (container.classList.contains('dark')) {
-        tempContainer.classList.add('dark');
-      }
-      document.body.appendChild(tempContainer);
-
-      // Find the specific tab panel for this tab
-      let sourcePanel = container.querySelector(`[data-tab-panel-id="${tabId}"]`) as HTMLElement;
-      if (!sourcePanel) {
-        sourcePanel = container.querySelector(`[id*="${tabId}"][role="tabpanel"]`) as HTMLElement;
-      }
-      if (!sourcePanel) {
-        sourcePanel = container.querySelector(`[aria-labelledby*="${tabId}"]`) as HTMLElement;
-      }
-      if (!sourcePanel) {
-        // Try to find by matching tab button and then finding associated panel
-        const tabButton = container.querySelector(`[data-tab-id="${tabId}"], [value="${tabId}"], [data-value="${tabId}"]`);
-        if (tabButton) {
-          const controls = tabButton.getAttribute('aria-controls');
-          if (controls) {
-            sourcePanel = container.querySelector(`#${controls}`) as HTMLElement;
-          }
-        }
+      console.log(`\n--- Capturing tab: ${tabId} ---`);
+      
+      // Step 1: Activate the tab in the live dashboard
+      const activated = await activateTab(tabId);
+      
+      if (!activated) {
+        console.warn(`Failed to activate tab ${tabId}, capturing current state anyway`);
       }
       
-      if (!sourcePanel) {
-        // Last resort: look for tab panels and use index matching
-        const allPanels = container.querySelectorAll('[role="tabpanel"]');
-        const tabIndex = tabIds.indexOf(tabId);
-        if (tabIndex >= 0 && tabIndex < allPanels.length) {
-          sourcePanel = allPanels[tabIndex] as HTMLElement;
-        }
-      }
-
-      if (sourcePanel) {
-        // Clone just this panel's content
-        const panelClone = sourcePanel.cloneNode(true) as HTMLElement;
-        
-        // Apply styles to the clone
-        deepCloneWithStyles(sourcePanel, panelClone);
-        
-        // Ensure the clone is visible and properly styled
-        panelClone.style.display = 'block !important';
-        panelClone.style.visibility = 'visible !important';
-        panelClone.style.opacity = '1 !important';
-        panelClone.style.position = 'relative';
-        panelClone.style.width = '100%';
-        panelClone.style.height = 'auto';
-        
-        // Remove any tab-specific hiding classes
-        panelClone.classList.remove('MuiTabPanel-hidden');
-        panelClone.removeAttribute('hidden');
-        panelClone.setAttribute('aria-hidden', 'false');
-        
-        // Expand all collapsibles in this specific panel
-        expandAllCollapsibles(panelClone);
-        
-        tempContainer.appendChild(panelClone);
-        
-        // Wait for rendering
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Capture this isolated panel
-        const canvas = await html2canvas(tempContainer, { 
+      // Step 2: Wait for content to fully load
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Step 3: Clone the current dashboard state
+      const currentState = await cloneDashboardState();
+      
+      try {
+        // Step 4: Capture the cloned state
+        const canvas = await html2canvas(currentState, { 
           scale: options?.scale ?? 2,
           useCORS: true,
           allowTaint: true,
-          backgroundColor: container.style.backgroundColor || '#1a1a1a',
+          backgroundColor: currentState.style.backgroundColor || '#1a1a1a',
           width: 1200,
-          height: Math.max(tempContainer.scrollHeight, 800),
+          height: Math.max(currentState.scrollHeight, 800),
           logging: false,
           onclone: (clonedDoc) => {
-            // Ensure all elements in the cloned document are visible
+            // Final cleanup of cloned document
             const allElements = clonedDoc.querySelectorAll('*');
             allElements.forEach(el => {
               const element = el as HTMLElement;
@@ -316,30 +350,32 @@ export async function captureTabImages(
         });
         
         images.push(canvas.toDataURL('image/png'));
+        console.log(`Successfully captured tab: ${tabId}`);
         
-        // Clean up temporary container
-        document.body.removeChild(tempContainer);
-      } else {
-        console.warn(`Could not find panel for tab ${tabId}`);
+      } catch (error) {
+        console.error(`Failed to capture tab ${tabId}:`, error);
         
-        // Create a placeholder image
+        // Create error placeholder
         const canvas = document.createElement('canvas');
         canvas.width = 1200;
         canvas.height = 800;
         const ctx = canvas.getContext('2d');
         if (ctx) {
-          const isDark = container.classList.contains('dark');
-          ctx.fillStyle = isDark ? '#1a1a1a' : '#ffffff';
+          ctx.fillStyle = '#1a1a1a';
           ctx.fillRect(0, 0, canvas.width, canvas.height);
-          ctx.fillStyle = isDark ? '#ffffff' : '#333333';
+          ctx.fillStyle = '#ffffff';
           ctx.font = '24px Arial';
           ctx.textAlign = 'center';
-          ctx.fillText(`Tab "${tabId}" not found`, canvas.width / 2, canvas.height / 2);
+          ctx.fillText(`Failed to capture ${tabId} tab`, canvas.width / 2, canvas.height / 2);
         }
         images.push(canvas.toDataURL('image/png'));
       }
+      
+      // Step 5: Clean up the temporary clone
+      await cleanupCapture(currentState);
+      
     } catch (error) {
-      console.error(`Failed to capture tab ${tabId}:`, error);
+      console.error(`Error processing tab ${tabId}:`, error);
       
       // Create error placeholder
       const canvas = document.createElement('canvas');
@@ -347,18 +383,18 @@ export async function captureTabImages(
       canvas.height = 800;
       const ctx = canvas.getContext('2d');
       if (ctx) {
-        const isDark = container.classList.contains('dark');
-        ctx.fillStyle = isDark ? '#1a1a1a' : '#ffffff';
+        ctx.fillStyle = '#1a1a1a';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = isDark ? '#ffffff' : '#333333';
+        ctx.fillStyle = '#ffffff';
         ctx.font = '24px Arial';
         ctx.textAlign = 'center';
-        ctx.fillText(`Failed to capture ${tabId} tab`, canvas.width / 2, canvas.height / 2);
+        ctx.fillText(`Error capturing ${tabId} tab`, canvas.width / 2, canvas.height / 2);
       }
       images.push(canvas.toDataURL('image/png'));
     }
   }
   
+  console.log(`\nCapture process completed. Generated ${images.length} images.`);
   return images;
 }
 
