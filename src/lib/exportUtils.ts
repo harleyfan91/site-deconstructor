@@ -277,7 +277,7 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string): Promis
 
   // Header
   const headerHeight = 30;
-  pdf.setFillColor(15, 15, 15);
+  pdf.setFillColor(26, 26, 26);
   pdf.rect(0, 0, pageWidth, headerHeight, 'F');
 
   addGradientText('SiteDeconstructor', '#FF6B35', '#0984E3', margin, 20, 16);
