@@ -15,9 +15,12 @@ import {
   FormGroup,
   Box,
   Typography,
-  CircularProgress
+  CircularProgress,
+  LinearProgress
 } from '@mui/material';
 import { Download } from '@mui/icons-material';
+import { cloneDashboard, captureTabImages, cleanupCapture } from '../../utils/pdfCapture';
+import { assemblePDF } from '../../utils/pdfCapture';
 import type { AnalysisResponse } from '@/types/analysis';
 
 interface ExportModalProps {
@@ -51,6 +54,9 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose, data }) => {
     }
   });
   const [exporting, setExporting] = useState(false);
+  const [pdfProgress, setPdfProgress] = useState<number>(0);
+  const [isExportingPdf, setIsExportingPdf] = useState<boolean>(false);
+  const [totalTabs, setTotalTabs] = useState<number>(0);
 
   const handleFormatChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setOptions(prev => ({ ...prev, format: event.target.value as 'csv' | 'json' | 'pdf' }));
@@ -63,8 +69,46 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose, data }) => {
     }));
   };
 
+  const handleExportPdf = async () => {
+    if (!data) return;
+
+    setIsExportingPdf(true);
+    const container = await cloneDashboard();
+    const sectionMap: Record<keyof ExportOptions['sections'], string> = {
+      overview: 'overview',
+      ui: 'ui',
+      performance: 'performance',
+      seo: 'seo',
+      technical: 'tech',
+      compliance: 'compliance'
+    };
+    const tabIds = (Object.keys(options.sections) as Array<keyof ExportOptions['sections']>)
+      .filter(key => options.sections[key])
+      .map(key => sectionMap[key]);
+
+    setTotalTabs(tabIds.length);
+
+    const resolution: 'standard' | 'high' = 'standard';
+    const images: string[] = [];
+    for (let i = 0; i < tabIds.length; i++) {
+      const dataUrl = (await captureTabImages(container, [tabIds[i]], { scale: resolution === 'high' ? 2 : 1 }))[0];
+      images.push(dataUrl);
+      setPdfProgress(i + 1);
+    }
+    const pdf = await assemblePDF(images, { resolution });
+    await cleanupCapture(container);
+    pdf.save('dashboard-report.pdf');
+    setIsExportingPdf(false);
+    onClose();
+  };
+
   const handleExport = async () => {
     if (!data) return;
+
+    if (options.format === 'pdf') {
+      await handleExportPdf();
+      return;
+    }
 
     setExporting(true);
     try {
@@ -161,14 +205,22 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose, data }) => {
               PDF export includes visual charts and formatted layout for professional reporting.
             </Typography>
           )}
+          {isExportingPdf && (
+            <Box sx={{ mb: 2 }}>
+              <LinearProgress variant="determinate" value={(pdfProgress / totalTabs) * 100} />
+              <Typography variant="caption" align="center">
+                Capturing tab {pdfProgress} of {totalTabs}…
+              </Typography>
+            </Box>
+          )}
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={onClose} disabled={isExportingPdf}>Cancel</Button>
         <Button
           onClick={handleExport}
           variant="contained"
-          disabled={exporting || !data}
+          disabled={exporting || !data || isExportingPdf}
           startIcon={exporting ? <CircularProgress size={20} /> : <Download />}
           sx={{
             background: 'linear-gradient(45deg, #FF6B35 30%, #FF8A65 90%)',

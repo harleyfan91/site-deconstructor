@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
 let captureRoot: Root | null = null;
 
@@ -98,4 +99,35 @@ export async function captureTabImages(
     images.push(canvas.toDataURL('image/png'));
   }
   return images;
+}
+
+export async function assemblePDF(
+  images: string[],
+  options?: { resolution?: 'standard' | 'high' }
+): Promise<jsPDF> {
+  let pdf: jsPDF | null = null;
+
+  for (const dataUrl of images) {
+    await new Promise<void>(resolve => {
+      const img = new Image();
+      img.onload = () => {
+        const width = img.naturalWidth;
+        const height = img.naturalHeight;
+        const orientation: 'portrait' | 'landscape' =
+          width >= height ? 'landscape' : 'portrait';
+
+        if (!pdf) {
+          pdf = new jsPDF({ orientation, unit: 'pt', format: [width, height] });
+          pdf.addImage(dataUrl, 'PNG', 0, 0, width, height);
+        } else {
+          pdf.addPage([width, height], orientation);
+          pdf.addImage(dataUrl, 'PNG', 0, 0, width, height);
+        }
+        resolve();
+      };
+      img.src = dataUrl;
+    });
+  }
+
+  return pdf as jsPDF;
 }
