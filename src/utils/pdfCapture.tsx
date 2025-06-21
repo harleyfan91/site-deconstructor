@@ -261,7 +261,29 @@ export async function assemblePDF(images: string[]): Promise<jsPDF> {
       };
       img.src = dataUrl;
     });
+
   }
 
-  return pdf as jsPDF;
+  const [first, ...rest] = images;
+  const props = jsPDF.getImageProperties(first);
+  const orientation: 'portrait' | 'landscape' =
+    props.width >= props.height ? 'landscape' : 'portrait';
+
+  const pdf = new jsPDF({
+    orientation,
+    unit:   'px',
+    format: [props.width, props.height],
+  });
+
+  pdf.addImage(first, 'PNG', 0, 0, props.width, props.height);
+
+  rest.forEach(dataUrl => {
+    const p = jsPDF.getImageProperties(dataUrl);
+    const orient: 'portrait' | 'landscape' =
+      p.width >= p.height ? 'landscape' : 'portrait';
+    pdf.addPage([p.width, p.height], orient);
+    pdf.addImage(dataUrl, 'PNG', 0, 0, p.width, p.height);
+  });
+
+  return pdf;
 }
