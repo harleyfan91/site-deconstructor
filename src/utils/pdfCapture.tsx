@@ -3,6 +3,9 @@ import React, { useEffect, useRef } from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import { theme } from '../theme/theme';
 
 let captureRoot: Root | null = null;
 
@@ -64,7 +67,12 @@ export async function cloneDashboard(): Promise<HTMLElement> {
   };
 
   captureRoot = createRoot(container);
-  captureRoot.render(<DashboardClone />);
+  captureRoot.render(
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <DashboardClone />
+    </ThemeProvider>
+  );
 
   // Wait for the clone to signal readiness
   await new Promise<void>(resolve => {
@@ -204,15 +212,14 @@ export async function captureTabImages(
     try {
       const rect = panel.getBoundingClientRect();
       const canvas = await html2canvas(panel, {
-        scale: options?.scale || 2,
-        useCORS: true,
-        backgroundColor: '#ffffff',
-        width: rect.width,
-        height: rect.height,
-        windowWidth: rect.width,
-        windowHeight: rect.height,
-        scrollX: -rect.left,
-        scrollY: -rect.top
+        scale:        options?.scale ?? 2,
+        useCORS:      true,
+        allowTaint:   false,
+        backgroundColor: null,
+        windowWidth:  panel.scrollWidth,
+        windowHeight: panel.scrollHeight,
+        scrollX:      -rect.left,
+        scrollY:      -rect.top
       });
       images.push(canvas.toDataURL('image/png'));
     } catch (error) {
@@ -223,37 +230,19 @@ export async function captureTabImages(
   return images;
 }
 
-export async function assemblePDF(
-  images: string[],
-  options?: { resolution?: 'standard' | 'high' }
-): Promise<jsPDF> {
-  let pdf: jsPDF | null = null;
-
-  for (const dataUrl of images) {
-    await new Promise<void>(resolve => {
-      const img = new Image();
-      img.onload = () => {
-        const width = img.naturalWidth;
-        const height = img.naturalHeight;
-        const orientation: 'portrait' | 'landscape' =
-          width >= height ? 'landscape' : 'portrait';
-
-        if (!pdf) {
-          pdf = new jsPDF({ orientation, unit: 'pt', format: [width, height] });
-          pdf.addImage(dataUrl, 'PNG', 0, 0, width, height);
-        } else {
-          pdf.addPage([width, height], orientation);
-          pdf.addImage(dataUrl, 'PNG', 0, 0, width, height);
-        }
-        resolve();
-      };
-      img.onerror = () => {
-        console.error('Failed to load image for PDF');
-        resolve(); // Continue even if image fails to load
-      };
-      img.src = dataUrl;
-    });
-  }
-
-  return pdf as jsPDF;
+export function assemblePDF(images: string[]): jsPDF {
+  const [first, ...rest] = images;
+  const img = new Image();
+  img.src = first;
+  const pdf = new jsPDF({
+    orientation: 'landscape',
+    unit:        'px',
+    format:      [img.width, img.height],
+  });
+  pdf.addImage(first, 'PNG', 0, 0, img.width, img.height);
+  rest.forEach(dataUrl => {
+    pdf.addPage();
+    pdf.addImage(dataUrl, 'PNG', 0, 0, img.width, img.height);
+  });
+  return pdf;
 }
