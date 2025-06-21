@@ -3,9 +3,6 @@ import React, { useEffect, useRef } from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
-import { ThemeProvider } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
-import { theme } from '../theme/theme';
 
 let captureRoot: Root | null = null;
 
@@ -34,16 +31,16 @@ export async function cloneDashboard(): Promise<HTMLElement> {
 
   const DashboardClone = () => {
     const ref = useRef<HTMLDivElement>(null);
-
+    
     useEffect(() => {
       if (ref.current) {
         // Find the dashboard content - try multiple selectors
-        const sourceEl = document.querySelector('#dashboard-root') ||
+        const sourceEl = document.querySelector('#dashboard-root') || 
                          document.querySelector('[data-dashboard]') ||
                          document.querySelector('main') ||
                          document.querySelector('.dashboard-content') ||
                          document.body;
-
+        
         if (sourceEl) {
           const clone = sourceEl.cloneNode(true) as HTMLElement;
           
@@ -58,7 +55,6 @@ export async function cloneDashboard(): Promise<HTMLElement> {
           });
           
           ref.current.appendChild(clone);
-          (window as any).__PDF_CLONE_READY = true;
         }
       }
     }, []);
@@ -67,25 +63,10 @@ export async function cloneDashboard(): Promise<HTMLElement> {
   };
 
   captureRoot = createRoot(container);
-  captureRoot.render(
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <DashboardClone />
-    </ThemeProvider>
-  );
+  captureRoot.render(<DashboardClone />);
 
-  // Wait for the clone to signal readiness
-  await new Promise<void>(resolve => {
-    const checkReady = () => {
-      if ((window as any).__PDF_CLONE_READY) {
-        (window as any).__PDF_CLONE_READY = false;
-        resolve();
-      } else {
-        setTimeout(checkReady, 100);
-      }
-    };
-    checkReady();
-  });
+  // Wait longer for React to render and styles to apply
+  await new Promise(resolve => setTimeout(resolve, 1000));
   return container;
 }
 
@@ -93,29 +74,6 @@ export async function cloneDashboard(): Promise<HTMLElement> {
  * Expand all MUI Collapse/Accordion components within the cloned container.
  */
 export function expandAllCollapsibles(container: HTMLElement): void {
-  const details = Array.from(container.querySelectorAll<HTMLElement>('.MuiAccordionDetails-root'));
-  details.forEach(el => {
-    el.style.display = 'block';
-    el.style.height = 'auto';
-    el.style.maxHeight = 'none';
-    el.style.visibility = 'visible';
-    el.style.opacity = '1';
-  });
-
-  const wrappers = Array.from(container.querySelectorAll<HTMLElement>('.MuiCollapse-wrapper, .MuiCollapse-container'));
-  wrappers.forEach(el => {
-    el.style.height = 'auto';
-    el.style.maxHeight = 'none';
-    el.style.overflow = 'visible';
-    el.style.visibility = 'visible';
-    el.style.opacity = '1';
-  });
-
-  const summaries = Array.from(container.querySelectorAll<HTMLElement>('.MuiAccordionSummary-root'));
-  summaries.forEach(el => {
-    el.setAttribute('aria-expanded', 'true');
-  });
-
   // Expand MUI Collapse components
   const collapses = Array.from(container.querySelectorAll<HTMLElement>('.MuiCollapse-root, [class*="collapse"]'));
   collapses.forEach(el => {
@@ -177,64 +135,107 @@ export async function captureTabImages(
   options?: { scale?: number }
 ): Promise<string[]> {
   const images: string[] = [];
+  
+  // Find the tabs container - try multiple selectors
+  const tabsContainer = container.querySelector('[role="tablist"]') || 
+                       container.querySelector('.MuiTabs-root') ||
+                       container.querySelector('[class*="tab"]') ||
+                       container;
 
-  const tabs = Array.from(container.querySelectorAll<HTMLElement>('[role="tab"]'));
-
-  for (const tabId of tabIds) {
-    const tabButton = tabs.find(btn => btn.textContent?.trim().toLowerCase() === tabId.toLowerCase());
-
-    if (!tabButton) continue;
-
-    tabButton.click();
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    expandAllCollapsibles(container);
-
-    const controls = tabButton.getAttribute('aria-controls');
-    let panel: HTMLElement | null = null;
-    if (controls) {
-      try {
-        // CSS.escape ensures the ID is a valid selector even if it contains characters like ':'
-        const escaped = (window.CSS && CSS.escape) ? CSS.escape(controls) : controls.replace(/([\.\#\:\[\]])/g, '\\$1');
-        panel = container.querySelector<HTMLElement>(`#${escaped}`);
-      } catch {
-        // Fallback to attribute selector if CSS.escape is unavailable or fails
-        panel = container.querySelector<HTMLElement>(`[id="${controls}"]`);
+  for (let i = 0; i < tabIds.length; i++) {
+    const tabId = tabIds[i];
+    
+    // Try multiple ways to find and activate the tab
+    let tabButton = container.querySelector(`[data-tab-id="${tabId}"]`) as HTMLElement;
+    if (!tabButton) {
+      tabButton = container.querySelector(`[value="${tabId}"]`) as HTMLElement;
+    }
+    if (!tabButton) {
+      tabButton = container.querySelector(`[data-value="${tabId}"]`) as HTMLElement;
+    }
+    if (!tabButton) {
+      // Try to find by text content
+      const allButtons = container.querySelectorAll('button, [role="tab"]');
+      for (const btn of allButtons) {
+        if (btn.textContent?.toLowerCase().includes(tabId.toLowerCase())) {
+          tabButton = btn as HTMLElement;
+          break;
+        }
       }
     }
+
+    if (tabButton) {
+      // Simulate tab activation
+      tabButton.click();
+      tabButton.setAttribute('aria-selected', 'true');
+      tabButton.classList.add('active', 'selected');
+      
+      // Wait for tab content to render
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+
+    // Expand all collapsibles in the current view
+    expandAllCollapsibles(container);
+    
+    // Find the tab panel content
+    let panel = container.querySelector(`[data-tab-panel-id="${tabId}"]`) as HTMLElement;
     if (!panel) {
-      panel = container.querySelector<HTMLElement>('[role="tabpanel"]:not([hidden])');
+      panel = container.querySelector(`[id*="${tabId}"]`) as HTMLElement;
     }
     if (!panel) {
-      panel = container;
+      panel = container.querySelector('[role="tabpanel"]:not([hidden])') as HTMLElement;
+    }
+    if (!panel) {
+      // Fallback to the entire visible content area
+      panel = container.querySelector('.MuiTabPanel-root') as HTMLElement || container;
     }
 
     try {
-      const rect = panel.getBoundingClientRect();
-      const canvas = await html2canvas(panel, {
-        scale:        options?.scale ?? 2,
-        useCORS:      true,
-        allowTaint:   false,
-        backgroundColor: null,
-        windowWidth:  panel.scrollWidth,
-        windowHeight: panel.scrollHeight,
-        scrollX:      -rect.left,
-        scrollY:      -rect.top
-      });
-      images.push(canvas.toDataURL('image/png'));
+      // Ensure the panel is visible and has content
+      if (panel) {
+        panel.style.display = 'block';
+        panel.style.visibility = 'visible';
+        panel.style.opacity = '1';
+        
+        // Wait a bit more for rendering
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        const canvas = await html2canvas(panel, { 
+          scale: options?.scale ?? 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+          width: 1200,
+          height: Math.max(panel.scrollHeight, 800)
+        });
+        images.push(canvas.toDataURL('image/png'));
+      }
     } catch (error) {
       console.error(`Failed to capture tab ${tabId}:`, error);
+      // Create a placeholder image if capture fails
+      const canvas = document.createElement('canvas');
+      canvas.width = 1200;
+      canvas.height = 800;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#333333';
+        ctx.font = '24px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(`Failed to capture ${tabId} tab`, canvas.width / 2, canvas.height / 2);
+      }
+      images.push(canvas.toDataURL('image/png'));
     }
   }
-
+  
   return images;
 }
 
-export async function assemblePDF(images: string[]): Promise<jsPDF> {
-  if (images.length === 0) {
-    throw new Error('No images provided');
-  }
-
+export async function assemblePDF(
+  images: string[],
+  options?: { resolution?: 'standard' | 'high' }
+): Promise<jsPDF> {
   let pdf: jsPDF | null = null;
 
   for (const dataUrl of images) {
@@ -247,7 +248,7 @@ export async function assemblePDF(images: string[]): Promise<jsPDF> {
           width >= height ? 'landscape' : 'portrait';
 
         if (!pdf) {
-          pdf = new jsPDF({ orientation, unit: 'px', format: [width, height] });
+          pdf = new jsPDF({ orientation, unit: 'pt', format: [width, height] });
           pdf.addImage(dataUrl, 'PNG', 0, 0, width, height);
         } else {
           pdf.addPage([width, height], orientation);
@@ -257,33 +258,11 @@ export async function assemblePDF(images: string[]): Promise<jsPDF> {
       };
       img.onerror = () => {
         console.error('Failed to load image for PDF');
-        resolve();
+        resolve(); // Continue even if image fails to load
       };
       img.src = dataUrl;
     });
-
   }
 
-  const [first, ...rest] = images;
-  const props = jsPDF.getImageProperties(first);
-  const orientation: 'portrait' | 'landscape' =
-    props.width >= props.height ? 'landscape' : 'portrait';
-
-  const pdf = new jsPDF({
-    orientation,
-    unit:   'px',
-    format: [props.width, props.height],
-  });
-
-  pdf.addImage(first, 'PNG', 0, 0, props.width, props.height);
-
-  rest.forEach(dataUrl => {
-    const p = jsPDF.getImageProperties(dataUrl);
-    const orient: 'portrait' | 'landscape' =
-      p.width >= p.height ? 'landscape' : 'portrait';
-    pdf.addPage([p.width, p.height], orient);
-    pdf.addImage(dataUrl, 'PNG', 0, 0, p.width, p.height);
-  });
-
-  return pdf;
+  return pdf as jsPDF;
 }
