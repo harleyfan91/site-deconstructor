@@ -442,20 +442,23 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string): Promis
       });
     }
     
-    if (ui.images && ui.images.length > 0) {
-      addSubtitle('Image Analysis:');
-      const totalImages = ui.images.reduce((sum, img) => sum + img.count, 0);
-      addText(`Total Images: ${totalImages}`, 10, colors.text, 10);
-      ui.images.forEach(imageType => {
-        addText(`${imageType.type}: ${imageType.count} (${imageType.format})`, 10, colors.text, 10);
-      });
-    }
-    
     if (ui.imageAnalysis) {
-      addSubtitle('Image Details:');
+      addSubtitle('Image Analysis:');
       addText(`Total Images: ${ui.imageAnalysis.totalImages}`, 10, colors.text, 10);
+
       addText(`Estimated Photos: ${ui.imageAnalysis.estimatedPhotos}`, 10, colors.text, 10);
+      if (ui.imageAnalysis.photoUrls && ui.imageAnalysis.photoUrls.length > 0) {
+        ui.imageAnalysis.photoUrls.forEach(url => {
+          addText(`• ${url}`, 9, colors.text, 15);
+        });
+      }
+
       addText(`Estimated Icons: ${ui.imageAnalysis.estimatedIcons}`, 10, colors.text, 10);
+      if (ui.imageAnalysis.iconUrls && ui.imageAnalysis.iconUrls.length > 0) {
+        ui.imageAnalysis.iconUrls.forEach(url => {
+          addText(`• ${url}`, 9, colors.text, 15);
+        });
+      }
     }
   }
 
