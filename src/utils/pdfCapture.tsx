@@ -38,7 +38,7 @@ export async function captureTabImages(
       continue;
     }
 
-    // Ensure the panel is visible and expanded
+    // Ensure the panel is visible
     activePanel.style.display = 'block';
     activePanel.style.visibility = 'visible';
     activePanel.style.opacity = '1';
@@ -50,33 +50,22 @@ export async function captureTabImages(
     await new Promise(resolve => setTimeout(resolve, 500));
     
     try {
-      // Get the full content height
-      const contentHeight = Math.max(
-        activePanel.scrollHeight,
-        activePanel.offsetHeight,
-        800 // minimum height
-      );
+      console.log(`Capturing ${tabId}...`);
       
-      console.log(`Capturing ${tabId} - Height: ${contentHeight}px`);
-      
-      // Capture the panel with full height
+      // Capture with simpler settings to avoid scaling issues
       const canvas = await html2canvas(activePanel, {
-        scale: options?.scale || 2,
+        scale: 1, // Use scale 1 to avoid issues
         useCORS: true,
         allowTaint: true,
-        backgroundColor: '#ffffff', // Force white background for PDF
-        width: activePanel.offsetWidth,
-        height: contentHeight,
-        scrollX: 0,
-        scrollY: 0,
+        backgroundColor: null, // Let it use natural background
+        logging: false,
         removeContainer: false,
-        foreignObjectRendering: true,
-        logging: false
+        foreignObjectRendering: false // Try without this to improve compatibility
       });
       
-      const dataUrl = canvas.toDataURL('image/png', 1.0);
+      const dataUrl = canvas.toDataURL('image/png', 0.95);
       images.push(dataUrl);
-      console.log(`Successfully captured ${tabId}`);
+      console.log(`Successfully captured ${tabId} - Canvas size: ${canvas.width}x${canvas.height}`);
       
     } catch (error) {
       console.error(`Failed to capture ${tabId}:`, error);
@@ -118,8 +107,6 @@ export function expandAllCollapsibles(container: HTMLElement): void {
     el.style.setProperty('opacity', '1', 'important');
     el.style.setProperty('overflow', 'visible', 'important');
     el.style.setProperty('display', 'block', 'important');
-    el.classList.add('MuiCollapse-entered');
-    el.classList.remove('MuiCollapse-hidden');
   });
 
   // Force expand all accordion content
@@ -127,14 +114,6 @@ export function expandAllCollapsibles(container: HTMLElement): void {
   accordions.forEach(accordion => {
     accordion.classList.add('Mui-expanded');
     
-    // Expand summary
-    const summary = accordion.querySelector<HTMLElement>('.MuiAccordionSummary-root, [class*="summary"], [class*="Summary"]');
-    if (summary) {
-      summary.setAttribute('aria-expanded', 'true');
-      summary.classList.add('Mui-expanded');
-    }
-    
-    // Show details
     const details = accordion.querySelector<HTMLElement>('.MuiAccordionDetails-root, .MuiCollapse-root, [class*="details"], [class*="Details"]');
     if (details) {
       details.style.setProperty('height', 'auto', 'important');
@@ -142,16 +121,7 @@ export function expandAllCollapsibles(container: HTMLElement): void {
       details.style.setProperty('visibility', 'visible', 'important');
       details.style.setProperty('opacity', '1', 'important');
       details.style.setProperty('display', 'block', 'important');
-      details.classList.add('MuiCollapse-entered');
     }
-  });
-
-  // Show any hidden elements
-  const hiddenElements = container.querySelectorAll<HTMLElement>('[style*="display: none"], [style*="display:none"], [hidden]');
-  hiddenElements.forEach(el => {
-    el.style.setProperty('display', 'block', 'important');
-    el.style.setProperty('visibility', 'visible', 'important');
-    el.removeAttribute('hidden');
   });
 }
 
@@ -165,66 +135,54 @@ export async function assemblePDF(
     throw new Error('No images provided for PDF assembly');
   }
 
-  let pdf: jsPDF | null = null;
+  // Create PDF with A4 format
+  const pdf = new jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4'
+  });
+
+  // A4 dimensions in mm
+  const pageWidth = 210;
+  const pageHeight = 297;
+  const margin = 10;
+  const contentWidth = pageWidth - (margin * 2);
+  const contentHeight = pageHeight - (margin * 2);
 
   for (let i = 0; i < images.length; i++) {
     const dataUrl = images[i];
     console.log(`Processing image ${i + 1}/${images.length}`);
     
-    await new Promise<void>((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => {
-        try {
-          const imgWidth = img.naturalWidth;
-          const imgHeight = img.naturalHeight;
-          
-          // Standard A4 size with proper scaling
-          const pdfWidth = 595.28; // A4 width in points
-          const pdfHeight = 841.89; // A4 height in points
-          
-          // Calculate scaling to fit image on page
-          const scaleX = pdfWidth / imgWidth;
-          const scaleY = pdfHeight / imgHeight;
-          const scale = Math.min(scaleX, scaleY);
-          
-          const scaledWidth = imgWidth * scale;
-          const scaledHeight = imgHeight * scale;
-          
-          // Center the image on the page
-          const x = (pdfWidth - scaledWidth) / 2;
-          const y = (pdfHeight - scaledHeight) / 2;
+    try {
+      // If not the first page, add a new page
+      if (i > 0) {
+        pdf.addPage();
+      }
 
-          if (!pdf) {
-            pdf = new jsPDF({ 
-              orientation: 'portrait', 
-              unit: 'pt', 
-              format: 'a4' 
-            });
-            pdf.addImage(dataUrl, 'PNG', x, y, scaledWidth, scaledHeight);
-          } else {
-            pdf.addPage('a4', 'portrait');
-            pdf.addImage(dataUrl, 'PNG', x, y, scaledWidth, scaledHeight);
-          }
-          
-          console.log(`Added image ${i + 1} to PDF`);
-          resolve();
-        } catch (error) {
-          console.error(`Error processing image ${i + 1}:`, error);
-          reject(error);
-        }
-      };
+      // Add image to PDF with proper scaling
+      // The image will be scaled to fit within the content area while maintaining aspect ratio
+      pdf.addImage(
+        dataUrl,
+        'PNG',
+        margin, // x position
+        margin, // y position  
+        contentWidth, // width
+        0, // height (auto-calculated to maintain aspect ratio)
+        undefined, // alias
+        'FAST' // compression
+      );
       
-      img.onerror = () => {
-        console.error(`Failed to load image ${i + 1}`);
-        reject(new Error(`Failed to load image ${i + 1}`));
-      };
+      console.log(`Added image ${i + 1} to PDF`);
+    } catch (error) {
+      console.error(`Error adding image ${i + 1} to PDF:`, error);
       
-      img.src = dataUrl;
-    });
-  }
-
-  if (!pdf) {
-    throw new Error('Failed to create PDF');
+      // Add error page instead
+      if (i > 0) {
+        pdf.addPage();
+      }
+      pdf.setFontSize(16);
+      pdf.text(`Error loading content for page ${i + 1}`, pageWidth / 2, pageHeight / 2, { align: 'center' });
+    }
   }
 
   console.log('PDF assembly complete');
@@ -233,7 +191,6 @@ export async function assemblePDF(
 
 // Legacy functions for compatibility
 export async function cloneDashboard(): Promise<HTMLElement> {
-  // Return the main dashboard element directly
   const dashboardEl = document.querySelector('#dashboard-root') as HTMLElement;
   if (!dashboardEl) {
     throw new Error('Dashboard content not found');
@@ -242,6 +199,5 @@ export async function cloneDashboard(): Promise<HTMLElement> {
 }
 
 export async function cleanupCapture(container: HTMLElement): Promise<void> {
-  // No cleanup needed for the simplified approach
   await Promise.resolve();
 }
