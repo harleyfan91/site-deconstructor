@@ -19,7 +19,8 @@ import {
   LinearProgress
 } from '@mui/material';
 import { Download } from '@mui/icons-material';
-import { captureTabImages, assemblePDF } from '../../utils/pdfCapture';
+import { cloneDashboard, captureTabImages, cleanupCapture } from '../../utils/pdfCapture';
+import { assemblePDF } from '../../utils/pdfCapture';
 import type { AnalysisResponse } from '@/types/analysis';
 
 interface ExportModalProps {
@@ -74,9 +75,22 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose, data }) => {
 
     setIsExportingPdf(true);
     setPdfProgress(0);
-    setCurrentStep('Preparing export...');
+    setCurrentStep('Preparing dashboard...');
 
     try {
+      // Add dashboard-root ID to the main content if it doesn't exist
+      let dashboardRoot = document.querySelector('#dashboard-root');
+      if (!dashboardRoot) {
+        const mainContent = document.querySelector('main') || document.querySelector('[data-dashboard]');
+        if (mainContent) {
+          mainContent.id = 'dashboard-root';
+          dashboardRoot = mainContent;
+        }
+      }
+
+      setCurrentStep('Cloning dashboard...');
+      const container = await cloneDashboard();
+      
       // Map sections to actual tab identifiers
       const sectionMap: Record<keyof ExportOptions['sections'], string> = {
         overview: 'overview',
@@ -97,9 +111,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose, data }) => {
         throw new Error('No sections selected for export');
       }
 
-      setCurrentStep('Capturing dashboard screenshots...');
-      
-      // Capture images directly from the visible dashboard
+      setCurrentStep('Capturing screenshots...');
       const images: string[] = [];
       
       for (let i = 0; i < tabIds.length; i++) {
@@ -107,7 +119,9 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose, data }) => {
         setCurrentStep(`Capturing ${tabId} tab...`);
         
         try {
-          const tabImages = await captureTabImages([tabId], { scale: 2 });
+          const tabImages = await captureTabImages(container, [tabId], { 
+            scale: 2 // Fixed scale value instead of conditional
+          });
           
           if (tabImages.length > 0) {
             images.push(tabImages[0]);
@@ -118,6 +132,9 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose, data }) => {
           console.error(`Failed to capture ${tabId}:`, error);
           // Continue with other tabs even if one fails
         }
+        
+        // Small delay between captures
+        await new Promise(resolve => setTimeout(resolve, 200));
       }
       
       if (images.length === 0) {
@@ -128,6 +145,8 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose, data }) => {
       const pdf = await assemblePDF(images);
       
       setCurrentStep('Downloading...');
+      await cleanupCapture(container);
+      
       const fileName = `dashboard-report-${new Date().toISOString().split('T')[0]}.pdf`;
       pdf.save(fileName);
       
@@ -135,6 +154,12 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose, data }) => {
     } catch (error) {
       console.error('PDF export failed:', error);
       setCurrentStep(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      
+      // Clean up on error
+      const container = document.querySelector('#pdf-capture-container');
+      if (container) {
+        await cleanupCapture(container as HTMLElement);
+      }
     } finally {
       setTimeout(() => {
         setIsExportingPdf(false);
