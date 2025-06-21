@@ -169,100 +169,50 @@ export async function captureTabImages(
   options?: { scale?: number }
 ): Promise<string[]> {
   const images: string[] = [];
-  
-  // Find the tabs container - try multiple selectors
-  const tabsContainer = container.querySelector('[role="tablist"]') || 
-                       container.querySelector('.MuiTabs-root') ||
-                       container.querySelector('[class*="tab"]') ||
-                       container;
 
-  for (let i = 0; i < tabIds.length; i++) {
-    const tabId = tabIds[i];
-    
-    // Try multiple ways to find and activate the tab
-    let tabButton = container.querySelector(`[data-tab-id="${tabId}"]`) as HTMLElement;
-    if (!tabButton) {
-      tabButton = container.querySelector(`[value="${tabId}"]`) as HTMLElement;
-    }
-    if (!tabButton) {
-      tabButton = container.querySelector(`[data-value="${tabId}"]`) as HTMLElement;
-    }
-    if (!tabButton) {
-      // Try to find by text content
-      const allButtons = container.querySelectorAll('button, [role="tab"]');
-      for (const btn of allButtons) {
-        if (btn.textContent?.toLowerCase().includes(tabId.toLowerCase())) {
-          tabButton = btn as HTMLElement;
-          break;
-        }
-      }
-    }
+  const tabs = Array.from(container.querySelectorAll<HTMLElement>('[role="tab"]'));
 
-    if (tabButton) {
-      // Simulate tab activation
-      tabButton.click();
-      tabButton.setAttribute('aria-selected', 'true');
-      tabButton.classList.add('active', 'selected');
-      
-      // Wait for tab content to render
-      await new Promise(resolve => setTimeout(resolve, 500));
-    }
+  for (const tabId of tabIds) {
+    const tabButton = tabs.find(btn => btn.textContent?.trim().toLowerCase() === tabId.toLowerCase());
 
-    // Expand all collapsibles in the current view
+    if (!tabButton) continue;
+
+    tabButton.click();
+    await new Promise(resolve => setTimeout(resolve, 500));
+
     expandAllCollapsibles(container);
-    
-    // Find the tab panel content
-    let panel = container.querySelector(`[data-tab-panel-id="${tabId}"]`) as HTMLElement;
-    if (!panel) {
-      panel = container.querySelector(`[id*="${tabId}"]`) as HTMLElement;
+
+    const controls = tabButton.getAttribute('aria-controls');
+    let panel: HTMLElement | null = null;
+    if (controls) {
+      panel = container.querySelector<HTMLElement>(`#${controls}`);
     }
     if (!panel) {
-      panel = container.querySelector('[role="tabpanel"]:not([hidden])') as HTMLElement;
+      panel = container.querySelector<HTMLElement>('[role="tabpanel"]:not([hidden])');
     }
     if (!panel) {
-      // Fallback to the entire visible content area
-      panel = container.querySelector('.MuiTabPanel-root') as HTMLElement || container;
+      panel = container;
     }
 
     try {
-      // Ensure the panel is visible and has content
-      if (panel) {
-        panel.style.display = 'block';
-        panel.style.visibility = 'visible';
-        panel.style.opacity = '1';
-        
-        // Wait a bit more for rendering
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-        const canvas = await html2canvas(panel, { 
-          scale: options?.scale ?? 2,
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: '#ffffff',
-          width: 1200,
-          height: Math.max(panel.scrollHeight, 800)
-        });
-        images.push(canvas.toDataURL('image/png'));
-      }
+      const rect = panel.getBoundingClientRect();
+      const canvas = await html2canvas(panel, {
+        scale: options?.scale || 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        width: rect.width,
+        height: rect.height,
+        windowWidth: rect.width,
+        windowHeight: rect.height,
+        scrollX: -rect.left,
+        scrollY: -rect.top
+      });
+      images.push(canvas.toDataURL('image/png'));
     } catch (error) {
       console.error(`Failed to capture tab ${tabId}:`, error);
-      // Create a placeholder image if capture fails
-      const canvas = document.createElement('canvas');
-      canvas.width = 1200;
-      canvas.height = 800;
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = '#333333';
-        ctx.font = '24px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(`Failed to capture ${tabId} tab`, canvas.width / 2, canvas.height / 2);
-      }
-      images.push(canvas.toDataURL('image/png'));
     }
   }
-  
+
   return images;
 }
 
