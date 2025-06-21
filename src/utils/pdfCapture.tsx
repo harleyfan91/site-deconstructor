@@ -111,7 +111,7 @@ async function activateTab(tabId: string): Promise<boolean> {
     tabButton.dispatchEvent(changeEvent);
     
     // Wait for the tab to activate and content to render
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 2000));
     
     console.log(`Tab ${tabId} activation attempted`);
     return true;
@@ -322,7 +322,7 @@ export async function captureTabImages(
       }
       
       // Step 2: Wait for content to fully load
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
       // Step 3: Clone the current dashboard state
       const currentState = await cloneDashboardState();
