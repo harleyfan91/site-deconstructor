@@ -92,11 +92,11 @@ const DashboardContent = () => {
                 <TabsList className="grid w-full grid-cols-3 md:grid-cols-7 gap-1 h-auto">
                   <TabsTrigger value="overview" className="text-xs sm:text-sm" data-tab-id="overview">Overview</TabsTrigger>
                   <TabsTrigger value="ui" className="text-xs sm:text-sm" data-tab-id="ui">User Interface</TabsTrigger>
+                  <TabsTrigger value="content" className="text-xs sm:text-sm" data-tab-id="content">Content</TabsTrigger>
                   <TabsTrigger value="performance" className="text-xs sm:text-sm" data-tab-id="performance">Performance & Security</TabsTrigger>
                   <TabsTrigger value="seo" className="text-xs sm:text-sm" data-tab-id="seo">SEO Analysis</TabsTrigger>
                   <TabsTrigger value="tech" className="text-xs sm:text-sm" data-tab-id="tech">Tech</TabsTrigger>
                   <TabsTrigger value="compliance" className="text-xs sm:text-sm" data-tab-id="compliance">Compliance</TabsTrigger>
-                  <TabsTrigger value="content" className="text-xs sm:text-sm" data-tab-id="content">Content</TabsTrigger>
                 </TabsList>
               </motion.div>
             </Box>
@@ -114,6 +114,10 @@ const DashboardContent = () => {
                 <UIAnalysisTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
               
+              <TabsContent value="content" data-tab-panel-id="content">
+                <ContentAnalysisTab data={analysisData} loading={loading} error={error} />
+              </TabsContent>
+              
               <TabsContent value="performance" data-tab-panel-id="performance">
                 <PerformanceTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
@@ -128,10 +132,6 @@ const DashboardContent = () => {
 
               <TabsContent value="compliance" data-tab-panel-id="compliance">
                 <ComplianceTab data={analysisData} loading={loading} error={error} />
-              </TabsContent>
-
-              <TabsContent value="content" data-tab-panel-id="content">
-                <ContentAnalysisTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
             </motion.div>
           </Tabs>

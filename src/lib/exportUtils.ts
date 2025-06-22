@@ -1,3 +1,4 @@
+
 import jsPDF from 'jspdf';
 import { analysesToCsv, analysesToJSON } from './export';
 import type { AnalysisResponse } from '@/types/analysis';
@@ -7,11 +8,11 @@ interface ExportOptions {
   sections: {
     overview: boolean;
     ui: boolean;
+    content: boolean;
     performance: boolean;
     seo: boolean;
     technical: boolean;
     compliance: boolean;
-    content: boolean;
   };
 }
 
@@ -320,8 +321,8 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string, section
   addText(`Analysis Date: ${new Date(data.timestamp).toLocaleString()}`, 10, colors.darkGray);
   yPosition += 10;
 
-  // Overview Section
-  if (data.data.overview) {
+  // Overview Section (1st)
+  if (sections.overview && data.data.overview) {
     addSection('Overview');
     
     const overview = data.data.overview;
@@ -380,106 +381,8 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string, section
     );
   }
 
-  // Performance Section
-  if (data.data.performance) {
-    addSection('Performance Analysis');
-    
-    const perf = data.data.performance;
-    addMetricCard(
-      'Performance Score', 
-      `${perf.performanceScore}/100`,
-      perf.performanceScore >= 80 ? colors.success : colors.warning,
-      'Overall performance rating'
-    );
-    
-    addMetricCard(
-      'Mobile Responsive', 
-      perf.mobileResponsive ? 'Yes' : 'No',
-      perf.mobileResponsive ? colors.success : colors.primary,
-      'Website adapts to mobile devices'
-    );
-    
-    if (perf.recommendations && perf.recommendations.length > 0) {
-      addSubtitle('Performance Recommendations:');
-      perf.recommendations.forEach((rec, index) => {
-        addText(`${index + 1}. ${rec.title || rec.description}`, 10, colors.text, 10);
-      });
-    }
-  }
-
-  // SEO Section
-  if (data.data.seo) {
-    addSection('SEO Analysis');
-    
-    const seo = data.data.seo;
-    addMetricCard(
-      'SEO Score', 
-      `${seo.score}/100`,
-      seo.score >= 80 ? colors.success : colors.warning,
-      'Search engine optimization effectiveness'
-    );
-    
-    if (seo.metaTags) {
-      addSubtitle('Meta Tags:');
-      Object.entries(seo.metaTags).forEach(([key, value]) => {
-        addText(`${key}: ${value}`, 9, colors.text, 10);
-      });
-    }
-    
-    if (seo.checks && seo.checks.length > 0) {
-      addSubtitle('SEO Checks:');
-      const passed = seo.checks.filter(c => c.status === 'good').length;
-      const failed = seo.checks.filter(c => c.status === 'error').length;
-      
-      addText(`✓ Passed: ${passed}`, 10, colors.success, 10);
-      addText(`✗ Failed: ${failed}`, 10, colors.primary, 10);
-      
-      seo.checks.forEach(check => {
-        const icon = check.status === 'good' ? '✓' : '✗';
-        const color = check.status === 'good' ? colors.success : colors.primary;
-        addText(`${icon} ${check.description}`, 9, color, 15);
-      });
-    }
-  }
-
-  // Technical Section
-  if (data.data.technical) {
-    addSection('Technical Analysis');
-    
-    const tech = data.data.technical;
-    addMetricCard(
-      'Health Grade', 
-      tech.healthGrade,
-      tech.healthGrade === 'A' ? colors.success : tech.healthGrade === 'B' ? colors.info : colors.warning,
-      'Overall technical health assessment'
-    );
-    
-    addMetricCard(
-      'Security Score', 
-      `${tech.securityScore}/100`,
-      tech.securityScore >= 80 ? colors.success : colors.warning,
-      'Website security assessment'
-    );
-    
-    if (tech.techStack && tech.techStack.length > 0) {
-      addSubtitle('Technologies Detected:');
-      tech.techStack.forEach(tech => {
-        addText(`• ${tech.technology} (${tech.category})`, 10, colors.text, 10);
-      });
-    }
-    
-    if (tech.issues && tech.issues.length > 0) {
-      addSubtitle('Technical Issues:');
-      tech.issues.forEach(issue => {
-        const color = issue.severity === 'high' ? colors.primary : 
-                     issue.severity === 'medium' ? colors.warning : colors.darkGray;
-        addText(`• ${issue.description} (${issue.severity})`, 10, color, 10);
-      });
-    }
-  }
-
-  // UI Analysis Section
-  if (data.data.ui) {
+  // UI Analysis Section (2nd)
+  if (sections.ui && data.data.ui) {
     addSection('User Interface Analysis');
     
     const ui = data.data.ui;
@@ -514,14 +417,13 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string, section
       addText(`Estimated Icons: ${ui.imageAnalysis.estimatedIcons}`, 10, colors.text, 10);
       if (ui.imageAnalysis.iconUrls && ui.imageAnalysis.iconUrls.length > 0) {
         ui.imageAnalysis.iconUrls.forEach(url => {
-
           addText(`• ${url}`, 9, colors.text, 15);
         });
       }
     }
   }
 
-  // Content Analysis Section
+  // Content Analysis Section (3rd)
   if (sections.content && data.data.ui) {
     addSection('Content Analysis');
     
@@ -580,6 +482,104 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string, section
     addText(`Alt Text Coverage: ${altTextCoverage}%`, 10, altTextCoverage >= 80 ? colors.success : colors.warning, 10);
   }
 
+  // Performance Section (4th)
+  if (sections.performance && data.data.performance) {
+    addSection('Performance Analysis');
+    
+    const perf = data.data.performance;
+    addMetricCard(
+      'Performance Score', 
+      `${perf.performanceScore}/100`,
+      perf.performanceScore >= 80 ? colors.success : colors.warning,
+      'Overall performance rating'
+    );
+    
+    addMetricCard(
+      'Mobile Responsive', 
+      perf.mobileResponsive ? 'Yes' : 'No',
+      perf.mobileResponsive ? colors.success : colors.primary,
+      'Website adapts to mobile devices'
+    );
+    
+    if (perf.recommendations && perf.recommendations.length > 0) {
+      addSubtitle('Performance Recommendations:');
+      perf.recommendations.forEach((rec, index) => {
+        addText(`${index + 1}. ${rec.title || rec.description}`, 10, colors.text, 10);
+      });
+    }
+  }
+
+  // SEO Section (5th)
+  if (sections.seo && data.data.seo) {
+    addSection('SEO Analysis');
+    
+    const seo = data.data.seo;
+    addMetricCard(
+      'SEO Score', 
+      `${seo.score}/100`,
+      seo.score >= 80 ? colors.success : colors.warning,
+      'Search engine optimization effectiveness'
+    );
+    
+    if (seo.metaTags) {
+      addSubtitle('Meta Tags:');
+      Object.entries(seo.metaTags).forEach(([key, value]) => {
+        addText(`${key}: ${value}`, 9, colors.text, 10);
+      });
+    }
+    
+    if (seo.checks && seo.checks.length > 0) {
+      addSubtitle('SEO Checks:');
+      const passed = seo.checks.filter(c => c.status === 'good').length;
+      const failed = seo.checks.filter(c => c.status === 'error').length;
+      
+      addText(`✓ Passed: ${passed}`, 10, colors.success, 10);
+      addText(`✗ Failed: ${failed}`, 10, colors.primary, 10);
+      
+      seo.checks.forEach(check => {
+        const icon = check.status === 'good' ? '✓' : '✗';
+        const color = check.status === 'good' ? colors.success : colors.primary;
+        addText(`${icon} ${check.description}`, 9, color, 15);
+      });
+    }
+  }
+
+  // Technical Section (6th)
+  if (sections.technical && data.data.technical) {
+    addSection('Technical Analysis');
+    
+    const tech = data.data.technical;
+    addMetricCard(
+      'Health Grade', 
+      tech.healthGrade,
+      tech.healthGrade === 'A' ? colors.success : tech.healthGrade === 'B' ? colors.info : colors.warning,
+      'Overall technical health assessment'
+    );
+    
+    addMetricCard(
+      'Security Score', 
+      `${tech.securityScore}/100`,
+      tech.securityScore >= 80 ? colors.success : colors.warning,
+      'Website security assessment'
+    );
+    
+    if (tech.techStack && tech.techStack.length > 0) {
+      addSubtitle('Technologies Detected:');
+      tech.techStack.forEach(tech => {
+        addText(`• ${tech.technology} (${tech.category})`, 10, colors.text, 10);
+      });
+    }
+    
+    if (tech.issues && tech.issues.length > 0) {
+      addSubtitle('Technical Issues:');
+      tech.issues.forEach(issue => {
+        const color = issue.severity === 'high' ? colors.primary : 
+                     issue.severity === 'medium' ? colors.warning : colors.darkGray;
+        addText(`• ${issue.description} (${issue.severity})`, 10, color, 10);
+      });
+    }
+  }
+
   // Security Headers
   if (data.securityHeaders) {
     addSection('Security Headers');
@@ -588,6 +588,21 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string, section
       const icon = status === 'present' ? '✓' : '✗';
       addText(`${icon} ${header}: ${status}`, 10, color, 10);
     });
+  }
+
+  // Compliance Section (7th - Last)
+  if (sections.compliance) {
+    addSection('Compliance');
+    
+    const complianceStatus = data.complianceStatus || 'unknown';
+    addMetricCard(
+      'Compliance Status', 
+      complianceStatus.charAt(0).toUpperCase() + complianceStatus.slice(1),
+      complianceStatus === 'compliant' ? colors.success : colors.warning,
+      'Overall compliance assessment'
+    );
+    
+    addText('This section includes accessibility, privacy, and regulatory compliance checks.', 10, colors.text, 10);
   }
 
   // Footer

@@ -10,23 +10,35 @@ function flatten(record: AnalysisResponse): Record<string, any> {
   const metaTags = record.data?.seo?.metaTags || {};
   
   return {
+    // Overview section
     url: record.url ?? '',
     timestamp: record.timestamp ?? '',
     status: record.status ?? '',
+    overallScore: record.data?.overview?.overallScore ?? '',
+    
+    // Core Web Vitals
     lcp: record.coreWebVitals?.lcp ?? '',
     fid: record.coreWebVitals?.fid ?? '',
     cls: record.coreWebVitals?.cls ?? '',
+    
+    // Performance & Security
     performanceScore: record.performanceScore ?? '',
+    
+    // SEO Analysis
     seoScore: record.seoScore ?? '',
-    readabilityScore: record.readabilityScore ?? '',
-    complianceStatus: record.complianceStatus ?? '',
-    totalImages: imageData?.totalImages ?? '',
-    estimatedPhotos: imageData?.estimatedPhotos ?? '',
-    estimatedIcons: imageData?.estimatedIcons ?? '',
     titleTag: metaTags.title ? 'Present' : 'Missing',
     metaDescription: metaTags.description ? 'Present' : 'Missing',
     canonicalUrl: metaTags.canonical ? 'Present' : 'Missing',
     openGraphTags: (metaTags['og:title'] || metaTags['og:description']) ? 'Present' : 'Missing',
+    
+    // Content Analysis
+    readabilityScore: record.readabilityScore ?? '',
+    totalImages: imageData?.totalImages ?? '',
+    estimatedPhotos: imageData?.estimatedPhotos ?? '',
+    estimatedIcons: imageData?.estimatedIcons ?? '',
+    
+    // Compliance
+    complianceStatus: record.complianceStatus ?? '',
   };
 }
 
