@@ -3,7 +3,6 @@ import React from 'react';
 import { Box, Typography, Collapse, IconButton } from '@mui/material';
 import { Palette, ChevronDown, ChevronUp } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
-import { groupByFrequency } from '@/lib/ui';
 import { useSessionState } from '@/hooks/useSessionState';
 
 interface ColorExtractionCardProps {
@@ -31,6 +30,29 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
       ...prev,
       [sectionName]: !prev[sectionName]
     }));
+  };
+
+  // Group colors by frequency within each group
+  const groupByFrequency = (colors: AnalysisResponse['data']['ui']['colors']): FrequencyGroup[] => {
+    const sorted = [...colors].sort((a, b) => b.count - a.count);
+
+    let mostCount = 3;
+    if (sorted.length < 3) mostCount = sorted.length;
+    else if (sorted.length > 5) mostCount = 5;
+    else mostCount = sorted.length;
+
+    const mostUsed = sorted.slice(0, mostCount);
+    const remaining = sorted.slice(mostCount);
+    const supportingCount = Math.ceil(remaining.length / 2);
+    const supporting = remaining.slice(0, supportingCount);
+    const accent = remaining.slice(supportingCount);
+
+    const groups: FrequencyGroup[] = [];
+    if (mostUsed.length) groups.push({ name: 'Most Used', colors: mostUsed });
+    if (supporting.length) groups.push({ name: 'Supporting Colors', colors: supporting });
+    if (accent.length) groups.push({ name: 'Accent Colors', colors: accent });
+
+    return groups;
   };
 
   // Group colors by usage category
