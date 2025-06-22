@@ -49,30 +49,39 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
     );
   }
 
-  // Extract content data from API response
+  // Extract content-specific data from API response
   const imageData = data.data?.ui?.imageAnalysis;
   const totalImages = imageData?.totalImages || 0;
   const estimatedPhotos = imageData?.estimatedPhotos || 0;
   const estimatedIcons = imageData?.estimatedIcons || 0;
 
-  // Create content distribution data
+  // Create content distribution data (focusing on content types)
   const contentTypes = [
     { name: 'Photos', value: estimatedPhotos, color: theme.palette.primary.main },
     { name: 'Icons', value: estimatedIcons, color: theme.palette.success.main },
     { name: 'Other Images', value: Math.max(0, totalImages - estimatedPhotos - estimatedIcons), color: theme.palette.warning.main },
   ].filter(item => item.value > 0);
 
-  // Mock readability data (since not available in current API response)
-  const readabilityData = [
-    { metric: 'Flesch Reading Ease', score: data.readabilityScore || 75 },
-    { metric: 'SEO Score', score: (data.seoScore || 0) * 100 },
-    { metric: 'Performance', score: (data.performanceScore || 0) * 100 },
-    { metric: 'Overall Quality', score: data.data?.overview?.overallScore || 70 },
+  // Content readability and text analysis data
+  const readabilityScore = data.readabilityScore || 0;
+  const seoChecks = data.data?.seo?.checks || [];
+  const metaTags = data.data?.seo?.metaTags || {};
+
+  // Content structure analysis
+  const contentStructureData = [
+    { metric: 'Readability Score', score: readabilityScore, benchmark: 60 },
+    { metric: 'Meta Description', score: metaTags.description ? 100 : 0, benchmark: 100 },
+    { metric: 'Title Tag', score: metaTags.title ? 100 : 0, benchmark: 100 },
+    { metric: 'Alt Text Coverage', score: totalImages > 0 ? Math.min(100, (estimatedPhotos / totalImages) * 100) : 0, benchmark: 80 },
   ];
+
+  // Text accessibility metrics
+  const textAccessibilityScore = seoChecks.filter(check => check.status === 'good').length / Math.max(seoChecks.length, 1) * 100;
 
   // Use theme for chart config
   const chartConfig = {
-    score: { label: 'Score', color: theme.palette.primary.main }
+    score: { label: 'Score', color: theme.palette.primary.main },
+    benchmark: { label: 'Benchmark', color: theme.palette.grey[400] }
   };
 
   return (
@@ -119,14 +128,15 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
         <Card sx={{ borderRadius: 2, height: '400px' }}>
           <CardContent sx={{ p: 3, height: '100%' }}>
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-              Quality Metrics
+              Content Structure Analysis
             </Typography>
             <ChartContainer config={chartConfig} className="h-80">
-              <BarChart data={readabilityData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+              <BarChart data={contentStructureData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                 <XAxis dataKey="metric" tick={{ fontSize: 10 }} />
                 <YAxis domain={[0, 100]} />
                 <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar dataKey="score" fill={theme.palette.success.main} />
+                <Bar dataKey="score" fill={theme.palette.primary.main} />
+                <Bar dataKey="benchmark" fill={theme.palette.grey[300]} />
               </BarChart>
             </ChartContainer>
           </CardContent>
@@ -137,68 +147,63 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-              Content Quality Metrics
+              Text Content Quality
             </Typography>
             
             <Box sx={{ mb: 3 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="body2">SEO Score</Typography>
-                <Typography variant="body2">{Math.round((data.seoScore || 0) * 100)}%</Typography>
+                <Typography variant="body2">Readability Score (Flesch Reading Ease)</Typography>
+                <Typography variant="body2">{readabilityScore}%</Typography>
               </Box>
               <LinearProgress 
                 variant="determinate" 
-                value={(data.seoScore || 0) * 100} 
+                value={readabilityScore} 
                 sx={{ 
                   height: 8, 
                   borderRadius: 4, 
                   backgroundColor: theme.palette.grey[200], 
-                  '& .MuiLinearProgress-bar': { backgroundColor: theme.palette.success.main } 
+                  '& .MuiLinearProgress-bar': { 
+                    backgroundColor: readabilityScore >= 60 ? theme.palette.success.main : theme.palette.warning.main 
+                  } 
+                }} 
+              />
+              <Typography variant="caption" color="text.secondary">
+                {readabilityScore >= 90 ? 'Very Easy' : 
+                 readabilityScore >= 80 ? 'Easy' :
+                 readabilityScore >= 70 ? 'Fairly Easy' :
+                 readabilityScore >= 60 ? 'Standard' :
+                 readabilityScore >= 50 ? 'Fairly Difficult' :
+                 readabilityScore >= 30 ? 'Difficult' : 'Very Difficult'}
+              </Typography>
+            </Box>
+
+            <Box sx={{ mb: 3 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                <Typography variant="body2">Text Accessibility Score</Typography>
+                <Typography variant="body2">{Math.round(textAccessibilityScore)}%</Typography>
+              </Box>
+              <LinearProgress 
+                variant="determinate" 
+                value={textAccessibilityScore} 
+                sx={{ 
+                  height: 8, 
+                  borderRadius: 4, 
+                  backgroundColor: theme.palette.grey[200], 
+                  '& .MuiLinearProgress-bar': { backgroundColor: theme.palette.info.main } 
                 }} 
               />
             </Box>
 
             <Box sx={{ mb: 3 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="body2">Performance Score</Typography>
-                <Typography variant="body2">{Math.round((data.performanceScore || 0) * 100)}%</Typography>
+                <Typography variant="body2">Alt Text Coverage</Typography>
+                <Typography variant="body2">
+                  {totalImages > 0 ? Math.round((estimatedPhotos / totalImages) * 100) : 0}%
+                </Typography>
               </Box>
               <LinearProgress 
                 variant="determinate" 
-                value={(data.performanceScore || 0) * 100} 
-                sx={{ 
-                  height: 8, 
-                  borderRadius: 4, 
-                  backgroundColor: theme.palette.grey[200], 
-                  '& .MuiLinearProgress-bar': { backgroundColor: theme.palette.primary.main } 
-                }} 
-              />
-            </Box>
-
-            <Box sx={{ mb: 3 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="body2">Readability Score</Typography>
-                <Typography variant="body2">{data.readabilityScore || 0}%</Typography>
-              </Box>
-              <LinearProgress 
-                variant="determinate" 
-                value={data.readabilityScore || 0} 
-                sx={{ 
-                  height: 8, 
-                  borderRadius: 4, 
-                  backgroundColor: theme.palette.grey[200], 
-                  '& .MuiLinearProgress-bar': { backgroundColor: theme.palette.warning.main } 
-                }} 
-              />
-            </Box>
-
-            <Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="body2">Overall Score</Typography>
-                <Typography variant="body2">{data.data?.overview?.overallScore || 0}%</Typography>
-              </Box>
-              <LinearProgress 
-                variant="determinate" 
-                value={data.data?.overview?.overallScore || 0} 
+                value={totalImages > 0 ? (estimatedPhotos / totalImages) * 100 : 0} 
                 sx={{ 
                   height: 8, 
                   borderRadius: 4, 
@@ -213,34 +218,40 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-              Content Statistics
+              Content Metadata
             </Typography>
             
             <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary">Total Images</Typography>
-              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{totalImages}</Typography>
+              <Typography variant="body2" color="text.secondary">Title Tag</Typography>
+              <Typography variant="body2" sx={{ fontWeight: 'bold', wordBreak: 'break-word' }}>
+                {metaTags.title ? '✓ Present' : '✗ Missing'}
+              </Typography>
             </Box>
 
             <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary">Estimated Photos</Typography>
-              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{estimatedPhotos}</Typography>
+              <Typography variant="body2" color="text.secondary">Meta Description</Typography>
+              <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                {metaTags.description ? '✓ Present' : '✗ Missing'}
+              </Typography>
             </Box>
 
             <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary">Estimated Icons</Typography>
-              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{estimatedIcons}</Typography>
-            </Box>
-
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary">Tech Stack</Typography>
+              <Typography variant="body2" color="text.secondary">Open Graph Tags</Typography>
               <Typography variant="body2">
-                {data.data?.technical?.techStack?.length || 0} technologies detected
+                {metaTags['og:title'] || metaTags['og:description'] ? '✓ Present' : '✗ Missing'}
+              </Typography>
+            </Box>
+
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="body2" color="text.secondary">Canonical URL</Typography>
+              <Typography variant="body2">
+                {metaTags.canonical ? '✓ Present' : '✗ Missing'}
               </Typography>
             </Box>
 
             <Box>
-              <Typography variant="body2" color="text.secondary">Page Load Time</Typography>
-              <Typography variant="body2">{data.data?.overview?.pageLoadTime || 'N/A'}</Typography>
+              <Typography variant="body2" color="text.secondary">Content Images</Typography>
+              <Typography variant="body2">{totalImages} total images detected</Typography>
             </Box>
           </CardContent>
         </Card>
