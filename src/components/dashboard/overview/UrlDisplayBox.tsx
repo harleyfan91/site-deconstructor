@@ -20,7 +20,7 @@ const UrlDisplayBox: React.FC<UrlDisplayBoxProps> = ({ url }) => {
       <Typography
         variant="caption"
         sx={{
-          fontSize: { xs: '0.8rem', sm: '0.85rem' },
+          fontSize: { xs: '0.85rem', sm: '0.9rem' },
           color: 'white',
           overflow: 'hidden',
           textOverflow: 'ellipsis',

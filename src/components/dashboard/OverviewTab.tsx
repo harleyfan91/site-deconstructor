@@ -129,6 +129,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
       {/* Popover for metric info (shows only when infoAnchor is set) */}
       <MetricInfoPopover anchorEl={infoAnchor} infoText={infoText} onClose={handleClosePopover} />
 
+      {/* Analysis Summary */}
       <Box sx={{ mt: 4 }}>
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 3 }}>
@@ -150,20 +151,26 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
                 ? ' The page shows excellent performance across most metrics.'
                 : ' The page has room for improvement in several areas.'}
             </Typography>
-            <Typography variant="body1" paragraph>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <TrendingUp size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-                <Typography 
-                  variant="h6" 
-                  sx={{ 
-                    fontWeight: 'bold',
-                    fontSize: { xs: '1.1rem', sm: '1.25rem' }
-                  }}
-                >
-                  Key Findings
-                </Typography>
-              </Box>
-            </Typography>
+          </CardContent>
+        </Card>
+      </Box>
+
+      {/* Key Findings */}
+      <Box sx={{ mt: 3 }}>
+        <Card sx={{ borderRadius: 2 }}>
+          <CardContent sx={{ p: 3 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+              <TrendingUp size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  fontWeight: 'bold',
+                  fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                }}
+              >
+                Key Findings
+              </Typography>
+            </Box>
             <KeyFindingsGrid overview={data.data.overview} theme={theme} />
           </CardContent>
         </Card>
