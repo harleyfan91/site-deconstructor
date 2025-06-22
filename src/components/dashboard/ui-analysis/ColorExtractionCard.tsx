@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Box, Typography, Collapse, IconButton } from '@mui/material';
 import { Palette, ChevronDown, ChevronUp } from 'lucide-react';
@@ -6,11 +7,6 @@ import { groupByFrequency } from '@/lib/ui';
 import { useSessionState } from '@/hooks/useSessionState';
 
 interface ColorExtractionCardProps {
-  colors: AnalysisResponse['data']['ui']['colors'];
-}
-
-interface ColorGroup {
-  name: string;
   colors: AnalysisResponse['data']['ui']['colors'];
 }
 
@@ -37,40 +33,7 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
     }));
   };
 
-  // Helper function to determine color harmony group
-  const getColorHarmonyGroup = (hex: string): string => {
-    const rgb = hexToRgb(hex);
-    if (!rgb) return 'Other';
-    
-    const { r, g, b } = rgb;
-    const max = Math.max(r, g, b);
-    const min = Math.min(r, g, b);
-    const diff = max - min;
-    
-    // Grayscale
-    if (diff < 15) return 'Grayscale';
-    
-    // Determine dominant color channel
-    if (r === max && r > g + 20 && r > b + 20) return 'Warm Reds';
-    if (g === max && g > r + 20 && g > b + 20) return 'Cool Greens';
-    if (b === max && b > r + 20 && b > g + 20) return 'Cool Blues';
-    if (r > 200 && g > 200 && b < 100) return 'Warm Yellows';
-    if (r > 150 && g < 100 && b > 150) return 'Cool Purples';
-    if (r > 150 && g > 100 && b < 100) return 'Warm Oranges';
-    
-    return 'Mixed Tones';
-  };
-
-  const hexToRgb = (hex: string): {r:number;g:number;b:number} | null => {
-    const match = hex.replace('#','').match(/^([0-9a-f]{3}|[0-9a-f]{6})$/i);
-    if (!match) return null;
-    let h = match[0];
-    if (h.length === 3) h = h.split('').map(c=>c+c).join('');
-    const num = parseInt(h, 16);
-    return {r:(num>>16)&255, g:(num>>8)&255, b:num&255};
-  };
-
-  // Group colors by usage category with improved handling
+  // Group colors by usage category
   const groupByUsage = (): UsageGroup[] => {
     const usageGroups: Record<string, AnalysisResponse['data']['ui']['colors']> = {};
     
@@ -126,22 +89,13 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
     return sortedGroups;
   };
 
-  // Group colors within a usage category by color harmony
-  const groupByColorHarmony = (colors: AnalysisResponse['data']['ui']['colors']) => {
-    const harmonyGroups: Record<string, AnalysisResponse['data']['ui']['colors']> = {};
-    
-    colors.forEach(color => {
-      const harmonyGroup = getColorHarmonyGroup(color.hex);
-      if (!harmonyGroups[harmonyGroup]) {
-        harmonyGroups[harmonyGroup] = [];
-      }
-      harmonyGroups[harmonyGroup].push(color);
-    });
-
-    return Object.entries(harmonyGroups).map(([harmony, colors]) => ({
-      name: harmony,
-      colors: colors
-    }));
+  const hexToRgb = (hex: string): {r:number;g:number;b:number} | null => {
+    const match = hex.replace('#','').match(/^([0-9a-f]{3}|[0-9a-f]{6})$/i);
+    if (!match) return null;
+    let h = match[0];
+    if (h.length === 3) h = h.split('').map(c=>c+c).join('');
+    const num = parseInt(h, 16);
+    return {r:(num>>16)&255, g:(num>>8)&255, b:num&255};
   };
 
   const usageGroups = groupByUsage();
@@ -228,76 +182,60 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
                       <Typography
                         variant="subtitle2"
                         sx={{ fontWeight: 'bold', mb: 1 }}
-
                       >
                         {freqGroup.name}
                       </Typography>
-                      {groupByColorHarmony(freqGroup.colors).map((harmonyGroup, harmonyIndex) => (
-                        <Box key={harmonyIndex} sx={{ mb: 3 }}>
-                          <Typography
-                            variant="subtitle2"
+                      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(3, 1fr)', md: 'repeat(6, 1fr)' }, gap: 1, mb: 2 }}>
+                        {freqGroup.colors.map((color, colorIndex) => (
+                          <Box
+                            key={colorIndex}
                             sx={{
-                              fontWeight: 'medium',
-                              color: 'text.secondary',
-                              mb: 1,
-                              fontSize: '0.85rem'
+                              display: 'flex',
+                              alignItems: 'center',
+                              bgcolor: 'background.paper',
+                              border: '1px solid rgba(0,0,0,0.1)',
+                              borderRadius: 1,
+                              p: 1,
                             }}
                           >
-                            {harmonyGroup.name}
-                          </Typography>
-                          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(3, 1fr)', md: 'repeat(6, 1fr)' }, gap: 1, mb: 2 }}>
-                            {harmonyGroup.colors.map((color, colorIndex) => (
-                              <Box
-                                key={colorIndex}
+                            <Box
+                              sx={{
+                                width: 24,
+                                height: 24,
+                                backgroundColor: color.hex,
+                                borderRadius: 0.5,
+                                mr: 1,
+                                border: '1px solid rgba(0,0,0,0.1)',
+                                flexShrink: 0,
+                              }}
+                            />
+                            <Box sx={{ flex: 1, minWidth: 0 }}>
+                              <Typography
+                                variant="caption"
                                 sx={{
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  bgcolor: 'background.paper',
-                                  border: '1px solid rgba(0,0,0,0.1)',
-                                  borderRadius: 1,
-                                  p: 1,
+                                  fontWeight: 'bold',
+                                  display: 'block',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  fontSize: { xs: '0.65rem', sm: '0.75rem' }
                                 }}
                               >
-                                <Box
-                                  sx={{
-                                    width: 24,
-                                    height: 24,
-                                    backgroundColor: color.hex,
-                                  borderRadius: 0.5,
-                                  mr: 1,
-                                  border: '1px solid rgba(0,0,0,0.1)',
-                                  flexShrink: 0,
+                                {color.name}
+                              </Typography>
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                sx={{
+                                  display: 'block',
+                                  fontSize: { xs: '0.6rem', sm: '0.7rem' }
                                 }}
-                              />
-                              <Box sx={{ flex: 1, minWidth: 0 }}>
-                                <Typography
-                                  variant="caption"
-                                  sx={{
-                                    fontWeight: 'bold',
-                                    display: 'block',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    fontSize: { xs: '0.65rem', sm: '0.75rem' }
-                                  }}
-                                >
-                                  {color.name}
-                                </Typography>
-                                <Typography
-                                  variant="caption"
-                                  color="text.secondary"
-                                  sx={{
-                                    display: 'block',
-                                    fontSize: { xs: '0.6rem', sm: '0.7rem' }
-                                  }}
-                                >
-                                  {color.hex}
-                                </Typography>
-                              </Box>
-                              </Box>
-                            ))}
+                              >
+                                {color.hex}
+                              </Typography>
+                            </Box>
                           </Box>
-                        </Box>
-                      ))}
+                        ))}
+                      </Box>
                     </Box>
                   ))}
                 </Box>
