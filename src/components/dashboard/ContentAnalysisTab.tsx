@@ -1,8 +1,8 @@
-
 import React from 'react';
 import { Box, Typography, Grid, Card, CardContent, LinearProgress, CircularProgress, Alert, Chip, Tooltip } from '@mui/material';
+import { FileText, PieChart, BarChart3, Tags } from 'lucide-react';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart';
-import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis } from 'recharts';
+import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis } from 'recharts';
 import { useTheme } from '@mui/material/styles';
 import type { AnalysisResponse } from '../../hooks/useAnalysisApi';
 
@@ -115,12 +115,15 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
         <Card sx={{ borderRadius: 2, height: '400px' }}>
           <CardContent sx={{ p: 3, height: '100%' }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-              Content Distribution
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+              <PieChart size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                Content Distribution
+              </Typography>
+            </Box>
             {contentTypes.length > 0 ? (
               <ChartContainer config={chartConfig} className="h-80">
-                <PieChart>
+                <RechartsPieChart>
                   <Pie
                     data={contentTypes}
                     cx="50%"
@@ -135,7 +138,7 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
                     ))}
                   </Pie>
                   <ChartTooltip content={<ChartTooltipContent />} />
-                </PieChart>
+                </RechartsPieChart>
               </ChartContainer>
             ) : (
               <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px' }}>
@@ -149,9 +152,12 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
 
         <Card sx={{ borderRadius: 2, height: '400px' }}>
           <CardContent sx={{ p: 3, height: '100%' }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-              Content Structure Analysis
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+              <BarChart3 size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                Content Structure Analysis
+              </Typography>
+            </Box>
             <ChartContainer config={chartConfig} className="h-80">
               <BarChart data={contentStructureData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                 <XAxis dataKey="metric" tick={{ fontSize: 10 }} />
@@ -168,9 +174,13 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 3, mt: 3 }}>
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-              Text Content Quality
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+              <FileText size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                Text Content Quality
+              </Typography>
+            </Box>
+            
             
             <Box sx={{ mb: 3 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
@@ -281,9 +291,13 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
 
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-              Content Metadata
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+              <Tags size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                Content Metadata
+              </Typography>
+            </Box>
+            
             
             <Box sx={{ mb: 2 }}>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>Title Tag</Typography>

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Box,
@@ -8,6 +7,7 @@ import {
   CircularProgress,
   Alert,
 } from '@mui/material';
+import { BarChart3, TrendingUp } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 import { useTheme } from '@mui/material/styles';
 import UrlDisplayBox from './overview/UrlDisplayBox';
@@ -129,9 +129,12 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
       <MetricInfoPopover anchorEl={infoAnchor} infoText={infoText} onClose={handleClosePopover} />
 
       <Box sx={{ mt: 4 }}>
-        <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-          Analysis Summary
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+          <BarChart3 size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+            Analysis Summary
+          </Typography>
+        </Box>
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 3 }}>
             <Typography variant="body1" paragraph>
@@ -141,7 +144,12 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
                 : ' The page has room for improvement in several areas.'}
             </Typography>
             <Typography variant="body1" paragraph>
-              <strong>Key Findings:</strong>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <TrendingUp size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                  Key Findings
+                </Typography>
+              </Box>
             </Typography>
             <KeyFindingsGrid overview={data.data.overview} theme={theme} />
           </CardContent>

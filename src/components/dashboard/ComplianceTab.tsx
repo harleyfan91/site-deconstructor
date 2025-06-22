@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Box,
@@ -14,7 +13,7 @@ import {
   IconButton,
   Badge,
 } from '@mui/material';
-import { ChevronDown, ChevronUp, Shield } from 'lucide-react';
+import { ChevronDown, ChevronUp, Shield, Accessibility, CheckCircle } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 import { dashIfEmpty } from '../../lib/ui';
 import { calculateSecurityScore } from '../../lib/seo';
@@ -108,7 +107,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
       </Box>
       
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3, mb: 3 }}>
-        {/* Security Headers - back to top-left position */}
+        {/* Security Headers - using Shield icon to match SEO Security Score */}
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 2 }}>
             <Box
@@ -121,7 +120,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
               onClick={() => setSecurityHeadersExpanded(!securityHeadersExpanded)}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Shield size={20} />
+                <Shield size={24} color="#FF6B35" style={{ marginRight: 8 }} />
                 <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
                   Security Headers
                 </Typography>
@@ -164,12 +163,15 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
           </CardContent>
         </Card>
 
-        {/* Accessibility Violations - stays top-right */}
+        {/* Accessibility Violations - using Accessibility icon */}
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-              Accessibility Violations
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+              <Accessibility size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                Accessibility Violations
+              </Typography>
+            </Box>
             {violations.length === 0 ? (
               <Typography variant="body2">None</Typography>
             ) : (
@@ -185,12 +187,15 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
         </Card>
       </Box>
 
-      {/* Other Checks - back to bottom, full-width */}
+      {/* Other Checks - using CheckCircle icon for compliance checks */}
       <Card sx={{ borderRadius: 2 }}>
         <CardContent sx={{ p: 2 }}>
-          <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-            Other Checks
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+            <CheckCircle size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+              Other Checks
+            </Typography>
+          </Box>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
             <Tooltip
               title={social.hasOpenGraph ? 'Open Graph tags detected' : 'Open Graph tags missing'}

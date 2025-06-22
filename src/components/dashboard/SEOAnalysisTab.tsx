@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { Box, Typography, Card, CardContent, Chip, CircularProgress, Alert, Tooltip } from '@mui/material';
-import { CheckCircle, AlertCircle, XCircle } from 'lucide-react';
+import { CheckCircle, AlertCircle, XCircle, Search, Target, TrendingUp } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 import { useTheme } from '@mui/material/styles';
 
@@ -134,9 +133,12 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 3 }}>
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-              SEO Checklist
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+              <Search size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                SEO Checklist
+              </Typography>
+            </Box>
             <Box>
               {seo.checks.map((check, index) => (
                 <Box
@@ -184,84 +186,95 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
           </CardContent>
         </Card>
 
-        <Card sx={{ borderRadius: 2, mb: 2 }}>
-          <CardContent sx={{ p: 3, textAlign: 'center' }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-              SEO Score
-            </Typography>
-            <Tooltip 
-              title={getSeoScoreTooltip(seoScore)}
-              enterDelay={300}
-              enterTouchDelay={300}
-            >
-              <Typography variant="h2" sx={{ 
-                fontWeight: 'bold', 
-                color: seoScoreColor,
-                mb: 1,
-                cursor: 'help'
-              }}>
-                {seoScore}
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Card sx={{ borderRadius: 2 }}>
+            <CardContent sx={{ p: 3, textAlign: 'center' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, justifyContent: 'center' }}>
+                <Target size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                  SEO Score
+                </Typography>
+              </Box>
+              <Tooltip 
+                title={getSeoScoreTooltip(seoScore)}
+                enterDelay={300}
+                enterTouchDelay={300}
+              >
+                <Typography variant="h2" sx={{ 
+                  fontWeight: 'bold', 
+                  color: seoScoreColor,
+                  mb: 1,
+                  cursor: 'help'
+                }}>
+                  {seoScore}
+                </Typography>
+              </Tooltip>
+              <Typography variant="body2" color="text.secondary">
+                {seoScoreDescription}
               </Typography>
-            </Tooltip>
-            <Typography variant="body2" color="text.secondary">
-              {seoScoreDescription}
-            </Typography>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card sx={{ borderRadius: 2 }}>
-          <CardContent sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-              Analysis Status
-            </Typography>
-            <Box sx={{ mb: 2 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="body2">Checks Passed</Typography>
-                <Tooltip 
-                  title="Number of SEO checks that passed"
-                  enterDelay={300}
-                  enterTouchDelay={300}
-                >
-                  <Typography variant="body2" sx={{ fontWeight: 'bold', color: theme.palette.success.main, cursor: 'help' }}>
-                    {seo.checks.filter(c => c.status === 'good').length}/{seo.checks.length}
-                  </Typography>
-                </Tooltip>
+          <Card sx={{ borderRadius: 2 }}>
+            <CardContent sx={{ p: 3 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                <TrendingUp size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                  Analysis Status
+                </Typography>
               </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="body2">Warnings</Typography>
-                <Tooltip 
-                  title="Number of SEO warnings found"
-                  enterDelay={300}
-                  enterTouchDelay={300}
-                >
-                  <Typography variant="body2" sx={{ fontWeight: 'bold', color: theme.palette.warning.main, cursor: 'help' }}>
-                    {seo.checks.filter(c => c.status === 'warning').length}
-                  </Typography>
-                </Tooltip>
+              <Box sx={{ mb: 2 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                  <Typography variant="body2">Checks Passed</Typography>
+                  <Tooltip 
+                    title="Number of SEO checks that passed"
+                    enterDelay={300}
+                    enterTouchDelay={300}
+                  >
+                    <Typography variant="body2" sx={{ fontWeight: 'bold', color: theme.palette.success.main, cursor: 'help' }}>
+                      {seo.checks.filter(c => c.status === 'good').length}/{seo.checks.length}
+                    </Typography>
+                  </Tooltip>
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                  <Typography variant="body2">Warnings</Typography>
+                  <Tooltip 
+                    title="Number of SEO warnings found"
+                    enterDelay={300}
+                    enterTouchDelay={300}
+                  >
+                    <Typography variant="body2" sx={{ fontWeight: 'bold', color: theme.palette.warning.main, cursor: 'help' }}>
+                      {seo.checks.filter(c => c.status === 'warning').length}
+                    </Typography>
+                  </Tooltip>
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                  <Typography variant="body2">Errors</Typography>
+                  <Tooltip 
+                    title="Number of SEO errors found"
+                    enterDelay={300}
+                    enterTouchDelay={300}
+                  >
+                    <Typography variant="body2" sx={{ fontWeight: 'bold', color: theme.palette.error.main, cursor: 'help' }}>
+                      {seo.checks.filter(c => c.status === 'error').length}
+                    </Typography>
+                  </Tooltip>
+                </Box>
               </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="body2">Errors</Typography>
-                <Tooltip 
-                  title="Number of SEO errors found"
-                  enterDelay={300}
-                  enterTouchDelay={300}
-                >
-                  <Typography variant="body2" sx={{ fontWeight: 'bold', color: theme.palette.error.main, cursor: 'help' }}>
-                    {seo.checks.filter(c => c.status === 'error').length}
-                  </Typography>
-                </Tooltip>
-              </Box>
-            </Box>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </Box>
       </Box>
 
       <Box sx={{ mt: 3 }}>
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-              SEO Recommendations
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+              <Target size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                SEO Recommendations
+              </Typography>
+            </Box>
             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 2 }}>
               {seo.recommendations.map((rec, index) => (
                 <Tooltip 
