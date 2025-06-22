@@ -82,6 +82,7 @@ const DashboardContent = () => {
                 mb: 2,
                 borderBottom: '1px solid',
                 borderColor: 'divider',
+                borderRadius: '8px'
               }}
             >
               <motion.div
