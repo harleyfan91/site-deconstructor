@@ -594,11 +594,11 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string, section
   if (sections.compliance) {
     addSection('Compliance');
     
-    const complianceStatus = data.complianceStatus || 'unknown';
+    const complianceStatus = data.complianceStatus || 'warn';
     addMetricCard(
       'Compliance Status', 
       complianceStatus.charAt(0).toUpperCase() + complianceStatus.slice(1),
-      complianceStatus === 'compliant' ? colors.success : colors.warning,
+      complianceStatus === 'pass' ? colors.success : colors.warning,
       'Overall compliance assessment'
     );
     
