@@ -1,3 +1,4 @@
+
 export interface CoreWebVitals {
   lcp: number;
   fid: number;
@@ -40,6 +41,35 @@ export interface LinkIssueInfo {
   mixedContentLinks: string[];
 }
 
+// New analysis data interfaces
+export interface MobileResponsivenessData {
+  score: number;
+  issues: Array<{
+    id: string;
+    title: string;
+    description: string;
+  }>;
+}
+
+export interface SecurityScoreData {
+  grade: string;
+  findings: Array<{
+    id: string;
+    title: string;
+    description: string;
+  }>;
+}
+
+export interface AccessibilityData {
+  violations: AccessibilityViolation[];
+}
+
+export interface HeaderChecksData {
+  hsts: string;
+  csp: string;
+  frameOptions: string;
+}
+
 export type ComplianceStatus = 'pass' | 'fail' | 'warn';
 
 export interface AnalysisResponse {
@@ -53,6 +83,11 @@ export interface AnalysisResponse {
   seoScore: number;
   readabilityScore: number;
   complianceStatus: ComplianceStatus;
+  // Add new analysis data properties
+  mobileResponsiveness?: MobileResponsivenessData;
+  securityScore?: SecurityScoreData;
+  accessibility?: AccessibilityData;
+  headerChecks?: HeaderChecksData;
   data: {
     overview: {
       overallScore: number;

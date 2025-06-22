@@ -22,7 +22,7 @@ const GradeBadge: React.FC<GradeBadgeProps> = ({ grade }) => {
     <Chip 
       label={`Grade: ${grade}`} 
       color={getGradeColor(grade) as any}
-      size="large"
+      size="medium"
       sx={{ fontSize: '1.2rem', py: 2 }}
     />
   );
