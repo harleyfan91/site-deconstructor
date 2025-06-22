@@ -13,7 +13,8 @@ const UrlDisplayBox: React.FC<UrlDisplayBoxProps> = ({ url }) => {
         display: 'flex',
         alignItems: 'center',
         minWidth: 0,
-        flex: 1,
+        flexBasis: '50%',
+        justifyContent: 'flex-end',
       }}
     >
       <Typography
