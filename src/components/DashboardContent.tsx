@@ -90,7 +90,7 @@ const DashboardContent = () => {
                 transition={{ duration: 0.6, delay: 0.4 }}
               >
                 <TabsList className="grid w-full grid-cols-3 md:grid-cols-7 gap-1 h-auto">
-                  <TabsTrigger value="overview" className="text-xs sm:text-sm" data-tab-id="overview">Overview</TabsTrigger>
+                  <TabsTrigger value="overview" className="col-span-3 md:col-span-1 text-xs sm:text-sm" data-tab-id="overview">Overview</TabsTrigger>
                   <TabsTrigger value="ui" className="text-xs sm:text-sm" data-tab-id="ui">User Interface</TabsTrigger>
                   <TabsTrigger value="content" className="text-xs sm:text-sm" data-tab-id="content">Content</TabsTrigger>
                   <TabsTrigger value="performance" className="text-xs sm:text-sm" data-tab-id="performance">Performance & Security</TabsTrigger>
