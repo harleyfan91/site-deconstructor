@@ -2,14 +2,51 @@
 import { useState } from 'react';
 import type { AnalysisResponse } from '@/types/analysis';
 
+// Extended types for the new analysis data
+export interface MobileResponsivenessData {
+  score: number;
+  issues: Array<{
+    id: string;
+    title: string;
+    description: string;
+  }>;
+}
+
+export interface SecurityScoreData {
+  grade: string;
+  findings: Array<{
+    id: string;
+    title: string;
+    description: string;
+  }>;
+}
+
+export interface AccessibilityData {
+  violations: any[];
+}
+
+export interface HeaderChecksData {
+  hsts: string;
+  csp: string;
+  frameOptions: string;
+}
+
+// Extended analysis response type
+export interface ExtendedAnalysisResponse extends AnalysisResponse {
+  mobileResponsiveness?: MobileResponsivenessData;
+  securityScore?: SecurityScoreData;
+  accessibility?: AccessibilityData;
+  headerChecks?: HeaderChecksData;
+}
+
 export type { AnalysisResponse } from '@/types/analysis';
 
 export const useAnalysisApi = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<AnalysisResponse | null>(null);
+  const [data, setData] = useState<ExtendedAnalysisResponse | null>(null);
 
-  const analyzeWebsite = async (url: string): Promise<AnalysisResponse | null> => {
+  const analyzeWebsite = async (url: string): Promise<ExtendedAnalysisResponse | null> => {
     setLoading(true);
     setError(null);
     
@@ -17,7 +54,6 @@ export const useAnalysisApi = () => {
       console.log('Analyzing URL:', url);
       
       // Call the edge function directly with the URL parameter
-
       const response = await fetch(
         `https://sxrhpwmdslxgwpqfdmxu.supabase.co/functions/v1/analyze?url=${encodeURIComponent(url)}`,
         {
@@ -25,11 +61,9 @@ export const useAnalysisApi = () => {
           headers: {
             'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY ?? ''}`,
             'Content-Type': 'application/json'
-
           },
         }
       );
-
 
       console.log('Response status:', response.status);
 
@@ -39,8 +73,14 @@ export const useAnalysisApi = () => {
         throw new Error(`HTTP error! status: ${response.status}, message: ${errorData}`);
       }
 
-      const analysisResult: AnalysisResponse = await response.json();
+      const analysisResult: ExtendedAnalysisResponse = await response.json();
       console.log('Analysis result:', analysisResult);
+      
+      // Validate that the response contains the expected new data structure
+      if (analysisResult.mobileResponsiveness || analysisResult.securityScore || 
+          analysisResult.accessibility || analysisResult.headerChecks) {
+        console.log('New analysis data structure detected and parsed successfully');
+      }
       
       setData(analysisResult);
       return analysisResult;
