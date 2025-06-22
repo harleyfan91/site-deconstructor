@@ -56,7 +56,10 @@ const MetricCard: React.FC<MetricCardProps> = ({
             }}
             data-testid="card-title"
           >
-            {titleLines[0]}<br />{titleLines[1]}
+            {titleLines[0]}
+            <span className="hidden sm:inline"> </span>
+            <br className="sm:hidden" />
+            {titleLines[1]}
           </Typography>
           {/* Always render a placeholder IconButton for alignment (real or invisible) */}
           {info && onInfo ? (
