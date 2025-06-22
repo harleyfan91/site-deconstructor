@@ -84,16 +84,16 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
           py: 2,
         }}
       >
-        {/* Orange gradient background - extends to edge, no rounded corners, more transparent on left */}
+        {/* Orange gradient background - stops before edge, larger transparent section */}
         <Box
           sx={{
             position: 'absolute',
             top: 0,
             left: 0,
-            right: 0,
+            right: '20px', // Stop before the edge
             bottom: 0,
-            background: 'linear-gradient(to left, #FF6B35 0%, #FF6B35 30%, transparent 100%)',
-            borderRadius: 0, // Remove rounded corners
+            background: 'linear-gradient(to left, #FF6B35 0%, #FF6B35 20%, transparent 60%)',
+            borderRadius: 0,
           }}
         />
         {/* Content */}

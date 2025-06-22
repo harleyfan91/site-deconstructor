@@ -44,7 +44,7 @@ const LayeredCarousel = () => {
         bgcolor: 'transparent',
       }}
     >
-      {/* Floating decorative shapes */}
+      {/* Floating decorative shapes - consistent sizes */}
       <motion.div
         animate={{
           y: [0, -12, 0],

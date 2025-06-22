@@ -86,7 +86,7 @@ const FeatureShowcase = () => {
         // Masked/gradient background is rendered as absolute below
       }}
     >
-      {/* Floating decorative shapes */}
+      {/* Floating decorative shapes - consistent sizes */}
       <motion.div
         animate={{
           y: [0, -15, 0],

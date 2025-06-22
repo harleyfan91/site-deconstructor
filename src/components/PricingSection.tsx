@@ -24,7 +24,7 @@ const PricingSection = () => {
         minHeight: { xs: 600, md: 780 },
       }}
     >
-      {/* Floating decorative shapes */}
+      {/* Floating decorative shapes - consistent sizes */}
       <motion.div
         animate={{
           y: [0, 15, 0],
