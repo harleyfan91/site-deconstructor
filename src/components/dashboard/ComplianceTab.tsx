@@ -120,17 +120,16 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
               }}
               onClick={() => setSecurityHeadersExpanded(!securityHeadersExpanded)}
             >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1, minWidth: 0 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Shield size={20} />
-                <Typography variant="h6" sx={{ fontWeight: 'bold', flex: 1, minWidth: 0 }}>
+                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
                   Security Headers
                 </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 2 }}>
                 <Badge
                   badgeContent={headersDetected}
                   color="primary"
                   sx={{
+                    mr: 1,
                     '& .MuiBadge-badge': {
                       backgroundColor: getSecurityScoreColor(securityScore),
                     },
@@ -138,19 +137,17 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
                 />
                 <Chip
                   label={`${securityScore}%`}
-                  variant="outlined"
                   size="small"
                   sx={{
-                    borderColor: getSecurityScoreColor(securityScore),
-                    color: getSecurityScoreColor(securityScore),
-                    backgroundColor: `${getSecurityScoreColor(securityScore)}20`,
+                    backgroundColor: getSecurityScoreColor(securityScore),
+                    color: 'white',
                     fontWeight: 600,
                   }}
                 />
-                <IconButton size="small">
-                  {securityHeadersExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                </IconButton>
               </Box>
+              <IconButton size="small">
+                {securityHeadersExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+              </IconButton>
             </Box>
             
             <Collapse in={securityHeadersExpanded} timeout="auto">
