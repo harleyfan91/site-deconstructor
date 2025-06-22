@@ -93,7 +93,6 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
             right: '20px', // Stop before the edge
             bottom: 0,
             background: 'linear-gradient(to left, #FF6B35 0%, #FF6B35 12%, transparent 60%)',
-            borderRadius: 0,
             borderRadius: '8px'
           }}
         />
@@ -129,6 +128,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
       {/* Popover for metric info (shows only when infoAnchor is set) */}
       <MetricInfoPopover anchorEl={infoAnchor} infoText={infoText} onClose={handleClosePopover} />
 
+      {/* Analysis Summary */}
       <Box sx={{ mt: 4 }}>
         <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
           Analysis Summary
@@ -141,9 +141,17 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
                 ? ' The page shows excellent performance across most metrics.'
                 : ' The page has room for improvement in several areas.'}
             </Typography>
-            <Typography variant="body1" paragraph>
-              <strong>Key Findings:</strong>
-            </Typography>
+          </CardContent>
+        </Card>
+      </Box>
+
+      {/* Key Findings */}
+      <Box sx={{ mt: 3 }}>
+        <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+          Key Findings
+        </Typography>
+        <Card sx={{ borderRadius: 2 }}>
+          <CardContent sx={{ p: 3 }}>
             <KeyFindingsGrid overview={data.data.overview} theme={theme} />
           </CardContent>
         </Card>
