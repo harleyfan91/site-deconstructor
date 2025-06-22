@@ -84,7 +84,7 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
     benchmark: { label: 'Benchmark', color: theme.palette.grey[400] }
   };
 
-  // Helper function to get status chip props
+  // Helper function to get status chip props with proper color coding
   const getStatusChipProps = (isPresent: boolean, label: string) => {
     if (isPresent) {
       return {
@@ -170,64 +170,106 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
             <Box sx={{ mb: 3 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography variant="body2">Readability Score (Flesch Reading Ease)</Typography>
-                <Typography variant="body2">{readabilityScore}%</Typography>
+                <Tooltip 
+                  title={`Readability score: ${readabilityScore}% - ${readabilityScore >= 90 ? 'Very Easy' : 
+                    readabilityScore >= 80 ? 'Easy' :
+                    readabilityScore >= 70 ? 'Fairly Easy' :
+                    readabilityScore >= 60 ? 'Standard' :
+                    readabilityScore >= 50 ? 'Fairly Difficult' :
+                    readabilityScore >= 30 ? 'Difficult' : 'Very Difficult'}`}
+                  enterDelay={300}
+                  enterTouchDelay={300}
+                >
+                  <Typography variant="body2" sx={{ cursor: 'help' }}>{readabilityScore}%</Typography>
+                </Tooltip>
               </Box>
-              <LinearProgress 
-                variant="determinate" 
-                value={readabilityScore} 
-                sx={{ 
-                  height: 8, 
-                  borderRadius: 4, 
-                  backgroundColor: theme.palette.grey[200], 
-                  '& .MuiLinearProgress-bar': { 
-                    backgroundColor: readabilityScore >= 60 ? '#43A047' : '#FF6B35' // Orange for needs improvement
-                  } 
-                }} 
-              />
-              <Typography variant="caption" color="text.secondary">
-                {readabilityScore >= 90 ? 'Very Easy' : 
-                 readabilityScore >= 80 ? 'Easy' :
-                 readabilityScore >= 70 ? 'Fairly Easy' :
-                 readabilityScore >= 60 ? 'Standard' :
-                 readabilityScore >= 50 ? 'Fairly Difficult' :
-                 readabilityScore >= 30 ? 'Difficult' : 'Very Difficult'}
+              <Tooltip 
+                title={`Readability score: ${readabilityScore}% - ${readabilityScore >= 90 ? 'Very Easy' : 
+                  readabilityScore >= 80 ? 'Easy' :
+                  readabilityScore >= 70 ? 'Fairly Easy' :
+                  readabilityScore >= 60 ? 'Standard' :
+                  readabilityScore >= 50 ? 'Fairly Difficult' :
+                  readabilityScore >= 30 ? 'Difficult' : 'Very Difficult'}`}
+                enterDelay={300}
+                enterTouchDelay={300}
+              >
+                <LinearProgress 
+                  variant="determinate" 
+                  value={readabilityScore} 
+                  sx={{ 
+                    height: 8, 
+                    borderRadius: 4, 
+                    cursor: 'help'
+                  }} 
+                />
+              </Tooltip>
+              <Typography variant="body2" color="text.secondary">
+                Your content readability scores better than {readabilityScore}% of websites
               </Typography>
             </Box>
 
             <Box sx={{ mb: 3 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography variant="body2">Text Accessibility Score</Typography>
-                <Typography variant="body2">{Math.round(textAccessibilityScore)}%</Typography>
+                <Tooltip 
+                  title={`Text accessibility score: ${Math.round(textAccessibilityScore)}%`}
+                  enterDelay={300}
+                  enterTouchDelay={300}
+                >
+                  <Typography variant="body2" sx={{ cursor: 'help' }}>{Math.round(textAccessibilityScore)}%</Typography>
+                </Tooltip>
               </Box>
-              <LinearProgress 
-                variant="determinate" 
-                value={textAccessibilityScore} 
-                sx={{ 
-                  height: 8, 
-                  borderRadius: 4, 
-                  backgroundColor: theme.palette.grey[200], 
-                  '& .MuiLinearProgress-bar': { backgroundColor: '#FF6B35' } // Orange theme
-                }} 
-              />
+              <Tooltip 
+                title={`Text accessibility score: ${Math.round(textAccessibilityScore)}%`}
+                enterDelay={300}
+                enterTouchDelay={300}
+              >
+                <LinearProgress 
+                  variant="determinate" 
+                  value={textAccessibilityScore} 
+                  sx={{ 
+                    height: 8, 
+                    borderRadius: 4, 
+                    cursor: 'help'
+                  }} 
+                />
+              </Tooltip>
+              <Typography variant="body2" color="text.secondary">
+                Your text accessibility scores better than {Math.round(textAccessibilityScore)}% of websites
+              </Typography>
             </Box>
 
             <Box sx={{ mb: 3 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography variant="body2">Alt Text Coverage</Typography>
-                <Typography variant="body2">
-                  {totalImages > 0 ? Math.round((estimatedPhotos / totalImages) * 100) : 0}%
-                </Typography>
+                <Tooltip 
+                  title={`Alt text coverage: ${totalImages > 0 ? Math.round((estimatedPhotos / totalImages) * 100) : 0}%`}
+                  enterDelay={300}
+                  enterTouchDelay={300}
+                >
+                  <Typography variant="body2" sx={{ cursor: 'help' }}>
+                    {totalImages > 0 ? Math.round((estimatedPhotos / totalImages) * 100) : 0}%
+                  </Typography>
+                </Tooltip>
               </Box>
-              <LinearProgress 
-                variant="determinate" 
-                value={totalImages > 0 ? (estimatedPhotos / totalImages) * 100 : 0} 
-                sx={{ 
-                  height: 8, 
-                  borderRadius: 4, 
-                  backgroundColor: theme.palette.grey[200], 
-                  '& .MuiLinearProgress-bar': { backgroundColor: '#FF6B35' } // Orange theme
-                }} 
-              />
+              <Tooltip 
+                title={`Alt text coverage: ${totalImages > 0 ? Math.round((estimatedPhotos / totalImages) * 100) : 0}%`}
+                enterDelay={300}
+                enterTouchDelay={300}
+              >
+                <LinearProgress 
+                  variant="determinate" 
+                  value={totalImages > 0 ? (estimatedPhotos / totalImages) * 100 : 0} 
+                  sx={{ 
+                    height: 8, 
+                    borderRadius: 4, 
+                    cursor: 'help'
+                  }} 
+                />
+              </Tooltip>
+              <Typography variant="body2" color="text.secondary">
+                Your alt text coverage scores better than {totalImages > 0 ? Math.round((estimatedPhotos / totalImages) * 100) : 0}% of websites
+              </Typography>
             </Box>
           </CardContent>
         </Card>
