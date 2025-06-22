@@ -16,6 +16,15 @@ const LegendContainer: React.FC = () => {
   const theme = useTheme();
   const LEGEND_COLORS = useLegendColors(theme);
 
+  // Guard against empty legend data
+  if (!LEGEND_COLORS || LEGEND_COLORS.length === 0) {
+    return (
+      <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'text.secondary' }}>
+        No legend data to display.
+      </Typography>
+    );
+  }
+
   // Use ref for stable anchor
   const anchorRef = React.useRef<HTMLDivElement | null>(null);
   const [open, setOpen] = React.useState(false);
@@ -66,7 +75,7 @@ const LegendContainer: React.FC = () => {
               <Circle
                 key={key}
                 size={12}
-                stroke={color}
+                stroke={color || theme.palette.grey[400]}
                 fill="none"
                 strokeWidth={2}
                 style={{
@@ -121,12 +130,12 @@ const LegendContainer: React.FC = () => {
             >
               <Circle
                 size={14}
-                stroke={color}
+                stroke={color || theme.palette.grey[400]}
                 fill="none"
                 strokeWidth={2}
                 style={{ marginRight: 8 }}
               />
-              <Typography variant="body2">{label}</Typography>
+              <Typography variant="body2">{label || 'Unknown'}</Typography>
             </Box>
           ))}
         </Box>
