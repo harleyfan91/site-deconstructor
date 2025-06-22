@@ -15,6 +15,125 @@ function mapScoreToGrade(score: number): string {
   return 'F';
 }
 
+// Helper function to get color name
+function getColorName(hex: string): string {
+  const colorNames: Record<string, string> = {
+    '#FFFFFF': 'White',
+    '#000000': 'Black',
+    '#FF0000': 'Red',
+    '#00FF00': 'Green',
+    '#0000FF': 'Blue',
+    '#FFFF00': 'Yellow',
+    '#FF00FF': 'Magenta',
+    '#00FFFF': 'Cyan',
+    '#808080': 'Gray',
+    '#800000': 'Maroon',
+    '#008000': 'Dark Green',
+    '#000080': 'Navy',
+    '#808000': 'Olive',
+    '#800080': 'Purple',
+    '#008080': 'Teal',
+    '#C0C0C0': 'Silver'
+  };
+  return colorNames[hex.toUpperCase()] || hex;
+}
+
+// Enhanced color extraction with usage-based categorization
+function extractCssColors(html: string): Array<{name: string, hex: string, usage: string, count: number}> {
+  const colors: Array<{name: string, hex: string, usage: string, count: number}> = [];
+  const colorCounts: Record<string, number> = {};
+  try {
+    // Count all hex colors
+    const allColorRegex = /#[0-9a-fA-F]{3,6}/g;
+    const matches = html.match(allColorRegex) || [];
+    matches.forEach(hex => {
+      const normalized = hex.toUpperCase();
+      colorCounts[normalized] = (colorCounts[normalized] || 0) + 1;
+    });
+
+    // Prepare regexes for usage
+    const backgroundColorRegex = /background-color:\s*(#[0-9a-fA-F]{3,6})/gi;
+    const colorRegex           = /(?:^|[^-])color:\s*(#[0-9a-fA-F]{3,6})/gi;
+    const borderColorRegex     = /border(?:-\w+)?-color:\s*(#[0-9a-fA-F]{3,6})/gi;
+    const boxShadowRegex       = /box-shadow:[^;]*?(#[0-9a-fA-F]{3,6})/gi;
+
+    // Extract each usage set
+    let match;
+    const backgroundColors = new Set<string>();
+    while ((match = backgroundColorRegex.exec(html)) !== null) {
+      backgroundColors.add(match[1].toUpperCase());
+    }
+    const textColors = new Set<string>();
+    while ((match = colorRegex.exec(html)) !== null) {
+      textColors.add(match[1].toUpperCase());
+    }
+    const borderColors = new Set<string>();
+    while ((match = borderColorRegex.exec(html)) !== null) {
+      borderColors.add(match[1].toUpperCase());
+    }
+    const accentColors = new Set<string>();
+    while ((match = boxShadowRegex.exec(html)) !== null) {
+      accentColors.add(match[1].toUpperCase());
+    }
+
+    // Helper to avoid duplicates
+    const processed = new Set<string>();
+
+    // Push by usage in order: Background → Text → Border → Accent
+    backgroundColors.forEach(hex => {
+      if (!processed.has(hex)) {
+        colors.push({ name: getColorName(hex), hex, usage: 'Background', count: colorCounts[hex] || 0 });
+        processed.add(hex);
+      }
+    });
+    textColors.forEach(hex => {
+      if (!processed.has(hex)) {
+        colors.push({ name: getColorName(hex), hex, usage: 'Text', count: colorCounts[hex] || 0 });
+        processed.add(hex);
+      }
+    });
+    borderColors.forEach(hex => {
+      if (!processed.has(hex)) {
+        colors.push({ name: getColorName(hex), hex, usage: 'Border', count: colorCounts[hex] || 0 });
+        processed.add(hex);
+      }
+    });
+    accentColors.forEach(hex => {
+      if (!processed.has(hex)) {
+        colors.push({ name: getColorName(hex), hex, usage: 'Accent', count: colorCounts[hex] || 0 });
+        processed.add(hex);
+      }
+    });
+
+    // Remaining frequent colors → Theme
+    Object.entries(colorCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .forEach(([hex, cnt]) => {
+        const upper = hex.toUpperCase();
+        if (!processed.has(upper) && cnt > 1) {
+          colors.push({ name: getColorName(upper), hex: upper, usage: 'Theme', count: cnt });
+          processed.add(upper);
+        }
+      });
+
+    // Fallback if nothing found
+    if (colors.length === 0) {
+      colors.push(
+        { name: 'Primary Text',  hex: '#000000', usage: 'Text',       count: 0 },
+        { name: 'Background',    hex: '#FFFFFF', usage: 'Background', count: 0 }
+      );
+    }
+  } catch (e) {
+    console.error('Color extraction error:', e);
+    return [
+      { name: 'Primary Text',  hex: '#000000', usage: 'Text',       count: 0 },
+      { name: 'Background',    hex: '#FFFFFF', usage: 'Background', count: 0 }
+    ];
+  }
+  return colors;
+}
+
 // Helper function to map color usage to expected buckets
 function mapColorUsage(usage: string): string {
   const lowerUsage = usage.toLowerCase();
@@ -211,6 +330,17 @@ export async function analyze(url: string): Promise<AnalysisResult> {
     // Extract image URLs from HTML
     const extractedImageUrls = extractImageUrls(html);
     
+    // Extract colors dynamically from HTML
+    const extractedColors = extractCssColors(html);
+    
+    // Map colors to the expected four buckets
+    const mappedColors = extractedColors.map(color => ({
+      name: color.name,
+      hex: color.hex,
+      usage: mapColorUsage(color.usage),
+      count: color.count
+    }));
+    
     // Basic mobile responsiveness check
     const hasViewportMeta = html.includes('viewport');
     const hasResponsiveCSS = html.includes('max-width') || html.includes('min-width');
@@ -267,18 +397,6 @@ export async function analyze(url: string): Promise<AnalysisResult> {
     const overallScore = Math.round((mobileScore + securityScore + (hasAltTags ? 80 : 60)) / 3);
     const seoScore = hasViewportMeta && hasAltTags ? 85 : 65;
     const userExperienceScore = mobileScore;
-
-    // Create properly mapped colors for the four expected buckets
-    const mappedColors = [
-      { name: 'Primary Background', hex: '#ffffff', usage: 'background', count: 12 },
-      { name: 'Secondary Background', hex: '#f5f5f5', usage: 'background', count: 8 },
-      { name: 'Primary Text', hex: '#333333', usage: 'text', count: 15 },
-      { name: 'Secondary Text', hex: '#666666', usage: 'text', count: 10 },
-      { name: 'Primary Theme', hex: '#1976d2', usage: 'theme', count: 5 },
-      { name: 'Secondary Theme', hex: '#0d47a1', usage: 'theme', count: 3 },
-      { name: 'Primary Accent', hex: '#dc004e', usage: 'accent', count: 4 },
-      { name: 'Secondary Accent', hex: '#ff6b35', usage: 'accent', count: 2 }
-    ];
 
     console.log(`Analysis completed for ${url}`);
 
