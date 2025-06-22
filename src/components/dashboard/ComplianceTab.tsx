@@ -131,6 +131,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
                   badgeContent={headersDetected}
                   color="primary"
                   sx={{
+                    mr: 1,
                     '& .MuiBadge-badge': {
                       backgroundColor: getSecurityScoreColor(securityScore),
                     },
