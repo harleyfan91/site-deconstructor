@@ -62,8 +62,8 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
   // Create content distribution data with consistent colors including text
   const contentTypes = [
     { name: 'Photos', value: estimatedPhotos, color: '#FF6B35' }, // Primary orange
-    { name: 'Icons', value: estimatedIcons, color: '#0984E3' }, // Secondary blue
-    { name: 'Text Content', value: estimatedTextContent, color: '#937B91' }, // Specified purple color
+    { name: 'Icons', value: estimatedIcons, color: '#937B91' }, // Secondary blue
+    { name: 'Text Content', value: estimatedTextContent, color: '#0984E3' }, // Specified purple color
     { name: 'Other Images', value: Math.max(0, totalImages - estimatedPhotos - estimatedIcons), color: theme.palette.grey[400] },
   ].filter(item => item.value > 0);
 
