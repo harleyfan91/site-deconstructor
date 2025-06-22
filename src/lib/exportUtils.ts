@@ -1,4 +1,3 @@
-
 import jsPDF from 'jspdf';
 import { analysesToCsv, analysesToJSON } from './export';
 import type { AnalysisResponse } from '@/types/analysis';
@@ -12,6 +11,7 @@ interface ExportOptions {
     seo: boolean;
     technical: boolean;
     compliance: boolean;
+    content: boolean;
   };
 }
 
@@ -39,7 +39,7 @@ export const exportAnalysis = async (data: AnalysisResponse, options: ExportOpti
       );
       break;
     case 'pdf':
-      await exportToPDF(filteredData, baseFileName);
+      await exportToPDF(filteredData, baseFileName, options.sections);
       break;
   }
 };
@@ -62,6 +62,7 @@ const filterDataBySections = (data: AnalysisResponse, sections: ExportOptions['s
   if (!sections.technical) {
     delete filtered.data.technical;
   }
+  // Note: content analysis is derived from existing data, so no filtering needed
   
   return filtered;
 };
@@ -78,7 +79,7 @@ const downloadFile = (content: string, fileName: string, mimeType: string): void
   URL.revokeObjectURL(url);
 };
 
-const exportToPDF = async (data: AnalysisResponse, baseFileName: string): Promise<void> => {
+const exportToPDF = async (data: AnalysisResponse, baseFileName: string, sections: ExportOptions['sections']): Promise<void> => {
   const pdf = new jsPDF();
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
@@ -289,7 +290,7 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string): Promis
     const letters = text.split('');
     let currentX = x;
     letters.forEach((letter, idx) => {
-      const ratio = letters.length === 1 ? 0 : idx / (letters.length - 1);
+      const ratio = letters.length === letters.length ? 0 : idx / (letters.length - 1);
       const r = Math.round(startRgb.r + (endRgb.r - startRgb.r) * ratio);
       const g = Math.round(startRgb.g + (endRgb.g - startRgb.g) * ratio);
       const b = Math.round(startRgb.b + (endRgb.b - startRgb.b) * ratio);
@@ -518,6 +519,65 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string): Promis
         });
       }
     }
+  }
+
+  // Content Analysis Section
+  if (sections.content && data.data.ui) {
+    addSection('Content Analysis');
+    
+    const imageData = data.data.ui.imageAnalysis;
+    const totalImages = imageData?.totalImages || 0;
+    const estimatedPhotos = imageData?.estimatedPhotos || 0;
+    const estimatedIcons = imageData?.estimatedIcons || 0;
+    const readabilityScore = data.readabilityScore || 0;
+    const metaTags = data.data?.seo?.metaTags || {};
+    
+    addMetricCard(
+      'Total Images', 
+      totalImages.toString(),
+      colors.info,
+      'Total number of images detected on the page'
+    );
+    
+    addMetricCard(
+      'Photos Detected', 
+      estimatedPhotos.toString(),
+      colors.primary,
+      'Estimated number of photos found'
+    );
+    
+    addMetricCard(
+      'Icons Detected', 
+      estimatedIcons.toString(),
+      colors.info,
+      'Estimated number of icons found'
+    );
+    
+    addMetricCard(
+      'Readability Score', 
+      `${readabilityScore}%`,
+      readabilityScore >= 60 ? colors.success : colors.warning,
+      'Flesch Reading Ease score for content readability'
+    );
+    
+    // Content metadata information
+    addSubtitle('Content Metadata:');
+    addText(`Title Tag: ${metaTags.title ? 'Present' : 'Missing'}`, 10, metaTags.title ? colors.success : colors.primary, 10);
+    addText(`Meta Description: ${metaTags.description ? 'Present' : 'Missing'}`, 10, metaTags.description ? colors.success : colors.primary, 10);
+    addText(`Canonical URL: ${metaTags.canonical ? 'Present' : 'Missing'}`, 10, metaTags.canonical ? colors.success : colors.primary, 10);
+    addText(`Open Graph Tags: ${(metaTags['og:title'] || metaTags['og:description']) ? 'Present' : 'Missing'}`, 10, (metaTags['og:title'] || metaTags['og:description']) ? colors.success : colors.primary, 10);
+    
+    // Content distribution
+    if (totalImages > 0) {
+      addSubtitle('Content Distribution:');
+      addText(`Photos: ${estimatedPhotos} (${Math.round((estimatedPhotos / totalImages) * 100)}%)`, 10, colors.text, 10);
+      addText(`Icons: ${estimatedIcons} (${Math.round((estimatedIcons / totalImages) * 100)}%)`, 10, colors.text, 10);
+      addText(`Other Images: ${totalImages - estimatedPhotos - estimatedIcons} (${Math.round(((totalImages - estimatedPhotos - estimatedIcons) / totalImages) * 100)}%)`, 10, colors.text, 10);
+    }
+    
+    // Alt text coverage
+    const altTextCoverage = totalImages > 0 ? Math.round((estimatedPhotos / totalImages) * 100) : 0;
+    addText(`Alt Text Coverage: ${altTextCoverage}%`, 10, altTextCoverage >= 80 ? colors.success : colors.warning, 10);
   }
 
   // Security Headers

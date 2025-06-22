@@ -36,6 +36,7 @@ interface ExportOptions {
     seo: boolean;
     technical: boolean;
     compliance: boolean;
+    content: boolean;
   };
 }
 
@@ -49,6 +50,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose, data }) => {
       seo: true,
       technical: true,
       compliance: true,
+      content: true,
     }
   });
   const [exporting, setExporting] = useState(false);
@@ -63,7 +65,6 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose, data }) => {
       sections: { ...prev.sections, [section]: !prev.sections[section] }
     }));
   };
-
 
   const handleExport = async () => {
     if (!data) return;
@@ -154,6 +155,15 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose, data }) => {
                   />
                 }
                 label="Compliance"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={options.sections.content}
+                    onChange={() => handleSectionChange('content')}
+                  />
+                }
+                label="Content Analysis"
               />
             </FormGroup>
           </FormControl>

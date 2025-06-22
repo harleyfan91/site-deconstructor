@@ -1,3 +1,4 @@
+
 export interface CSVOptions {
   delimiter?: string;
 }
@@ -5,6 +6,9 @@ export interface CSVOptions {
 import type { AnalysisResponse } from '@/types/analysis';
 
 function flatten(record: AnalysisResponse): Record<string, any> {
+  const imageData = record.data?.ui?.imageAnalysis;
+  const metaTags = record.data?.seo?.metaTags || {};
+  
   return {
     url: record.url ?? '',
     timestamp: record.timestamp ?? '',
@@ -16,6 +20,13 @@ function flatten(record: AnalysisResponse): Record<string, any> {
     seoScore: record.seoScore ?? '',
     readabilityScore: record.readabilityScore ?? '',
     complianceStatus: record.complianceStatus ?? '',
+    totalImages: imageData?.totalImages ?? '',
+    estimatedPhotos: imageData?.estimatedPhotos ?? '',
+    estimatedIcons: imageData?.estimatedIcons ?? '',
+    titleTag: metaTags.title ? 'Present' : 'Missing',
+    metaDescription: metaTags.description ? 'Present' : 'Missing',
+    canonicalUrl: metaTags.canonical ? 'Present' : 'Missing',
+    openGraphTags: (metaTags['og:title'] || metaTags['og:description']) ? 'Present' : 'Missing',
   };
 }
 
