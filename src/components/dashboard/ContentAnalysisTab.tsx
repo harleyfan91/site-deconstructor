@@ -88,13 +88,13 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
   const getStatusChipProps = (isPresent: boolean, label: string) => {
     if (isPresent) {
       return {
-        label: '✓ Present',
+        label: 'Present',
         color: 'success' as const,
         tooltip: `${label} is present and properly configured`
       };
     } else {
       return {
-        label: '✗ Missing',
+        label: 'Missing',
         color: 'error' as const,
         tooltip: `${label} is missing - this may impact SEO and accessibility`
       };
