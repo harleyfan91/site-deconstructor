@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Box, Typography, Card, CardContent, Chip, CircularProgress, Alert, Tooltip } from '@mui/material';
 import { Shield, Globe, Server, Database, Code, Layers, Zap, Activity, BarChart } from 'lucide-react';
@@ -200,6 +201,9 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
 
   // Main render
   const { technical } = data.data;
+  const adTags = data.data.adTags; // Extract adTags separately for better debugging
+
+  console.log('TechTab - adTags data:', adTags); // Debug log
 
   return (
     <Box>
@@ -208,6 +212,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
           Technical Analysis
         </Typography>
       </Box>
+      
       {/* Section: Tech Stack */}
       <Card sx={{ borderRadius: 2, mb: 3 }}>
         <CardContent sx={{ p: 3 }}>
@@ -229,49 +234,47 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
         </CardContent>
       </Card>
 
-      {/* Section: Detected Ad Tags */}
-      {data.data.adTags && (
-        <Card sx={{ borderRadius: 2, mb: 3 }}>
-          <CardContent sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-              Detected Ad Tags
-            </Typography>
-            <Box sx={{
-              display: 'grid',
-              gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
-              gap: 2
-            }}>
-              {adTagDescriptors.map(({ label, key }) => {
-                const isDetected = Boolean(data.data.adTags[key]);
-                return (
-                  <Tooltip
-                    key={key}
-                    title={isDetected ? `${label} detected on this website` : `${label} not found on this website`}
-                    enterDelay={300}
-                    enterTouchDelay={300}
-                  >
-                    <Chip
-                      label={label}
-                      {...chipStateStyle(isDetected, theme)}
-                      size="small"
-                      sx={{
-                        ...chipStateStyle(isDetected, theme).sx,
-                        justifyContent: 'center',
-                        textAlign: 'center',
-                        cursor: 'help',
-                        '& .MuiChip-label': {
-                          width: '100%',
-                          textAlign: 'center'
-                        }
-                      }}
-                    />
-                  </Tooltip>
-                );
-              })}
-            </Box>
-          </CardContent>
-        </Card>
-      )}
+      {/* Section: Detected Ad Tags - Always show, don't use conditional */}
+      <Card sx={{ borderRadius: 2, mb: 3 }}>
+        <CardContent sx={{ p: 3 }}>
+          <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
+            Detected Ad Tags
+          </Typography>
+          <Box sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
+            gap: 2
+          }}>
+            {adTagDescriptors.map(({ label, key }) => {
+              const isDetected = Boolean(adTags?.[key]);
+              return (
+                <Tooltip
+                  key={key}
+                  title={isDetected ? `${label} detected on this website` : `${label} not found on this website`}
+                  enterDelay={300}
+                  enterTouchDelay={300}
+                >
+                  <Chip
+                    label={label}
+                    {...chipStateStyle(isDetected, theme)}
+                    size="small"
+                    sx={{
+                      ...chipStateStyle(isDetected, theme).sx,
+                      justifyContent: 'center',
+                      textAlign: 'center',
+                      cursor: 'help',
+                      '& .MuiChip-label': {
+                        width: '100%',
+                        textAlign: 'center'
+                      }
+                    }}
+                  />
+                </Tooltip>
+              );
+            })}
+          </Box>
+        </CardContent>
+      </Card>
 
       {/* Section: Detected Social Tags */}
       <Card sx={{ borderRadius: 2, mb: 3 }}>
