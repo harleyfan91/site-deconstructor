@@ -34,13 +34,13 @@ const MobileDrawer: React.FC<MobileDrawerProps> = ({
   showUserIcon
 }) => {
   const drawer = (
-    <Box sx={{ width: 250, pt: 2 }}>
+    <Box sx={{ width: 250, pt: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', pr: 2, pb: 2 }}>
         <IconButton onClick={onDrawerToggle} color="inherit">
           <Close />
         </IconButton>
       </Box>
-      <List>
+      <List sx={{ flex: 1 }}>
         {navigationItems.map((item) => (
           <ListItem key={item.id} disablePadding>
             {item.type === 'link' ? (
@@ -84,12 +84,8 @@ const MobileDrawer: React.FC<MobileDrawerProps> = ({
             )}
           </ListItem>
         ))}
-        <ListItem>
-          {showUserIcon ? (
-            <IconButton color="inherit">
-              <AccountCircle />
-            </IconButton>
-          ) : (
+        {!showUserIcon && (
+          <ListItem>
             <Button
               variant="contained"
               fullWidth
@@ -103,9 +99,18 @@ const MobileDrawer: React.FC<MobileDrawerProps> = ({
             >
               Get Started
             </Button>
-          )}
-        </ListItem>
+          </ListItem>
+        )}
       </List>
+      
+      {/* User icon positioned at bottom right */}
+      {showUserIcon && (
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 2 }}>
+          <IconButton color="inherit">
+            <AccountCircle />
+          </IconButton>
+        </Box>
+      )}
     </Box>
   );
 
