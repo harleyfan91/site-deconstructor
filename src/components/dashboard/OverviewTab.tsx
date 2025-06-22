@@ -8,7 +8,6 @@ import {
   CircularProgress,
   Alert,
 } from '@mui/material';
-import { BarChart3, TrendingUp } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 import { useTheme } from '@mui/material/styles';
 import UrlDisplayBox from './overview/UrlDisplayBox';
@@ -95,6 +94,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
             bottom: 0,
             background: 'linear-gradient(to left, #FF6B35 0%, #FF6B35 12%, transparent 60%)',
             borderRadius: 0,
+            borderRadius: '8px'
           }}
         />
         {/* Content */}
@@ -129,48 +129,21 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
       {/* Popover for metric info (shows only when infoAnchor is set) */}
       <MetricInfoPopover anchorEl={infoAnchor} infoText={infoText} onClose={handleClosePopover} />
 
-      {/* Analysis Summary */}
       <Box sx={{ mt: 4 }}>
+        <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+          Analysis Summary
+        </Typography>
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 3 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-              <BarChart3 size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  fontWeight: 'bold',
-                  fontSize: { xs: '1.1rem', sm: '1.25rem' }
-                }}
-              >
-                Analysis Summary
-              </Typography>
-            </Box>
             <Typography variant="body1" paragraph>
               Analysis completed at {new Date(data.timestamp).toLocaleString()}.
               {data.data.overview.overallScore >= 80
                 ? ' The page shows excellent performance across most metrics.'
                 : ' The page has room for improvement in several areas.'}
             </Typography>
-          </CardContent>
-        </Card>
-      </Box>
-
-      {/* Key Findings */}
-      <Box sx={{ mt: 3 }}>
-        <Card sx={{ borderRadius: 2 }}>
-          <CardContent sx={{ p: 3 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-              <TrendingUp size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  fontWeight: 'bold',
-                  fontSize: { xs: '1.1rem', sm: '1.25rem' }
-                }}
-              >
-                Key Findings
-              </Typography>
-            </Box>
+            <Typography variant="body1" paragraph>
+              <strong>Key Findings:</strong>
+            </Typography>
             <KeyFindingsGrid overview={data.data.overview} theme={theme} />
           </CardContent>
         </Card>
