@@ -12,7 +12,6 @@ import {
   Tooltip,
   Collapse,
   IconButton,
-  Badge,
 } from '@mui/material';
 import { ChevronDown, ChevronUp, Shield } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
