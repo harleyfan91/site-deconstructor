@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Box, Typography, Card, CardContent, Chip, CircularProgress, Alert, Tooltip } from '@mui/material';
 import { CheckCircle, AlertCircle, XCircle, Search, Target, TrendingUp } from 'lucide-react';
@@ -135,7 +136,13 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
           <CardContent sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
               <Search size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  fontWeight: 'bold',
+                  fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                }}
+              >
                 SEO Checklist
               </Typography>
             </Box>
@@ -191,7 +198,13 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
             <CardContent sx={{ p: 3, textAlign: 'center' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, justifyContent: 'center' }}>
                 <Target size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                <Typography 
+                  variant="h6" 
+                  sx={{ 
+                    fontWeight: 'bold',
+                    fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                  }}
+                >
                   SEO Score
                 </Typography>
               </Box>
@@ -219,7 +232,13 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
             <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
                 <TrendingUp size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                <Typography 
+                  variant="h6" 
+                  sx={{ 
+                    fontWeight: 'bold',
+                    fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                  }}
+                >
                   Analysis Status
                 </Typography>
               </Box>
@@ -271,7 +290,13 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
           <CardContent sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
               <Target size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  fontWeight: 'bold',
+                  fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                }}
+              >
                 SEO Recommendations
               </Typography>
             </Box>

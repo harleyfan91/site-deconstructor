@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Box, Typography, Grid, Card, CardContent, LinearProgress, CircularProgress, Alert, Chip, Tooltip } from '@mui/material';
 import { FileText, PieChart, BarChart3, Tags } from 'lucide-react';
@@ -117,7 +118,13 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
           <CardContent sx={{ p: 3, height: '100%' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
               <PieChart size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  fontWeight: 'bold',
+                  fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                }}
+              >
                 Content Distribution
               </Typography>
             </Box>
@@ -154,7 +161,13 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
           <CardContent sx={{ p: 3, height: '100%' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
               <BarChart3 size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  fontWeight: 'bold',
+                  fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                }}
+              >
                 Content Structure Analysis
               </Typography>
             </Box>
@@ -176,7 +189,13 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
           <CardContent sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
               <FileText size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  fontWeight: 'bold',
+                  fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                }}
+              >
                 Text Content Quality
               </Typography>
             </Box>
@@ -293,7 +312,13 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
           <CardContent sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
               <Tags size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  fontWeight: 'bold',
+                  fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                }}
+              >
                 Content Metadata
               </Typography>
             </Box>

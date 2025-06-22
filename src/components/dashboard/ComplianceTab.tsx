@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   Box,
@@ -121,7 +122,13 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Shield size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                <Typography 
+                  variant="h6" 
+                  sx={{ 
+                    fontWeight: 'bold',
+                    fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                  }}
+                >
                   Security Headers
                 </Typography>
                 <Badge
@@ -168,7 +175,13 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
           <CardContent sx={{ p: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
               <Accessibility size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  fontWeight: 'bold',
+                  fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                }}
+              >
                 Accessibility Violations
               </Typography>
             </Box>
@@ -192,7 +205,13 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
         <CardContent sx={{ p: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
             <CheckCircle size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+            <Typography 
+              variant="h6" 
+              sx={{ 
+                fontWeight: 'bold',
+                fontSize: { xs: '1.1rem', sm: '1.25rem' }
+              }}
+            >
               Other Checks
             </Typography>
           </Box>

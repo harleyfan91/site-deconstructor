@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   Box,
@@ -131,7 +132,13 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
       <Box sx={{ mt: 4 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
           <BarChart3 size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+          <Typography 
+            variant="h6" 
+            sx={{ 
+              fontWeight: 'bold',
+              fontSize: { xs: '1.1rem', sm: '1.25rem' }
+            }}
+          >
             Analysis Summary
           </Typography>
         </Box>
@@ -146,7 +153,13 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
             <Typography variant="body1" paragraph>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                 <TrendingUp size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                <Typography 
+                  variant="h6" 
+                  sx={{ 
+                    fontWeight: 'bold',
+                    fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                  }}
+                >
                   Key Findings
                 </Typography>
               </Box>
