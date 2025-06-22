@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Box, Typography, Grid, Card, CardContent, LinearProgress, CircularProgress, Alert } from '@mui/material';
+import { Box, Typography, Grid, Card, CardContent, LinearProgress, CircularProgress, Alert, Chip, Tooltip } from '@mui/material';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis } from 'recharts';
 import { useTheme } from '@mui/material/styles';
@@ -55,11 +55,11 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
   const estimatedPhotos = imageData?.estimatedPhotos || 0;
   const estimatedIcons = imageData?.estimatedIcons || 0;
 
-  // Create content distribution data (focusing on content types)
+  // Create content distribution data with consistent colors
   const contentTypes = [
-    { name: 'Photos', value: estimatedPhotos, color: theme.palette.primary.main },
-    { name: 'Icons', value: estimatedIcons, color: theme.palette.success.main },
-    { name: 'Other Images', value: Math.max(0, totalImages - estimatedPhotos - estimatedIcons), color: theme.palette.warning.main },
+    { name: 'Photos', value: estimatedPhotos, color: '#FF6B35' }, // Primary orange
+    { name: 'Icons', value: estimatedIcons, color: '#0984E3' }, // Secondary blue
+    { name: 'Other Images', value: Math.max(0, totalImages - estimatedPhotos - estimatedIcons), color: theme.palette.grey[400] },
   ].filter(item => item.value > 0);
 
   // Content readability and text analysis data
@@ -67,7 +67,7 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
   const seoChecks = data.data?.seo?.checks || [];
   const metaTags = data.data?.seo?.metaTags || {};
 
-  // Content structure analysis
+  // Content structure analysis with consistent colors
   const contentStructureData = [
     { metric: 'Readability Score', score: readabilityScore, benchmark: 60 },
     { metric: 'Meta Description', score: metaTags.description ? 100 : 0, benchmark: 100 },
@@ -78,10 +78,27 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
   // Text accessibility metrics
   const textAccessibilityScore = seoChecks.filter(check => check.status === 'good').length / Math.max(seoChecks.length, 1) * 100;
 
-  // Use theme for chart config
+  // Use consistent chart colors
   const chartConfig = {
-    score: { label: 'Score', color: theme.palette.primary.main },
+    score: { label: 'Score', color: '#FF6B35' }, // Primary orange
     benchmark: { label: 'Benchmark', color: theme.palette.grey[400] }
+  };
+
+  // Helper function to get status chip props
+  const getStatusChipProps = (isPresent: boolean, label: string) => {
+    if (isPresent) {
+      return {
+        label: '✓ Present',
+        color: 'success' as const,
+        tooltip: `${label} is present and properly configured`
+      };
+    } else {
+      return {
+        label: '✗ Missing',
+        color: 'error' as const,
+        tooltip: `${label} is missing - this may impact SEO and accessibility`
+      };
+    }
   };
 
   return (
@@ -135,7 +152,7 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
                 <XAxis dataKey="metric" tick={{ fontSize: 10 }} />
                 <YAxis domain={[0, 100]} />
                 <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar dataKey="score" fill={theme.palette.primary.main} />
+                <Bar dataKey="score" fill="#FF6B35" />
                 <Bar dataKey="benchmark" fill={theme.palette.grey[300]} />
               </BarChart>
             </ChartContainer>
@@ -163,7 +180,7 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
                   borderRadius: 4, 
                   backgroundColor: theme.palette.grey[200], 
                   '& .MuiLinearProgress-bar': { 
-                    backgroundColor: readabilityScore >= 60 ? theme.palette.success.main : theme.palette.warning.main 
+                    backgroundColor: readabilityScore >= 60 ? '#43A047' : '#FF6B35' // Orange for needs improvement
                   } 
                 }} 
               />
@@ -189,7 +206,7 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
                   height: 8, 
                   borderRadius: 4, 
                   backgroundColor: theme.palette.grey[200], 
-                  '& .MuiLinearProgress-bar': { backgroundColor: theme.palette.info.main } 
+                  '& .MuiLinearProgress-bar': { backgroundColor: '#FF6B35' } // Orange theme
                 }} 
               />
             </Box>
@@ -208,7 +225,7 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
                   height: 8, 
                   borderRadius: 4, 
                   backgroundColor: theme.palette.grey[200], 
-                  '& .MuiLinearProgress-bar': { backgroundColor: theme.palette.success.main } 
+                  '& .MuiLinearProgress-bar': { backgroundColor: '#FF6B35' } // Orange theme
                 }} 
               />
             </Box>
@@ -222,31 +239,67 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
             </Typography>
             
             <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary">Title Tag</Typography>
-              <Typography variant="body2" sx={{ fontWeight: 'bold', wordBreak: 'break-word' }}>
-                {metaTags.title ? '✓ Present' : '✗ Missing'}
-              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>Title Tag</Typography>
+              <Tooltip 
+                title={getStatusChipProps(!!metaTags.title, 'Title Tag').tooltip}
+                enterDelay={300}
+                enterTouchDelay={300}
+              >
+                <Chip
+                  {...getStatusChipProps(!!metaTags.title, 'Title Tag')}
+                  size="small"
+                  variant="outlined"
+                  sx={{ cursor: 'help' }}
+                />
+              </Tooltip>
             </Box>
 
             <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary">Meta Description</Typography>
-              <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                {metaTags.description ? '✓ Present' : '✗ Missing'}
-              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>Meta Description</Typography>
+              <Tooltip 
+                title={getStatusChipProps(!!metaTags.description, 'Meta Description').tooltip}
+                enterDelay={300}
+                enterTouchDelay={300}
+              >
+                <Chip
+                  {...getStatusChipProps(!!metaTags.description, 'Meta Description')}
+                  size="small"
+                  variant="outlined"
+                  sx={{ cursor: 'help' }}
+                />
+              </Tooltip>
             </Box>
 
             <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary">Open Graph Tags</Typography>
-              <Typography variant="body2">
-                {metaTags['og:title'] || metaTags['og:description'] ? '✓ Present' : '✗ Missing'}
-              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>Open Graph Tags</Typography>
+              <Tooltip 
+                title={getStatusChipProps(!!(metaTags['og:title'] || metaTags['og:description']), 'Open Graph Tags').tooltip}
+                enterDelay={300}
+                enterTouchDelay={300}
+              >
+                <Chip
+                  {...getStatusChipProps(!!(metaTags['og:title'] || metaTags['og:description']), 'Open Graph Tags')}
+                  size="small"
+                  variant="outlined"
+                  sx={{ cursor: 'help' }}
+                />
+              </Tooltip>
             </Box>
 
             <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary">Canonical URL</Typography>
-              <Typography variant="body2">
-                {metaTags.canonical ? '✓ Present' : '✗ Missing'}
-              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>Canonical URL</Typography>
+              <Tooltip 
+                title={getStatusChipProps(!!metaTags.canonical, 'Canonical URL').tooltip}
+                enterDelay={300}
+                enterTouchDelay={300}
+              >
+                <Chip
+                  {...getStatusChipProps(!!metaTags.canonical, 'Canonical URL')}
+                  size="small"
+                  variant="outlined"
+                  sx={{ cursor: 'help' }}
+                />
+              </Tooltip>
             </Box>
 
             <Box>
