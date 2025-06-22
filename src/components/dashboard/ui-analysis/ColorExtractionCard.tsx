@@ -60,27 +60,51 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
     const usageGroups: Record<string, AnalysisResponse['data']['ui']['colors']> = {};
     
     colors.forEach(color => {
-      // Use the usage property from the backend, with fallback logic
+      // Map backend usage values to meaningful UI categories
       let usage = color.usage || 'Other';
       
-      // Map old generic terms to meaningful categories
-      if (usage === 'Primary' || usage === 'Secondary') {
-        // Try to infer usage based on color characteristics
-        const rgb = hexToRgb(color.hex);
-        if (rgb) {
-          const { r, g, b } = rgb;
-          const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-          
-          if (brightness > 240) {
-            usage = 'Background';
-          } else if (brightness < 50) {
-            usage = 'Text';
-          } else {
-            usage = 'Theme';
-          }
-        } else {
+      // Map all possible backend values to UI categories
+      switch (usage.toLowerCase()) {
+        case 'buttons':
+        case 'button':
+        case 'primary':
           usage = 'Theme';
-        }
+          break;
+        case 'accents':
+        case 'accent':
+        case 'secondary':
+          usage = 'Accent';
+          break;
+        case 'background':
+        case 'backgrounds':
+          usage = 'Background';
+          break;
+        case 'text':
+        case 'typography':
+        case 'font':
+          usage = 'Text';
+          break;
+        case 'border':
+        case 'borders':
+          usage = 'Border';
+          break;
+        default:
+          // For unknown usage values, try to infer based on color characteristics
+          const rgb = hexToRgb(color.hex);
+          if (rgb) {
+            const { r, g, b } = rgb;
+            const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+            
+            if (brightness > 240) {
+              usage = 'Background';
+            } else if (brightness < 50) {
+              usage = 'Text';
+            } else {
+              usage = 'Theme';
+            }
+          } else {
+            usage = 'Other';
+          }
       }
       
       if (!usageGroups[usage]) {
