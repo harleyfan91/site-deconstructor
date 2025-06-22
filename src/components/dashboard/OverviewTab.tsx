@@ -92,7 +92,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
             left: 0,
             right: '20px', // Stop before the edge
             bottom: 0,
-            background: 'linear-gradient(to left, #FF6B35 0%, #FF6B35 20%, transparent 60%)',
+            background: 'linear-gradient(to left, #FF6B35 0%, #FF6B35 15%, transparent 60%)',
             borderRadius: 0,
           }}
         />
