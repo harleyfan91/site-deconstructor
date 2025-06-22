@@ -1,9 +1,11 @@
 
-import lighthouse from 'lighthouse';
-import chromeLauncher from 'chrome-launcher';
-import axeCore from 'axe-core';
-import puppeteer from 'puppeteer';
-import fetch from 'node-fetch';
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
+// Use Deno-compatible imports
+const lighthouse = await import("npm:lighthouse@12.6.1");
+const chromeLauncher = await import("npm:chrome-launcher@1.0.0");
+const axeCore = await import("npm:axe-core@4.10.3");
+const puppeteer = await import("npm:puppeteer@23.10.4");
 
 interface LighthouseAudit {
   id: string;
@@ -48,6 +50,11 @@ interface AnalysisResult {
   };
 }
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
 // Helper function to map score to letter grade
 function mapScoreToGrade(score: number): string {
   if (score >= 90) return 'A';
@@ -63,9 +70,9 @@ export async function analyze(url: string): Promise<AnalysisResult> {
   try {
     // 1. Run Lighthouse analysis
     console.log('Launching Chrome for Lighthouse...');
-    const chrome = await chromeLauncher.launch({ chromeFlags: ['--headless'] });
+    const chrome = await chromeLauncher.default.launch({ chromeFlags: ['--headless'] });
     
-    const lighthouseResult = await lighthouse(url, {
+    const lighthouseResult = await lighthouse.default(url, {
       port: chrome.port,
       onlyCategories: ['performance', 'best-practices'],
     }) as { lhr: LighthouseResult };
@@ -106,14 +113,14 @@ export async function analyze(url: string): Promise<AnalysisResult> {
 
     // 2. Run Puppeteer + axe-core for accessibility
     console.log('Launching Puppeteer for accessibility analysis...');
-    const browser = await puppeteer.launch({ headless: true });
+    const browser = await puppeteer.default.launch({ headless: true });
     const page = await browser.newPage();
     
     await page.goto(url, { waitUntil: 'networkidle0' });
     
     // Inject axe-core
     await page.addScriptTag({
-      content: axeCore.source
+      content: axeCore.default.source
     });
     
     // Run axe analysis
@@ -193,6 +200,50 @@ export async function analyze(url: string): Promise<AnalysisResult> {
     };
   }
 }
+
+// Deno serve handler for the edge function
+serve(async (req) => {
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const url = new URL(req.url);
+    const targetUrl = url.searchParams.get('url');
+    
+    if (!targetUrl) {
+      return new Response(
+        JSON.stringify({ error: 'URL parameter is required' }),
+        { 
+          status: 400,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders }
+        }
+      );
+    }
+
+    console.log(`Analyzing URL: ${targetUrl}`);
+    const result = await analyze(targetUrl);
+    
+    return new Response(
+      JSON.stringify(result),
+      { 
+        status: 200,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders }
+      }
+    );
+    
+  } catch (error) {
+    console.error('Edge function error:', error);
+    return new Response(
+      JSON.stringify({ error: 'Internal server error' }),
+      { 
+        status: 500,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders }
+      }
+    );
+  }
+});
 
 // Export for testing purposes
 export { mapScoreToGrade };
