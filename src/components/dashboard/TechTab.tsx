@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Box, Typography, Card, CardContent, Chip, CircularProgress, Alert, Tooltip } from '@mui/material';
 import { Shield, Globe, Server, Database, Code, Layers, Zap, Activity, BarChart } from 'lucide-react';
@@ -31,6 +32,8 @@ function chipSeverityStyle(severity: string, theme: any) {
       color,
       background: "transparent",
       fontWeight: 600,
+      height: 22,
+      fontSize: '0.82rem'
     }
   };
 }
@@ -346,7 +349,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                 <Chip
                   label="Cookie Consent Script Detected"
                   {...chipStateStyle(true, theme)}
-                  size="medium"
+                  size="small"
                   sx={{ cursor: 'help' }}
                 />
               </Tooltip>
@@ -359,7 +362,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                 <Chip
                   label="No Cookie Consent Script Found"
                   {...chipStateStyle(false, theme)}
-                  size="medium"
+                  size="small"
                   sx={{ cursor: 'help' }}
                 />
               </Tooltip>
@@ -383,7 +386,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
               <Chip
                 label={`CSS: ${technical.minification?.cssMinified ? 'Minified' : 'Not Minified'}`}
                 {...chipStateStyle(Boolean(technical.minification?.cssMinified), theme)}
-                size="medium"
+                size="small"
                 sx={{ 
                   ...chipStateStyle(Boolean(technical.minification?.cssMinified), theme).sx, 
                   width: '100%',
@@ -399,7 +402,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
               <Chip
                 label={`JavaScript: ${technical.minification?.jsMinified ? 'Minified' : 'Not Minified'}`}
                 {...chipStateStyle(Boolean(technical.minification?.jsMinified), theme)}
-                size="medium"
+                size="small"
                 sx={{ 
                   ...chipStateStyle(Boolean(technical.minification?.jsMinified), theme).sx, 
                   width: '100%',
@@ -418,37 +421,48 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
               Technical Issues
             </Typography>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead>Severity</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {(technical.issues ?? []).map((issue, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{issue.type}</TableCell>
-                    <TableCell>{issue.description}</TableCell>
-                    <TableCell>
-                      <Chip
-                        label={issue.severity}
-                        {...chipSeverityStyle(issue.severity, theme)}
-                        size="small"
-                        sx={{
-                          ...chipSeverityStyle(issue.severity, theme).sx,
-                          height: 22,
-                          fontSize: '0.82rem'
-                        }}
-                      />
-                    </TableCell>
-                    <TableCell>{issue.status}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <div className="relative w-full overflow-auto">
+              <table className="w-full caption-bottom text-sm">
+                <thead className="[&_tr]:border-b">
+                  <tr>
+                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">Type</th>
+                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">Description</th>
+                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">Severity</th>
+                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="[&_tr:last-child]:border-0">
+                  {(technical.issues ?? []).map((issue, index) => (
+                    <tr key={index} className="border-b transition-colors [&:has([role=checkbox])]:pr-0">
+                      <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">{issue.type}</td>
+                      <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">{issue.description}</td>
+                      <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
+                        <Tooltip
+                          title={`${issue.severity.charAt(0).toUpperCase() + issue.severity.slice(1)} severity issue - ${
+                            issue.severity === 'high' ? 'requires immediate attention' :
+                            issue.severity === 'medium' ? 'should be addressed soon' :
+                            'low priority but worth fixing'
+                          }`}
+                          enterDelay={300}
+                          enterTouchDelay={300}
+                        >
+                          <Chip
+                            label={issue.severity}
+                            {...chipSeverityStyle(issue.severity, theme)}
+                            size="small"
+                            sx={{
+                              ...chipSeverityStyle(issue.severity, theme).sx,
+                              cursor: 'help'
+                            }}
+                          />
+                        </Tooltip>
+                      </td>
+                      <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">{issue.status}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </CardContent>
         </Card>
         <TechnicalHealthSummary healthGrade={technical.healthGrade} issues={technical.issues ?? []} />
