@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Box, Typography, Card, CardContent, Chip, CircularProgress, Alert, Tooltip } from '@mui/material';
-import { Shield, Globe, Server, Database, Code, Layers, Zap, Activity, BarChart } from 'lucide-react';
+import { Shield, Globe, Server, Database, Code, Layers, Zap, Activity, BarChart, Users, Cookie, Settings } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import type { AnalysisResponse } from '@/types/analysis';
 import TechStackGrid from './TechStackGrid';
@@ -109,9 +109,18 @@ function TechnicalHealthSummary({ healthGrade, issues }: { healthGrade: string, 
   return (
     <Card sx={{ borderRadius: 2 }}>
       <CardContent sx={{ p: 3 }}>
-        <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-          Technical Health
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+          <Activity size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+          <Typography 
+            variant="h6" 
+            sx={{ 
+              fontWeight: 'bold',
+              fontSize: { xs: '1.1rem', sm: '1.25rem' }
+            }}
+          >
+            Technical Health
+          </Typography>
+        </Box>
         <Box sx={{ mb: 3 }}>
           <Typography variant="h3" sx={{
             fontWeight: 'bold',
@@ -216,8 +225,15 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
       {/* Section: Tech Stack */}
       <Card sx={{ borderRadius: 2, mb: 3 }}>
         <CardContent sx={{ p: 3 }}>
-          <Box sx={{ mb: 3 }}>
-            <Typography variant="h6" sx={{ fontWeight: 'bold', display: 'inline' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+            <Layers size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+            <Typography 
+              variant="h6" 
+              sx={{ 
+                fontWeight: 'bold',
+                fontSize: { xs: '1.1rem', sm: '1.25rem' }
+              }}
+            >
               Tech Stack
             </Typography>
             <Typography variant="body2" sx={{
@@ -225,7 +241,6 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
               fontWeight: 'normal',
               color: 'text.secondary',
               ml: 1,
-              display: 'inline'
             }}>
               (Powered by Wappalyzer)
             </Typography>
@@ -237,9 +252,18 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
       {/* Section: Detected Ad Tags - Always show, don't use conditional */}
       <Card sx={{ borderRadius: 2, mb: 3 }}>
         <CardContent sx={{ p: 3 }}>
-          <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-            Detected Ad Tags
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+            <Zap size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+            <Typography 
+              variant="h6" 
+              sx={{ 
+                fontWeight: 'bold',
+                fontSize: { xs: '1.1rem', sm: '1.25rem' }
+              }}
+            >
+              Detected Ad Tags
+            </Typography>
+          </Box>
           <Box sx={{
             display: 'grid',
             gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
@@ -279,9 +303,18 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
       {/* Section: Detected Social Tags */}
       <Card sx={{ borderRadius: 2, mb: 3 }}>
         <CardContent sx={{ p: 3 }}>
-          <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-            Detected Social Tags
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+            <Users size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+            <Typography 
+              variant="h6" 
+              sx={{ 
+                fontWeight: 'bold',
+                fontSize: { xs: '1.1rem', sm: '1.25rem' }
+              }}
+            >
+              Detected Social Tags
+            </Typography>
+          </Box>
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 2 }}>
             <Tooltip
               title={technical.social?.hasOpenGraph ? 'Open Graph meta tags detected' : 'Open Graph meta tags not found'}
@@ -338,9 +371,18 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
       {/* Section: Cookie Banner & Consent Script */}
       <Card sx={{ borderRadius: 2, mb: 3 }}>
         <CardContent sx={{ p: 3 }}>
-          <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-            Detected Cookie Banner & Consent Script
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+            <Cookie size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+            <Typography 
+              variant="h6" 
+              sx={{ 
+                fontWeight: 'bold',
+                fontSize: { xs: '1.1rem', sm: '1.25rem' }
+              }}
+            >
+              Detected Cookie Banner & Consent Script
+            </Typography>
+          </Box>
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 2 }}>
             {technical.cookies?.hasCookieScript ? (
               <Tooltip
@@ -384,9 +426,18 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
       {/* Section: Minification Status */}
       <Card sx={{ borderRadius: 2, mb: 3 }}>
         <CardContent sx={{ p: 3 }}>
-          <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-            Minification Status
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+            <Settings size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+            <Typography 
+              variant="h6" 
+              sx={{ 
+                fontWeight: 'bold',
+                fontSize: { xs: '1.1rem', sm: '1.25rem' }
+              }}
+            >
+              Minification Status
+            </Typography>
+          </Box>
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 2 }}>
             <Tooltip
               title={technical.minification?.cssMinified ? 'CSS files are minified for better performance' : 'CSS files are not minified - consider minifying for better performance'}
@@ -428,9 +479,18 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 3 }}>
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-              Technical Issues
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+              <Shield size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  fontWeight: 'bold',
+                  fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                }}
+              >
+                Technical Issues
+              </Typography>
+            </Box>
             <div className="relative w-full overflow-auto">
               <table className="w-full caption-bottom text-sm">
                 <thead className="[&_tr]:border-b">

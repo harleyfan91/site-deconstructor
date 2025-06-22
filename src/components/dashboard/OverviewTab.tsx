@@ -130,20 +130,20 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
       <MetricInfoPopover anchorEl={infoAnchor} infoText={infoText} onClose={handleClosePopover} />
 
       <Box sx={{ mt: 4 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-          <BarChart3 size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-          <Typography 
-            variant="h6" 
-            sx={{ 
-              fontWeight: 'bold',
-              fontSize: { xs: '1.1rem', sm: '1.25rem' }
-            }}
-          >
-            Analysis Summary
-          </Typography>
-        </Box>
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 3 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+              <BarChart3 size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  fontWeight: 'bold',
+                  fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                }}
+              >
+                Analysis Summary
+              </Typography>
+            </Box>
             <Typography variant="body1" paragraph>
               Analysis completed at {new Date(data.timestamp).toLocaleString()}.
               {data.data.overview.overallScore >= 80
