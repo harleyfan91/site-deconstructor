@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Box, Typography, Card, CardContent, Chip, CircularProgress, Alert, Tooltip } from '@mui/material';
 import { Shield, Globe, Server, Database, Code, Layers, Zap, Activity, BarChart } from 'lucide-react';
@@ -350,7 +349,11 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                   label="Cookie Consent Script Detected"
                   {...chipStateStyle(true, theme)}
                   size="small"
-                  sx={{ cursor: 'help' }}
+                  sx={{ 
+                    ...chipStateStyle(true, theme).sx,
+                    width: '100%',
+                    cursor: 'help'
+                  }}
                 />
               </Tooltip>
             ) : (
@@ -363,7 +366,11 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                   label="No Cookie Consent Script Found"
                   {...chipStateStyle(false, theme)}
                   size="small"
-                  sx={{ cursor: 'help' }}
+                  sx={{ 
+                    ...chipStateStyle(false, theme).sx,
+                    width: '100%',
+                    cursor: 'help'
+                  }}
                 />
               </Tooltip>
             )}
