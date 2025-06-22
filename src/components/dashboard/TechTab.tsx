@@ -1,13 +1,7 @@
-// MUI imports
 import React from 'react';
-import { Box, Typography, Card, CardContent, Chip, CircularProgress, Alert } from '@mui/material';
-
-// Lucide icons
+import { Box, Typography, Card, CardContent, Chip, CircularProgress, Alert, Tooltip } from '@mui/material';
 import { Shield, Globe, Server, Database, Code, Layers, Zap, Activity, BarChart } from 'lucide-react';
-// Table UI component
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
-
-// Types
 import type { AnalysisResponse } from '@/types/analysis';
 import TechStackGrid from './TechStackGrid';
 import LegendContainer from './LegendContainer';
@@ -245,23 +239,33 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
               gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
               gap: 2
             }}>
-              {adTagDescriptors.map(({ label, key }) => (
-                <Chip
-                  key={key}
-                  label={label}
-                  {...chipStateStyle(Boolean(data.data.adTags[key]), theme)}
-                  size="small"
-                  sx={{
-                    ...chipStateStyle(Boolean(data.data.adTags[key]), theme).sx,
-                    justifyContent: 'center',
-                    textAlign: 'center',
-                    '& .MuiChip-label': {
-                      width: '100%',
-                      textAlign: 'center'
-                    }
-                  }}
-                />
-              ))}
+              {adTagDescriptors.map(({ label, key }) => {
+                const isDetected = Boolean(data.data.adTags[key]);
+                return (
+                  <Tooltip
+                    key={key}
+                    title={isDetected ? `${label} detected on this website` : `${label} not found on this website`}
+                    enterDelay={300}
+                    enterTouchDelay={300}
+                  >
+                    <Chip
+                      label={label}
+                      {...chipStateStyle(isDetected, theme)}
+                      size="small"
+                      sx={{
+                        ...chipStateStyle(isDetected, theme).sx,
+                        justifyContent: 'center',
+                        textAlign: 'center',
+                        cursor: 'help',
+                        '& .MuiChip-label': {
+                          width: '100%',
+                          textAlign: 'center'
+                        }
+                      }}
+                    />
+                  </Tooltip>
+                );
+              })}
             </Box>
           </CardContent>
         </Card>
@@ -274,24 +278,54 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
             Detected Social Tags
           </Typography>
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 2 }}>
-            <Chip
-              label="Open Graph Meta Tags"
-              {...chipStateStyle(Boolean(technical.social?.hasOpenGraph), theme)}
-              size="small"
-              sx={{ ...chipStateStyle(Boolean(technical.social?.hasOpenGraph), theme).sx, width: '100%' }}
-            />
-            <Chip
-              label="Twitter Card Meta Tags"
-              {...chipStateStyle(Boolean(technical.social?.hasTwitterCard), theme)}
-              size="small"
-              sx={{ ...chipStateStyle(Boolean(technical.social?.hasTwitterCard), theme).sx, width: '100%' }}
-            />
-            <Chip
-              label="Share Buttons"
-              {...chipStateStyle(Boolean(technical.social?.hasShareButtons), theme)}
-              size="small"
-              sx={{ ...chipStateStyle(Boolean(technical.social?.hasShareButtons), theme).sx, width: '100%' }}
-            />
+            <Tooltip
+              title={technical.social?.hasOpenGraph ? 'Open Graph meta tags detected' : 'Open Graph meta tags not found'}
+              enterDelay={300}
+              enterTouchDelay={300}
+            >
+              <Chip
+                label="Open Graph Meta Tags"
+                {...chipStateStyle(Boolean(technical.social?.hasOpenGraph), theme)}
+                size="small"
+                sx={{ 
+                  ...chipStateStyle(Boolean(technical.social?.hasOpenGraph), theme).sx, 
+                  width: '100%',
+                  cursor: 'help'
+                }}
+              />
+            </Tooltip>
+            <Tooltip
+              title={technical.social?.hasTwitterCard ? 'Twitter card meta tags detected' : 'Twitter card meta tags not found'}
+              enterDelay={300}
+              enterTouchDelay={300}
+            >
+              <Chip
+                label="Twitter Card Meta Tags"
+                {...chipStateStyle(Boolean(technical.social?.hasTwitterCard), theme)}
+                size="small"
+                sx={{ 
+                  ...chipStateStyle(Boolean(technical.social?.hasTwitterCard), theme).sx, 
+                  width: '100%',
+                  cursor: 'help'
+                }}
+              />
+            </Tooltip>
+            <Tooltip
+              title={technical.social?.hasShareButtons ? 'Share buttons detected on the website' : 'Share buttons not found on the website'}
+              enterDelay={300}
+              enterTouchDelay={300}
+            >
+              <Chip
+                label="Share Buttons"
+                {...chipStateStyle(Boolean(technical.social?.hasShareButtons), theme)}
+                size="small"
+                sx={{ 
+                  ...chipStateStyle(Boolean(technical.social?.hasShareButtons), theme).sx, 
+                  width: '100%',
+                  cursor: 'help'
+                }}
+              />
+            </Tooltip>
           </Box>
         </CardContent>
       </Card>
@@ -304,17 +338,31 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
           </Typography>
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 2 }}>
             {technical.cookies?.hasCookieScript ? (
-              <Chip
-                label="Cookie Consent Script Detected"
-                {...chipStateStyle(true, theme)}
-                size="medium"
-              />
+              <Tooltip
+                title="Cookie consent script detected on this website"
+                enterDelay={300}
+                enterTouchDelay={300}
+              >
+                <Chip
+                  label="Cookie Consent Script Detected"
+                  {...chipStateStyle(true, theme)}
+                  size="medium"
+                  sx={{ cursor: 'help' }}
+                />
+              </Tooltip>
             ) : (
-              <Chip
-                label="No Cookie Consent Script Found"
-                {...chipStateStyle(false, theme)}
-                size="medium"
-              />
+              <Tooltip
+                title="No cookie consent script found on this website"
+                enterDelay={300}
+                enterTouchDelay={300}
+              >
+                <Chip
+                  label="No Cookie Consent Script Found"
+                  {...chipStateStyle(false, theme)}
+                  size="medium"
+                  sx={{ cursor: 'help' }}
+                />
+              </Tooltip>
             )}
           </Box>
         </CardContent>
@@ -327,18 +375,38 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
             Minification Status
           </Typography>
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 2 }}>
-            <Chip
-              label={`CSS: ${technical.minification?.cssMinified ? 'Minified' : 'Not Minified'}`}
-              {...chipStateStyle(Boolean(technical.minification?.cssMinified), theme)}
-              size="medium"
-              sx={{ ...chipStateStyle(Boolean(technical.minification?.cssMinified), theme).sx, width: '100%' }}
-            />
-            <Chip
-              label={`JavaScript: ${technical.minification?.jsMinified ? 'Minified' : 'Not Minified'}`}
-              {...chipStateStyle(Boolean(technical.minification?.jsMinified), theme)}
-              size="medium"
-              sx={{ ...chipStateStyle(Boolean(technical.minification?.jsMinified), theme).sx, width: '100%' }}
-            />
+            <Tooltip
+              title={technical.minification?.cssMinified ? 'CSS files are minified for better performance' : 'CSS files are not minified - consider minifying for better performance'}
+              enterDelay={300}
+              enterTouchDelay={300}
+            >
+              <Chip
+                label={`CSS: ${technical.minification?.cssMinified ? 'Minified' : 'Not Minified'}`}
+                {...chipStateStyle(Boolean(technical.minification?.cssMinified), theme)}
+                size="medium"
+                sx={{ 
+                  ...chipStateStyle(Boolean(technical.minification?.cssMinified), theme).sx, 
+                  width: '100%',
+                  cursor: 'help'
+                }}
+              />
+            </Tooltip>
+            <Tooltip
+              title={technical.minification?.jsMinified ? 'JavaScript files are minified for better performance' : 'JavaScript files are not minified - consider minifying for better performance'}
+              enterDelay={300}
+              enterTouchDelay={300}
+            >
+              <Chip
+                label={`JavaScript: ${technical.minification?.jsMinified ? 'Minified' : 'Not Minified'}`}
+                {...chipStateStyle(Boolean(technical.minification?.jsMinified), theme)}
+                size="medium"
+                sx={{ 
+                  ...chipStateStyle(Boolean(technical.minification?.jsMinified), theme).sx, 
+                  width: '100%',
+                  cursor: 'help'
+                }}
+              />
+            </Tooltip>
           </Box>
         </CardContent>
       </Card>
