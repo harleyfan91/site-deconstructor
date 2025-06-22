@@ -34,15 +34,13 @@ const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnal
     }));
   };
 
-
   // Use real scraped URLs, make sure they're arrays even if undefined
   const imageUrls = imageAnalysis?.imageUrls || [];
   const photoUrls = imageAnalysis?.photoUrls || [];
   const iconUrls = imageAnalysis?.iconUrls || [];
 
   const truncateUrl = (url: string, length = 80) =>
-    url.length > length ? `${url.slice(0, length)}[...]` : url;
-
+    url.length > length ? `${url.slice(0, length)}...` : url;
 
   const totalImagesCount = imageAnalysis?.totalImages || images.reduce((acc, img) => acc + img.count, 0);
   const photosCount = imageAnalysis?.estimatedPhotos || images.find(img => img.type === 'Estimated Photos')?.count || 0;
@@ -92,28 +90,20 @@ const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnal
                   {section.urls && section.urls.length > 0 ? (
                     <List dense>
                       {section.urls.map((url, idx) => (
-                        <ListItem key={idx} disableGutters>
+                        <ListItem key={idx} disableGutters sx={{ py: 0.5 }}>
                           <Link
                             href={url}
                             target="_blank"
                             rel="noopener noreferrer"
                             underline="hover"
                             title={url}
-                            sx={{ maxWidth: '100%' }}
+                            sx={{ 
+                              maxWidth: '100%',
+                              wordBreak: 'break-all',
+                              fontSize: '0.875rem'
+                            }}
                           >
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap',
-                                maxWidth: '100%',
-                                display: 'block'
-                              }}
-                            >
-                              {truncateUrl(url)}
-                            </Typography>
-
+                            {truncateUrl(url)}
                           </Link>
                         </ListItem>
                       ))}

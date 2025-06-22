@@ -55,56 +55,20 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
     return groups;
   };
 
-  // Group colors by usage category
+  // Group colors by usage category - preserve original backend usage values
   const groupByUsage = (): UsageGroup[] => {
     const usageGroups: Record<string, AnalysisResponse['data']['ui']['colors']> = {};
     
     colors.forEach(color => {
-      // Map backend usage values to meaningful UI categories
+      // Use original usage value from backend, with minimal cleanup
       let usage = color.usage || 'Other';
       
-      // Map all possible backend values to UI categories
-      switch (usage.toLowerCase()) {
-        case 'buttons':
-        case 'button':
-        case 'primary':
-          usage = 'Theme';
-          break;
-        case 'accents':
-        case 'accent':
-        case 'secondary':
-          usage = 'Accent';
-          break;
-        case 'background':
-        case 'backgrounds':
-          usage = 'Background';
-          break;
-        case 'text':
-        case 'typography':
-        case 'font':
-          usage = 'Text';
-          break;
-        case 'border':
-        case 'borders':
-          usage = 'Border';
-          break;
-        default:
-          // For unknown usage values, try to infer based on color characteristics
-          const rgb = hexToRgb(color.hex);
-          if (rgb) {
-            const { r, g, b } = rgb;
-            const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-            
-            if (brightness > 240) {
-              usage = 'Background';
-            } else if (brightness < 50) {
-              usage = 'Text';
-            } else {
-              usage = 'Theme';
-            }
-          } else {
-            usage = 'Other';
-          }
+      // Only normalize casing and basic cleanup, don't remap to different categories
+      usage = usage.charAt(0).toUpperCase() + usage.slice(1).toLowerCase();
+      
+      // Handle plural forms
+      if (usage.endsWith('s') && usage !== 'Buttons') {
+        usage = usage.slice(0, -1);
       }
       
       if (!usageGroups[usage]) {
@@ -113,8 +77,8 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
       usageGroups[usage].push(color);
     });
 
-    // Sort usage groups by importance
-    const usageOrder = ['Background', 'Text', 'Theme', 'Accent', 'Border', 'Other'];
+    // Sort usage groups by importance, preserving original categories
+    const usageOrder = ['Background', 'Text', 'Button', 'Border', 'Other'];
     const sortedGroups = usageOrder
       .filter(usage => usageGroups[usage])
       .map(usage => ({
@@ -125,6 +89,7 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
     // Add any remaining groups not in the predefined order
     Object.keys(usageGroups)
       .filter(usage => !usageOrder.includes(usage))
+      .sort()
       .forEach(usage => {
         sortedGroups.push({
           name: usage,
@@ -135,51 +100,49 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
     return sortedGroups;
   };
 
-  const hexToRgb = (hex: string): {r:number;g:number;b:number} | null => {
-    const match = hex.replace('#','').match(/^([0-9a-f]{3}|[0-9a-f]{6})$/i);
-    if (!match) return null;
-    let h = match[0];
-    if (h.length === 3) h = h.split('').map(c=>c+c).join('');
-    const num = parseInt(h, 16);
-    return {r:(num>>16)&255, g:(num>>8)&255, b:num&255};
-  };
-
   const usageGroups = groupByUsage();
 
-  // Initialize sections when colors change, but respect any stored state
+  // Initialize sections and auto-collapse functionality
   React.useEffect(() => {
-    const hadStoredState = Object.keys(expandedSections).length > 0;
-    let hasNewSection = false;
-    setExpandedSections(prev => {
-      const updated = { ...prev };
+    const hasStoredState = Object.keys(expandedSections).length > 0;
+    
+    // Set all sections to expanded initially if no stored state
+    if (!hasStoredState) {
+      const initialState: Record<string, boolean> = {};
       usageGroups.forEach(group => {
-        if (!(group.name in updated)) {
-          updated[group.name] = true;
-          hasNewSection = true;
-        }
+        initialState[group.name] = true;
       });
-      return updated;
-    });
+      setExpandedSections(initialState);
 
-    let timer: NodeJS.Timeout | undefined;
-    if (!hadStoredState && hasNewSection) {
-      timer = setTimeout(() => {
+      // Auto-collapse all sections except the first one after a delay
+      const timer = setTimeout(() => {
         setExpandedSections(prev => {
           const updated: Record<string, boolean> = { ...prev };
-          Object.keys(updated).forEach(name => {
-            if (name !== 'Background') {
-              updated[name] = false;
+          usageGroups.forEach((group, index) => {
+            if (index > 0) {
+              updated[group.name] = false;
             }
           });
           return updated;
         });
       }, 2500);
-    }
 
-    return () => {
-      if (timer) clearTimeout(timer);
-    };
-  }, [colors]);
+      return () => clearTimeout(timer);
+    } else {
+      // Ensure any new sections are expanded by default
+      setExpandedSections(prev => {
+        const updated = { ...prev };
+        let hasNewSection = false;
+        usageGroups.forEach(group => {
+          if (!(group.name in updated)) {
+            updated[group.name] = true;
+            hasNewSection = true;
+          }
+        });
+        return updated;
+      });
+    }
+  }, [colors, usageGroups.length]);
 
   return (
     <Box>
