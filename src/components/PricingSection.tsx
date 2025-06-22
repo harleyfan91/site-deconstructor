@@ -24,6 +24,54 @@ const PricingSection = () => {
         minHeight: { xs: 600, md: 780 },
       }}
     >
+      {/* Floating decorative shapes */}
+      <motion.div
+        animate={{
+          y: [0, 15, 0],
+          rotate: [0, 4, 0],
+        }}
+        transition={{
+          duration: 10,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 2,
+        }}
+        style={{
+          position: 'absolute',
+          top: '25%',
+          left: '5%',
+          width: 75,
+          height: 75,
+          background: 'linear-gradient(45deg, #0984E3, #42A5F5)',
+          borderRadius: '50%',
+          opacity: 0.09,
+          zIndex: 0,
+        }}
+      />
+      <motion.div
+        animate={{
+          y: [0, -22, 0],
+          rotate: [0, -6, 0],
+        }}
+        transition={{
+          duration: 7,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 5,
+        }}
+        style={{
+          position: 'absolute',
+          bottom: '20%',
+          right: '8%',
+          width: 55,
+          height: 55,
+          background: 'linear-gradient(45deg, #FF6B35, #FF8A65)',
+          borderRadius: '16px',
+          opacity: 0.11,
+          zIndex: 0,
+        }}
+      />
+
       {/* Decorative background absolutely positioned with zIndex: 0 */}
       <Box
         sx={{
@@ -106,4 +154,3 @@ const PricingSection = () => {
   );
 };
 export default PricingSection;
-

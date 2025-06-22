@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Box, Container, Typography } from '@mui/material';
 // MUI icons used for features
@@ -85,6 +86,53 @@ const FeatureShowcase = () => {
         // Masked/gradient background is rendered as absolute below
       }}
     >
+      {/* Floating decorative shapes */}
+      <motion.div
+        animate={{
+          y: [0, -15, 0],
+          rotate: [0, 3, 0],
+        }}
+        transition={{
+          duration: 7,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        style={{
+          position: 'absolute',
+          top: '15%',
+          left: '8%',
+          width: 50,
+          height: 50,
+          background: 'linear-gradient(45deg, #0984E3, #42A5F5)',
+          borderRadius: '50%',
+          opacity: 0.12,
+          zIndex: 0,
+        }}
+      />
+      <motion.div
+        animate={{
+          y: [0, 18, 0],
+          rotate: [0, -4, 0],
+        }}
+        transition={{
+          duration: 9,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 3,
+        }}
+        style={{
+          position: 'absolute',
+          bottom: '25%',
+          right: '12%',
+          width: 70,
+          height: 70,
+          background: 'linear-gradient(45deg, #FF6B35, #FF8A65)',
+          borderRadius: '16px',
+          opacity: 0.1,
+          zIndex: 0,
+        }}
+      />
+
       {/* Masked/gradient background, absolutely positioned and masked */}
       <Box
         sx={{

@@ -12,27 +12,23 @@ const UrlDisplayBox: React.FC<UrlDisplayBoxProps> = ({ url }) => {
       sx={{
         display: 'flex',
         alignItems: 'center',
-        bgcolor: 'background.paper',
-        border: '1px solid rgba(0,0,0,0.1)',
-        borderRadius: 1,
-        px: 2,
-        py: 1,
-        width: '49%',
         minWidth: 0,
+        flex: 1,
       }}
     >
       <Typography
         variant="caption"
         sx={{
           fontSize: { xs: '0.8rem', sm: '0.85rem' },
-          color: 'text.secondary',
+          color: 'white',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
           cursor: 'pointer',
           fontWeight: 'bold',
-          textAlign: 'center',
+          textAlign: 'right',
           width: '100%',
+          textShadow: '0 1px 2px rgba(0,0,0,0.3)',
         }}
         component={Link}
         href={url}

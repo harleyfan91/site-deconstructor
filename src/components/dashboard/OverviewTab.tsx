@@ -74,12 +74,44 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
 
   return (
     <Box>
-      {/* Header with title and styled URL box */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, gap: 2 }}>
-        <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-          Website Overview
-        </Typography>
-        <UrlDisplayBox url={data.url} />
+      {/* Header with title and styled URL background */}
+      <Box 
+        sx={{ 
+          position: 'relative',
+          mb: 3,
+          mx: -3, // Extend beyond card padding
+          px: 3, // Add padding back for content
+          py: 2,
+        }}
+      >
+        {/* Orange gradient background */}
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'linear-gradient(to left, #FF6B35 0%, transparent 100%)',
+            borderRadius: '8px 8px 0 0',
+          }}
+        />
+        {/* Content */}
+        <Box 
+          sx={{ 
+            position: 'relative',
+            zIndex: 1,
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center', 
+            gap: 2 
+          }}
+        >
+          <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'white', textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}>
+            Website Overview
+          </Typography>
+          <UrlDisplayBox url={data.url} />
+        </Box>
       </Box>
 
       {/* Styled divider matching Font Analysis and SEO Checklist */}

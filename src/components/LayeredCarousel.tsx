@@ -1,3 +1,4 @@
+
 import React from 'react';
 import SwipeableViews from 'react-swipeable-views';
 import {
@@ -9,6 +10,7 @@ import {
   useTheme,
 } from '@mui/material';
 import { KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material';
+import { motion } from 'framer-motion';
 
 const screenshots = [
   'https://via.placeholder.com/400x300?text=Screenshot+1',
@@ -42,7 +44,55 @@ const LayeredCarousel = () => {
         bgcolor: 'transparent',
       }}
     >
-      <Container maxWidth="lg" sx={{ position: 'relative' }}>
+      {/* Floating decorative shapes */}
+      <motion.div
+        animate={{
+          y: [0, -12, 0],
+          rotate: [0, -3, 0],
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 1,
+        }}
+        style={{
+          position: 'absolute',
+          top: '20%',
+          right: '10%',
+          width: 60,
+          height: 60,
+          background: 'linear-gradient(45deg, #FF6B35, #FF8A65)',
+          borderRadius: '16px',
+          opacity: 0.08,
+          zIndex: 0,
+        }}
+      />
+      <motion.div
+        animate={{
+          y: [0, 20, 0],
+          rotate: [0, 5, 0],
+        }}
+        transition={{
+          duration: 6,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 4,
+        }}
+        style={{
+          position: 'absolute',
+          bottom: '15%',
+          left: '15%',
+          width: 45,
+          height: 45,
+          background: 'linear-gradient(45deg, #0984E3, #42A5F5)',
+          borderRadius: '50%',
+          opacity: 0.1,
+          zIndex: 0,
+        }}
+      />
+
+      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
         <Box sx={{ overflow: 'visible' }}>
           <SwipeableViews
             index={activeStep}
