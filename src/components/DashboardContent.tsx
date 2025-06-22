@@ -78,7 +78,7 @@ const DashboardContent = () => {
                 zIndex: 10,
                 backgroundColor: 'background.paper',
                 pt: 1,
-                pb: 2,
+                pb: 1,
                 mb: 2,
                 borderBottom: '1px solid',
                 borderColor: 'divider',
