@@ -12,7 +12,6 @@ import {
   Tooltip,
   Collapse,
   IconButton,
-  Badge,
 } from '@mui/material';
 import { ChevronDown, ChevronUp, Shield } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
@@ -127,13 +126,16 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 2 }}>
-                <Badge
-                  badgeContent={headersDetected}
-                  color="primary"
+                <Chip
+                  label={`${headersDetected} of ${securityEntries.length}`}
+                  variant="outlined"
+                  size="small"
                   sx={{
-                    '& .MuiBadge-badge': {
-                      backgroundColor: getSecurityScoreColor(securityScore),
-                    },
+                    borderColor: getSecurityScoreColor(securityScore),
+                    color: getSecurityScoreColor(securityScore),
+                    backgroundColor: `${getSecurityScoreColor(securityScore)}20`,
+                    fontWeight: 600,
+                    mr: 1,
                   }}
                 />
                 <Chip
