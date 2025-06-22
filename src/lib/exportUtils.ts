@@ -197,38 +197,62 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string): Promis
     if (col !== 0) yPosition += cellHeight;
   };
 
-  const addMetricCard = (title: string, value: string, color: string, description?: string) => {
-    addNewPageIfNeeded(40);
-    
+  let currentColumn = 0;
+  const columnGap = 10;
+
+  const addMetricCard = (
+    title: string,
+    value: string,
+    color: string,
+    description?: string
+  ) => {
+    const cardWidth = (pageWidth - margin * 2 - columnGap) / 2;
+    const cardHeight = 35;
+
+    if (currentColumn === 0) {
+      addNewPageIfNeeded(cardHeight + 10);
+    }
+
+    const x = margin + currentColumn * (cardWidth + columnGap);
+
     // Card background
     pdf.setFillColor(245, 245, 245);
-    pdf.rect(margin, yPosition - 5, pageWidth - (margin * 2), 35, 'F');
-    
+    pdf.rect(x, yPosition - 5, cardWidth, cardHeight, 'F');
+
     // Title
     pdf.setFontSize(11);
     pdf.setFont('helvetica', 'bold');
     pdf.setTextColor(colors.text);
-    pdf.text(title, margin + 5, yPosition + 5);
-    
+    pdf.text(title, x + 5, yPosition + 5);
+
     // Value
     pdf.setFontSize(14);
     pdf.setFont('helvetica', 'bold');
     pdf.setTextColor(color);
-    pdf.text(value, margin + 5, yPosition + 15);
-    
+    pdf.text(value, x + 5, yPosition + 15);
+
     // Description
     if (description) {
       pdf.setFontSize(9);
       pdf.setFont('helvetica', 'normal');
       pdf.setTextColor(colors.darkGray);
-      const descLines = pdf.splitTextToSize(description, pageWidth - (margin * 2) - 10);
-      pdf.text(descLines, margin + 5, yPosition + 25);
+      const descLines = pdf.splitTextToSize(description, cardWidth - 10);
+      pdf.text(descLines, x + 5, yPosition + 25);
     }
-    
-    yPosition += 45;
+
+    if (currentColumn === 0) {
+      currentColumn = 1;
+    } else {
+      currentColumn = 0;
+      yPosition += 45;
+    }
   };
 
   const addSection = (title: string, content?: any) => {
+    if (currentColumn === 1) {
+      currentColumn = 0;
+      yPosition += 45;
+    }
     addNewPageIfNeeded(50);
     
     // Section header with line
