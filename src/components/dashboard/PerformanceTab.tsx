@@ -14,6 +14,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart';
 import { BarChart as RechartsBarChart, Bar, XAxis, YAxis } from 'recharts';
 import { Shield, Smartphone, Zap, Activity, ShieldCheck, Gauge, BarChart } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
+import { useAnalysisContext } from '../../contexts/AnalysisContext';
 
 // Helper to determine score color given a numeric score
 const getScoreColor = (score: number) => {
@@ -73,7 +74,21 @@ function MetricCard({
 }
 
 // Renders the section with multiple metric cards at the top of the panel
-function MetricsSection({ performanceScore }: { performanceScore: number }) {
+function MetricsSection({ performanceScore, mobileScore, securityGrade }: { 
+  performanceScore: number; 
+  mobileScore: number; 
+  securityGrade: string; 
+}) {
+  const getGradeColor = (grade: string) => {
+    switch (grade) {
+      case 'A': return '#4CAF50';
+      case 'B': return '#2196F3';
+      case 'C': return '#FF9800';
+      case 'D': case 'F': return '#F44336';
+      default: return '#9E9E9E';
+    }
+  };
+
   const metrics = [
     {
       title: 'Performance Score',
@@ -88,17 +103,17 @@ function MetricsSection({ performanceScore }: { performanceScore: number }) {
           : 'Needs Improvement',
     },
     {
-      title: 'Mobile Responsiveness',
-      value: '—',
+      title: 'Mobile Score',
+      value: `${mobileScore}%`,
       icon: Smartphone,
-      color: '#4CAF50',
-      description: 'Not yet implemented',
+      color: getScoreColor(mobileScore),
+      description: 'Mobile Responsiveness',
     },
     {
-      title: 'Security Score',
-      value: '—',
+      title: 'Security Grade',
+      value: securityGrade,
       icon: Shield,
-      color: '#4CAF50',
+      color: getGradeColor(securityGrade),
       description: 'Based on security headers',
     },
   ];
@@ -235,6 +250,199 @@ function SecurityHeadersSection({ securityHeaders }: { securityHeaders: Analysis
   );
 }
 
+// Mobile Responsiveness Section
+function MobileResponsivenessSection() {
+  const { data, loading, error } = useAnalysisContext();
+
+  if (loading) {
+    return (
+      <Card sx={{ borderRadius: 2 }}>
+        <CardContent sx={{ p: 3 }}>
+          <Box display="flex" alignItems="center" mb={2}>
+            <Smartphone size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+              Mobile Responsiveness Details
+            </Typography>
+          </Box>
+          <Box display="flex" justifyContent="center" alignItems="center" py={2}>
+            <CircularProgress size={24} />
+            <Typography variant="body2" sx={{ ml: 2 }}>
+              Analyzing mobile responsiveness...
+            </Typography>
+          </Box>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card sx={{ borderRadius: 2 }}>
+        <CardContent sx={{ p: 3 }}>
+          <Alert severity="error">
+            Error loading mobile responsiveness data: {error}
+          </Alert>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const { score = 0, issues = [] } = data?.mobileResponsiveness || {};
+
+  return (
+    <Card sx={{ borderRadius: 2 }}>
+      <CardContent sx={{ p: 3 }}>
+        <Box display="flex" alignItems="center" mb={2}>
+          <Smartphone size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+            Mobile Responsiveness Details
+          </Typography>
+        </Box>
+        
+        <Box mb={3}>
+          <Box display="flex" alignItems="center" mb={1}>
+            <Typography variant="body2" sx={{ mr: 2 }}>Mobile Performance Score</Typography>
+            <Typography variant="h4" color="primary">
+              {score}%
+            </Typography>
+          </Box>
+          <LinearProgress 
+            variant="determinate" 
+            value={score} 
+            sx={{ height: 8, borderRadius: 4 }}
+          />
+        </Box>
+
+        <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
+          Detected Issues
+        </Typography>
+        
+        {issues.length > 0 ? (
+          issues.map((issue, idx) => (
+            <Card key={idx} sx={{ mb: 1, backgroundColor: 'warning.light' }}>
+              <CardContent sx={{ py: 1.5 }}>
+                <Typography variant="subtitle2" color="warning.dark" gutterBottom>
+                  {issue.title}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {issue.description}
+                </Typography>
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'text.secondary' }}>
+            No mobile issues detected.
+          </Typography>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+// Security Score Section
+function SecurityScoreSection() {
+  const { data, loading, error } = useAnalysisContext();
+
+  const getGradeColor = (grade: string) => {
+    switch (grade) {
+      case 'A': return '#4CAF50';
+      case 'B': return '#2196F3';
+      case 'C': return '#FF9800';
+      case 'D': case 'F': return '#F44336';
+      default: return '#9E9E9E';
+    }
+  };
+
+  if (loading) {
+    return (
+      <Card sx={{ borderRadius: 2 }}>
+        <CardContent sx={{ p: 3 }}>
+          <Box display="flex" alignItems="center" mb={2}>
+            <Shield size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+              Security Score Details
+            </Typography>
+          </Box>
+          <Box display="flex" justifyContent="center" alignItems="center" py={2}>
+            <CircularProgress size={24} />
+            <Typography variant="body2" sx={{ ml: 2 }}>
+              Analyzing security...
+            </Typography>
+          </Box>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card sx={{ borderRadius: 2 }}>
+        <CardContent sx={{ p: 3 }}>
+          <Alert severity="error">
+            Error loading security data: {error}
+          </Alert>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const { grade = '—', findings = [] } = data?.securityScore || {};
+
+  return (
+    <Card sx={{ borderRadius: 2 }}>
+      <CardContent sx={{ p: 3 }}>
+        <Box display="flex" alignItems="center" mb={2}>
+          <Shield size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+            Security Score Details
+          </Typography>
+        </Box>
+        
+        <Box sx={{ textAlign: 'center', mb: 3 }}>
+          <Chip 
+            label={`Grade: ${grade}`} 
+            sx={{
+              backgroundColor: getGradeColor(grade),
+              color: 'white',
+              fontSize: '1.2rem',
+              py: 2,
+              fontWeight: 'bold'
+            }}
+            size="medium"
+          />
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            Overall Security Grade
+          </Typography>
+        </Box>
+
+        <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
+          Security Findings
+        </Typography>
+        
+        {findings.length > 0 ? (
+          findings.map((finding, i) => (
+            <Card key={i} sx={{ mb: 1, backgroundColor: 'error.light' }}>
+              <CardContent sx={{ py: 1.5 }}>
+                <Typography variant="subtitle2" color="error.dark" gutterBottom>
+                  {finding.title}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {finding.description}
+                </Typography>
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'text.secondary' }}>
+            No security issues detected.
+          </Typography>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 // Recommendations
 function RecommendationsSection({ recommendations }: { recommendations: AnalysisResponse["data"]["performance"]["recommendations"] }) {
   const getRecommendationTooltip = (type: string) => {
@@ -297,6 +505,8 @@ interface PerformanceTabProps {
 }
 
 const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error }) => {
+  const { data: contextData } = useAnalysisContext();
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
@@ -323,8 +533,9 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
   }
 
   // Make sure we destructure the right variable!
-  // DO NOT overwrite 'data' or destructure 'data' from 'data.data'!
   const { performance } = data.data;
+  const mobileScore = contextData?.mobileResponsiveness?.score || 0;
+  const securityGrade = contextData?.securityScore?.grade || '—';
 
   return (
     <Box>
@@ -335,7 +546,11 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
       </Box>
 
       {/* Performance Score Section */}
-      <MetricsSection performanceScore={performance.performanceScore} />
+      <MetricsSection 
+        performanceScore={performance.performanceScore} 
+        mobileScore={mobileScore}
+        securityGrade={securityGrade}
+      />
 
       {/* Core Web Vitals and Speed Index */}
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 2, alignItems: 'stretch', mb: 4 }}>
@@ -343,9 +558,14 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
         <SpeedIndexSection performanceScore={performance.performanceScore} />
       </Box>
 
-      {/* Security Section */}
+      {/* Mobile and Security Details */}
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3, mb: 4 }}>
+        <MobileResponsivenessSection />
+        <SecurityScoreSection />
+      </Box>
+
+      {/* Security Headers Section */}
       <Box sx={{ mb: 4 }}>
-        {/* Use TOP-LEVEL data.securityHeaders here (NOT data.data.securityHeaders)! */}
         <SecurityHeadersSection securityHeaders={data.securityHeaders} />
       </Box>
 
