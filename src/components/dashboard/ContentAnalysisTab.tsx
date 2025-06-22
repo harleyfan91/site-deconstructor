@@ -55,10 +55,15 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
   const estimatedPhotos = imageData?.estimatedPhotos || 0;
   const estimatedIcons = imageData?.estimatedIcons || 0;
 
-  // Create content distribution data with consistent colors
+  // Estimate text content (this could be enhanced with actual text analysis data)
+  const estimatedTextContent = data.data?.seo?.metaTags ? 
+    (Object.keys(data.data.seo.metaTags).length * 10) + 50 : 50; // Base estimate
+
+  // Create content distribution data with consistent colors including text
   const contentTypes = [
     { name: 'Photos', value: estimatedPhotos, color: '#FF6B35' }, // Primary orange
     { name: 'Icons', value: estimatedIcons, color: '#0984E3' }, // Secondary blue
+    { name: 'Text Content', value: estimatedTextContent, color: '#937B91' }, // Specified purple color
     { name: 'Other Images', value: Math.max(0, totalImages - estimatedPhotos - estimatedIcons), color: theme.palette.grey[400] },
   ].filter(item => item.value > 0);
 
