@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Box, Typography, Paper, Button } from '@mui/material';
 import { motion } from 'framer-motion';
@@ -9,7 +10,6 @@ import TechTab from './dashboard/TechTab';
 import UIAnalysisTab from './dashboard/UIAnalysisTab';
 import ComplianceTab from './dashboard/ComplianceTab';
 import ContentAnalysisTab from './dashboard/ContentAnalysisTab';
-import AccessibilitySnapshot from './dashboard/AccessibilitySnapshot';
 import ExportModal from './export/ExportModal';
 import { useAnalysisContext } from '../contexts/AnalysisContext';
 
@@ -90,12 +90,11 @@ const DashboardContent = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
               >
-                <TabsList className="grid w-full grid-cols-3 md:grid-cols-8 gap-1 h-auto">
+                <TabsList className="grid w-full grid-cols-3 md:grid-cols-7 gap-1 h-auto">
                   <TabsTrigger value="overview" className="col-span-3 md:col-span-1 text-xs sm:text-sm" data-tab-id="overview">Overview</TabsTrigger>
                   <TabsTrigger value="ui" className="text-xs sm:text-sm" data-tab-id="ui">User Interface</TabsTrigger>
                   <TabsTrigger value="content" className="text-xs sm:text-sm" data-tab-id="content">Content</TabsTrigger>
                   <TabsTrigger value="performance" className="text-xs sm:text-sm" data-tab-id="performance">Performance & Security</TabsTrigger>
-                  <TabsTrigger value="accessibility" className="text-xs sm:text-sm" data-tab-id="accessibility">Accessibility</TabsTrigger>
                   <TabsTrigger value="seo" className="text-xs sm:text-sm" data-tab-id="seo">SEO Analysis</TabsTrigger>
                   <TabsTrigger value="tech" className="text-xs sm:text-sm" data-tab-id="tech">Tech</TabsTrigger>
                   <TabsTrigger value="compliance" className="text-xs sm:text-sm" data-tab-id="compliance">Compliance</TabsTrigger>
@@ -122,10 +121,6 @@ const DashboardContent = () => {
               
               <TabsContent value="performance" data-tab-panel-id="performance">
                 <PerformanceTab data={analysisData} loading={loading} error={error} />
-              </TabsContent>
-              
-              <TabsContent value="accessibility" data-tab-panel-id="accessibility">
-                <AccessibilitySnapshot />
               </TabsContent>
               
               <TabsContent value="seo" data-tab-panel-id="seo">

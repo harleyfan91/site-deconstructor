@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Box, Typography, Card, CardContent, CircularProgress, Alert } from '@mui/material';
 import type { AnalysisResponse } from '@/types/analysis';
@@ -56,7 +57,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
           </CardContent>
         </Card>
 
-        {/* Font Analysis and Contrast Warnings */}
+        {/* Font Analysis and Accessibility & Contrast */}
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
           <Card sx={{ borderRadius: 2, width: '100%' }}>
             <CardContent sx={{ p: 2 }}>
@@ -66,7 +67,11 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
 
           <Card sx={{ borderRadius: 2, width: '100%' }}>
             <CardContent sx={{ p: 2 }}>
-              <ContrastWarningsCard issues={data.data.ui.contrastIssues} />
+              <ContrastWarningsCard 
+                issues={data.data.ui.contrastIssues} 
+                data={data}
+                loading={loading}
+              />
             </CardContent>
           </Card>
         </Box>
