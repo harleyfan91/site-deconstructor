@@ -1,5 +1,6 @@
 
 
+
 export interface CoreWebVitals {
   lcp: number;
   fid: number;
@@ -11,11 +12,32 @@ export interface CoreWebVitals {
   fcp_benchmark: number;
 }
 
+export interface AccessibilityViolation {
+  id: string;
+  impact: string;
+  description: string;
+}
+
+export interface SecurityHeaders {
+  csp: string;
+  hsts: string;
+  xfo: string;
+  xcto: string;
+  referrer: string;
+}
+
 export interface AnalysisResponse {
   success: boolean;
+  id?: string;
   url?: string;
   timestamp?: string;
+  status?: string;
+  coreWebVitals?: CoreWebVitals;
+  securityHeaders?: SecurityHeaders;
+  performanceScore?: number;
+  seoScore?: number;
   readabilityScore?: number;
+  complianceStatus?: string;
   mobileResponsiveness?: {
     score: number;
     issues: Array<{
@@ -43,6 +65,9 @@ export interface AnalysisResponse {
   data: {
     overview?: {
       overallScore: number;
+      pageLoadTime?: string;
+      seoScore?: number;
+      userExperienceScore?: number;
       [key: string]: any;
     };
     technical: {
@@ -72,10 +97,12 @@ export interface AnalysisResponse {
       techStack?: any[];
       healthGrade?: string;
       issues?: any[];
+      securityScore?: number;
     };
     performance: {
       performanceScore: number;
       coreWebVitals: CoreWebVitals[];
+      mobileResponsive?: boolean;
       recommendations: Array<{
         title: string;
         description: string;
@@ -90,6 +117,9 @@ export interface AnalysisResponse {
         totalImages: number;
         estimatedPhotos: number;
         estimatedIcons: number;
+        imageUrls?: string[];
+        photoUrls?: string[];
+        iconUrls?: string[];
       };
       contrastIssues?: any[];
     };
@@ -140,4 +170,5 @@ export interface AnalysisResponse {
     >;
   };
 }
+
 
