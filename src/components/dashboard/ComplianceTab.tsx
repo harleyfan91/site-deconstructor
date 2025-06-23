@@ -14,7 +14,7 @@ import {
   IconButton,
   Badge,
 } from '@mui/material';
-import { ChevronDown, ChevronUp, Shield, Accessibility, CheckCircle } from 'lucide-react';
+import { ChevronDown, ChevronUp, Shield, Accessibility, CheckCircle, Lock } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 import { dashIfEmpty } from '../../lib/ui';
 import { useSessionState } from '../../hooks/useSessionState';
@@ -52,6 +52,7 @@ function chipStateStyle(isActive: boolean, theme: any) {
 const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) => {
   const theme = useTheme();
   const [securityHeadersExpanded, setSecurityHeadersExpanded] = useSessionState('compliance-security-headers-expanded', false);
+  const [securityGradeExpanded, setSecurityGradeExpanded] = useSessionState('compliance-security-grade-expanded', false);
   const { data: contextData } = useAnalysisContext();
   
   if (loading) {
@@ -86,9 +87,20 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
   const minify = tech.minification || { cssMinified: false, jsMinified: false };
   const links = tech.linkIssues || { brokenLinks: [], mixedContentLinks: [] };
 
+  // Get security headers from the data
+  const securityHeaders = data.securityHeaders || { csp: '', hsts: '', xfo: '', xcto: '', referrer: '' };
+  
   // Get Lighthouse security data
   const lhr = contextData?.lhr;
-  const securityScore = lhr ? Math.round(lhr.categories.security.score * 100) : 0;
+  const lighthouseSecurityScore = lhr ? Math.round(lhr.categories.security.score * 100) : 0;
+  
+  // Get performance tab security score for comparison
+  const performanceSecurityScore = data.securityScore?.grade ? 
+    (data.securityScore.grade === 'A' ? 90 : data.securityScore.grade === 'B' ? 80 : data.securityScore.grade === 'C' ? 70 : data.securityScore.grade === 'D' ? 60 : 50) : 
+    (tech.securityScore || 0);
+
+  // Only show Security Grade if it's different from Performance tab score
+  const showSeparateSecurityGrade = lighthouseSecurityScore !== performanceSecurityScore && lighthouseSecurityScore > 0;
 
   return (
     <Box>
@@ -98,8 +110,8 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
         </Typography>
       </Box>
       
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3, mb: 3 }}>
-        {/* Security Headers - using Lighthouse data */}
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: showSeparateSecurityGrade ? '1fr 1fr 1fr' : '1fr 1fr' }, gap: 3, mb: 3 }}>
+        {/* Security Headers */}
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 2 }}>
             <Box
@@ -112,7 +124,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
               onClick={() => setSecurityHeadersExpanded(!securityHeadersExpanded)}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Shield size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+                <Lock size={24} color="#FF6B35" style={{ marginRight: 8 }} />
                 <Typography 
                   variant="h6" 
                   sx={{ 
@@ -120,17 +132,8 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
                     fontSize: { xs: '1.1rem', sm: '1.25rem' }
                   }}
                 >
-                  Security Grade
+                  Security Headers
                 </Typography>
-                <Chip
-                  label={`${securityScore}%`}
-                  size="small"
-                  sx={{
-                    backgroundColor: securityScore >= 80 ? '#4CAF50' : securityScore >= 60 ? '#FF9800' : '#F44336',
-                    color: 'white',
-                    fontWeight: 600,
-                  }}
-                />
               </Box>
               <IconButton size="small">
                 {securityHeadersExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
@@ -139,40 +142,129 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
             
             <Collapse in={securityHeadersExpanded} timeout="auto">
               <Box sx={{ mt: 2 }}>
-                {lhr?.categories['best-practices'] ? (
-                  <Box sx={{ display: 'grid', gap: 1 }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
-                      Header Compliance
+                <Box sx={{ display: 'grid', gap: 1 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 0.5 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
+                      Content Security Policy
                     </Typography>
-                    {lhr.categories['best-practices'].auditRefs
-                      .filter(ref => ref.id.match(/-headers?/))
-                      .map(ref => {
-                        const audit = lhr.audits[ref.id];
-                        const isPassing = audit.score === 1;
-                        return (
-                          <Box key={ref.id} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 0.5 }}>
-                            <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                              {audit.title}
-                            </Typography>
-                            <Typography variant="body2" sx={{ color: isPassing ? 'success.main' : 'error.main' }}>
-                              {isPassing ? '✅ Present' : '❌ Missing'}
-                            </Typography>
-                          </Box>
-                        );
-                      })
-                    }
+                    <Typography variant="body2" sx={{ color: securityHeaders.csp ? 'success.main' : 'error.main' }}>
+                      {securityHeaders.csp ? '✅ Present' : '❌ Missing'}
+                    </Typography>
                   </Box>
-                ) : (
-                  <Typography variant="body2" color="text.secondary">
-                    Lighthouse security audit data not available
-                  </Typography>
-                )}
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 0.5 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
+                      Strict Transport Security
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: securityHeaders.hsts ? 'success.main' : 'error.main' }}>
+                      {securityHeaders.hsts ? '✅ Present' : '❌ Missing'}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 0.5 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
+                      X-Frame-Options
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: securityHeaders.xfo ? 'success.main' : 'error.main' }}>
+                      {securityHeaders.xfo ? '✅ Present' : '❌ Missing'}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 0.5 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
+                      X-Content-Type-Options
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: securityHeaders.xcto ? 'success.main' : 'error.main' }}>
+                      {securityHeaders.xcto ? '✅ Present' : '❌ Missing'}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 0.5 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
+                      Referrer Policy
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: securityHeaders.referrer ? 'success.main' : 'error.main' }}>
+                      {securityHeaders.referrer ? '✅ Present' : '❌ Missing'}
+                    </Typography>
+                  </Box>
+                </Box>
               </Box>
             </Collapse>
           </CardContent>
         </Card>
 
-        {/* Accessibility Violations - using Accessibility icon */}
+        {/* Security Grade - only show if different from Performance tab */}
+        {showSeparateSecurityGrade && (
+          <Card sx={{ borderRadius: 2 }}>
+            <CardContent sx={{ p: 2 }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  cursor: 'pointer',
+                }}
+                onClick={() => setSecurityGradeExpanded(!securityGradeExpanded)}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Shield size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+                  <Typography 
+                    variant="h6" 
+                    sx={{ 
+                      fontWeight: 'bold',
+                      fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                    }}
+                  >
+                    Security Grade
+                  </Typography>
+                  <Chip
+                    label={`${lighthouseSecurityScore}%`}
+                    size="small"
+                    sx={{
+                      backgroundColor: lighthouseSecurityScore >= 80 ? '#4CAF50' : lighthouseSecurityScore >= 60 ? '#FF9800' : '#F44336',
+                      color: 'white',
+                      fontWeight: 600,
+                    }}
+                  />
+                </Box>
+                <IconButton size="small">
+                  {securityGradeExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                </IconButton>
+              </Box>
+              
+              <Collapse in={securityGradeExpanded} timeout="auto">
+                <Box sx={{ mt: 2 }}>
+                  {lhr?.categories['best-practices'] ? (
+                    <Box sx={{ display: 'grid', gap: 1 }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
+                        Lighthouse Security Checks
+                      </Typography>
+                      {lhr.categories['best-practices'].auditRefs
+                        .filter(ref => ref.id.match(/-headers?/))
+                        .map(ref => {
+                          const audit = lhr.audits[ref.id];
+                          const isPassing = audit.score === 1;
+                          return (
+                            <Box key={ref.id} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 0.5 }}>
+                              <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
+                                {audit.title}
+                              </Typography>
+                              <Typography variant="body2" sx={{ color: isPassing ? 'success.main' : 'error.main' }}>
+                                {isPassing ? '✅ Pass' : '❌ Fail'}
+                              </Typography>
+                            </Box>
+                          );
+                        })
+                      }
+                    </Box>
+                  ) : (
+                    <Typography variant="body2" color="text.secondary">
+                      Lighthouse security audit data not available
+                    </Typography>
+                  )}
+                </Box>
+              </Collapse>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Accessibility Violations */}
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
