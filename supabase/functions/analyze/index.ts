@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import namer from 'color-namer';
+import namer from 'npm:color-namer@1.4.0';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
