@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
@@ -82,25 +81,25 @@ function extractCssColors(html: string): Array<{name: string, hex: string, usage
     // Push by usage in order: Background → Text → Border → Accent
     backgroundColors.forEach(hex => {
       if (!processed.has(hex)) {
-        colors.push({ name: getColorName(hex), hex, usage: 'Background', count: colorCounts[hex] || 0 });
+        colors.push({ name: getColorName(hex), hex, usage: 'background', count: colorCounts[hex] || 0 });
         processed.add(hex);
       }
     });
     textColors.forEach(hex => {
       if (!processed.has(hex)) {
-        colors.push({ name: getColorName(hex), hex, usage: 'Text', count: colorCounts[hex] || 0 });
+        colors.push({ name: getColorName(hex), hex, usage: 'text', count: colorCounts[hex] || 0 });
         processed.add(hex);
       }
     });
     borderColors.forEach(hex => {
       if (!processed.has(hex)) {
-        colors.push({ name: getColorName(hex), hex, usage: 'Border', count: colorCounts[hex] || 0 });
+        colors.push({ name: getColorName(hex), hex, usage: 'accent', count: colorCounts[hex] || 0 });
         processed.add(hex);
       }
     });
     accentColors.forEach(hex => {
       if (!processed.has(hex)) {
-        colors.push({ name: getColorName(hex), hex, usage: 'Accent', count: colorCounts[hex] || 0 });
+        colors.push({ name: getColorName(hex), hex, usage: 'accent', count: colorCounts[hex] || 0 });
         processed.add(hex);
       }
     });
@@ -112,7 +111,7 @@ function extractCssColors(html: string): Array<{name: string, hex: string, usage
       .forEach(([hex, cnt]) => {
         const upper = hex.toUpperCase();
         if (!processed.has(upper) && cnt > 1) {
-          colors.push({ name: getColorName(upper), hex: upper, usage: 'Theme', count: cnt });
+          colors.push({ name: getColorName(upper), hex: upper, usage: 'theme', count: cnt });
           processed.add(upper);
         }
       });
@@ -120,39 +119,18 @@ function extractCssColors(html: string): Array<{name: string, hex: string, usage
     // Fallback if nothing found
     if (colors.length === 0) {
       colors.push(
-        { name: 'Primary Text',  hex: '#000000', usage: 'Text',       count: 0 },
-        { name: 'Background',    hex: '#FFFFFF', usage: 'Background', count: 0 }
+        { name: 'Primary Text',  hex: '#000000', usage: 'text',       count: 0 },
+        { name: 'Background',    hex: '#FFFFFF', usage: 'background', count: 0 }
       );
     }
   } catch (e) {
     console.error('Color extraction error:', e);
     return [
-      { name: 'Primary Text',  hex: '#000000', usage: 'Text',       count: 0 },
-      { name: 'Background',    hex: '#FFFFFF', usage: 'Background', count: 0 }
+      { name: 'Primary Text',  hex: '#000000', usage: 'text',       count: 0 },
+      { name: 'Background',    hex: '#FFFFFF', usage: 'background', count: 0 }
     ];
   }
   return colors;
-}
-
-// Helper function to map color usage to expected buckets
-function mapColorUsage(usage: string): string {
-  const lowerUsage = usage.toLowerCase();
-  
-  if (lowerUsage.includes('button') || lowerUsage.includes('btn')) {
-    return 'theme';
-  }
-  if (lowerUsage.includes('accent')) {
-    return 'accent';
-  }
-  if (lowerUsage.includes('background') || lowerUsage.includes('bg')) {
-    return 'background';
-  }
-  if (lowerUsage.includes('text') || lowerUsage.includes('font') || lowerUsage.includes('color')) {
-    return 'text';
-  }
-  
-  // Default mapping for other cases
-  return 'accent';
 }
 
 // Helper function to extract image URLs from HTML
@@ -333,14 +311,6 @@ export async function analyze(url: string): Promise<AnalysisResult> {
     // Extract colors dynamically from HTML
     const extractedColors = extractCssColors(html);
     
-    // Map colors to the expected four buckets
-    const mappedColors = extractedColors.map(color => ({
-      name: color.name,
-      hex: color.hex,
-      usage: mapColorUsage(color.usage),
-      count: color.count
-    }));
-    
     // Basic mobile responsiveness check
     const hasViewportMeta = html.includes('viewport');
     const hasResponsiveCSS = html.includes('max-width') || html.includes('min-width');
@@ -441,7 +411,7 @@ export async function analyze(url: string): Promise<AnalysisResult> {
           userExperienceScore
         },
         ui: {
-          colors: mappedColors,
+          colors: extractedColors,
           fonts: [
             { name: 'Roboto', category: 'sans-serif', usage: 'Body text', weight: '400' },
             { name: 'Arial', category: 'sans-serif', usage: 'Headings', weight: '700' }

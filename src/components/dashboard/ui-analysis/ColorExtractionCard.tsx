@@ -55,21 +55,13 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
     return groups;
   };
 
-  // Group colors by usage category - preserve original backend usage values
+  // Group colors by usage category - now simplified
   const groupByUsage = (): UsageGroup[] => {
     const usageGroups: Record<string, AnalysisResponse['data']['ui']['colors']> = {};
     
     colors.forEach(color => {
-      // Use original usage value from backend, with minimal cleanup
-      let usage = color.usage || 'Other';
-      
-      // Only normalize casing and basic cleanup, don't remap to different categories
-      usage = usage.charAt(0).toUpperCase() + usage.slice(1).toLowerCase();
-      
-      // Handle plural forms
-      if (usage.endsWith('s') && usage !== 'Buttons') {
-        usage = usage.slice(0, -1);
-      }
+      // Normalize usage to title case
+      const usage = color.usage.charAt(0).toUpperCase() + color.usage.slice(1);
       
       if (!usageGroups[usage]) {
         usageGroups[usage] = [];
@@ -77,8 +69,8 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
       usageGroups[usage].push(color);
     });
 
-    // Sort usage groups by importance, preserving original categories
-    const usageOrder = ['Background', 'Text', 'Theme', 'Accent', 'Border', 'Other'];
+    // Sort usage groups by importance
+    const usageOrder = ['Background', 'Text', 'Theme', 'Accent'];
     const sortedGroups = usageOrder
       .filter(usage => usageGroups[usage])
       .map(usage => ({
@@ -86,45 +78,27 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
         groups: groupByFrequency(usageGroups[usage])
       }));
 
-    // Add any remaining groups not in the predefined order
-    Object.keys(usageGroups)
-      .filter(usage => !usageOrder.includes(usage))
-      .sort()
-      .forEach(usage => {
-        sortedGroups.push({
-          name: usage,
-          groups: groupByFrequency(usageGroups[usage])
-        });
-      });
-
     return sortedGroups;
   };
 
   const usageGroups = groupByUsage();
 
-  // Initialize sections and auto-collapse functionality
+  // Simplified auto-collapse logic
   React.useEffect(() => {
     const hadStoredState = Object.keys(expandedSections).length > 0;
-    let hasNewSection = false;
-
-    // Ensure any brand-new groups show up expanded
-    setExpandedSections(prev => {
-      const updated = { ...prev };
+    
+    if (!hadStoredState && usageGroups.length > 0) {
+      // Initialize all sections as expanded
+      const initialState: Record<string, boolean> = {};
       usageGroups.forEach(group => {
-        if (!(group.name in updated)) {
-          updated[group.name] = true;
-          hasNewSection = true;
-        }
+        initialState[group.name] = true;
       });
-      return updated;
-    });
+      setExpandedSections(initialState);
 
-    // Only auto-collapse on very first load when new sections appeared
-    let timer: NodeJS.Timeout | undefined;
-    if (!hadStoredState && hasNewSection) {
-      timer = setTimeout(() => {
+      // Auto-collapse all except Background after delay
+      const timer = setTimeout(() => {
         setExpandedSections(prev => {
-          const updated: Record<string, boolean> = { ...prev };
+          const updated = { ...prev };
           Object.keys(updated).forEach(name => {
             if (name !== 'Background') {
               updated[name] = false;
@@ -133,12 +107,10 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
           return updated;
         });
       }, 2500);
-    }
 
-    return () => {
-      if (timer) clearTimeout(timer);
-    };
-  }, [colors]);
+      return () => clearTimeout(timer);
+    }
+  }, [usageGroups.length]);
 
   return (
     <Box>
