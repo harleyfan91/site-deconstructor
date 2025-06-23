@@ -41,150 +41,102 @@ function getColorName(hex: string): string {
   return colorNames[hex.toUpperCase()] || hex;
 }
 
-// Enhanced color extraction that looks for actual CSS colors
+// ----- BEGIN ORIGINAL extractCssColors -----
 function extractCssColors(html: string): Array<{name: string, hex: string, usage: string, count: number}> {
   const colors: Array<{name: string, hex: string, usage: string, count: number}> = [];
   const colorCounts: Record<string, number> = {};
-  
   try {
-    // Extract all hex colors from the HTML (including CSS, inline styles, etc.)
+    // Count all hex colors
     const allColorRegex = /#[0-9a-fA-F]{3,6}/g;
     const matches = html.match(allColorRegex) || [];
-    
-    // Normalize and count colors
     matches.forEach(hex => {
-      // Convert 3-digit hex to 6-digit
-      let normalized = hex.toUpperCase();
-      if (normalized.length === 4) {
-        normalized = '#' + normalized[1] + normalized[1] + normalized[2] + normalized[2] + normalized[3] + normalized[3];
-      }
+      const normalized = hex.toUpperCase();
       colorCounts[normalized] = (colorCounts[normalized] || 0) + 1;
     });
 
-    // Check for common dark backgrounds by looking at HTML structure
-    const isDarkSite = html.toLowerCase().includes('dark') || 
-                       html.toLowerCase().includes('black') ||
-                       html.includes('#000') ||
-                       html.includes('rgb(0,0,0)') ||
-                       html.includes('rgb(0, 0, 0)');
+    // Prepare regexes for usage
+    const backgroundColorRegex = /background-color:\s*(#[0-9a-fA-F]{3,6})/gi;
+    const colorRegex           = /(?:^|[^-])color:\s*(#[0-9a-fA-F]{3,6})/gi;
+    const borderColorRegex     = /border(?:-\w+)?-color:\s*(#[0-9a-fA-F]{3,6})/gi;
+    const boxShadowRegex       = /box-shadow:[^;]*?(#[0-9a-fA-F]{3,6})/gi;
 
-    // Check for common light backgrounds
-    const isLightSite = html.toLowerCase().includes('white') ||
-                        html.includes('#fff') ||
-                        html.includes('#ffffff') ||
-                        html.includes('rgb(255,255,255)');
-
-    // Look for CSS background properties in style tags and attributes
-    const backgroundColorRegex = /background(?:-color)?:\s*([^;}\s]+)/gi;
-    const colorRegex = /(?:^|[^-])color:\s*([^;}\s]+)/gi;
-    
+    // Extract each usage set
+    let match;
     const backgroundColors = new Set<string>();
+    while ((match = backgroundColorRegex.exec(html)) !== null) {
+      backgroundColors.add(match[1].toUpperCase());
+    }
     const textColors = new Set<string>();
-    
-    let bgMatch;
-    while ((bgMatch = backgroundColorRegex.exec(html)) !== null) {
-      const colorValue = bgMatch[1].trim();
-      if (colorValue.startsWith('#')) {
-        let normalized = colorValue.toUpperCase();
-        if (normalized.length === 4) {
-          normalized = '#' + normalized[1] + normalized[1] + normalized[2] + normalized[2] + normalized[3] + normalized[3];
-        }
-        backgroundColors.add(normalized);
-      }
+    while ((match = colorRegex.exec(html)) !== null) {
+      textColors.add(match[1].toUpperCase());
     }
-    
-    let textMatch;
-    while ((textMatch = colorRegex.exec(html)) !== null) {
-      const colorValue = textMatch[1].trim();
-      if (colorValue.startsWith('#')) {
-        let normalized = colorValue.toUpperCase();
-        if (normalized.length === 4) {
-          normalized = '#' + normalized[1] + normalized[1] + normalized[2] + normalized[2] + normalized[3] + normalized[3];
-        }
-        textColors.add(normalized);
-      }
+    const borderColors = new Set<string>();
+    while ((match = borderColorRegex.exec(html)) !== null) {
+      borderColors.add(match[1].toUpperCase());
+    }
+    const accentColors = new Set<string>();
+    while ((match = boxShadowRegex.exec(html)) !== null) {
+      accentColors.add(match[1].toUpperCase());
     }
 
-    // Add inferred background colors based on site analysis
-    if (isDarkSite && !backgroundColors.has('#000000')) {
-      backgroundColors.add('#000000');
-      colorCounts['#000000'] = (colorCounts['#000000'] || 0) + 10; // Give it high priority
-    }
-    
-    if (isLightSite && !backgroundColors.has('#FFFFFF')) {
-      backgroundColors.add('#FFFFFF');
-      colorCounts['#FFFFFF'] = (colorCounts['#FFFFFF'] || 0) + 10; // Give it high priority
-    }
-
+    // Helper to avoid duplicates
     const processed = new Set<string>();
 
-    // Add background colors first
+    // Push by usage in order: Background → Text → Border → Accent
     backgroundColors.forEach(hex => {
       if (!processed.has(hex)) {
-        colors.push({ 
-          name: getColorName(hex), 
-          hex, 
-          usage: 'background', 
-          count: colorCounts[hex] || 1 
-        });
+        colors.push({ name: getColorName(hex), hex, usage: 'Background', count: colorCounts[hex] || 0 });
         processed.add(hex);
       }
     });
-
-    // Add text colors
     textColors.forEach(hex => {
       if (!processed.has(hex)) {
-        colors.push({ 
-          name: getColorName(hex), 
-          hex, 
-          usage: 'text', 
-          count: colorCounts[hex] || 1 
-        });
+        colors.push({ name: getColorName(hex), hex, usage: 'Text', count: colorCounts[hex] || 0 });
+        processed.add(hex);
+      }
+    });
+    borderColors.forEach(hex => {
+      if (!processed.has(hex)) {
+        colors.push({ name: getColorName(hex), hex, usage: 'Border', count: colorCounts[hex] || 0 });
+        processed.add(hex);
+      }
+    });
+    accentColors.forEach(hex => {
+      if (!processed.has(hex)) {
+        colors.push({ name: getColorName(hex), hex, usage: 'Accent', count: colorCounts[hex] || 0 });
         processed.add(hex);
       }
     });
 
-    // Add remaining frequent colors as theme colors
+    // Remaining frequent colors → Theme
     Object.entries(colorCounts)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 10)
-      .forEach(([hex, count]) => {
-        if (!processed.has(hex) && count > 1) {
-          colors.push({ 
-            name: getColorName(hex), 
-            hex, 
-            usage: 'theme', 
-            count 
-          });
-          processed.add(hex);
+      .forEach(([hex, cnt]) => {
+        const upper = hex.toUpperCase();
+        if (!processed.has(upper) && cnt > 1) {
+          colors.push({ name: getColorName(upper), hex: upper, usage: 'Theme', count: cnt });
+          processed.add(upper);
         }
       });
 
-    // Ensure we always have at least basic colors
+    // Fallback if nothing found
     if (colors.length === 0) {
-      if (isDarkSite) {
-        colors.push(
-          { name: 'Black', hex: '#000000', usage: 'background', count: 1 },
-          { name: 'White', hex: '#FFFFFF', usage: 'text', count: 1 }
-        );
-      } else {
-        colors.push(
-          { name: 'White', hex: '#FFFFFF', usage: 'background', count: 1 },
-          { name: 'Black', hex: '#000000', usage: 'text', count: 1 }
-        );
-      }
+      colors.push(
+        { name: 'Primary Text',  hex: '#000000', usage: 'Text',       count: 0 },
+        { name: 'Background',    hex: '#FFFFFF', usage: 'Background', count: 0 }
+      );
     }
-
   } catch (e) {
     console.error('Color extraction error:', e);
     return [
-      { name: 'Black', hex: '#000000', usage: 'background', count: 1 },
-      { name: 'White', hex: '#FFFFFF', usage: 'text', count: 1 }
+      { name: 'Primary Text',  hex: '#000000', usage: 'Text',       count: 0 },
+      { name: 'Background',    hex: '#FFFFFF', usage: 'Background', count: 0 }
     ];
   }
-  
   return colors;
 }
+// ----- END ORIGINAL extractCssColors -----
 
 // Helper function to extract image URLs from HTML
 function extractImageUrls(html: string): string[] {
