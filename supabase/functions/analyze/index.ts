@@ -134,6 +134,19 @@ function extractCssColors(html: string): Array<{name: string, hex: string, usage
       { name: 'Background',    hex: '#FFFFFF', usage: 'Background', count: 0 }
     ];
   }
+  // ——— Post-filter: keep only the single true page background ———
+  const bgHits = colors.filter(c => c.usage === 'Background');
+  if (bgHits.length > 1) {
+    // Identify the most frequent background color
+    const primary = bgHits.reduce((prev, cur) => prev.count >= cur.count ? prev : cur);
+    // Demote all other background hits into Theme
+    colors.forEach(c => {
+      if (c.usage === 'Background' && c.hex !== primary.hex) {
+        c.usage = 'Theme';
+      }
+    });
+  }
+  // ————————————————————————————————————————————————
   return colors;
 }
 // ----- END ORIGINAL extractCssColors -----
