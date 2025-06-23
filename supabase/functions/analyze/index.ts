@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import namer from 'npm:color-namer@1.4.0';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -17,14 +16,29 @@ function mapScoreToGrade(score: number): string {
 
 // Helper function to get color name
 function getColorName(hex: string): string {
-  try {
-    const result = namer(hex);
-    const name = result.ntc?.[0]?.name || result.html?.[0]?.name;
-    return name && name.toLowerCase() !== hex.toLowerCase() ? name : '';
-  } catch (error) {
-    console.error('color-namer failed:', error);
-    return '';
-  }
+  const colorNames: Record<string, string> = {
+    '#FFFFFF': 'White',
+    '#000000': 'Black',
+    '#FF0000': 'Red',
+    '#00FF00': 'Green',
+    '#0000FF': 'Blue',
+    '#FFFF00': 'Yellow',
+    '#FF00FF': 'Magenta',
+    '#00FFFF': 'Cyan',
+    '#808080': 'Gray',
+    '#800000': 'Maroon',
+    '#008000': 'Dark Green',
+    '#000080': 'Navy',
+    '#808000': 'Olive',
+    '#800080': 'Purple',
+    '#008080': 'Teal',
+    '#C0C0C0': 'Silver',
+    '#F5F5F5': 'White Smoke',
+    '#1A1A1A': 'Dark Gray',
+    '#2D2D2D': 'Charcoal',
+    '#333333': 'Dark Charcoal'
+  };
+  return colorNames[hex.toUpperCase()] || hex;
 }
 
 // ----- BEGIN ORIGINAL extractCssColors -----
@@ -120,19 +134,6 @@ function extractCssColors(html: string): Array<{name: string, hex: string, usage
       { name: 'Background',    hex: '#FFFFFF', usage: 'Background', count: 0 }
     ];
   }
-  // ——— Post-filter: keep only the single true page background ———
-  const bgHits = colors.filter(c => c.usage === 'Background');
-  if (bgHits.length > 1) {
-    // Identify the most frequent background color
-    const primary = bgHits.reduce((prev, cur) => prev.count >= cur.count ? prev : cur);
-    // Demote all other background hits into Theme
-    colors.forEach(c => {
-      if (c.usage === 'Background' && c.hex !== primary.hex) {
-        c.usage = 'Theme';
-      }
-    });
-  }
-  // ————————————————————————————————————————————————
   return colors;
 }
 // ----- END ORIGINAL extractCssColors -----

@@ -207,5 +207,4 @@ export interface AnalysisResponse {
       hasIAS: boolean;
     };
   };
-  lhr: { categories: Record<string, any>; audits: Record<string, any> };
 }
