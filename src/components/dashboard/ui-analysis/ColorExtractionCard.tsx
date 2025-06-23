@@ -34,6 +34,11 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
 
   // Helper function to convert hex to HSL
   const hexToHsl = (hex: string): { h: number; s: number; l: number } => {
+    // Add safety check for hex string
+    if (!hex || typeof hex !== 'string' || !hex.startsWith('#')) {
+      return { h: 0, s: 0, l: 0 };
+    }
+    
     const r = parseInt(hex.slice(1, 3), 16) / 255;
     const g = parseInt(hex.slice(3, 5), 16) / 255;
     const b = parseInt(hex.slice(5, 7), 16) / 255;
@@ -60,7 +65,10 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
 
   // Group colors by color harmony within each usage category
   const groupByHarmony = (colors: AnalysisResponse['data']['ui']['colors']): HarmonyGroup[] => {
-    if (colors.length === 0) return [];
+    // Add safety check for colors array
+    if (!colors || !Array.isArray(colors) || colors.length === 0) {
+      return [];
+    }
 
     const neutrals: AnalysisResponse['data']['ui']['colors'] = [];
     const warm: AnalysisResponse['data']['ui']['colors'] = [];
@@ -68,6 +76,11 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
     const vibrant: AnalysisResponse['data']['ui']['colors'] = [];
 
     colors.forEach(color => {
+      // Add safety checks for color object
+      if (!color || !color.hex || typeof color.hex !== 'string') {
+        return;
+      }
+      
       const hsl = hexToHsl(color.hex);
       
       // Neutral colors (low saturation)
@@ -90,16 +103,16 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
 
     const groups: HarmonyGroup[] = [];
     if (neutrals.length) {
-      groups.push({ name: 'Neutral Tones', colors: neutrals.sort((a, b) => b.count - a.count) });
+      groups.push({ name: 'Neutral Tones', colors: neutrals.sort((a, b) => (b.count || 0) - (a.count || 0)) });
     }
     if (vibrant.length) {
-      groups.push({ name: 'Vibrant Colors', colors: vibrant.sort((a, b) => b.count - a.count) });
+      groups.push({ name: 'Vibrant Colors', colors: vibrant.sort((a, b) => (b.count || 0) - (a.count || 0)) });
     }
     if (warm.length) {
-      groups.push({ name: 'Warm Palette', colors: warm.sort((a, b) => b.count - a.count) });
+      groups.push({ name: 'Warm Palette', colors: warm.sort((a, b) => (b.count || 0) - (a.count || 0)) });
     }
     if (cool.length) {
-      groups.push({ name: 'Cool Palette', colors: cool.sort((a, b) => b.count - a.count) });
+      groups.push({ name: 'Cool Palette', colors: cool.sort((a, b) => (b.count || 0) - (a.count || 0)) });
     }
 
     return groups;
@@ -107,9 +120,19 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
 
   // Group colors by usage category - now simplified
   const groupByUsage = (): UsageGroup[] => {
+    // Add safety check for colors array
+    if (!colors || !Array.isArray(colors)) {
+      return [];
+    }
+
     const usageGroups: Record<string, AnalysisResponse['data']['ui']['colors']> = {};
     
     colors.forEach(color => {
+      // Add safety checks for color object and its properties
+      if (!color || !color.usage || typeof color.usage !== 'string') {
+        return;
+      }
+      
       // Normalize usage to title case
       const usage = color.usage.charAt(0).toUpperCase() + color.usage.slice(1);
       
@@ -122,7 +145,7 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
     // Sort usage groups by importance
     const usageOrder = ['Background', 'Text', 'Theme', 'Accent'];
     const sortedGroups = usageOrder
-      .filter(usage => usageGroups[usage])
+      .filter(usage => usageGroups[usage] && usageGroups[usage].length > 0)
       .map(usage => ({
         name: usage,
         groups: groupByHarmony(usageGroups[usage])
@@ -161,6 +184,23 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
       return () => clearTimeout(timer);
     }
   }, [usageGroups.length]);
+
+  // Early return if no valid data
+  if (!colors || !Array.isArray(colors) || colors.length === 0) {
+    return (
+      <Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+          <Palette size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+            Color Extraction
+          </Typography>
+        </Box>
+        <Typography variant="body2" color="text.secondary">
+          No colors detected in the analyzed website.
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box>
@@ -229,7 +269,7 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
                               sx={{
                                 width: 24,
                                 height: 24,
-                                backgroundColor: color.hex,
+                                backgroundColor: color.hex || '#000000',
                                 borderRadius: 0.5,
                                 mr: 1,
                                 border: '1px solid rgba(0,0,0,0.1)',
@@ -247,7 +287,7 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
                                   fontSize: { xs: '0.65rem', sm: '0.75rem' }
                                 }}
                               >
-                                {color.name}
+                                {color.name || 'Unknown'}
                               </Typography>
                               <Typography
                                 variant="caption"
@@ -257,7 +297,7 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
                                   fontSize: { xs: '0.6rem', sm: '0.7rem' }
                                 }}
                               >
-                                {color.hex}
+                                {color.hex || '#000000'}
                               </Typography>
                             </Box>
                           </Box>
