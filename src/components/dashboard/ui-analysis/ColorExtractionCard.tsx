@@ -9,14 +9,14 @@ interface ColorExtractionCardProps {
   colors: AnalysisResponse['data']['ui']['colors'];
 }
 
-interface FrequencyGroup {
+interface HarmonyGroup {
   name: string;
   colors: AnalysisResponse['data']['ui']['colors'];
 }
 
 interface UsageGroup {
   name: string;
-  groups: FrequencyGroup[];
+  groups: HarmonyGroup[];
 }
 
 const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => {
@@ -32,25 +32,75 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
     }));
   };
 
-  // Group colors by frequency within each group
-  const groupByFrequency = (colors: AnalysisResponse['data']['ui']['colors']): FrequencyGroup[] => {
-    const sorted = [...colors].sort((a, b) => b.count - a.count);
+  // Helper function to convert hex to HSL
+  const hexToHsl = (hex: string): { h: number; s: number; l: number } => {
+    const r = parseInt(hex.slice(1, 3), 16) / 255;
+    const g = parseInt(hex.slice(3, 5), 16) / 255;
+    const b = parseInt(hex.slice(5, 7), 16) / 255;
 
-    let mostCount = 3;
-    if (sorted.length < 3) mostCount = sorted.length;
-    else if (sorted.length > 5) mostCount = 5;
-    else mostCount = sorted.length;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    let h = 0;
+    let s = 0;
+    const l = (max + min) / 2;
 
-    const mostUsed = sorted.slice(0, mostCount);
-    const remaining = sorted.slice(mostCount);
-    const supportingCount = Math.ceil(remaining.length / 2);
-    const supporting = remaining.slice(0, supportingCount);
-    const accent = remaining.slice(supportingCount);
+    if (max !== min) {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      switch (max) {
+        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+        case g: h = (b - r) / d + 2; break;
+        case b: h = (r - g) / d + 4; break;
+      }
+      h /= 6;
+    }
 
-    const groups: FrequencyGroup[] = [];
-    if (mostUsed.length) groups.push({ name: 'Most Used', colors: mostUsed });
-    if (supporting.length) groups.push({ name: 'Supporting Colors', colors: supporting });
-    if (accent.length) groups.push({ name: 'Accent Colors', colors: accent });
+    return { h: h * 360, s: s * 100, l: l * 100 };
+  };
+
+  // Group colors by color harmony within each usage category
+  const groupByHarmony = (colors: AnalysisResponse['data']['ui']['colors']): HarmonyGroup[] => {
+    if (colors.length === 0) return [];
+
+    const neutrals: AnalysisResponse['data']['ui']['colors'] = [];
+    const warm: AnalysisResponse['data']['ui']['colors'] = [];
+    const cool: AnalysisResponse['data']['ui']['colors'] = [];
+    const vibrant: AnalysisResponse['data']['ui']['colors'] = [];
+
+    colors.forEach(color => {
+      const hsl = hexToHsl(color.hex);
+      
+      // Neutral colors (low saturation)
+      if (hsl.s < 20 || hsl.l > 90 || hsl.l < 10) {
+        neutrals.push(color);
+      }
+      // Vibrant colors (high saturation)
+      else if (hsl.s > 70) {
+        vibrant.push(color);
+      }
+      // Warm colors (reds, oranges, yellows)
+      else if ((hsl.h >= 0 && hsl.h <= 60) || (hsl.h >= 300 && hsl.h <= 360)) {
+        warm.push(color);
+      }
+      // Cool colors (blues, greens, purples)
+      else {
+        cool.push(color);
+      }
+    });
+
+    const groups: HarmonyGroup[] = [];
+    if (neutrals.length) {
+      groups.push({ name: 'Neutral Tones', colors: neutrals.sort((a, b) => b.count - a.count) });
+    }
+    if (vibrant.length) {
+      groups.push({ name: 'Vibrant Colors', colors: vibrant.sort((a, b) => b.count - a.count) });
+    }
+    if (warm.length) {
+      groups.push({ name: 'Warm Palette', colors: warm.sort((a, b) => b.count - a.count) });
+    }
+    if (cool.length) {
+      groups.push({ name: 'Cool Palette', colors: cool.sort((a, b) => b.count - a.count) });
+    }
 
     return groups;
   };
@@ -75,7 +125,7 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
       .filter(usage => usageGroups[usage])
       .map(usage => ({
         name: usage,
-        groups: groupByFrequency(usageGroups[usage])
+        groups: groupByHarmony(usageGroups[usage])
       }));
 
     return sortedGroups;
@@ -154,16 +204,16 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
               {/* Collapsible Content */}
               <Collapse in={expandedSections[usageGroup.name]}>
                 <Box sx={{ mt: 2, ml: 2 }}>
-                  {usageGroup.groups.map((freqGroup, freqIndex) => (
-                    <Box key={freqIndex} sx={{ mb: 2 }}>
+                  {usageGroup.groups.map((harmonyGroup, harmonyIndex) => (
+                    <Box key={harmonyIndex} sx={{ mb: 2 }}>
                       <Typography
                         variant="subtitle2"
                         sx={{ fontWeight: 'bold', mb: 1 }}
                       >
-                        {freqGroup.name}
+                        {harmonyGroup.name}
                       </Typography>
                       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(3, 1fr)', md: 'repeat(6, 1fr)' }, gap: 1, mb: 2 }}>
-                        {freqGroup.colors.map((color, colorIndex) => (
+                        {harmonyGroup.colors.map((color, colorIndex) => (
                           <Box
                             key={colorIndex}
                             sx={{
