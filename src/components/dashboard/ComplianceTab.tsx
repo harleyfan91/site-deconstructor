@@ -17,8 +17,8 @@ import {
 import { ChevronDown, ChevronUp, Shield, Accessibility, CheckCircle } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 import { dashIfEmpty } from '../../lib/ui';
-import { calculateSecurityScore } from '../../lib/seo';
 import { useSessionState } from '../../hooks/useSessionState';
+import { useAnalysisContext } from '../../contexts/AnalysisContext';
 
 interface ComplianceTabProps {
   data: AnalysisResponse | null;
@@ -52,6 +52,7 @@ function chipStateStyle(isActive: boolean, theme: any) {
 const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) => {
   const theme = useTheme();
   const [securityHeadersExpanded, setSecurityHeadersExpanded] = useSessionState('compliance-security-headers-expanded', false);
+  const { data: contextData } = useAnalysisContext();
   
   if (loading) {
     return (
@@ -78,14 +79,6 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
     );
   }
 
-  const { securityHeaders } = data;
-  const securityEntries = React.useMemo(
-    () => Object.entries(securityHeaders),
-    [securityHeaders]
-  );
-  const securityScore = calculateSecurityScore(securityHeaders);
-  const headersDetected = securityEntries.filter(([, v]) => v && v !== '').length;
-  
   const tech = data.data.technical;
   const violations = tech.accessibility.violations;
   const social = tech.social || { hasOpenGraph: false, hasTwitterCard: false, hasShareButtons: false };
@@ -93,11 +86,9 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
   const minify = tech.minification || { cssMinified: false, jsMinified: false };
   const links = tech.linkIssues || { brokenLinks: [], mixedContentLinks: [] };
 
-  const getSecurityScoreColor = (score: number) => {
-    if (score >= 80) return theme.palette.success.main;
-    if (score >= 60) return theme.palette.warning.main;
-    return theme.palette.error.main;
-  };
+  // Get Lighthouse security data
+  const lhr = contextData?.lhr;
+  const securityScore = lhr ? Math.round(lhr.categories.security.score * 100) : 0;
 
   return (
     <Box>
@@ -108,7 +99,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
       </Box>
       
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3, mb: 3 }}>
-        {/* Security Headers - using Shield icon to match SEO Security Score */}
+        {/* Security Headers - using Lighthouse data */}
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 2 }}>
             <Box
@@ -129,23 +120,13 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
                     fontSize: { xs: '1.1rem', sm: '1.25rem' }
                   }}
                 >
-                  Security Headers
+                  Security Grade
                 </Typography>
-                <Badge
-                  badgeContent={headersDetected}
-                  color="primary"
-                  sx={{
-                    mr: 1,
-                    '& .MuiBadge-badge': {
-                      backgroundColor: getSecurityScoreColor(securityScore),
-                    },
-                  }}
-                />
                 <Chip
                   label={`${securityScore}%`}
                   size="small"
                   sx={{
-                    backgroundColor: getSecurityScoreColor(securityScore),
+                    backgroundColor: securityScore >= 80 ? '#4CAF50' : securityScore >= 60 ? '#FF9800' : '#F44336',
                     color: 'white',
                     fontWeight: 600,
                   }}
@@ -158,13 +139,34 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
             
             <Collapse in={securityHeadersExpanded} timeout="auto">
               <Box sx={{ mt: 2 }}>
-                <Box component="ul" sx={{ pl: 2 }}>
-                  {securityEntries.map(([k, v]) => (
-                    <Typography component="li" variant="body2" key={k}>
-                      <strong>{k.toUpperCase()}:</strong> {dashIfEmpty(v)}
+                {lhr?.categories['best-practices'] ? (
+                  <Box sx={{ display: 'grid', gap: 1 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
+                      Header Compliance
                     </Typography>
-                  ))}
-                </Box>
+                    {lhr.categories['best-practices'].auditRefs
+                      .filter(ref => ref.id.match(/-headers?/))
+                      .map(ref => {
+                        const audit = lhr.audits[ref.id];
+                        const isPassing = audit.score === 1;
+                        return (
+                          <Box key={ref.id} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 0.5 }}>
+                            <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
+                              {audit.title}
+                            </Typography>
+                            <Typography variant="body2" sx={{ color: isPassing ? 'success.main' : 'error.main' }}>
+                              {isPassing ? '✅ Present' : '❌ Missing'}
+                            </Typography>
+                          </Box>
+                        );
+                      })
+                    }
+                  </Box>
+                ) : (
+                  <Typography variant="body2" color="text.secondary">
+                    Lighthouse security audit data not available
+                  </Typography>
+                )}
               </Box>
             </Collapse>
           </CardContent>

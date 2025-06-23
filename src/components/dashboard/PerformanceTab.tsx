@@ -74,21 +74,11 @@ function MetricCard({
 }
 
 // Renders the section with multiple metric cards at the top of the panel
-function MetricsSection({ performanceScore, mobileScore, securityGrade }: { 
+function MetricsSection({ performanceScore, mobileScore, securityScore }: { 
   performanceScore: number; 
   mobileScore: number; 
-  securityGrade: string; 
+  securityScore: number; 
 }) {
-  const getGradeColor = (grade: string) => {
-    switch (grade) {
-      case 'A': return '#4CAF50';
-      case 'B': return '#2196F3';
-      case 'C': return '#FF9800';
-      case 'D': case 'F': return '#F44336';
-      default: return '#9E9E9E';
-    }
-  };
-
   const metrics = [
     {
       title: 'Performance Score',
@@ -110,11 +100,11 @@ function MetricsSection({ performanceScore, mobileScore, securityGrade }: {
       description: 'Mobile Responsiveness',
     },
     {
-      title: 'Security Grade',
-      value: securityGrade,
+      title: 'Security Score',
+      value: `${securityScore}%`,
       icon: Shield,
-      color: getGradeColor(securityGrade),
-      description: 'Based on security headers',
+      color: getScoreColor(securityScore),
+      description: 'Based on Lighthouse security audits',
     },
   ];
   return (
@@ -126,7 +116,6 @@ function MetricsSection({ performanceScore, mobileScore, securityGrade }: {
   );
 }
 
-// Renders the main chart (Core Web Vitals) card
 function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["data"]["performance"] }) {
   const chartConfig = {
     value: { label: 'Your Site', color: '#2196F3' },
@@ -163,7 +152,6 @@ function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["
   );
 }
 
-// Renders Speed Index panel
 function SpeedIndexSection({ performanceScore }: { performanceScore: number }) {
   return (
     <Card sx={{ borderRadius: 2 }}>
@@ -201,56 +189,81 @@ function SpeedIndexSection({ performanceScore }: { performanceScore: number }) {
   );
 }
 
-// Security headers grid
-function SecurityHeadersSection({ securityHeaders }: { securityHeaders: AnalysisResponse["securityHeaders"] }) {
+// New Security Audits Section using Lighthouse data
+function SecurityAuditsSection() {
+  const { data } = useAnalysisContext();
+
+  if (!data?.lhr) {
+    return (
+      <Card sx={{ borderRadius: 2 }}>
+        <CardContent sx={{ p: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+            <ShieldCheck size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
+              Security Audits
+            </Typography>
+          </Box>
+          <Typography variant="body2" color="text.secondary">
+            Security audit data not available
+          </Typography>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const { lhr } = data;
+
   return (
     <Card sx={{ borderRadius: 2 }}>
       <CardContent sx={{ p: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <ShieldCheck size={24} color="#FF6B35" style={{ marginRight: 8 }} />
           <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
-            Security Headers Analysis
+            Security Audits
           </Typography>
         </Box>
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 2 }}>
-          {Object.entries(securityHeaders).map(([key, value]) => (
-            <Box
-              key={key}
-              sx={{
-                p: 2,
-                border: '1px solid rgba(0,0,0,0.1)',
-                bgcolor: 'background.paper',
-                borderRadius: 1,
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-              }}
-            >
-              <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                {key.toUpperCase()}
-              </Typography>
+          {lhr.categories.security.auditRefs.map(ref => {
+            const audit = lhr.audits[ref.id];
+            const score = Math.round(audit.score * 100);
+            return (
               <Tooltip 
-                title={value ? 'Security header is present and configured' : 'Security header is missing - this may be a security risk'}
+                key={ref.id}
+                title={audit.description}
                 enterDelay={300}
                 enterTouchDelay={300}
               >
-                <Chip
-                  label={value ? 'Present' : 'Missing'}
-                  color={value ? 'success' : 'error'}
-                  size="small"
-                  variant="outlined"
-                  sx={{ cursor: 'help' }}
-                />
+                <Box
+                  sx={{
+                    p: 2,
+                    border: '1px solid rgba(0,0,0,0.1)',
+                    bgcolor: 'background.paper',
+                    borderRadius: 1,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    cursor: 'help'
+                  }}
+                >
+                  <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
+                    {audit.title}
+                  </Typography>
+                  <Chip
+                    label={`${score}%`}
+                    color={score >= 80 ? 'success' : score >= 60 ? 'warning' : 'error'}
+                    size="small"
+                    variant="outlined"
+                  />
+                </Box>
               </Tooltip>
-            </Box>
-          ))}
+            );
+          })}
         </Box>
       </CardContent>
     </Card>
   );
 }
 
-// Mobile Responsiveness Section
 function MobileResponsivenessSection() {
   const { data, loading, error } = useAnalysisContext();
 
@@ -340,19 +353,8 @@ function MobileResponsivenessSection() {
   );
 }
 
-// Security Score Section
 function SecurityScoreSection() {
   const { data, loading, error } = useAnalysisContext();
-
-  const getGradeColor = (grade: string) => {
-    switch (grade) {
-      case 'A': return '#4CAF50';
-      case 'B': return '#2196F3';
-      case 'C': return '#FF9800';
-      case 'D': case 'F': return '#F44336';
-      default: return '#9E9E9E';
-    }
-  };
 
   if (loading) {
     return (
@@ -403,7 +405,7 @@ function SecurityScoreSection() {
           <Chip 
             label={`Grade: ${grade}`} 
             sx={{
-              backgroundColor: getGradeColor(grade),
+              backgroundColor: '#9E9E9E',
               color: 'white',
               fontSize: '1.2rem',
               py: 2,
@@ -443,7 +445,6 @@ function SecurityScoreSection() {
   );
 }
 
-// Recommendations
 function RecommendationsSection({ recommendations }: { recommendations: AnalysisResponse["data"]["performance"]["recommendations"] }) {
   const getRecommendationTooltip = (type: string) => {
     switch (type) {
@@ -532,10 +533,9 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
     );
   }
 
-  // Make sure we destructure the right variable!
   const { performance } = data.data;
   const mobileScore = contextData?.mobileResponsiveness?.score || 0;
-  const securityGrade = contextData?.securityScore?.grade || '—';
+  const securityScore = contextData?.lhr ? Math.round(contextData.lhr.categories.security.score * 100) : 0;
 
   return (
     <Box>
@@ -549,7 +549,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
       <MetricsSection 
         performanceScore={performance.performanceScore} 
         mobileScore={mobileScore}
-        securityGrade={securityGrade}
+        securityScore={securityScore}
       />
 
       {/* Core Web Vitals and Speed Index */}
@@ -564,9 +564,9 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
         <SecurityScoreSection />
       </Box>
 
-      {/* Security Headers Section */}
+      {/* Security Audits Section */}
       <Box sx={{ mb: 4 }}>
-        <SecurityHeadersSection securityHeaders={data.securityHeaders} />
+        <SecurityAuditsSection />
       </Box>
 
       {/* Performance Recommendations Section */}
