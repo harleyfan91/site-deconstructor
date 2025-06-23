@@ -2,6 +2,7 @@
 import React from 'react';
 import { Box, Typography, Collapse, IconButton } from '@mui/material';
 import { Palette, ChevronDown, ChevronUp } from 'lucide-react';
+import namer from 'color-namer';
 import type { AnalysisResponse } from '@/types/analysis';
 import { useSessionState } from '@/hooks/useSessionState';
 
@@ -30,6 +31,16 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
       ...prev,
       [sectionName]: !prev[sectionName]
     }));
+  };
+
+  // Helper function to get color name using color-namer
+  const getColorName = (hex: string): string => {
+    try {
+      const result = namer(hex);
+      return result.pantone[0]?.name || result.basic[0]?.name || '';
+    } catch (error) {
+      return '';
+    }
   };
 
   // Helper function to convert hex to HSL
@@ -213,55 +224,60 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
                         {harmonyGroup.name}
                       </Typography>
                       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(3, 1fr)', md: 'repeat(6, 1fr)' }, gap: 1, mb: 2 }}>
-                        {harmonyGroup.colors.map((color, colorIndex) => (
-                          <Box
-                            key={colorIndex}
-                            sx={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              bgcolor: 'background.paper',
-                              border: '1px solid rgba(0,0,0,0.1)',
-                              borderRadius: 1,
-                              p: 1,
-                            }}
-                          >
+                        {harmonyGroup.colors.map((color, colorIndex) => {
+                          const colorName = getColorName(color.hex);
+                          return (
                             <Box
+                              key={colorIndex}
                               sx={{
-                                width: 24,
-                                height: 24,
-                                backgroundColor: color.hex,
-                                borderRadius: 0.5,
-                                mr: 1,
+                                display: 'flex',
+                                alignItems: 'center',
+                                bgcolor: 'background.paper',
                                 border: '1px solid rgba(0,0,0,0.1)',
-                                flexShrink: 0,
+                                borderRadius: 1,
+                                p: 1,
                               }}
-                            />
-                            <Box sx={{ flex: 1, minWidth: 0 }}>
-                              <Typography
-                                variant="caption"
+                            >
+                              <Box
                                 sx={{
-                                  fontWeight: 'bold',
-                                  display: 'block',
-                                  overflow: 'hidden',
-                                  textOverflow: 'ellipsis',
-                                  fontSize: { xs: '0.65rem', sm: '0.75rem' }
+                                  width: 24,
+                                  height: 24,
+                                  backgroundColor: color.hex,
+                                  borderRadius: 0.5,
+                                  mr: 1,
+                                  border: '1px solid rgba(0,0,0,0.1)',
+                                  flexShrink: 0,
                                 }}
-                              >
-                                {color.name}
-                              </Typography>
-                              <Typography
-                                variant="caption"
-                                color="text.secondary"
-                                sx={{
-                                  display: 'block',
-                                  fontSize: { xs: '0.6rem', sm: '0.7rem' }
-                                }}
-                              >
-                                {color.hex}
-                              </Typography>
+                              />
+                              <Box sx={{ flex: 1, minWidth: 0 }}>
+                                <Typography
+                                  variant="caption"
+                                  sx={{
+                                    fontWeight: 'bold',
+                                    display: 'block',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    fontSize: { xs: '0.65rem', sm: '0.75rem' }
+                                  }}
+                                >
+                                  {color.hex}
+                                </Typography>
+                                {colorName && (
+                                  <Typography
+                                    variant="caption"
+                                    color="text.secondary"
+                                    sx={{
+                                      display: 'block',
+                                      fontSize: { xs: '0.6rem', sm: '0.7rem' }
+                                    }}
+                                  >
+                                    {colorName}
+                                  </Typography>
+                                )}
+                              </Box>
                             </Box>
-                          </Box>
-                        ))}
+                          );
+                        })}
                       </Box>
                     </Box>
                   ))}
