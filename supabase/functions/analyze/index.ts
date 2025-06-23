@@ -17,10 +17,14 @@ function mapScoreToGrade(score: number): string {
 
 // Helper function to get color name
 function getColorName(hex: string): string {
-  // Use the html palette from color-namer
-  const result = namer(hex);
-  const name  = result.html?.[0]?.name;
-  return name && name.toLowerCase() !== hex.toLowerCase() ? name : hex;
+  try {
+    const result = namer(hex);
+    const name = result.ntc?.[0]?.name || result.html?.[0]?.name;
+    return name && name.toLowerCase() !== hex.toLowerCase() ? name : '';
+  } catch (error) {
+    console.error('color-namer failed:', error);
+    return '';
+  }
 }
 
 // ----- BEGIN ORIGINAL extractCssColors -----
