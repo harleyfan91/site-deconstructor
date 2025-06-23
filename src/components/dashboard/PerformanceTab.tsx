@@ -7,12 +7,12 @@ import {
   LinearProgress,
   CircularProgress,
   Alert,
-  Chip,
   Tooltip,
 } from '@mui/material';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart';
 import { BarChart as RechartsBarChart, Bar, XAxis, YAxis } from 'recharts';
-import { Shield, Smartphone, Zap, Activity, ShieldCheck, Gauge, BarChart } from 'lucide-react';
+import { Shield, Smartphone, Zap, Activity, Gauge, BarChart } from 'lucide-react';
+import ScoreChip from './ScoreChip';
 import type { AnalysisResponse } from '@/types/analysis';
 import { useAnalysisContext } from '../../contexts/AnalysisContext';
 
@@ -74,51 +74,46 @@ function MetricCard({
 }
 
 // Renders the section with multiple metric cards at the top of the panel
-function MetricsSection({ performanceScore, mobileScore, securityGrade }: { 
-  performanceScore: number; 
-  mobileScore: number; 
-  securityGrade: string; 
-}) {
-  const getGradeColor = (grade: string) => {
-    switch (grade) {
-      case 'A': return '#4CAF50';
-      case 'B': return '#2196F3';
-      case 'C': return '#FF9800';
-      case 'D': case 'F': return '#F44336';
-      default: return '#9E9E9E';
-    }
+function MetricsSection({ lhr }: { lhr: any }) {
+  const perfCategory = lhr.categories.performance;
+
+  const getMetric = (id: string) => {
+    const ref = perfCategory.auditRefs.find((a: any) => a.id === id);
+    return ref?.result?.numericValue || 0;
   };
 
   const metrics = [
     {
-      title: 'Performance Score',
-      value: performanceScore.toString(),
+      title: 'FCP',
+      value: `${getMetric('first-contentful-paint')} ms`,
       icon: Zap,
-      color: getScoreColor(performanceScore),
-      description:
-        performanceScore >= 90
-          ? 'Excellent Performance'
-          : performanceScore >= 70
-          ? 'Good Performance'
-          : 'Needs Improvement',
+      color: getScoreColor((lhr.audits['first-contentful-paint']?.score ?? 0) * 100),
+      description: 'First Contentful Paint',
     },
     {
-      title: 'Mobile Score',
-      value: `${mobileScore}%`,
-      icon: Smartphone,
-      color: getScoreColor(mobileScore),
-      description: 'Mobile Responsiveness',
+      title: 'Speed Index',
+      value: `${Math.round(perfCategory.score * 100)}`,
+      icon: Gauge,
+      color: getScoreColor(perfCategory.score * 100),
+      description: 'Overall Performance Score',
     },
     {
-      title: 'Security Grade',
-      value: securityGrade,
-      icon: Shield,
-      color: getGradeColor(securityGrade),
-      description: 'Based on security headers',
+      title: 'TTI',
+      value: `${getMetric('interactive')} ms`,
+      icon: Activity,
+      color: getScoreColor((lhr.audits['interactive']?.score ?? 0) * 100),
+      description: 'Time to Interactive',
+    },
+    {
+      title: 'LCP',
+      value: `${getMetric('largest-contentful-paint')} ms`,
+      icon: BarChart,
+      color: getScoreColor((lhr.audits['largest-contentful-paint']?.score ?? 0) * 100),
+      description: 'Largest Contentful Paint',
     },
   ];
   return (
-    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 3, mb: 4 }}>
+    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: 3, mb: 4 }}>
       {metrics.map((metric, idx) => (
         <MetricCard key={idx} {...metric} />
       ))}
@@ -201,54 +196,6 @@ function SpeedIndexSection({ performanceScore }: { performanceScore: number }) {
   );
 }
 
-// Security headers grid
-function SecurityHeadersSection({ securityHeaders }: { securityHeaders: AnalysisResponse["securityHeaders"] }) {
-  return (
-    <Card sx={{ borderRadius: 2 }}>
-      <CardContent sx={{ p: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <ShieldCheck size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-          <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
-            Security Headers Analysis
-          </Typography>
-        </Box>
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 2 }}>
-          {Object.entries(securityHeaders).map(([key, value]) => (
-            <Box
-              key={key}
-              sx={{
-                p: 2,
-                border: '1px solid rgba(0,0,0,0.1)',
-                bgcolor: 'background.paper',
-                borderRadius: 1,
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-              }}
-            >
-              <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                {key.toUpperCase()}
-              </Typography>
-              <Tooltip 
-                title={value ? 'Security header is present and configured' : 'Security header is missing - this may be a security risk'}
-                enterDelay={300}
-                enterTouchDelay={300}
-              >
-                <Chip
-                  label={value ? 'Present' : 'Missing'}
-                  color={value ? 'success' : 'error'}
-                  size="small"
-                  variant="outlined"
-                  sx={{ cursor: 'help' }}
-                />
-              </Tooltip>
-            </Box>
-          ))}
-        </Box>
-      </CardContent>
-    </Card>
-  );
-}
 
 // Mobile Responsiveness Section
 function MobileResponsivenessSection() {
@@ -344,16 +291,6 @@ function MobileResponsivenessSection() {
 function SecurityScoreSection() {
   const { data, loading, error } = useAnalysisContext();
 
-  const getGradeColor = (grade: string) => {
-    switch (grade) {
-      case 'A': return '#4CAF50';
-      case 'B': return '#2196F3';
-      case 'C': return '#FF9800';
-      case 'D': case 'F': return '#F44336';
-      default: return '#9E9E9E';
-    }
-  };
-
   if (loading) {
     return (
       <Card sx={{ borderRadius: 2 }}>
@@ -361,7 +298,7 @@ function SecurityScoreSection() {
           <Box display="flex" alignItems="center" mb={2}>
             <Shield size={24} color="#FF6B35" style={{ marginRight: 8 }} />
             <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-              Security Score Details
+              Security Details
             </Typography>
           </Box>
           <Box display="flex" justifyContent="center" alignItems="center" py={2}>
@@ -379,15 +316,15 @@ function SecurityScoreSection() {
     return (
       <Card sx={{ borderRadius: 2 }}>
         <CardContent sx={{ p: 3 }}>
-          <Alert severity="error">
-            Error loading security data: {error}
-          </Alert>
+          <Alert severity="error">Error loading security data: {error}</Alert>
         </CardContent>
       </Card>
     );
   }
 
-  const { grade = '—', findings = [] } = data?.securityScore || {};
+  const lhr = data?.lhr;
+
+  if (!lhr) return null;
 
   return (
     <Card sx={{ borderRadius: 2 }}>
@@ -395,49 +332,20 @@ function SecurityScoreSection() {
         <Box display="flex" alignItems="center" mb={2}>
           <Shield size={24} color="#FF6B35" style={{ marginRight: 8 }} />
           <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-            Security Score Details
-          </Typography>
-        </Box>
-        
-        <Box sx={{ textAlign: 'center', mb: 3 }}>
-          <Chip 
-            label={`Grade: ${grade}`} 
-            sx={{
-              backgroundColor: getGradeColor(grade),
-              color: 'white',
-              fontSize: '1.2rem',
-              py: 2,
-              fontWeight: 'bold'
-            }}
-            size="medium"
-          />
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            Overall Security Grade
+            Security Details
           </Typography>
         </Box>
 
-        <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
-          Security Findings
-        </Typography>
-        
-        {findings.length > 0 ? (
-          findings.map((finding, i) => (
-            <Card key={i} sx={{ mb: 1, backgroundColor: 'error.light' }}>
-              <CardContent sx={{ py: 1.5 }}>
-                <Typography variant="subtitle2" color="error.dark" gutterBottom>
-                  {finding.title}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {finding.description}
-                </Typography>
-              </CardContent>
-            </Card>
-          ))
-        ) : (
-          <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'text.secondary' }}>
-            No security issues detected.
-          </Typography>
-        )}
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+          {lhr.categories.security.auditRefs.map((ref: any) => (
+            <ScoreChip
+              key={ref.id}
+              label={ref.id}
+              score={lhr.audits[ref.id].score}
+              description={lhr.audits[ref.id].title}
+            />
+          ))}
+        </Box>
       </CardContent>
     </Card>
   );
@@ -534,8 +442,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
 
   // Make sure we destructure the right variable!
   const { performance } = data.data;
-  const mobileScore = contextData?.mobileResponsiveness?.score || 0;
-  const securityGrade = contextData?.securityScore?.grade || '—';
+  const { lhr } = data;
 
   return (
     <Box>
@@ -546,16 +453,12 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
       </Box>
 
       {/* Performance Score Section */}
-      <MetricsSection 
-        performanceScore={performance.performanceScore} 
-        mobileScore={mobileScore}
-        securityGrade={securityGrade}
-      />
+      <MetricsSection lhr={lhr} />
 
       {/* Core Web Vitals and Speed Index */}
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 2, alignItems: 'stretch', mb: 4 }}>
         <CoreWebVitalsSection performance={performance} />
-        <SpeedIndexSection performanceScore={performance.performanceScore} />
+        <SpeedIndexSection performanceScore={Math.round(lhr.categories.performance.score * 100)} />
       </Box>
 
       {/* Mobile and Security Details */}
@@ -564,10 +467,6 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
         <SecurityScoreSection />
       </Box>
 
-      {/* Security Headers Section */}
-      <Box sx={{ mb: 4 }}>
-        <SecurityHeadersSection securityHeaders={data.securityHeaders} />
-      </Box>
 
       {/* Performance Recommendations Section */}
       <Box sx={{ mt: 3 }}>

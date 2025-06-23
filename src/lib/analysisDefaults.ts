@@ -13,6 +13,7 @@ export function createDefaultAnalysis(url: string): AnalysisResponse {
     seoScore: 0,
     readabilityScore: 0,
     complianceStatus: 'warn',
+    lhr: { categories: {}, audits: {} },
     data: {
       overview: {
         overallScore: 0,
