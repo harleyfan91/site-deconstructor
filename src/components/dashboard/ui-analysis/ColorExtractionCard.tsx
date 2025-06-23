@@ -78,7 +78,7 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
     });
 
     // Sort usage groups by importance, preserving original categories
-    const usageOrder = ['Background', 'Text', 'Button', 'Border', 'Other'];
+    const usageOrder = ['Background', 'Text', 'Theme', 'Accent', 'Border', 'Other'];
     const sortedGroups = usageOrder
       .filter(usage => usageGroups[usage])
       .map(usage => ({
@@ -104,45 +104,41 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
 
   // Initialize sections and auto-collapse functionality
   React.useEffect(() => {
-    const hasStoredState = Object.keys(expandedSections).length > 0;
-    
-    // Set all sections to expanded initially if no stored state
-    if (!hasStoredState) {
-      const initialState: Record<string, boolean> = {};
-      usageGroups.forEach(group => {
-        initialState[group.name] = true;
-      });
-      setExpandedSections(initialState);
+    const hadStoredState = Object.keys(expandedSections).length > 0;
+    let hasNewSection = false;
 
-      // Auto-collapse all sections except the first one after a delay
-      const timer = setTimeout(() => {
+    // Ensure any brand-new groups show up expanded
+    setExpandedSections(prev => {
+      const updated = { ...prev };
+      usageGroups.forEach(group => {
+        if (!(group.name in updated)) {
+          updated[group.name] = true;
+          hasNewSection = true;
+        }
+      });
+      return updated;
+    });
+
+    // Only auto-collapse on very first load when new sections appeared
+    let timer: NodeJS.Timeout | undefined;
+    if (!hadStoredState && hasNewSection) {
+      timer = setTimeout(() => {
         setExpandedSections(prev => {
           const updated: Record<string, boolean> = { ...prev };
-          usageGroups.forEach((group, index) => {
-            if (index > 0) {
-              updated[group.name] = false;
+          Object.keys(updated).forEach(name => {
+            if (name !== 'Background') {
+              updated[name] = false;
             }
           });
           return updated;
         });
       }, 2500);
-
-      return () => clearTimeout(timer);
-    } else {
-      // Ensure any new sections are expanded by default
-      setExpandedSections(prev => {
-        const updated = { ...prev };
-        let hasNewSection = false;
-        usageGroups.forEach(group => {
-          if (!(group.name in updated)) {
-            updated[group.name] = true;
-            hasNewSection = true;
-          }
-        });
-        return updated;
-      });
     }
-  }, [colors, usageGroups.length]);
+
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [colors]);
 
   return (
     <Box>
