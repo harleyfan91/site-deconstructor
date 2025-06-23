@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import namer from 'color-namer';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -16,29 +17,10 @@ function mapScoreToGrade(score: number): string {
 
 // Helper function to get color name
 function getColorName(hex: string): string {
-  const colorNames: Record<string, string> = {
-    '#FFFFFF': 'White',
-    '#000000': 'Black',
-    '#FF0000': 'Red',
-    '#00FF00': 'Green',
-    '#0000FF': 'Blue',
-    '#FFFF00': 'Yellow',
-    '#FF00FF': 'Magenta',
-    '#00FFFF': 'Cyan',
-    '#808080': 'Gray',
-    '#800000': 'Maroon',
-    '#008000': 'Dark Green',
-    '#000080': 'Navy',
-    '#808000': 'Olive',
-    '#800080': 'Purple',
-    '#008080': 'Teal',
-    '#C0C0C0': 'Silver',
-    '#F5F5F5': 'White Smoke',
-    '#1A1A1A': 'Dark Gray',
-    '#2D2D2D': 'Charcoal',
-    '#333333': 'Dark Charcoal'
-  };
-  return colorNames[hex.toUpperCase()] || hex;
+  // Use the html palette from color-namer
+  const result = namer(hex);
+  const name  = result.html?.[0]?.name;
+  return name && name.toLowerCase() !== hex.toLowerCase() ? name : hex;
 }
 
 // ----- BEGIN ORIGINAL extractCssColors -----
