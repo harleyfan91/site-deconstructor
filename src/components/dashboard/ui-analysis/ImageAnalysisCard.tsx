@@ -11,9 +11,9 @@ interface ImageAnalysisCardProps {
     totalImages: number;
     estimatedPhotos: number;
     estimatedIcons: number;
-    imageUrls: string[];
-    photoUrls: string[];
-    iconUrls: string[];
+    imageUrls?: string[];
+    photoUrls?: string[];
+    iconUrls?: string[];
   };
 }
 
@@ -42,9 +42,9 @@ const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnal
   const truncateUrl = (url: string, length = 80) =>
     url.length > length ? `${url.slice(0, length)}...` : url;
 
-  const totalImagesCount = imageAnalysis?.totalImages || images.reduce((acc, img) => acc + img.count, 0);
-  const photosCount = imageAnalysis?.estimatedPhotos || images.find(img => img.type === 'Estimated Photos')?.count || 0;
-  const iconsCount = imageAnalysis?.estimatedIcons || images.find(img => img.type === 'Estimated Icons')?.count || 0;
+  const totalImagesCount = imageAnalysis?.totalImages || images?.reduce((acc, img) => acc + img.count, 0) || 0;
+  const photosCount = imageAnalysis?.estimatedPhotos || images?.find(img => img.type === 'Estimated Photos')?.count || 0;
+  const iconsCount = imageAnalysis?.estimatedIcons || images?.find(img => img.type === 'Estimated Icons')?.count || 0;
 
   return (
     <Box>

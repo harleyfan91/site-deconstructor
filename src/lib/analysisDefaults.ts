@@ -1,14 +1,24 @@
+
 import { AnalysisResponse } from '@/types/analysis';
 
 export function createDefaultAnalysis(url: string): AnalysisResponse {
   return {
+    success: true,
     id: 'default',
     url,
     timestamp: new Date().toISOString(),
     status: 'complete',
-    coreWebVitals: { lcp: 0, fid: 0, cls: 0 },
+    coreWebVitals: { 
+      lcp: 0, 
+      fid: 0, 
+      cls: 0,
+      fcp: 0,
+      lcp_benchmark: 0,
+      fid_benchmark: 0,
+      cls_benchmark: 0,
+      fcp_benchmark: 0
+    },
     securityHeaders: { csp: '', hsts: '', xfo: '', xcto: '', referrer: '' },
-
     performanceScore: 0,
     seoScore: 0,
     readabilityScore: 0,
@@ -36,19 +46,16 @@ export function createDefaultAnalysis(url: string): AnalysisResponse {
           iconUrls: [],
         },
         contrastIssues: [],
-
       },
       performance: {
         coreWebVitals: [],
         performanceScore: 0,
         mobileResponsive: false,
-
         recommendations: [],
       },
       seo: {
         score: 0,
         metaTags: {},
-
         checks: [],
         recommendations: [],
       },
@@ -57,13 +64,11 @@ export function createDefaultAnalysis(url: string): AnalysisResponse {
         healthGrade: '',
         issues: [],
         securityScore: 0,
-
         accessibility: { violations: [] },
         social: { hasOpenGraph: false, hasTwitterCard: false, hasShareButtons: false },
         cookies: { hasCookieScript: false, scripts: [] },
         minification: { cssMinified: false, jsMinified: false },
         linkIssues: { brokenLinks: [], mixedContentLinks: [] },
-
       },
       adTags: {
         hasGAM: false,
@@ -87,6 +92,15 @@ export function createDefaultAnalysis(url: string): AnalysisResponse {
         hasDV: false,
         hasIAS: false,
       },
+    },
+    lhr: {
+      categories: {
+        security: {
+          score: 0,
+          auditRefs: [],
+        },
+      },
+      audits: {},
     },
   };
 }
