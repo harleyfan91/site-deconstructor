@@ -108,7 +108,7 @@ function MetricsSection({ performanceScore, mobileScore, securityScore }: {
     },
   ];
   return (
-    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 3, mb: 4 }}>
+    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 2 }}>
       {metrics.map((metric, idx) => (
         <MetricCard key={idx} {...metric} />
       ))}
@@ -123,7 +123,7 @@ function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["
   };
   return (
     <Card sx={{ borderRadius: 2, height: '400px' }}>
-      <CardContent sx={{ p: 3, height: '100%' }}>
+      <CardContent sx={{ p: 2, height: '100%' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <BarChart size={24} color="#FF6B35" style={{ marginRight: 8 }} />
           <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
@@ -155,7 +155,7 @@ function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["
 function SpeedIndexSection({ performanceScore }: { performanceScore: number }) {
   return (
     <Card sx={{ borderRadius: 2 }}>
-      <CardContent sx={{ p: 3 }}>
+      <CardContent sx={{ p: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <Gauge size={24} color="#FF6B35" style={{ marginRight: 8 }} />
           <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
@@ -196,7 +196,7 @@ function SecurityAuditsSection() {
   if (!data?.lhr) {
     return (
       <Card sx={{ borderRadius: 2 }}>
-        <CardContent sx={{ p: 3 }}>
+        <CardContent sx={{ p: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
             <ShieldCheck size={24} color="#FF6B35" style={{ marginRight: 8 }} />
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
@@ -215,7 +215,7 @@ function SecurityAuditsSection() {
 
   return (
     <Card sx={{ borderRadius: 2 }}>
-      <CardContent sx={{ p: 3 }}>
+      <CardContent sx={{ p: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <ShieldCheck size={24} color="#FF6B35" style={{ marginRight: 8 }} />
           <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
@@ -270,7 +270,7 @@ function MobileResponsivenessSection() {
   if (loading) {
     return (
       <Card sx={{ borderRadius: 2 }}>
-        <CardContent sx={{ p: 3 }}>
+        <CardContent sx={{ p: 2 }}>
           <Box display="flex" alignItems="center" mb={2}>
             <Smartphone size={24} color="#FF6B35" style={{ marginRight: 8 }} />
             <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
@@ -291,7 +291,7 @@ function MobileResponsivenessSection() {
   if (error) {
     return (
       <Card sx={{ borderRadius: 2 }}>
-        <CardContent sx={{ p: 3 }}>
+        <CardContent sx={{ p: 2 }}>
           <Alert severity="error">
             Error loading mobile responsiveness data: {error}
           </Alert>
@@ -304,7 +304,7 @@ function MobileResponsivenessSection() {
 
   return (
     <Card sx={{ borderRadius: 2 }}>
-      <CardContent sx={{ p: 3 }}>
+      <CardContent sx={{ p: 2 }}>
         <Box display="flex" alignItems="center" mb={2}>
           <Smartphone size={24} color="#FF6B35" style={{ marginRight: 8 }} />
           <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
@@ -359,7 +359,7 @@ function SecurityScoreSection() {
   if (loading) {
     return (
       <Card sx={{ borderRadius: 2 }}>
-        <CardContent sx={{ p: 3 }}>
+        <CardContent sx={{ p: 2 }}>
           <Box display="flex" alignItems="center" mb={2}>
             <Shield size={24} color="#FF6B35" style={{ marginRight: 8 }} />
             <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
@@ -380,7 +380,7 @@ function SecurityScoreSection() {
   if (error) {
     return (
       <Card sx={{ borderRadius: 2 }}>
-        <CardContent sx={{ p: 3 }}>
+        <CardContent sx={{ p: 2 }}>
           <Alert severity="error">
             Error loading security data: {error}
           </Alert>
@@ -393,7 +393,7 @@ function SecurityScoreSection() {
 
   return (
     <Card sx={{ borderRadius: 2 }}>
-      <CardContent sx={{ p: 3 }}>
+      <CardContent sx={{ p: 2 }}>
         <Box display="flex" alignItems="center" mb={2}>
           <Shield size={24} color="#FF6B35" style={{ marginRight: 8 }} />
           <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
@@ -456,7 +456,7 @@ function RecommendationsSection({ recommendations }: { recommendations: Analysis
 
   return (
     <Card sx={{ borderRadius: 2 }}>
-      <CardContent sx={{ p: 3 }}>
+      <CardContent sx={{ p: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <Activity size={24} color="#FF6B35" style={{ marginRight: 8 }} />
           <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
@@ -544,33 +544,30 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
           Performance & Security Analysis
         </Typography>
       </Box>
+      <Box sx={{ display: 'grid', gap: 2, alignItems: 'stretch' }}>
+        {/* Performance Score Section */}
+        <MetricsSection 
+          performanceScore={performance.performanceScore} 
+          mobileScore={mobileScore}
+          securityScore={securityScore}
+        />
 
-      {/* Performance Score Section */}
-      <MetricsSection 
-        performanceScore={performance.performanceScore} 
-        mobileScore={mobileScore}
-        securityScore={securityScore}
-      />
+        {/* Core Web Vitals and Speed Index */}
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 2 }}>
+          <CoreWebVitalsSection performance={performance} />
+          <SpeedIndexSection performanceScore={performance.performanceScore} />
+        </Box>
 
-      {/* Core Web Vitals and Speed Index */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 2, alignItems: 'stretch', mb: 4 }}>
-        <CoreWebVitalsSection performance={performance} />
-        <SpeedIndexSection performanceScore={performance.performanceScore} />
-      </Box>
+        {/* Mobile and Security Details */}
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
+          <MobileResponsivenessSection />
+          <SecurityScoreSection />
+        </Box>
 
-      {/* Mobile and Security Details */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3, mb: 4 }}>
-        <MobileResponsivenessSection />
-        <SecurityScoreSection />
-      </Box>
-
-      {/* Security Audits Section */}
-      <Box sx={{ mb: 4 }}>
+        {/* Security Audits Section */}
         <SecurityAuditsSection />
-      </Box>
 
-      {/* Performance Recommendations Section */}
-      <Box sx={{ mt: 3 }}>
+        {/* Performance Recommendations Section */}
         <RecommendationsSection recommendations={performance.recommendations} />
       </Box>
     </Box>

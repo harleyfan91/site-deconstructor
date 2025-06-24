@@ -222,32 +222,85 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
         </Typography>
       </Box>
       <Box sx={{ display: 'grid', gap: 2, alignItems: 'stretch' }}>
-        {/* Section: Tech Stack */}
-        <Card sx={{ borderRadius: 2 }}>
-        <CardContent sx={{ p: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-            <Layers size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-            <Typography 
-              variant="h6" 
-              sx={{ 
-                fontWeight: 'bold',
-                fontSize: { xs: '1.1rem', sm: '1.25rem' }
-              }}
-            >
-              Tech Stack
-            </Typography>
-            <Typography variant="body2" sx={{
-              fontSize: '0.75rem',
-              fontWeight: 'normal',
-              color: 'text.secondary',
-              ml: 1,
-            }}>
-              (Powered by Wappalyzer)
-            </Typography>
-          </Box>
-            <TechStackGrid techStack={technical.techStack ?? []} />
-          </CardContent>
-        </Card>
+        {/* Section: Tech Stack and Minification Status side by side */}
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 2 }}>
+          <Card sx={{ borderRadius: 2 }}>
+            <CardContent sx={{ p: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Layers size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+                <Typography 
+                  variant="h6" 
+                  sx={{ 
+                    fontWeight: 'bold',
+                    fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                  }}
+                >
+                  Tech Stack
+                </Typography>
+                <Typography variant="body2" sx={{
+                  fontSize: '0.75rem',
+                  fontWeight: 'normal',
+                  color: 'text.secondary',
+                  ml: 1,
+                }}>
+                  (Powered by Wappalyzer)
+                </Typography>
+              </Box>
+              <TechStackGrid techStack={technical.techStack ?? []} />
+            </CardContent>
+          </Card>
+
+          <Card sx={{ borderRadius: 2 }}>
+            <CardContent sx={{ p: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Settings size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+                <Typography 
+                  variant="h6" 
+                  sx={{ 
+                    fontWeight: 'bold',
+                    fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                  }}
+                >
+                  Minification Status
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr', gap: 2 }}>
+                <Tooltip
+                  title={technical.minification?.cssMinified ? 'CSS files are minified for better performance' : 'CSS files are not minified - consider minifying for better performance'}
+                  enterDelay={300}
+                  enterTouchDelay={300}
+                >
+                  <Chip
+                    label={`CSS: ${technical.minification?.cssMinified ? 'Minified' : 'Not Minified'}`}
+                    {...chipStateStyle(Boolean(technical.minification?.cssMinified), theme)}
+                    size="small"
+                    sx={{ 
+                      ...chipStateStyle(Boolean(technical.minification?.cssMinified), theme).sx, 
+                      width: '100%',
+                      cursor: 'help'
+                    }}
+                  />
+                </Tooltip>
+                <Tooltip
+                  title={technical.minification?.jsMinified ? 'JavaScript files are minified for better performance' : 'JavaScript files are not minified - consider minifying for better performance'}
+                  enterDelay={300}
+                  enterTouchDelay={300}
+                >
+                  <Chip
+                    label={`JavaScript: ${technical.minification?.jsMinified ? 'Minified' : 'Not Minified'}`}
+                    {...chipStateStyle(Boolean(technical.minification?.jsMinified), theme)}
+                    size="small"
+                    sx={{ 
+                      ...chipStateStyle(Boolean(technical.minification?.jsMinified), theme).sx, 
+                      width: '100%',
+                      cursor: 'help'
+                    }}
+                  />
+                </Tooltip>
+              </Box>
+            </CardContent>
+          </Card>
+        </Box>
 
         {/* Section: Detected Ad Tags - Always show, don't use conditional */}
         <Card sx={{ borderRadius: 2 }}>
@@ -423,57 +476,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
         </CardContent>
       </Card>
 
-        {/* Section: Minification Status */}
-        <Card sx={{ borderRadius: 2 }}>
-          <CardContent sx={{ p: 2 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-            <Settings size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-            <Typography 
-              variant="h6" 
-              sx={{ 
-                fontWeight: 'bold',
-                fontSize: { xs: '1.1rem', sm: '1.25rem' }
-              }}
-            >
-              Minification Status
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 2 }}>
-            <Tooltip
-              title={technical.minification?.cssMinified ? 'CSS files are minified for better performance' : 'CSS files are not minified - consider minifying for better performance'}
-              enterDelay={300}
-              enterTouchDelay={300}
-            >
-              <Chip
-                label={`CSS: ${technical.minification?.cssMinified ? 'Minified' : 'Not Minified'}`}
-                {...chipStateStyle(Boolean(technical.minification?.cssMinified), theme)}
-                size="small"
-                sx={{ 
-                  ...chipStateStyle(Boolean(technical.minification?.cssMinified), theme).sx, 
-                  width: '100%',
-                  cursor: 'help'
-                }}
-              />
-            </Tooltip>
-            <Tooltip
-              title={technical.minification?.jsMinified ? 'JavaScript files are minified for better performance' : 'JavaScript files are not minified - consider minifying for better performance'}
-              enterDelay={300}
-              enterTouchDelay={300}
-            >
-              <Chip
-                label={`JavaScript: ${technical.minification?.jsMinified ? 'Minified' : 'Not Minified'}`}
-                {...chipStateStyle(Boolean(technical.minification?.jsMinified), theme)}
-                size="small"
-                sx={{ 
-                  ...chipStateStyle(Boolean(technical.minification?.jsMinified), theme).sx, 
-                  width: '100%',
-                  cursor: 'help'
-                }}
-              />
-            </Tooltip>
-          </Box>
-          </CardContent>
-        </Card>
+
 
         {/* Section: Technical Issues & Health */}
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 2 }}>
