@@ -564,11 +564,11 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
           <SecurityScoreSection />
         </Box>
 
-        {/* Security Audits Section */}
-        <SecurityAuditsSection />
-
-        {/* Performance Recommendations Section */}
-        <RecommendationsSection recommendations={performance.recommendations} />
+        {/* Security Audits and Performance Recommendations */}
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
+          <SecurityAuditsSection />
+          <RecommendationsSection recommendations={performance.recommendations} />
+        </Box>
       </Box>
     </Box>
   );
