@@ -1,6 +1,10 @@
 
 import React from 'react';
-import SwipeableViews from 'react-swipeable-views';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
 import {
   Box,
   Card,
@@ -94,38 +98,38 @@ const LayeredCarousel = () => {
 
       <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
         <Box sx={{ overflow: 'visible' }}>
-          <SwipeableViews
-            index={activeStep}
-            onChangeIndex={handleStepChange}
-            enableMouseEvents
-            containerStyle={{ overflow: 'visible' }}
-            slideStyle={{ paddingLeft: '10%', paddingRight: '10%' }}
+          <Swiper
+            modules={[Navigation, Pagination]}
+            spaceBetween={50}
+            slidesPerView={1}
+            centeredSlides={true}
+            onSlideChange={(swiper) => setActiveStep(swiper.activeIndex)}
+            style={{ overflow: 'visible', padding: '0 10%' }}
           >
             {screenshots.map((src, index) => (
-              <Box
-                key={src}
-                sx={{ display: 'flex', justifyContent: 'center', py: 1 }}
-              >
-                <Card
-                  sx={{
-                    width: '100%',
-                    maxWidth: 400,
-                    height: 250,
-                    transition: 'transform 0.4s ease, opacity 0.4s ease',
-                    transform: activeStep === index ? 'scale(1)' : 'scale(0.9)',
-                    opacity: activeStep === index ? 1 : 0.5,
-                  }}
-                >
-                  <Box
-                    component="img"
-                    src={src}
-                    alt={`Screenshot ${index + 1}`}
-                    sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                  />
-                </Card>
-              </Box>
+              <SwiperSlide key={src}>
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 1 }}>
+                  <Card
+                    sx={{
+                      width: '100%',
+                      maxWidth: 400,
+                      height: 250,
+                      transition: 'transform 0.4s ease, opacity 0.4s ease',
+                      transform: activeStep === index ? 'scale(1)' : 'scale(0.9)',
+                      opacity: activeStep === index ? 1 : 0.5,
+                    }}
+                  >
+                    <Box
+                      component="img"
+                      src={src}
+                      alt={`Screenshot ${index + 1}`}
+                      sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    />
+                  </Card>
+                </Box>
+              </SwiperSlide>
             ))}
-          </SwipeableViews>
+          </Swiper>
         </Box>
         <MobileStepper
           steps={maxSteps}
