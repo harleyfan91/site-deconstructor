@@ -122,7 +122,7 @@ function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["
     benchmark: { label: 'Industry Average', color: '#E0E0E0' }
   };
   return (
-    <Card sx={{ borderRadius: 2, height: '400px' }}>
+    <Card sx={{ borderRadius: 2, height: '400px', width: '100%', maxWidth: '100%', minWidth: 0 }}>
       <CardContent sx={{ p: 2, height: '100%' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <BarChart size={24} color="#FF6B35" style={{ marginRight: 8 }} />
@@ -154,7 +154,7 @@ function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["
 
 function SpeedIndexSection({ performanceScore }: { performanceScore: number }) {
   return (
-    <Card sx={{ borderRadius: 2 }}>
+    <Card sx={{ borderRadius: 2, width: '100%', maxWidth: '100%', minWidth: 0 }}>
       <CardContent sx={{ p: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <Gauge size={24} color="#FF6B35" style={{ marginRight: 8 }} />
@@ -538,16 +538,22 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
   const securityScore = contextData?.lhr ? Math.round(contextData.lhr.categories.security.score * 100) : 0;
 
   return (
-    <Box>
+    <Box sx={{ width: '100%', maxWidth: '100%', overflow: 'hidden' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
         <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', flexGrow: 1 }}>
           Performance & Security Analysis
         </Typography>
       </Box>
-      <Box sx={{ display: 'grid', gap: 2, alignItems: 'stretch' }}>
+      <Box sx={{ display: 'grid', gap: 2, alignItems: 'stretch', width: '100%', maxWidth: '100%' }}>
         {/* Performance Score Section */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 2 }}>
-          <Card sx={{ borderRadius: 2 }}>
+        <Box sx={{ 
+          display: 'grid', 
+          gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, 
+          gap: 2,
+          width: '100%',
+          maxWidth: '100%'
+        }}>
+          <Card sx={{ borderRadius: 2, width: '100%', maxWidth: '100%', minWidth: 0 }}>
             <CardContent sx={{ p: 2, textAlign: 'center' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                 <Zap size={24} color="#FF6B35" style={{ marginRight: 8 }} />
@@ -619,23 +625,51 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
         </Box>
 
         {/* Core Web Vitals and Speed Index */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 2 }}>
-          <Box sx={{ gridColumn: { xs: '1', md: '1 / 3' } }}>
+        <Box sx={{ 
+          display: 'grid', 
+          gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, 
+          gap: 2,
+          width: '100%',
+          maxWidth: '100%'
+        }}>
+          <Box sx={{ gridColumn: { xs: '1', md: '1 / 3' }, width: '100%', maxWidth: '100%', minWidth: 0 }}>
             <CoreWebVitalsSection performance={performance} />
           </Box>
-          <SpeedIndexSection performanceScore={performance.performanceScore} />
+          <Box sx={{ width: '100%', maxWidth: '100%', minWidth: 0 }}>
+            <SpeedIndexSection performanceScore={performance.performanceScore} />
+          </Box>
         </Box>
 
         {/* Mobile and Security Details */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
-          <MobileResponsivenessSection />
-          <SecurityScoreSection />
+        <Box sx={{ 
+          display: 'grid', 
+          gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, 
+          gap: 2,
+          width: '100%',
+          maxWidth: '100%'
+        }}>
+          <Box sx={{ width: '100%', maxWidth: '100%', minWidth: 0 }}>
+            <MobileResponsivenessSection />
+          </Box>
+          <Box sx={{ width: '100%', maxWidth: '100%', minWidth: 0 }}>
+            <SecurityScoreSection />
+          </Box>
         </Box>
 
         {/* Security Audits and Performance Recommendations */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
-          <SecurityAuditsSection />
-          <RecommendationsSection recommendations={performance.recommendations} />
+        <Box sx={{ 
+          display: 'grid', 
+          gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, 
+          gap: 2,
+          width: '100%',
+          maxWidth: '100%'
+        }}>
+          <Box sx={{ width: '100%', maxWidth: '100%', minWidth: 0 }}>
+            <SecurityAuditsSection />
+          </Box>
+          <Box sx={{ width: '100%', maxWidth: '100%', minWidth: 0 }}>
+            <RecommendationsSection recommendations={performance.recommendations} />
+          </Box>
         </Box>
       </Box>
     </Box>
