@@ -51,7 +51,6 @@ function chipStateStyle(isActive: boolean, theme: any) {
 
 const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) => {
   const theme = useTheme();
-  const [securityHeadersExpanded, setSecurityHeadersExpanded] = useSessionState('compliance-security-headers-expanded', false);
   const [securityGradeExpanded, setSecurityGradeExpanded] = useSessionState('compliance-security-grade-expanded', false);
   const [headerSectionsExpanded, setHeaderSectionsExpanded] = useSessionState<Record<string, boolean>>(
     'compliance-header-sections-expanded',
@@ -113,7 +112,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
   // Only show Security Grade if it's different from Performance tab score
   const showSeparateSecurityGrade = lighthouseSecurityScore !== performanceSecurityScore && lighthouseSecurityScore > 0;
 
-  // Security header categories
+  // Security header categories with actual header values
   const headerCategories = [
     {
       name: 'Content Security Policy',
@@ -180,71 +179,58 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
       </Box>
       
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: showSeparateSecurityGrade ? '1fr 1fr 1fr' : '1fr 1fr' }, gap: 3, mb: 3 }}>
-        {/* Security Headers */}
+        {/* Security Headers - No top-level collapsibility */}
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 2 }}>
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                cursor: 'pointer',
-              }}
-              onClick={() => setSecurityHeadersExpanded(!securityHeadersExpanded)}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Lock size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-                <Typography 
-                  variant="h6" 
-                  sx={{ 
-                    fontWeight: 'bold',
-                    fontSize: { xs: '1.1rem', sm: '1.25rem' }
-                  }}
-                >
-                  Security Headers
-                </Typography>
-              </Box>
-              <IconButton size="small">
-                {securityHeadersExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-              </IconButton>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <Lock size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  fontWeight: 'bold',
+                  fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                }}
+              >
+                Security Headers
+              </Typography>
             </Box>
             
-            <Collapse in={securityHeadersExpanded} timeout="auto">
-              <Box sx={{ mt: 2 }}>
-                {headerCategories.map((category, categoryIndex) => (
-                  <Box key={categoryIndex} sx={{ mb: 2 }}>
-                    {/* Category Header */}
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        cursor: 'pointer',
-                        p: 1,
-                        borderRadius: 1,
-                        bgcolor: 'rgba(255, 107, 53, 0.05)',
-                        '&:hover': {
-                          bgcolor: 'rgba(255, 107, 53, 0.1)',
-                        },
-                      }}
-                      onClick={() => toggleHeaderSection(category.name)}
-                    >
-                      <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: '#FF6B35' }}>
-                        {category.name} ({category.headers.filter(h => h.value).length}/{category.headers.length})
-                      </Typography>
-                      <IconButton size="small">
-                        {headerSectionsExpanded[category.name] ? 
-                          <ChevronUp size={16} /> : 
-                          <ChevronDown size={16} />
-                        }
-                      </IconButton>
-                    </Box>
+            <Box>
+              {headerCategories.map((category, categoryIndex) => (
+                <Box key={categoryIndex} sx={{ mb: 2 }}>
+                  {/* Category Header */}
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      cursor: 'pointer',
+                      p: 1,
+                      borderRadius: 1,
+                      bgcolor: 'rgba(255, 107, 53, 0.05)',
+                      '&:hover': {
+                        bgcolor: 'rgba(255, 107, 53, 0.1)',
+                      },
+                    }}
+                    onClick={() => toggleHeaderSection(category.name)}
+                  >
+                    <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: '#FF6B35' }}>
+                      {category.name} ({category.headers.filter(h => h.value).length}/{category.headers.length})
+                    </Typography>
+                    <IconButton size="small">
+                      {headerSectionsExpanded[category.name] ? 
+                        <ChevronUp size={16} /> : 
+                        <ChevronDown size={16} />
+                      }
+                    </IconButton>
+                  </Box>
 
-                    {/* Collapsible Content */}
-                    <Collapse in={headerSectionsExpanded[category.name]}>
-                      <Box sx={{ mt: 1, ml: 2 }}>
-                        {category.headers.map((header, headerIndex) => (
-                          <Box key={headerIndex} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 1 }}>
+                  {/* Collapsible Content with actual header values */}
+                  <Collapse in={headerSectionsExpanded[category.name]}>
+                    <Box sx={{ mt: 1, ml: 2 }}>
+                      {category.headers.map((header, headerIndex) => (
+                        <Box key={headerIndex} sx={{ mb: 2 }}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
                             <Box sx={{ flex: 1 }}>
                               <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
                                 {header.name}
@@ -260,13 +246,35 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
                               sx={{ ml: 1, ...chipStateStyle(Boolean(header.value), theme).sx }}
                             />
                           </Box>
-                        ))}
-                      </Box>
-                    </Collapse>
-                  </Box>
-                ))}
-              </Box>
-            </Collapse>
+                          {/* Show actual header value if present */}
+                          {header.value && (
+                            <Box sx={{ 
+                              mt: 1, 
+                              p: 1, 
+                              bgcolor: 'rgba(0, 0, 0, 0.05)', 
+                              borderRadius: 1,
+                              border: '1px solid rgba(0, 0, 0, 0.1)'
+                            }}>
+                              <Typography 
+                                variant="caption" 
+                                sx={{ 
+                                  fontFamily: 'monospace',
+                                  wordBreak: 'break-all',
+                                  fontSize: '0.75rem',
+                                  lineHeight: 1.4
+                                }}
+                              >
+                                {header.value}
+                              </Typography>
+                            </Box>
+                          )}
+                        </Box>
+                      ))}
+                    </Box>
+                  </Collapse>
+                </Box>
+              ))}
+            </Box>
           </CardContent>
         </Card>
 
