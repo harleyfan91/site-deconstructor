@@ -53,7 +53,18 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
   const theme = useTheme();
   const [securityHeadersExpanded, setSecurityHeadersExpanded] = useSessionState('compliance-security-headers-expanded', false);
   const [securityGradeExpanded, setSecurityGradeExpanded] = useSessionState('compliance-security-grade-expanded', false);
+  const [headerSectionsExpanded, setHeaderSectionsExpanded] = useSessionState<Record<string, boolean>>(
+    'compliance-header-sections-expanded',
+    {}
+  );
   const { data: contextData } = useAnalysisContext();
+
+  const toggleHeaderSection = (sectionName: string) => {
+    setHeaderSectionsExpanded(prev => ({
+      ...prev,
+      [sectionName]: !prev[sectionName]
+    }));
+  };
   
   if (loading) {
     return (
@@ -102,6 +113,64 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
   // Only show Security Grade if it's different from Performance tab score
   const showSeparateSecurityGrade = lighthouseSecurityScore !== performanceSecurityScore && lighthouseSecurityScore > 0;
 
+  // Security header categories
+  const headerCategories = [
+    {
+      name: 'Content Security Policy',
+      headers: [
+        { name: 'Content-Security-Policy', value: securityHeaders.csp, description: 'Prevents XSS and code injection attacks' },
+        { name: 'Content-Security-Policy-Report-Only', value: '', description: 'Reports CSP violations without blocking' }
+      ]
+    },
+    {
+      name: 'Transport Security',
+      headers: [
+        { name: 'Strict-Transport-Security', value: securityHeaders.hsts, description: 'Enforces HTTPS connections' },
+        { name: 'Upgrade-Insecure-Requests', value: '', description: 'Upgrades HTTP requests to HTTPS' }
+      ]
+    },
+    {
+      name: 'Frame Protection',
+      headers: [
+        { name: 'X-Frame-Options', value: securityHeaders.xfo, description: 'Prevents clickjacking attacks' },
+        { name: 'X-Content-Type-Options', value: securityHeaders.xcto, description: 'Prevents MIME type sniffing' }
+      ]
+    },
+    {
+      name: 'Referrer Policy',
+      headers: [
+        { name: 'Referrer-Policy', value: securityHeaders.referrer, description: 'Controls referrer information' }
+      ]
+    }
+  ];
+
+  // Auto-collapse logic similar to Color Extraction
+  React.useEffect(() => {
+    const hadStoredState = Object.keys(headerSectionsExpanded).length > 0;
+    
+    if (!hadStoredState && headerCategories.length > 0) {
+      // Initialize all sections as expanded
+      const initialState: Record<string, boolean> = {};
+      headerCategories.forEach(category => {
+        initialState[category.name] = true;
+      });
+      setHeaderSectionsExpanded(initialState);
+
+      // Auto-collapse all sections after delay
+      const timer = setTimeout(() => {
+        setHeaderSectionsExpanded(prev => {
+          const updated = { ...prev };
+          Object.keys(updated).forEach(name => {
+            updated[name] = false;
+          });
+          return updated;
+        });
+      }, 2500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [headerCategories.length]);
+
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
@@ -142,48 +211,60 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
             
             <Collapse in={securityHeadersExpanded} timeout="auto">
               <Box sx={{ mt: 2 }}>
-                <Box sx={{ display: 'grid', gap: 1 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 0.5 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                      Content Security Policy
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: securityHeaders.csp ? 'success.main' : 'error.main' }}>
-                      {securityHeaders.csp ? '✅ Present' : '❌ Missing'}
-                    </Typography>
+                {headerCategories.map((category, categoryIndex) => (
+                  <Box key={categoryIndex} sx={{ mb: 2 }}>
+                    {/* Category Header */}
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        cursor: 'pointer',
+                        p: 1,
+                        borderRadius: 1,
+                        bgcolor: 'rgba(255, 107, 53, 0.05)',
+                        '&:hover': {
+                          bgcolor: 'rgba(255, 107, 53, 0.1)',
+                        },
+                      }}
+                      onClick={() => toggleHeaderSection(category.name)}
+                    >
+                      <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: '#FF6B35' }}>
+                        {category.name} ({category.headers.filter(h => h.value).length}/{category.headers.length})
+                      </Typography>
+                      <IconButton size="small">
+                        {headerSectionsExpanded[category.name] ? 
+                          <ChevronUp size={16} /> : 
+                          <ChevronDown size={16} />
+                        }
+                      </IconButton>
+                    </Box>
+
+                    {/* Collapsible Content */}
+                    <Collapse in={headerSectionsExpanded[category.name]}>
+                      <Box sx={{ mt: 1, ml: 2 }}>
+                        {category.headers.map((header, headerIndex) => (
+                          <Box key={headerIndex} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 1 }}>
+                            <Box sx={{ flex: 1 }}>
+                              <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
+                                {header.name}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                {header.description}
+                              </Typography>
+                            </Box>
+                            <Chip
+                              label={header.value ? 'Present' : 'Missing'}
+                              size="small"
+                              {...chipStateStyle(Boolean(header.value), theme)}
+                              sx={{ ml: 1, ...chipStateStyle(Boolean(header.value), theme).sx }}
+                            />
+                          </Box>
+                        ))}
+                      </Box>
+                    </Collapse>
                   </Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 0.5 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                      Strict Transport Security
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: securityHeaders.hsts ? 'success.main' : 'error.main' }}>
-                      {securityHeaders.hsts ? '✅ Present' : '❌ Missing'}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 0.5 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                      X-Frame-Options
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: securityHeaders.xfo ? 'success.main' : 'error.main' }}>
-                      {securityHeaders.xfo ? '✅ Present' : '❌ Missing'}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 0.5 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                      X-Content-Type-Options
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: securityHeaders.xcto ? 'success.main' : 'error.main' }}>
-                      {securityHeaders.xcto ? '✅ Present' : '❌ Missing'}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 0.5 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                      Referrer Policy
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: securityHeaders.referrer ? 'success.main' : 'error.main' }}>
-                      {securityHeaders.referrer ? '✅ Present' : '❌ Missing'}
-                    </Typography>
-                  </Box>
-                </Box>
+                ))}
               </Box>
             </Collapse>
           </CardContent>
