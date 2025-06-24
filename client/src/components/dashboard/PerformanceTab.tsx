@@ -546,11 +546,77 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
       </Box>
       <Box sx={{ display: 'grid', gap: 2, alignItems: 'stretch' }}>
         {/* Performance Score Section */}
-        <MetricsSection 
-          performanceScore={performance.performanceScore} 
-          mobileScore={mobileScore}
-          securityScore={securityScore}
-        />
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 2 }}>
+          <Card sx={{ borderRadius: 2 }}>
+            <CardContent sx={{ p: 2, textAlign: 'center' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Zap size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+                <Typography variant="h6" sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
+                  Performance Score
+                </Typography>
+              </Box>
+              <Tooltip 
+                title={getScoreTooltip(performance.performanceScore)}
+                enterDelay={300}
+                enterTouchDelay={300}
+              >
+                <Typography
+                  variant="h2"
+                  sx={{ fontWeight: 'bold', color: getScoreColor(performance.performanceScore), textAlign: 'center', mb: 1, cursor: 'help' }}
+                >
+                  {performance.performanceScore}
+                </Typography>
+              </Tooltip>
+              <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
+                {performance.performanceScore >= 90
+                  ? 'Excellent Performance'
+                  : performance.performanceScore >= 70
+                  ? 'Good Performance'
+                  : 'Needs Improvement'}
+              </Typography>
+            </CardContent>
+          </Card>
+
+          <Card sx={{ borderRadius: 2 }}>
+            <CardContent sx={{ p: 2, textAlign: 'center' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Smartphone size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+                <Typography variant="h6" sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
+                  Mobile Score
+                </Typography>
+              </Box>
+              <Typography
+                variant="h3"
+                sx={{ fontWeight: 'bold', color: getScoreColor(mobileScore), textAlign: 'center', mb: 1 }}
+              >
+                {mobileScore}%
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
+                Mobile Responsiveness
+              </Typography>
+            </CardContent>
+          </Card>
+
+          <Card sx={{ borderRadius: 2 }}>
+            <CardContent sx={{ p: 2, textAlign: 'center' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Shield size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+                <Typography variant="h6" sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
+                  Security Score
+                </Typography>
+              </Box>
+              <Typography
+                variant="h3"
+                sx={{ fontWeight: 'bold', color: getScoreColor(securityScore), textAlign: 'center', mb: 1 }}
+              >
+                {securityScore}%
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
+                Based on Lighthouse security audits
+              </Typography>
+            </CardContent>
+          </Card>
+        </Box>
 
         {/* Core Web Vitals and Speed Index */}
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 2 }}>
