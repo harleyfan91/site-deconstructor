@@ -168,7 +168,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
 
       return () => clearTimeout(timer);
     }
-  }, [headerCategories.length]);
+  }, [headerCategories.length, headerSectionsExpanded, setHeaderSectionsExpanded]);
 
   return (
     <Box>
@@ -178,7 +178,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
         </Typography>
       </Box>
       
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: showSeparateSecurityGrade ? '1fr 1fr 1fr' : '1fr 1fr' }, gap: 3, mb: 3 }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: showSeparateSecurityGrade ? '1fr 1fr 1fr' : '1fr 1fr' }, gap: 2, mb: 2 }}>
         {/* Security Headers - No top-level collapsibility */}
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 2 }}>

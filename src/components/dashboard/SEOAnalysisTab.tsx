@@ -131,7 +131,7 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
           SEO Analysis
         </Typography>
       </Box>
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 3 }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 2, mb: 2 }}>
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
@@ -285,71 +285,69 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
         </Box>
       </Box>
 
-      <Box sx={{ mt: 3 }}>
-        <Card sx={{ borderRadius: 2 }}>
-          <CardContent sx={{ p: 3 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-              <Target size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  fontWeight: 'bold',
-                  fontSize: { xs: '1.1rem', sm: '1.25rem' }
-                }}
+      <Card sx={{ borderRadius: 2 }}>
+        <CardContent sx={{; p: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+            <Target size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+            <Typography 
+              variant="h6" 
+              sx={{ 
+                fontWeight: 'bold',
+                fontSize: { xs: '1.1rem', sm: '1.25rem' }
+              }}
+            >
+              SEO Recommendations
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 2 }}>
+            {seo.recommendations.map((rec, index) => (
+              <Tooltip 
+                key={index} 
+                title={getPriorityTooltip(rec.priority)}
+                enterDelay={300}
+                enterTouchDelay={300}
               >
-                SEO Recommendations
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 2 }}>
-              {seo.recommendations.map((rec, index) => (
-                <Tooltip 
-                  key={index} 
-                  title={getPriorityTooltip(rec.priority)}
-                  enterDelay={300}
-                  enterTouchDelay={300}
-                >
-                  <Box sx={{ 
-                    p: 2, 
-                    border: `1px solid ${getPriorityColor(rec.priority)}`,
-                    borderRadius: 1,
-                    backgroundColor: `${getPriorityColor(rec.priority)}10`,
-                    cursor: 'help'
-                  }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      <Typography variant="subtitle2" sx={{ 
-                        fontWeight: 'bold', 
-                        color: getPriorityColor(rec.priority),
-                        mr: 1
-                      }}>
-                        {rec.title}
-                      </Typography>
-                      <Tooltip 
-                        title={getPriorityTooltip(rec.priority)}
-                        enterDelay={300}
-                        enterTouchDelay={300}
-                      >
-                        <Chip 
-                          label={rec.priority} 
-                          size="small" 
-                          sx={{ 
-                            backgroundColor: getPriorityColor(rec.priority),
-                            color: 'white',
-                            fontSize: '0.7rem',
-                            cursor: 'help'
-                          }}
-                        />
-                      </Tooltip>
-                    </Box>
-                    <Typography variant="body2" sx={{ color: 'rgba(0, 0, 0, 0.87)' }}>
-                      {rec.description}
+                <Box sx={{ 
+                  p: 2, 
+                  border: `1px solid ${getPriorityColor(rec.priority)}`,
+                  borderRadius: 1,
+                  backgroundColor: `${getPriorityColor(rec.priority)}10`,
+                  cursor: 'help'
+                }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <Typography variant="subtitle2" sx={{ 
+                      fontWeight: 'bold', 
+                      color: getPriorityColor(rec.priority),
+                      mr: 1
+                    }}>
+                      {rec.title}
                     </Typography>
+                    <Tooltip 
+                      title={getPriorityTooltip(rec.priority)}
+                      enterDelay={300}
+                      enterTouchDelay={300}
+                    >
+                      <Chip 
+                        label={rec.priority} 
+                        size="small" 
+                        sx={{ 
+                          backgroundColor: getPriorityColor(rec.priority),
+                          color: 'white',
+                          fontSize: '0.7rem',
+                          cursor: 'help'
+                        }}
+                      />
+                    </Tooltip>
                   </Box>
-                </Tooltip>
-              ))}
-            </Box>
-          </CardContent>
-        </Card>
-      </Box>
+                  <Typography variant="body2" sx={{ color: 'rgba(0, 0, 0, 0.87)' }}>
+                    {rec.description}
+                  </Typography>
+                </Box>
+              </Tooltip>
+            ))}
+          </Box>
+        </CardContent>
+      </Card>
     </Box>
   );
 };
