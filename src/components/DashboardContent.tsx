@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Box, Typography, Paper, Button } from '@mui/material';
 import { motion } from 'framer-motion';
@@ -116,15 +115,11 @@ const DashboardContent = () => {
               </TabsContent>
               
               <TabsContent value="content" data-tab-panel-id="content">
-                <Box sx={{ '& > *:not(:last-child)': { mb: 2 } }}>
-                  <ContentAnalysisTab data={analysisData} loading={loading} error={error} />
-                </Box>
+                <ContentAnalysisTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
               
               <TabsContent value="performance" data-tab-panel-id="performance">
-                <Box sx={{ '& > *:not(:last-child)': { mb: 2 } }}>
-                  <PerformanceTab data={analysisData} loading={loading} error={error} />
-                </Box>
+                <PerformanceTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
               
               <TabsContent value="seo" data-tab-panel-id="seo">
@@ -132,9 +127,7 @@ const DashboardContent = () => {
               </TabsContent>
               
               <TabsContent value="tech" data-tab-panel-id="tech">
-                <Box sx={{ '& > *:not(:last-child)': { mb: 2 } }}>
-                  <TechTab data={analysisData} loading={loading} error={error} />
-                </Box>
+                <TechTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
 
               <TabsContent value="compliance" data-tab-panel-id="compliance">
