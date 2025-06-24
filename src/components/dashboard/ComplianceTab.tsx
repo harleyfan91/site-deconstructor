@@ -145,9 +145,13 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
 
   // Auto-collapse logic similar to Color Extraction
   React.useEffect(() => {
-    const hadStoredState = Object.keys(headerSectionsExpanded).length > 0;
+    if (!data || headerCategories.length === 0) return;
     
-    if (!hadStoredState && headerCategories.length > 0) {
+    const hasStoredState = Object.keys(headerSectionsExpanded).some(key => 
+      headerCategories.some(cat => cat.name === key)
+    );
+    
+    if (!hasStoredState) {
       // Initialize all sections as expanded
       const initialState: Record<string, boolean> = {};
       headerCategories.forEach(category => {
@@ -157,18 +161,16 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
 
       // Auto-collapse all sections after delay
       const timer = setTimeout(() => {
-        setHeaderSectionsExpanded(prev => {
-          const updated = { ...prev };
-          Object.keys(updated).forEach(name => {
-            updated[name] = false;
-          });
-          return updated;
+        const collapsedState: Record<string, boolean> = {};
+        headerCategories.forEach(category => {
+          collapsedState[category.name] = false;
         });
+        setHeaderSectionsExpanded(collapsedState);
       }, 2500);
 
       return () => clearTimeout(timer);
     }
-  }, [headerCategories.length, headerSectionsExpanded, setHeaderSectionsExpanded]);
+  }, [data, headerCategories.length, setHeaderSectionsExpanded]); // Remove headerSectionsExpanded from deps to prevent infinite loop
 
   return (
     <Box>
