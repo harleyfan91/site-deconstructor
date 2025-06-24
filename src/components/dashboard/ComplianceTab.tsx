@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Box,
@@ -56,6 +55,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
     'compliance-header-sections-expanded',
     {}
   );
+  const [glowingSections, setGlowingSections] = React.useState<Record<string, boolean>>({});
   const { data: contextData } = useAnalysisContext();
 
   const toggleHeaderSection = (sectionName: string) => {
@@ -143,7 +143,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
     }
   ];
 
-  // Auto-collapse logic similar to Color Extraction
+  // Enhanced auto-collapse logic with glow animation
   React.useEffect(() => {
     if (!data || headerCategories.length === 0) return;
     
@@ -159,18 +159,32 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
       });
       setHeaderSectionsExpanded(initialState);
 
+      // Start glow animation 1 second before collapse
+      const glowTimer = setTimeout(() => {
+        const glowState: Record<string, boolean> = {};
+        headerCategories.forEach(category => {
+          glowState[category.name] = true;
+        });
+        setGlowingSections(glowState);
+      }, 1500); // Start glowing at 1.5s (collapse happens at 2.5s)
+
       // Auto-collapse all sections after delay
-      const timer = setTimeout(() => {
+      const collapseTimer = setTimeout(() => {
         const collapsedState: Record<string, boolean> = {};
         headerCategories.forEach(category => {
           collapsedState[category.name] = false;
         });
         setHeaderSectionsExpanded(collapsedState);
+        // Stop glowing after collapse
+        setGlowingSections({});
       }, 2500);
 
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(glowTimer);
+        clearTimeout(collapseTimer);
+      };
     }
-  }, [data, headerCategories.length, setHeaderSectionsExpanded]); // Remove headerSectionsExpanded from deps to prevent infinite loop
+  }, [data, headerCategories.length, setHeaderSectionsExpanded]);
 
   return (
     <Box>
@@ -200,7 +214,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
             <Box>
               {headerCategories.map((category, categoryIndex) => (
                 <Box key={categoryIndex} sx={{ mb: 2 }}>
-                  {/* Category Header */}
+                  {/* Category Header with glow animation */}
                   <Box
                     sx={{
                       display: 'flex',
@@ -210,6 +224,15 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
                       p: 1,
                       borderRadius: 1,
                       bgcolor: 'rgba(255, 107, 53, 0.05)',
+                      animation: glowingSections[category.name] ? 'pulse 1s ease-in-out infinite' : 'none',
+                      '@keyframes pulse': {
+                        '0%, 100%': {
+                          boxShadow: '0 0 5px rgba(255, 107, 53, 0.3)',
+                        },
+                        '50%': {
+                          boxShadow: '0 0 15px rgba(255, 107, 53, 0.6)',
+                        },
+                      },
                       '&:hover': {
                         bgcolor: 'rgba(255, 107, 53, 0.1)',
                       },

@@ -25,6 +25,7 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
     'ui-color-extraction-expanded',
     {}
   );
+  const [glowingSections, setGlowingSections] = React.useState<Record<string, boolean>>({});
 
   const toggleSection = (sectionName: string) => {
     setExpandedSections(prev => ({
@@ -144,7 +145,7 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
 
   const usageGroups = groupByUsage();
 
-  // Simplified auto-collapse logic
+  // Enhanced auto-collapse logic with glow animation
   React.useEffect(() => {
     const hadStoredState = Object.keys(expandedSections).length > 0;
     
@@ -156,8 +157,19 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
       });
       setExpandedSections(initialState);
 
+      // Start glow animation 1 second before collapse
+      const glowTimer = setTimeout(() => {
+        const glowState: Record<string, boolean> = {};
+        usageGroups.forEach(group => {
+          if (group.name !== 'Background') {
+            glowState[group.name] = true;
+          }
+        });
+        setGlowingSections(glowState);
+      }, 1500); // Start glowing at 1.5s (collapse happens at 2.5s)
+
       // Auto-collapse all except Background after delay
-      const timer = setTimeout(() => {
+      const collapseTimer = setTimeout(() => {
         setExpandedSections(prev => {
           const updated = { ...prev };
           Object.keys(updated).forEach(name => {
@@ -167,9 +179,14 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
           });
           return updated;
         });
+        // Stop glowing after collapse
+        setGlowingSections({});
       }, 2500);
 
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(glowTimer);
+        clearTimeout(collapseTimer);
+      };
     }
   }, [usageGroups.length]);
 
@@ -185,7 +202,7 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
         <Box>
           {usageGroups.map((usageGroup, usageIndex) => (
             <Box key={usageIndex} sx={{ mb: 2 }}>
-              {/* Usage Category Header */}
+              {/* Usage Category Header with glow animation */}
               <Box
                 sx={{
                   display: 'flex',
@@ -195,6 +212,15 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
                   p: 1,
                   borderRadius: 1,
                   bgcolor: 'rgba(255, 107, 53, 0.05)',
+                  animation: glowingSections[usageGroup.name] ? 'pulse 1s ease-in-out infinite' : 'none',
+                  '@keyframes pulse': {
+                    '0%, 100%': {
+                      boxShadow: '0 0 5px rgba(255, 107, 53, 0.3)',
+                    },
+                    '50%': {
+                      boxShadow: '0 0 15px rgba(255, 107, 53, 0.6)',
+                    },
+                  },
                   '&:hover': {
                     bgcolor: 'rgba(255, 107, 53, 0.1)',
                   },
