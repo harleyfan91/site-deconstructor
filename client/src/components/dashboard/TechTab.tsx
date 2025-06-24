@@ -221,9 +221,9 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
           Technical Analysis
         </Typography>
       </Box>
-      
-      {/* Section: Tech Stack */}
-      <Card sx={{ borderRadius: 2, mb: 3 }}>
+      <Box sx={{ display: 'grid', gap: 2, alignItems: 'stretch' }}>
+        {/* Section: Tech Stack */}
+        <Card sx={{ borderRadius: 2 }}>
         <CardContent sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
             <Layers size={24} color="#FF6B35" style={{ marginRight: 8 }} />
@@ -245,14 +245,14 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
               (Powered by Wappalyzer)
             </Typography>
           </Box>
-          <TechStackGrid techStack={technical.techStack ?? []} />
-        </CardContent>
-      </Card>
+            <TechStackGrid techStack={technical.techStack ?? []} />
+          </CardContent>
+        </Card>
 
-      {/* Section: Detected Ad Tags - Always show, don't use conditional */}
-      <Card sx={{ borderRadius: 2, mb: 3 }}>
-        <CardContent sx={{ p: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+        {/* Section: Detected Ad Tags - Always show, don't use conditional */}
+        <Card sx={{ borderRadius: 2 }}>
+          <CardContent sx={{ p: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
             <Zap size={24} color="#FF6B35" style={{ marginRight: 8 }} />
             <Typography 
               variant="h6" 
@@ -300,10 +300,10 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
         </CardContent>
       </Card>
 
-      {/* Section: Detected Social Tags */}
-      <Card sx={{ borderRadius: 2, mb: 3 }}>
-        <CardContent sx={{ p: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+        {/* Section: Detected Social Tags */}
+        <Card sx={{ borderRadius: 2 }}>
+          <CardContent sx={{ p: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
             <Users size={24} color="#FF6B35" style={{ marginRight: 8 }} />
             <Typography 
               variant="h6" 
@@ -365,11 +365,11 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
               />
             </Tooltip>
           </Box>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {/* Section: Cookie Banner & Consent Script */}
-      <Card sx={{ borderRadius: 2, mb: 3 }}>
+        {/* Section: Cookie Banner & Consent Script */}
+        <Card sx={{ borderRadius: 2 }}>
         <CardContent sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
             <Cookie size={24} color="#FF6B35" style={{ marginRight: 8 }} />
@@ -423,10 +423,10 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
         </CardContent>
       </Card>
 
-      {/* Section: Minification Status */}
-      <Card sx={{ borderRadius: 2, mb: 3 }}>
-        <CardContent sx={{ p: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+        {/* Section: Minification Status */}
+        <Card sx={{ borderRadius: 2 }}>
+          <CardContent sx={{ p: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
             <Settings size={24} color="#FF6B35" style={{ marginRight: 8 }} />
             <Typography 
               variant="h6" 
@@ -472,13 +472,13 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
               />
             </Tooltip>
           </Box>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {/* Section: Technical Issues & Health */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 3 }}>
-        <Card sx={{ borderRadius: 2 }}>
-          <CardContent sx={{ p: 3 }}>
+        {/* Section: Technical Issues & Health */}
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 2 }}>
+          <Card sx={{ borderRadius: 2 }}>
+            <CardContent sx={{ p: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
               <Shield size={24} color="#FF6B35" style={{ marginRight: 8 }} />
               <Typography 
@@ -534,8 +534,9 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
               </table>
             </div>
           </CardContent>
-        </Card>
-        <TechnicalHealthSummary healthGrade={technical.healthGrade} issues={technical.issues ?? []} />
+          </Card>
+          <TechnicalHealthSummary healthGrade={technical.healthGrade} issues={technical.issues ?? []} />
+        </Box>
       </Box>
     </Box>
   );

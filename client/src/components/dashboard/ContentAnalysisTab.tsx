@@ -109,25 +109,27 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
 
   return (
     <Box>
-      <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-        Content Analysis
-      </Typography>
-
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
-        <Card sx={{ borderRadius: 2, height: '400px' }}>
-          <CardContent sx={{ p: 3, height: '100%' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-              <PieChart size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  fontWeight: 'bold',
-                  fontSize: { xs: '1.1rem', sm: '1.25rem' }
-                }}
-              >
-                Content Distribution
-              </Typography>
-            </Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', flexGrow: 1 }}>
+          Content Analysis
+        </Typography>
+      </Box>
+      <Box sx={{ display: 'grid', gap: 2, alignItems: 'stretch' }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
+          <Card sx={{ borderRadius: 2, height: '400px' }}>
+            <CardContent sx={{ p: 2, height: '100%' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <PieChart size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+                <Typography 
+                  variant="h6" 
+                  sx={{ 
+                    fontWeight: 'bold',
+                    fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                  }}
+                >
+                  Content Distribution
+                </Typography>
+              </Box>
             {contentTypes.length > 0 ? (
               <ChartContainer config={chartConfig} className="h-80">
                 <RechartsPieChart>
@@ -154,23 +156,23 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
                 </Typography>
               </Box>
             )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card sx={{ borderRadius: 2, height: '400px' }}>
-          <CardContent sx={{ p: 3, height: '100%' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-              <BarChart3 size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  fontWeight: 'bold',
-                  fontSize: { xs: '1.1rem', sm: '1.25rem' }
-                }}
-              >
-                Content Structure Analysis
-              </Typography>
-            </Box>
+          <Card sx={{ borderRadius: 2, height: '400px' }}>
+            <CardContent sx={{ p: 2, height: '100%' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <BarChart3 size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+                <Typography 
+                  variant="h6" 
+                  sx={{ 
+                    fontWeight: 'bold',
+                    fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                  }}
+                >
+                  Content Structure Analysis
+                </Typography>
+              </Box>
             <ChartContainer config={chartConfig} className="h-80">
               <BarChart data={contentStructureData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                 <XAxis dataKey="metric" tick={{ fontSize: 10 }} />
@@ -180,25 +182,25 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
                 <Bar dataKey="benchmark" fill={theme.palette.grey[300]} />
               </BarChart>
             </ChartContainer>
-          </CardContent>
-        </Card>
-      </Box>
+            </CardContent>
+          </Card>
+        </Box>
 
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 3, mt: 3 }}>
-        <Card sx={{ borderRadius: 2 }}>
-          <CardContent sx={{ p: 3 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-              <FileText size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  fontWeight: 'bold',
-                  fontSize: { xs: '1.1rem', sm: '1.25rem' }
-                }}
-              >
-                Text Content Quality
-              </Typography>
-            </Box>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 2 }}>
+          <Card sx={{ borderRadius: 2 }}>
+            <CardContent sx={{ p: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <FileText size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+                <Typography 
+                  variant="h6" 
+                  sx={{ 
+                    fontWeight: 'bold',
+                    fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                  }}
+                >
+                  Text Content Quality
+                </Typography>
+              </Box>
             
             
             <Box sx={{ mb: 3 }}>
@@ -305,12 +307,12 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
                 Your alt text coverage scores better than {totalImages > 0 ? Math.round((estimatedPhotos / totalImages) * 100) : 0}% of websites
               </Typography>
             </Box>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card sx={{ borderRadius: 2 }}>
-          <CardContent sx={{ p: 3 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+          <Card sx={{ borderRadius: 2 }}>
+            <CardContent sx={{ p: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <Tags size={24} color="#FF6B35" style={{ marginRight: 8 }} />
               <Typography 
                 variant="h6" 
@@ -392,8 +394,9 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
               <Typography variant="body2" color="text.secondary">Content Images</Typography>
               <Typography variant="body2">{totalImages} total images detected</Typography>
             </Box>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </Box>
       </Box>
     </Box>
   );
