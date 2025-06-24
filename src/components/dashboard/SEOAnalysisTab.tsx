@@ -286,7 +286,7 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
       </Box>
 
       <Card sx={{ borderRadius: 2 }}>
-        <CardContent sx={{; p: 3 }}>
+        <CardContent sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
             <Target size={24} color="#FF6B35" style={{ marginRight: 8 }} />
             <Typography 
