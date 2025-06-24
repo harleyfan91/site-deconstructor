@@ -553,8 +553,10 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
         />
 
         {/* Core Web Vitals and Speed Index */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 2 }}>
-          <CoreWebVitalsSection performance={performance} />
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 2 }}>
+          <Box sx={{ gridColumn: { xs: '1', md: '1 / 3' } }}>
+            <CoreWebVitalsSection performance={performance} />
+          </Box>
           <SpeedIndexSection performanceScore={performance.performanceScore} />
         </Box>
 
