@@ -346,7 +346,6 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string, section
       'Comprehensive website performance rating'
     );
     
-      const seoScore = overview.seoScore ?? 0;
       addMetricCard(
         'SEO Score',
         `${seoScore}/100`,
@@ -361,7 +360,6 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string, section
         'Time taken for the page to fully load'
       );
     
-      const uxScore = overview.userExperienceScore ?? 0;
       addMetricCard(
         'User Experience Score',
         `${uxScore}/100`,
