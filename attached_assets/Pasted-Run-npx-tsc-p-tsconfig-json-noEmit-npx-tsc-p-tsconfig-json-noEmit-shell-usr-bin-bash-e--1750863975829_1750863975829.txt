@@ -1,0 +1,20 @@
+Run npx tsc -p tsconfig.json --noEmit
+  npx tsc -p tsconfig.json --noEmit
+  shell: /usr/bin/bash -e {0}
+  
+Error: client/src/components/dashboard/UIAnalysisTab.tsx(66,34): error TS2322: Type '{ name: string; hex: string; usage: string; count: number; }[] | undefined' is not assignable to type '{ name: string; hex: string; usage: string; count: number; }[]'.
+  Type 'undefined' is not assignable to type '{ name: string; hex: string; usage: string; count: number; }[]'.
+Error: client/src/components/dashboard/UIAnalysisTab.tsx(74,33): error TS2322: Type '{ name: string; category: string; usage: string; weight?: string | undefined; isLoaded?: boolean | undefined; isPublic?: boolean | undefined; }[] | undefined' is not assignable to type '{ name: string; category: string; usage: string; weight?: string | undefined; isLoaded?: boolean | undefined; isPublic?: boolean | undefined; }[]'.
+  Type 'undefined' is not assignable to type '{ name: string; category: string; usage: string; weight?: string | undefined; isLoaded?: boolean | undefined; isPublic?: boolean | undefined; }[]'.
+Error: client/src/components/dashboard/UIAnalysisTab.tsx(81,17): error TS2322: Type '{ textColor: string; backgroundColor: string; ratio: number; }[] | undefined' is not assignable to type '{ textColor: string; backgroundColor: string; ratio: number; }[]'.
+  Type 'undefined' is not assignable to type '{ textColor: string; backgroundColor: string; ratio: number; }[]'.
+Error: client/src/components/dashboard/UIAnalysisTab.tsx(81,25): error TS18048: 'data.data.ui' is possibly 'undefined'.
+Error: client/src/components/dashboard/UIAnalysisTab.tsx(93,15): error TS2322: Type '{ url: string; alt?: string | undefined; type?: string | undefined; }[] | undefined' is not assignable to type '{ url: string; alt?: string | undefined; type?: string | undefined; }[]'.
+  Type 'undefined' is not assignable to type '{ url: string; alt?: string | undefined; type?: string | undefined; }[]'.
+Error: client/src/components/dashboard/ui-analysis/ImageAnalysisCard.tsx(45,97): error TS2339: Property 'count' does not exist on type '{ url: string; alt?: string | undefined; type?: string | undefined; }'.
+Error: client/src/components/dashboard/ui-analysis/ImageAnalysisCard.tsx(46,111): error TS2339: Property 'count' does not exist on type '{ url: string; alt?: string | undefined; type?: string | undefined; }'.
+Error: client/src/components/dashboard/ui-analysis/ImageAnalysisCard.tsx(47,108): error TS2339: Property 'count' does not exist on type '{ url: string; alt?: string | undefined; type?: string | undefined; }'.
+Error: server/vite.ts(39,5): error TS2322: Type '{ middlewareMode: boolean; hmr: { server: Server<typeof IncomingMessage, typeof ServerResponse>; }; allowedHosts: boolean; }' is not assignable to type 'ServerOptions'.
+  Types of property 'allowedHosts' are incompatible.
+    Type 'boolean' is not assignable to type 'true | string[] | undefined'.
+Error: Process completed with exit code 2.

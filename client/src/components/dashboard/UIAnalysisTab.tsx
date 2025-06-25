@@ -63,7 +63,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
         {/* Color Extraction */}
         <Card sx={{ borderRadius: 2, width: '100%' }}>
           <CardContent sx={{ p: 2 }}>
-            <ColorExtractionCard colors={colors} />
+            <ColorExtractionCard colors={colors ?? []} />
           </CardContent>
         </Card>
 
@@ -71,14 +71,14 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
           <Card sx={{ borderRadius: 2, width: '100%' }}>
             <CardContent sx={{ p: 2 }}>
-              <FontAnalysisCard fonts={fonts} />
+              <FontAnalysisCard fonts={fonts ?? []} />
             </CardContent>
           </Card>
 
           <Card sx={{ borderRadius: 2, width: '100%' }}>
             <CardContent sx={{ p: 2 }}>
               <ContrastWarningsCard 
-                issues={data.data.ui.contrastIssues} 
+                issues={ui?.contrastIssues ?? []} 
                 data={data}
                 loading={loading}
               />
@@ -90,7 +90,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
         <Card sx={{ borderRadius: 2, width: '100%' }}>
           <CardContent sx={{ p: 2 }}>
             <ImageAnalysisCard
-              images={images}
+              images={images ?? []}
               imageAnalysis={imageAnalysis}
             />
           </CardContent>
