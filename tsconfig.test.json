@@ -4,11 +4,12 @@
     "outDir": "dist",
     "module": "ES2020",
     "moduleResolution": "node",
-    "lib": ["ES2020", "DOM"]
+    "lib": ["ES2020", "DOM"],
+    "rootDir": "client/src"
   },
   "include": [
-    "src/lib/**/*.ts",
-    "src/types/**/*.ts"
+    "client/src/lib/**/*.ts",
+    "client/src/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
