@@ -237,14 +237,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                 >
                   Tech Stack
                 </Typography>
-                <Typography variant="body2" sx={{
-                  fontSize: '0.75rem',
-                  fontWeight: 'normal',
-                  color: 'text.secondary',
-                  ml: 1,
-                }}>
-                  (Powered by Wappalyzer)
-                </Typography>
+
               </Box>
               <TechStackGrid techStack={technical.techStack ?? []} />
             </CardContent>

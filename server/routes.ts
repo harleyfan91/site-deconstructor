@@ -1,6 +1,8 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import Wappalyzer from 'wappalyzer';
+import { createClient } from '@supabase/supabase-js';
 
 // Helper function to map score to letter grade
 function mapScoreToGrade(score: number): string {
@@ -244,6 +246,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const seoScore = hasViewportMeta && hasAltTags ? 85 : 65;
       const userExperienceScore = mobileScore;
 
+      // Tech stack detection (fallback implementation due to Wappalyzer deprecation)
+      const techStack = [];
+      try {
+        // Basic technology detection from HTML content
+        if (html.includes('react')) techStack.push({ category: 'JavaScript Frameworks', technology: 'React' });
+        if (html.includes('vue')) techStack.push({ category: 'JavaScript Frameworks', technology: 'Vue.js' });
+        if (html.includes('angular')) techStack.push({ category: 'JavaScript Frameworks', technology: 'Angular' });
+        if (html.includes('bootstrap')) techStack.push({ category: 'CSS Frameworks', technology: 'Bootstrap' });
+        if (html.includes('tailwind')) techStack.push({ category: 'CSS Frameworks', technology: 'Tailwind CSS' });
+        if (html.includes('jquery')) techStack.push({ category: 'JavaScript Libraries', technology: 'jQuery' });
+        if (hasHTTPS) techStack.push({ category: 'Security', technology: 'HTTPS' });
+        
+        // Add HTML5 as default
+        techStack.push({ category: 'Markup Languages', technology: 'HTML5' });
+        
+        // Server detection from headers
+        const server = response.headers.get('server');
+        if (server) {
+          if (server.toLowerCase().includes('nginx')) techStack.push({ category: 'Web Servers', technology: 'Nginx' });
+          if (server.toLowerCase().includes('apache')) techStack.push({ category: 'Web Servers', technology: 'Apache' });
+          if (server.toLowerCase().includes('cloudflare')) techStack.push({ category: 'CDN', technology: 'Cloudflare' });
+        }
+      } catch (e) {
+        console.warn('Tech stack detection error:', e);
+        techStack.push({ category: 'Markup Languages', technology: 'HTML5' });
+      }
+
       console.log(`Analysis completed for ${url}`);
 
       const analysisResult = {
@@ -341,10 +370,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             recommendations: []
           },
           technical: {
-            techStack: [
-              { category: 'Frontend', technology: 'HTML5' },
-              { category: 'Security', technology: hasHTTPS ? 'HTTPS' : 'HTTP' }
-            ],
+            techStack,
             healthGrade: mapScoreToGrade(overallScore),
             issues: securityFindings.concat(mobileIssues).map(issue => ({
               type: 'security',
@@ -359,6 +385,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
       };
+
+      // Persist to Supabase when service-role key exists
+      if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        const admin = createClient(
+          process.env.SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_ROLE_KEY!
+        );
+
+        await admin.from('reports').upsert({
+          url,
+          scores: { performance: overallScore, mobile: mobileScore, security: securityScore },
+          techStack
+        });
+      }
 
       res.json(analysisResult);
 

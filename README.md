@@ -1,23 +1,15 @@
 
-# Welcome to your Lovable project
+# Website Analysis Tool
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/3a4c0dbb-697f-4cc3-8786-dfa109c5a225
+A comprehensive website analysis tool that provides insights into performance, SEO, accessibility, and design elements.
 
 ## How can I edit this code?
 
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/3a4c0dbb-697f-4cc3-8786-dfa109c5a225) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
 **Use your preferred IDE**
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+If you want to work locally using your own IDE, you can clone this repo and push changes.
 
 The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
@@ -64,7 +56,7 @@ This project is built with:
 
 ## Tech Stack Detection
 
-This application uses **Wappalyzer** for accurate technology detection on analyzed websites. Wappalyzer is an open-source tool that identifies technologies used on websites including:
+This application uses **Wappalyzer** for accurate technology detection on analyzed websites. Wappalyzer now runs server-side to provide real-time technology identification including:
 
 - JavaScript frameworks (React, Vue, Angular, etc.)
 - CSS frameworks (Bootstrap, Tailwind, etc.)
@@ -76,26 +68,19 @@ This application uses **Wappalyzer** for accurate technology detection on analyz
 
 The integration provides comprehensive technology fingerprinting without requiring API keys or external dependencies beyond the Wappalyzer npm package.
 
-## Environment Setup
+## Supabase Setup
 
-
-Copy `.env.example` to `.env` in the project root and fill in your credentials. The variables are:
-
+Copy `.env.example` to `.env` in the project root and fill in your Supabase credentials. The required environment variables are:
 
 ```sh
+VITE_SUPABASE_URL=<your-supabase-url>
 VITE_SUPABASE_ANON_KEY=<your-supabase-anon-key>
-SUPABASE_URL=<your-supabase-url>
 SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key>
 ```
 
-
-`VITE_SUPABASE_ANON_KEY` is exposed to the browser so the dashboard can call the Supabase function. `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are used by the serverless function when running locally.
-
-To test the edge function locally, install the [Supabase CLI](https://supabase.com/docs/guides/cli) and run:
-
-```sh
-supabase functions serve --env-file .env
-```
+- `VITE_SUPABASE_URL`: Your Supabase project URL
+- `VITE_SUPABASE_ANON_KEY`: Public anon key for client-side operations
+- `SUPABASE_SERVICE_ROLE_KEY`: Service role key for server-side operations (optional)
 
 
 To enable color palette extraction with `node-vibrant`, install the optional dependency pinned to version `^4.0.3`:
@@ -111,21 +96,7 @@ The library now includes its own TypeScript definitions.
 
 ## How can I deploy this project?
 
-Simply open [Lovable](https://lovable.dev/projects/3a4c0dbb-697f-4cc3-8786-dfa109c5a225) and click on Share -> Publish.
-
-## Environment Variables
-
-The frontend needs your Supabase anonymous key to authorize requests. Set
-`NEXT_PUBLIC_SUPABASE_ANON_KEY` in your shell or `.env` file with the value from
-your Supabase project before running the app or tests.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Deploy using your preferred hosting platform that supports Node.js applications.
 
 ## Continuous Integration and Testing
 
@@ -136,8 +107,7 @@ Every pull request runs these tests via GitHub Actions using the workflow at
 Run tests locally with:
 
 ```sh
-npm run test
-npx tsc -p tsconfig.json --noEmit
+npm test
 ```
 
 ## Manual UI Review

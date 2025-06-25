@@ -31,6 +31,10 @@ A comprehensive website analysis tool that provides insights into performance, S
 - ✓ Removed Supabase integration files
 - ✓ Configured Drizzle ORM for database operations
 - ✓ Fixed padding inconsistencies across dashboard tabs (Content, Performance & Security, Tech tabs now match UI tab spacing)
+- ✓ Added Supabase client integration for optional report persistence
+- ✓ Implemented tech stack detection with fallback due to Wappalyzer deprecation
+- ✓ Updated CI pipeline with Chrome dependencies for testing
+- ✓ Removed Lovable references from documentation
 
 ## Technical Stack
 - **Frontend**: React, TypeScript, MUI, Framer Motion
