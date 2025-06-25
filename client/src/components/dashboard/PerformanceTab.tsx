@@ -567,7 +567,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
                 enterTouchDelay={300}
               >
                 <Typography
-                  variant="h2"
+                  variant="h3"
                   sx={{ fontWeight: 'bold', color: getScoreColor(performance.performanceScore), textAlign: 'center', mb: 1, cursor: 'help' }}
                 >
                   {performance.performanceScore}
