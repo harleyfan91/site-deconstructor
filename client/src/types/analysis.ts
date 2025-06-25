@@ -26,6 +26,18 @@ export interface SecurityHeaders {
   referrer: string;
 }
 
+export interface AnalysisOverview {
+  overallScore: number;
+  pageLoadTime?: string;
+  seoScore?: number;
+  userExperienceScore?: number;
+  colors?: string[];
+  fonts?: string[];
+  images?: string[];
+  contrastIssues?: any[];
+  [key: string]: any;
+}
+
 export interface AnalysisResponse {
   success: boolean;
   id?: string;
@@ -63,13 +75,7 @@ export interface AnalysisResponse {
     frameOptions: string;
   };
   data: {
-    overview?: {
-      overallScore: number;
-      pageLoadTime?: string;
-      seoScore?: number;
-      userExperienceScore?: number;
-      [key: string]: any;
-    };
+    overview?: AnalysisOverview;
     technical: {
       accessibility: {
         violations: Array<{
