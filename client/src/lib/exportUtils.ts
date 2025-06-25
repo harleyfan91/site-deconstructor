@@ -18,7 +18,10 @@ interface ExportOptions {
 
 export const exportAnalysis = async (data: AnalysisResponse, options: ExportOptions): Promise<void> => {
   const timestamp = new Date().toISOString().split('T')[0];
-  const domain = new URL(data.url ?? '').hostname;
+  if (!data.url) {
+    throw new Error('Missing URL for export');
+  }
+  const domain = new URL(data.url).hostname;
   const baseFileName = `${domain}-analysis-${timestamp}`;
 
   // Filter data based on selected sections
@@ -49,19 +52,20 @@ const filterDataBySections = (data: AnalysisResponse, sections: ExportOptions['s
   const filtered = { ...data };
   
   if (!sections.overview) {
-    delete (filtered.data as any).overview;
+    filtered.data.overview = undefined;
   }
   if (!sections.ui) {
-    delete (filtered.data as any).ui;
+    filtered.data.ui = undefined;
   }
   if (!sections.performance) {
-    delete (filtered.data as any).performance;
+    (filtered.data as any).performance = undefined;
   }
   if (!sections.seo) {
-    delete (filtered.data as any).seo;
+    filtered.data.seo = undefined;
   }
   if (!sections.technical) {
-    delete (filtered.data as any).technical;
+    (filtered.data as any).technical = undefined;
+
   }
   // Note: content analysis is derived from existing data, so no filtering needed
   
@@ -138,16 +142,17 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string, section
     const match = hex.replace('#', '').match(/^([0-9a-f]{3}|[0-9a-f]{6})$/i);
     if (!match) return null;
     let h = match[0];
-    if (h.length === 3) h = h.split('').map(c => c + c).join('');
+      if (h.length === 3) h = h.split('').map((c: string) => c + c).join('');
     const num = parseInt(h, 16);
     return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
   };
 
   const groupColorsForExport = (
-    palette: NonNullable<AnalysisResponse['data']['ui']>['colors']
+    palette: { hex: string; usage?: string }[]
   ): { name: string; colors: string[] }[] => {
     const groups: Record<string, string[]> = {};
-    palette?.forEach((color: any) => {
+    palette.forEach((color: { hex: string; usage?: string }) => {
+
       let usage = color.usage || 'Theme';
       if (usage === 'Primary' || usage === 'Secondary') {
         const rgb = hexToRgb(color.hex);
@@ -166,7 +171,7 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string, section
     });
     const order = ['Background', 'Text', 'Theme'];
     return order
-      .map(name => ({ name, colors: groups[name] || [] }))
+      .map((name: string) => ({ name, colors: groups[name] || [] }))
       .filter(g => g.colors.length > 0);
   };
 
@@ -175,7 +180,7 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string, section
     const cellWidth = (pageWidth - margin * 2) / columns;
     const cellHeight = 15;
     let col = 0;
-    hexes.forEach(hex => {
+    hexes.forEach((hex: string) => {
       addNewPageIfNeeded(cellHeight);
       const x = margin + col * cellWidth;
       const y = yPosition;
@@ -290,7 +295,7 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string, section
     }
     const letters = text.split('');
     let currentX = x;
-    letters.forEach((letter, idx) => {
+    letters.forEach((letter: string, idx: number) => {
       const ratio = letters.length === letters.length ? 0 : idx / (letters.length - 1);
       const r = Math.round(startRgb.r + (endRgb.r - startRgb.r) * ratio);
       const g = Math.round(startRgb.g + (endRgb.g - startRgb.g) * ratio);
@@ -317,8 +322,12 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string, section
   yPosition += 15;
 
   // URL and timestamp
-  addText(`URL: ${data.url ?? ''}`, 12, colors.primary);
-  addText(`Analysis Date: ${new Date(data.timestamp ?? '').toLocaleString()}`, 10, colors.darkGray);
+  addText(`URL: ${data.url}`, 12, colors.primary);
+  const analysisDate = data.timestamp
+    ? new Date(data.timestamp)
+    : new Date();
+  addText(`Analysis Date: ${analysisDate.toLocaleString()}`, 10, colors.darkGray);
+
   yPosition += 10;
 
   // Overview Section (1st)
@@ -336,27 +345,29 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string, section
       overview.overallScore >= 80 ? colors.success : overview.overallScore >= 60 ? colors.warning : colors.primary,
       'Comprehensive website performance rating'
     );
-
-    addMetricCard(
-      'SEO Score',
-      `${seoScore}/100`,
-      seoScore >= 80 ? colors.success : seoScore >= 60 ? colors.warning : colors.primary,
-      'Search engine optimization effectiveness'
-    );
     
-    addMetricCard(
-      'Page Load Time',
-      overview.pageLoadTime ?? '',
-      colors.info,
-      'Time taken for the page to fully load'
-    );
+      const seoScore = overview.seoScore ?? 0;
+      addMetricCard(
+        'SEO Score',
+        `${seoScore}/100`,
+        seoScore >= 80 ? colors.success : seoScore >= 60 ? colors.warning : colors.primary,
+        'Search engine optimization effectiveness'
+      );
     
-    addMetricCard(
-      'User Experience Score',
-      `${uxScore}/100`,
-      uxScore >= 80 ? colors.success : colors.info,
-      'Overall user experience rating'
-    );
+      addMetricCard(
+        'Page Load Time',
+        overview.pageLoadTime || '',
+        colors.info,
+        'Time taken for the page to fully load'
+      );
+    
+      const uxScore = overview.userExperienceScore ?? 0;
+      addMetricCard(
+        'User Experience Score',
+        `${uxScore}/100`,
+        uxScore >= 80 ? colors.success : colors.info,
+        'Overall user experience rating'
+      );
   }
 
   // Core Web Vitals
@@ -394,7 +405,7 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string, section
     if (ui.colors && ui.colors.length > 0) {
       addSubtitle('Color Palette:');
       const usageGroups = groupColorsForExport(ui.colors);
-      usageGroups.forEach(group => {
+      usageGroups.forEach((group: { name: string; colors: string[] }) => {
         addText(group.name + ':', 10, colors.text, 10);
         addColorTable(group.colors);
       });
@@ -402,7 +413,7 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string, section
     
     if (ui.fonts && ui.fonts.length > 0) {
       addSubtitle('Fonts Used:');
-      ui.fonts.forEach(font => {
+      ui.fonts.forEach((font: { name: string; category: string; usage: string }) => {
         addText(`• ${font.name} - ${font.category} (${font.usage})`, 10, colors.text, 10);
       });
     }
@@ -413,14 +424,14 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string, section
 
       addText(`Estimated Photos: ${ui.imageAnalysis.estimatedPhotos}`, 10, colors.text, 10);
       if (ui.imageAnalysis.photoUrls && ui.imageAnalysis.photoUrls.length > 0) {
-        ui.imageAnalysis.photoUrls.forEach(url => {
+        ui.imageAnalysis.photoUrls.forEach((url: string) => {
           addText(`• ${url}`, 9, colors.text, 15);
         });
       }
 
       addText(`Estimated Icons: ${ui.imageAnalysis.estimatedIcons}`, 10, colors.text, 10);
       if (ui.imageAnalysis.iconUrls && ui.imageAnalysis.iconUrls.length > 0) {
-        ui.imageAnalysis.iconUrls.forEach(url => {
+        ui.imageAnalysis.iconUrls.forEach((url: string) => {
           addText(`• ${url}`, 9, colors.text, 15);
         });
       }
@@ -507,7 +518,7 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string, section
     
     if (perf.recommendations && perf.recommendations.length > 0) {
       addSubtitle('Performance Recommendations:');
-      perf.recommendations.forEach((rec, index) => {
+      perf.recommendations.forEach((rec: { title: string; description: string }, index: number) => {
         addText(`${index + 1}. ${rec.title || rec.description}`, 10, colors.text, 10);
       });
     }
@@ -527,7 +538,7 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string, section
     
     if (seo.metaTags) {
       addSubtitle('Meta Tags:');
-      Object.entries(seo.metaTags).forEach(([key, value]) => {
+      Object.entries(seo.metaTags).forEach(([key, value]: [string, any]) => {
         addText(`${key}: ${value}`, 9, colors.text, 10);
       });
     }
@@ -540,7 +551,7 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string, section
       addText(`✓ Passed: ${passed}`, 10, colors.success, 10);
       addText(`✗ Failed: ${failed}`, 10, colors.primary, 10);
       
-      seo.checks.forEach(check => {
+      seo.checks.forEach((check: { status: string; description: string }) => {
         const icon = check.status === 'good' ? '✓' : '✗';
         const color = check.status === 'good' ? colors.success : colors.primary;
         addText(`${icon} ${check.description}`, 9, color, 15);
@@ -553,31 +564,34 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string, section
     addSection('Technical Analysis');
     
     const tech = data.data.technical;
-    const secScore = tech.securityScore ?? 0;
+    const healthGrade = tech.healthGrade || '';
     addMetricCard(
       'Health Grade',
-      tech.healthGrade ?? '',
-      tech.healthGrade === 'A' ? colors.success : tech.healthGrade === 'B' ? colors.info : colors.warning,
+      healthGrade,
+      healthGrade === 'A' ? colors.success : healthGrade === 'B' ? colors.info : colors.warning,
+
       'Overall technical health assessment'
     );
     
+    const securityScore = tech.securityScore ?? 0;
     addMetricCard(
       'Security Score',
-      `${secScore}/100`,
-      secScore >= 80 ? colors.success : colors.warning,
+      `${securityScore}/100`,
+      securityScore >= 80 ? colors.success : colors.warning,
+
       'Website security assessment'
     );
     
     if (tech.techStack && tech.techStack.length > 0) {
       addSubtitle('Technologies Detected:');
-      tech.techStack.forEach(tech => {
+      tech.techStack.forEach((tech: { technology: string; category: string }) => {
         addText(`• ${tech.technology} (${tech.category})`, 10, colors.text, 10);
       });
     }
     
     if (tech.issues && tech.issues.length > 0) {
       addSubtitle('Technical Issues:');
-      tech.issues.forEach(issue => {
+      tech.issues.forEach((issue: { description: string; severity: string }) => {
         const color = issue.severity === 'high' ? colors.primary : 
                      issue.severity === 'medium' ? colors.warning : colors.darkGray;
         addText(`• ${issue.description} (${issue.severity})`, 10, color, 10);
@@ -588,7 +602,7 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string, section
   // Security Headers
   if (data.securityHeaders) {
     addSection('Security Headers');
-    Object.entries(data.securityHeaders).forEach(([header, status]) => {
+    Object.entries(data.securityHeaders).forEach(([header, status]: [string, string]) => {
       const color = status === 'present' ? colors.success : colors.primary;
       const icon = status === 'present' ? '✓' : '✗';
       addText(`${icon} ${header}: ${status}`, 10, color, 10);
