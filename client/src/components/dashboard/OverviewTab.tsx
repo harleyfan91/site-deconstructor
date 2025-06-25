@@ -140,7 +140,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
           <CardContent sx={{ p: 3 }}>
             <Typography variant="body1" paragraph>
               Analysis completed at {data.timestamp ? new Date(data.timestamp).toLocaleString() : 'Unknown time'}.
-              {data.data.overview.overallScore >= 80
+              {(overview?.overallScore ?? 0) >= 80
                 ? ' The page shows excellent performance across most metrics.'
                 : ' The page has room for improvement in several areas.'}
             </Typography>

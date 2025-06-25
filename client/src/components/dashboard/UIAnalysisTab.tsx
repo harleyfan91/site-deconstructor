@@ -41,7 +41,14 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
   }
 
   const ui = data.data.ui;
-  if (!ui) return null;
+  
+  if (!ui) {
+    return (
+      <Alert severity="info" sx={{ mt: 2 }}>
+        No UI analysis data available
+      </Alert>
+    );
+  }
 
   const { colors, fonts, images, imageAnalysis } = ui;
 

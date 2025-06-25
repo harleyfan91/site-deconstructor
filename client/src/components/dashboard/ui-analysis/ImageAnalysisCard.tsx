@@ -6,7 +6,7 @@ import type { AnalysisResponse } from '@/types/analysis';
 import { useSessionState } from '@/hooks/useSessionState';
 
 interface ImageAnalysisCardProps {
-  images: AnalysisResponse['data']['ui']['images'];
+  images: Array<{url: string, alt?: string, type?: string}>;
   imageAnalysis?: {
     totalImages: number;
     estimatedPhotos: number;

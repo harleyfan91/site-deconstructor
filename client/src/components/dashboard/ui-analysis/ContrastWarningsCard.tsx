@@ -5,7 +5,7 @@ import { AlertTriangle, Shield } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 
 interface ContrastWarningsCardProps {
-  issues: AnalysisResponse['data']['ui']['contrastIssues'];
+  issues: Array<{textColor: string, backgroundColor: string, ratio: number}>;
   data: AnalysisResponse | null;
   loading: boolean;
 }

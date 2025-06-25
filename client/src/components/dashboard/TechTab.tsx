@@ -531,7 +531,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
             </div>
           </CardContent>
           </Card>
-          <TechnicalHealthSummary healthGrade={technical.healthGrade} issues={technical.issues ?? []} />
+          <TechnicalHealthSummary healthGrade={technical.healthGrade ?? 'C'} issues={technical.issues ?? []} />
         </Box>
       </Box>
     </Box>

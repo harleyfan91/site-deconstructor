@@ -7,12 +7,12 @@ import type { AnalysisResponse } from '@/types/analysis';
 import { useSessionState } from '@/hooks/useSessionState';
 
 interface ColorExtractionCardProps {
-  colors: AnalysisResponse['data']['ui']['colors'];
+  colors: Array<{name: string, hex: string, usage: string, count: number}>;
 }
 
 interface HarmonyGroup {
   name: string;
-  colors: AnalysisResponse['data']['ui']['colors'];
+  colors: Array<{name: string, hex: string, usage: string, count: number}>;
 }
 
 interface UsageGroup {
@@ -71,15 +71,15 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
   };
 
   // Group colors by color harmony within each usage category
-  const groupByHarmony = (colors: AnalysisResponse['data']['ui']['colors']): HarmonyGroup[] => {
+  const groupByHarmony = (colors: Array<{name: string, hex: string, usage: string, count: number}>): HarmonyGroup[] => {
     if (colors.length === 0) return [];
 
-    const neutrals: AnalysisResponse['data']['ui']['colors'] = [];
-    const warm: AnalysisResponse['data']['ui']['colors'] = [];
-    const cool: AnalysisResponse['data']['ui']['colors'] = [];
-    const vibrant: AnalysisResponse['data']['ui']['colors'] = [];
+    const neutrals: Array<{name: string, hex: string, usage: string, count: number}> = [];
+    const warm: Array<{name: string, hex: string, usage: string, count: number}> = [];
+    const cool: Array<{name: string, hex: string, usage: string, count: number}> = [];
+    const vibrant: Array<{name: string, hex: string, usage: string, count: number}> = [];
 
-    colors.forEach((color: AnalysisResponse['data']['ui']['colors'][0]) => {
+    colors.forEach((color: any) => {
       const hsl = hexToHsl(color.hex);
       
       // Neutral colors (low saturation)
@@ -102,16 +102,16 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
 
     const groups: HarmonyGroup[] = [];
     if (neutrals.length) {
-      groups.push({ name: 'Neutral Tones', colors: neutrals.sort((a, b) => b.count - a.count) });
+      groups.push({ name: 'Neutral Tones', colors: neutrals.sort((a: any, b: any) => b.count - a.count) });
     }
     if (vibrant.length) {
-      groups.push({ name: 'Vibrant Colors', colors: vibrant.sort((a, b) => b.count - a.count) });
+      groups.push({ name: 'Vibrant Colors', colors: vibrant.sort((a: any, b: any) => b.count - a.count) });
     }
     if (warm.length) {
-      groups.push({ name: 'Warm Palette', colors: warm.sort((a, b) => b.count - a.count) });
+      groups.push({ name: 'Warm Palette', colors: warm.sort((a: any, b: any) => b.count - a.count) });
     }
     if (cool.length) {
-      groups.push({ name: 'Cool Palette', colors: cool.sort((a, b) => b.count - a.count) });
+      groups.push({ name: 'Cool Palette', colors: cool.sort((a: any, b: any) => b.count - a.count) });
     }
 
     return groups;
@@ -119,16 +119,16 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
 
   // Group colors by usage category - now simplified
   const groupByUsage = (): UsageGroup[] => {
-    const usageGroups: Record<string, AnalysisResponse['data']['ui']['colors']> = {};
+    const usageGroups: Record<string, Array<{name: string, hex: string, usage: string, count: number}>> = {};
     
-    colors.forEach(color => {
+    colors.forEach((color: any) => {
       // Normalize usage to title case
       const usage = color.usage.charAt(0).toUpperCase() + color.usage.slice(1);
       
       if (!usageGroups[usage]) {
         usageGroups[usage] = [];
       }
-      usageGroups[usage].push(color);
+      usageGroups[usage].push(color as any);
     });
 
     // Sort usage groups by importance
@@ -250,7 +250,7 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
                         {harmonyGroup.name}
                       </Typography>
                       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(3, 1fr)', md: 'repeat(6, 1fr)' }, gap: 1, mb: 2 }}>
-                        {harmonyGroup.colors.map((color, colorIndex) => {
+                        {harmonyGroup.colors.map((color: any, colorIndex: number) => {
                           const colorName = getColorName(color.hex);
                           return (
                             <Box

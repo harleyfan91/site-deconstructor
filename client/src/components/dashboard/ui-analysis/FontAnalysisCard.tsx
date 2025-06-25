@@ -6,7 +6,7 @@ import type { AnalysisResponse } from '@/types/analysis';
 import { analyzeFontsOnPage, FontAnalysisResult } from '@/utils/fontAnalysis';
 
 interface FontAnalysisCardProps {
-  fonts: AnalysisResponse['data']['ui']['fonts'];
+  fonts: Array<{name: string, category: string, usage: string, weight?: string, isLoaded?: boolean, isPublic?: boolean}>;
 }
 
 const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts }) => {

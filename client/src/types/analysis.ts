@@ -136,9 +136,9 @@ export interface AnalysisResponse {
       }>;
     };
     ui?: {
-      colors?: any[];
-      fonts?: any[];
-      images?: any[];
+      colors?: Array<{name: string, hex: string, usage: string, count: number}>;
+      fonts?: Array<{name: string, category: string, usage: string, weight?: string, isLoaded?: boolean, isPublic?: boolean}>;
+      images?: Array<{url: string, alt?: string, type?: string}>;
       imageAnalysis?: {
         totalImages: number;
         estimatedPhotos: number;
@@ -147,7 +147,7 @@ export interface AnalysisResponse {
         photoUrls?: string[];
         iconUrls?: string[];
       };
-      contrastIssues?: any[];
+      contrastIssues?: Array<{textColor: string, backgroundColor: string, ratio: number}>;
     };
     seo?: {
       score: number;
