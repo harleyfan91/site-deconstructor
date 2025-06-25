@@ -194,7 +194,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const hasResponsiveCSS = html.includes('max-width') || html.includes('min-width');
       const mobileScore = (hasViewportMeta ? 50 : 0) + (hasResponsiveCSS ? 50 : 0);
       
-      const mobileIssues = [];
+      const mobileIssues: { id: string; title: string; description: string }[] = [];
       if (!hasViewportMeta) {
         mobileIssues.push({
           id: 'viewport-meta',
@@ -214,7 +214,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const hasHTTPS = url.startsWith('https://');
       const securityScore = hasHTTPS ? 80 : 40;
       
-      const securityFindings = [];
+      const securityFindings: { id: string; title: string; description: string }[] = [];
       if (!hasHTTPS) {
         securityFindings.push({
           id: 'no-https',
@@ -225,7 +225,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Basic accessibility checks
       const hasAltTags = html.includes('alt=');
-      const accessibilityViolations = [];
+      const accessibilityViolations: { id: string; impact: string; description: string }[] = [];
       if (!hasAltTags) {
         accessibilityViolations.push({
           id: 'images-alt',
@@ -247,7 +247,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userExperienceScore = mobileScore;
 
       // Tech stack detection (fallback implementation due to Wappalyzer deprecation)
-      const techStack = [];
+      const techStack: { category: string; technology: string }[] = [];
       try {
         // Basic technology detection from HTML content
         if (html.includes('react')) techStack.push({ category: 'JavaScript Frameworks', technology: 'React' });
