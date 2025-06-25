@@ -132,12 +132,18 @@ function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["
         </Box>
         <Box sx={{ overflowX: 'auto', width: '100%', pb: 1 }}>
           <Box sx={{
-            minWidth: { xs: 520, sm: 600 },
-            width: { xs: 520, sm: 600, md: '100%' },
+            minWidth: { xs: 320, sm: 400 },
+            width: { xs: 320, sm: 400, md: '100%' },
             maxWidth: 'none'
           }}>
             <ChartContainer config={chartConfig} className="h-80">
-              <RechartsBarChart data={performance.coreWebVitals} margin={{ top: 20, right: 30, left: 5, bottom: 5 }} barCategoryGap="0%" categoryGap="0%">
+              <RechartsBarChart
+                data={performance.coreWebVitals}
+                margin={{ top: 20, right: 30, left: 5, bottom: 5 }}
+                barCategoryGap={20}
+                barGap={8}
+                maxBarSize={30}
+              >
                 <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                 <YAxis />
                 <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
