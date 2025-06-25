@@ -79,7 +79,7 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
     const cool: AnalysisResponse['data']['ui']['colors'] = [];
     const vibrant: AnalysisResponse['data']['ui']['colors'] = [];
 
-    colors.forEach(color => {
+    colors.forEach((color: AnalysisResponse['data']['ui']['colors'][0]) => {
       const hsl = hexToHsl(color.hex);
       
       // Neutral colors (low saturation)

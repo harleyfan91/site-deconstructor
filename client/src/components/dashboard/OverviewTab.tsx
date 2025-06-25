@@ -58,7 +58,10 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
     );
   }
 
-  const metrics = getMetricDefinitions(data.data.overview, theme);
+  const overview = data.data.overview;
+  if (!overview) return null;
+
+  const metrics = getMetricDefinitions(overview, theme);
 
   // Handler for launching metric info popover
   const handleMetricInfo = (event: React.MouseEvent<HTMLElement>, info: string) => {
@@ -110,7 +113,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
           <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'white', textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}>
             Website Overview
           </Typography>
-          <UrlDisplayBox url={data.url} />
+          <UrlDisplayBox url={data.url ?? ''} />
         </Box>
       </Box>
 
@@ -136,7 +139,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 3 }}>
             <Typography variant="body1" paragraph>
-              Analysis completed at {new Date(data.timestamp).toLocaleString()}.
+              Analysis completed at {data.timestamp ? new Date(data.timestamp).toLocaleString() : 'Unknown time'}.
               {data.data.overview.overallScore >= 80
                 ? ' The page shows excellent performance across most metrics.'
                 : ' The page has room for improvement in several areas.'}
@@ -152,7 +155,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
         </Typography>
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 3 }}>
-            <KeyFindingsGrid overview={data.data.overview} theme={theme} />
+            <KeyFindingsGrid overview={overview} theme={theme} />
           </CardContent>
         </Card>
       </Box>

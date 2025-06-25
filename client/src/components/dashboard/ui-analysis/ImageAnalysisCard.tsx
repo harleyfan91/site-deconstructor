@@ -89,7 +89,7 @@ const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnal
                 <Box sx={{ mt: 2, ml: 2 }}>
                   {section.urls && section.urls.length > 0 ? (
                     <List dense>
-                      {section.urls.map((url, idx) => (
+                      {section.urls.map((url: string, idx: number) => (
                         <ListItem key={idx} disableGutters sx={{ py: 0.5 }}>
                           <Link
                             href={url}

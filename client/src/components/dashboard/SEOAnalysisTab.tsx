@@ -40,6 +40,7 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
   }
 
   const { seo } = data.data;
+  if (!seo) return null;
 
   const getStatusIcon = (status: string) => {
     switch (status) {

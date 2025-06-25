@@ -68,6 +68,18 @@ export interface AnalysisResponse {
       pageLoadTime?: string;
       seoScore?: number;
       userExperienceScore?: number;
+      colors?: string[];
+      fonts?: string[];
+      images?: string[];
+      imageAnalysis?: {
+        totalImages: number;
+        estimatedPhotos: number;
+        estimatedIcons: number;
+        imageUrls?: string[];
+        photoUrls?: string[];
+        iconUrls?: string[];
+      };
+      contrastIssues?: any[];
       [key: string]: any;
     };
     technical: {
@@ -169,6 +181,21 @@ export interface AnalysisResponse {
       }
     >;
   };
+}
+
+export interface UIAnalysis {
+  colors?: string[];
+  fonts?: string[];
+  images?: string[];
+  imageAnalysis?: {
+    totalImages: number;
+    estimatedPhotos: number;
+    estimatedIcons: number;
+    imageUrls?: string[];
+    photoUrls?: string[];
+    iconUrls?: string[];
+  };
+  contrastIssues?: any[];
 }
 
 

@@ -47,7 +47,7 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts })
       </Box>
       
       <Box>
-        {fontsToDisplay.map((font, index) => (
+        {fontsToDisplay.map((font: any, index: number) => (
           <Box key={index} sx={{ mb: 3, pb: 2, borderBottom: index < fontsToDisplay.length - 1 ? '1px solid #E0E0E0' : 'none' }}>
             <Typography variant="h6" sx={{ fontFamily: font.name, mb: 1 }}>
               {font.name}

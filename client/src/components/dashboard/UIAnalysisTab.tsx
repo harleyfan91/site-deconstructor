@@ -40,7 +40,10 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
     );
   }
 
-  const { colors, fonts, images, imageAnalysis } = data.data.ui;
+  const ui = data.data.ui;
+  if (!ui) return null;
+
+  const { colors, fonts, images, imageAnalysis } = ui;
 
   return (
     <Box>
