@@ -18,7 +18,7 @@ interface ExportOptions {
 
 export const exportAnalysis = async (data: AnalysisResponse, options: ExportOptions): Promise<void> => {
   const timestamp = new Date().toISOString().split('T')[0];
-  const domain = new URL(data.url).hostname;
+  const domain = new URL(data.url ?? '').hostname;
   const baseFileName = `${domain}-analysis-${timestamp}`;
 
   // Filter data based on selected sections
@@ -49,19 +49,19 @@ const filterDataBySections = (data: AnalysisResponse, sections: ExportOptions['s
   const filtered = { ...data };
   
   if (!sections.overview) {
-    delete filtered.data.overview;
+    delete (filtered.data as any).overview;
   }
   if (!sections.ui) {
-    delete filtered.data.ui;
+    delete (filtered.data as any).ui;
   }
   if (!sections.performance) {
-    delete filtered.data.performance;
+    delete (filtered.data as any).performance;
   }
   if (!sections.seo) {
-    delete filtered.data.seo;
+    delete (filtered.data as any).seo;
   }
   if (!sections.technical) {
-    delete filtered.data.technical;
+    delete (filtered.data as any).technical;
   }
   // Note: content analysis is derived from existing data, so no filtering needed
   
@@ -144,10 +144,10 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string, section
   };
 
   const groupColorsForExport = (
-    palette: AnalysisResponse['data']['ui']['colors']
+    palette: NonNullable<AnalysisResponse['data']['ui']>['colors']
   ): { name: string; colors: string[] }[] => {
     const groups: Record<string, string[]> = {};
-    palette.forEach(color => {
+    palette?.forEach((color: any) => {
       let usage = color.usage || 'Theme';
       if (usage === 'Primary' || usage === 'Secondary') {
         const rgb = hexToRgb(color.hex);
@@ -317,40 +317,44 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string, section
   yPosition += 15;
 
   // URL and timestamp
-  addText(`URL: ${data.url}`, 12, colors.primary);
-  addText(`Analysis Date: ${new Date(data.timestamp).toLocaleString()}`, 10, colors.darkGray);
+  addText(`URL: ${data.url ?? ''}`, 12, colors.primary);
+  addText(`Analysis Date: ${new Date(data.timestamp ?? '').toLocaleString()}`, 10, colors.darkGray);
   yPosition += 10;
 
   // Overview Section (1st)
   if (sections.overview && data.data.overview) {
     addSection('Overview');
     
+
     const overview = data.data.overview;
+    const seoScore = overview.seoScore ?? 0;
+    const uxScore = overview.userExperienceScore ?? 0;
+
     addMetricCard(
-      'Overall Score', 
+      'Overall Score',
       `${overview.overallScore}/100`,
       overview.overallScore >= 80 ? colors.success : overview.overallScore >= 60 ? colors.warning : colors.primary,
       'Comprehensive website performance rating'
     );
-    
+
     addMetricCard(
-      'SEO Score', 
-      `${overview.seoScore}/100`,
-      overview.seoScore >= 80 ? colors.success : overview.seoScore >= 60 ? colors.warning : colors.primary,
+      'SEO Score',
+      `${seoScore}/100`,
+      seoScore >= 80 ? colors.success : seoScore >= 60 ? colors.warning : colors.primary,
       'Search engine optimization effectiveness'
     );
     
     addMetricCard(
-      'Page Load Time', 
-      overview.pageLoadTime,
+      'Page Load Time',
+      overview.pageLoadTime ?? '',
       colors.info,
       'Time taken for the page to fully load'
     );
     
     addMetricCard(
-      'User Experience Score', 
-      `${overview.userExperienceScore}/100`,
-      overview.userExperienceScore >= 80 ? colors.success : colors.info,
+      'User Experience Score',
+      `${uxScore}/100`,
+      uxScore >= 80 ? colors.success : colors.info,
       'Overall user experience rating'
     );
   }
@@ -549,17 +553,18 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string, section
     addSection('Technical Analysis');
     
     const tech = data.data.technical;
+    const secScore = tech.securityScore ?? 0;
     addMetricCard(
-      'Health Grade', 
-      tech.healthGrade,
+      'Health Grade',
+      tech.healthGrade ?? '',
       tech.healthGrade === 'A' ? colors.success : tech.healthGrade === 'B' ? colors.info : colors.warning,
       'Overall technical health assessment'
     );
     
     addMetricCard(
-      'Security Score', 
-      `${tech.securityScore}/100`,
-      tech.securityScore >= 80 ? colors.success : colors.warning,
+      'Security Score',
+      `${secScore}/100`,
+      secScore >= 80 ? colors.success : colors.warning,
       'Website security assessment'
     );
     

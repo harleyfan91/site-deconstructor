@@ -5,7 +5,9 @@
     "module": "ES2020",
     "moduleResolution": "node",
     "lib": ["ES2020", "DOM"],
-    "rootDir": "client/src"
+    "rootDir": "client/src",
+    "noEmit": false,
+    "allowImportingTsExtensions": false
   },
   "include": [
     "client/src/lib/**/*.ts",
