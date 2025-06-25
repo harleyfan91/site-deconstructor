@@ -65,6 +65,7 @@ const filterDataBySections = (data: AnalysisResponse, sections: ExportOptions['s
   }
   if (!sections.technical) {
     (filtered.data as any).technical = undefined;
+
   }
   // Note: content analysis is derived from existing data, so no filtering needed
   
@@ -151,6 +152,7 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string, section
   ): { name: string; colors: string[] }[] => {
     const groups: Record<string, string[]> = {};
     palette.forEach((color: { hex: string; usage?: string }) => {
+
       let usage = color.usage || 'Theme';
       if (usage === 'Primary' || usage === 'Secondary') {
         const rgb = hexToRgb(color.hex);
@@ -325,15 +327,20 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string, section
     ? new Date(data.timestamp)
     : new Date();
   addText(`Analysis Date: ${analysisDate.toLocaleString()}`, 10, colors.darkGray);
+
   yPosition += 10;
 
   // Overview Section (1st)
   if (sections.overview && data.data.overview) {
     addSection('Overview');
     
+
     const overview = data.data.overview;
+    const seoScore = overview.seoScore ?? 0;
+    const uxScore = overview.userExperienceScore ?? 0;
+
     addMetricCard(
-      'Overall Score', 
+      'Overall Score',
       `${overview.overallScore}/100`,
       overview.overallScore >= 80 ? colors.success : overview.overallScore >= 60 ? colors.warning : colors.primary,
       'Comprehensive website performance rating'
@@ -562,6 +569,7 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string, section
       'Health Grade',
       healthGrade,
       healthGrade === 'A' ? colors.success : healthGrade === 'B' ? colors.info : colors.warning,
+
       'Overall technical health assessment'
     );
     
@@ -570,6 +578,7 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string, section
       'Security Score',
       `${securityScore}/100`,
       securityScore >= 80 ? colors.success : colors.warning,
+
       'Website security assessment'
     );
     
