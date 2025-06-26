@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import Wappalyzer from 'wappalyzer';
 import { createClient } from '@supabase/supabase-js';
+import namer from 'color-namer';
 
 // Helper function to map score to letter grade
 function mapScoreToGrade(score: number): string {
@@ -13,31 +14,14 @@ function mapScoreToGrade(score: number): string {
   return 'F';
 }
 
-// Helper function to get color name
+// Helper function to get color name using color-namer
 function getColorName(hex: string): string {
-  const colorNames: Record<string, string> = {
-    '#FFFFFF': 'White',
-    '#000000': 'Black',
-    '#FF0000': 'Red',
-    '#00FF00': 'Green',
-    '#0000FF': 'Blue',
-    '#FFFF00': 'Yellow',
-    '#FF00FF': 'Magenta',
-    '#00FFFF': 'Cyan',
-    '#808080': 'Gray',
-    '#800000': 'Maroon',
-    '#008000': 'Dark Green',
-    '#000080': 'Navy',
-    '#808000': 'Olive',
-    '#800080': 'Purple',
-    '#008080': 'Teal',
-    '#C0C0C0': 'Silver',
-    '#F5F5F5': 'White Smoke',
-    '#1A1A1A': 'Dark Gray',
-    '#2D2D2D': 'Charcoal',
-    '#333333': 'Dark Charcoal'
-  };
-  return colorNames[hex.toUpperCase()] || hex;
+  try {
+    const result = namer(hex);
+    return result.pantone[0]?.name || result.basic[0]?.name || hex;
+  } catch {
+    return hex;
+  }
 }
 
 // Extract CSS colors from HTML
