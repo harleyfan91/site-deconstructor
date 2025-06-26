@@ -98,7 +98,30 @@ const PricingCard = ({ plan, index }: PricingCardProps) => {
           >
             {plan.description}
           </Typography>
-          <List sx={{ flex: 1 }}>
+          <List sx={{ 
+            flex: 1,
+            // Center features on tablet screens (768px - 1199px) while preserving mobile/desktop layout
+            '@media (min-width: 768px) and (max-width: 1199px)': {
+              maxWidth: '300px',
+              mx: 'auto',
+              '& .MuiListItem-root': {
+                justifyContent: 'center',
+                textAlign: 'center',
+                flexDirection: 'column',
+                alignItems: 'center',
+                py: 0.5,
+              },
+              '& .MuiListItemIcon-root': {
+                minWidth: 'auto',
+                marginBottom: '4px',
+                justifyContent: 'center',
+              },
+              '& .MuiListItemText-root': {
+                textAlign: 'center',
+                margin: 0,
+              }
+            }
+          }}>
             {plan.features.map((feature, i) => (
               <ListItem key={i} disablePadding>
                 <ListItemIcon sx={{ minWidth: '30px' }}>
