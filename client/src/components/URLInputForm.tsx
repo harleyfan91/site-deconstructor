@@ -21,7 +21,7 @@ const URLInputForm = ({ onAnalysisComplete }: URLInputFormProps) => {
   const { analyzeWebsite, loading, error } = useAnalysisContext();
 
   const validateUrl = (value: string) => {
-    const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/i;
+    const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]*)*\/?$/i;
     return urlPattern.test(value) || value === '';
   };
 
