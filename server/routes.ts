@@ -27,7 +27,27 @@ function getColorName(hex: string): string {
 // ==== COLOR CATEGORY CONFIGURATION ====
 // This object controls which color categories are analyzed
 // Add/remove categories here and they'll automatically be included in the analysis
-const COLOR_CATEGORIES = {
+// Type definitions for color configuration
+interface BaseColorConfig {
+  enabled: boolean;
+  regex: RegExp;
+  minCount: number;
+  maxResults: number;
+}
+
+interface ColorConfigWithFallback extends BaseColorConfig {
+  fallbackRegex: RegExp;
+  useFallback: boolean;
+  fallbackMinCount: number;
+}
+
+type ColorConfig = BaseColorConfig | ColorConfigWithFallback;
+
+function hasUseFallback(config: ColorConfig): config is ColorConfigWithFallback {
+  return 'useFallback' in config;
+}
+
+const COLOR_CATEGORIES: Record<string, ColorConfig> = {
   // Structural colors
   'Background': {
     enabled: true,
@@ -173,7 +193,7 @@ function extractCssColors(html: string): Array<{name: string, hex: string, usage
       }
 
       // Fallback logic for categories that support it (like Background)
-      if (config.useFallback && categoryColors.size === 0 && config.fallbackRegex) {
+      if (hasUseFallback(config) && categoryColors.size === 0) {
         const fallbackMatches = html.match(config.fallbackRegex) || [];
         const fallbackColorCounts: Record<string, number> = {};
 
@@ -186,9 +206,9 @@ function extractCssColors(html: string): Array<{name: string, hex: string, usage
 
         // Only include fallback colors that meet minimum count threshold
         Object.entries(fallbackColorCounts)
-          .filter(([_, count]) => count >= (config.fallbackMinCount || 2))
+          .filter(([_, count]) => count >= config.fallbackMinCount)
           .sort((a, b) => b[1] - a[1])
-          .slice(0, config.maxResults || 5)
+          .slice(0, config.maxResults)
           .forEach(([hex, _]) => {
             categoryColors.add(hex);
           });
