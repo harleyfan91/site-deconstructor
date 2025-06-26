@@ -1,0 +1,13 @@
+Run npx tsc -p tsconfig.json --noEmit
+  npx tsc -p tsconfig.json --noEmit
+  shell: /usr/bin/bash -e {0}
+Error: server/routes.ts(176,18): error TS2339: Property 'useFallback' does not exist on type '{ enabled: boolean; regex: RegExp; fallbackRegex: RegExp; minCount: number; maxResults: number; useFallback: boolean; fallbackMinCount: number; } | { enabled: boolean; regex: RegExp; minCount: number; maxResults: number; } | ... 14 more ... | { ...; }'.
+  Property 'useFallback' does not exist on type '{ enabled: boolean; regex: RegExp; minCount: number; maxResults: number; }'.
+Error: server/routes.ts(176,69): error TS2339: Property 'fallbackRegex' does not exist on type '{ enabled: boolean; regex: RegExp; fallbackRegex: RegExp; minCount: number; maxResults: number; useFallback: boolean; fallbackMinCount: number; } | { enabled: boolean; regex: RegExp; minCount: number; maxResults: number; } | ... 14 more ... | { ...; }'.
+  Property 'fallbackRegex' does not exist on type '{ enabled: boolean; regex: RegExp; minCount: number; maxResults: number; }'.
+Error: server/routes.ts(177,51): error TS2339: Property 'fallbackRegex' does not exist on type '{ enabled: boolean; regex: RegExp; fallbackRegex: RegExp; minCount: number; maxResults: number; useFallback: boolean; fallbackMinCount: number; } | { enabled: boolean; regex: RegExp; minCount: number; maxResults: number; } | ... 14 more ... | { ...; }'.
+  Property 'fallbackRegex' does not exist on type '{ enabled: boolean; regex: RegExp; minCount: number; maxResults: number; }'.
+Error: server/routes.ts(189,52): error TS2339: Property 'fallbackMinCount' does not exist on type '{ enabled: boolean; regex: RegExp; fallbackRegex: RegExp; minCount: number; maxResults: number; useFallback: boolean; fallbackMinCount: number; } | { enabled: boolean; regex: RegExp; minCount: number; maxResults: number; } | ... 14 more ... | { ...; }'.
+  Property 'fallbackMinCount' does not exist on type '{ enabled: boolean; regex: RegExp; minCount: number; maxResults: number; }'.
+Error: server/routes.ts(262,90): error TS2537: Type '{ Background: { enabled: boolean; regex: RegExp; fallbackRegex: RegExp; minCount: number; maxResults: number; useFallback: boolean; fallbackMinCount: number; }; Header: { enabled: boolean; regex: RegExp; minCount: number; maxResults: number; }; ... 14 more ...; Accent: { ...; }; }' has no matching index signature for type 'string'.
+Error: Process completed with exit code 2.
