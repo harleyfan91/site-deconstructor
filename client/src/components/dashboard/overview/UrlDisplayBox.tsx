@@ -69,7 +69,7 @@ const UrlDisplayBox: React.FC<UrlDisplayBoxProps> = ({ url }) => {
           fontSize: { xs: '0.95rem', sm: '1rem' },
           color: 'white',
           overflow: 'hidden',
-          textOverflow: 'ellipsis',
+          textOverflow: 'clip',
           whiteSpace: 'nowrap',
           cursor: 'pointer',
           fontWeight: 'bold',
