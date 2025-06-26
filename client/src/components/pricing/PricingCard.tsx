@@ -105,19 +105,16 @@ const PricingCard = ({ plan, index }: PricingCardProps) => {
               maxWidth: '300px',
               mx: 'auto',
               '& .MuiListItem-root': {
-                justifyContent: 'center',
-                textAlign: 'center',
-                flexDirection: 'column',
-                alignItems: 'center',
+                justifyContent: 'flex-start',
+                textAlign: 'left',
                 py: 0.5,
               },
               '& .MuiListItemIcon-root': {
-                minWidth: 'auto',
-                marginBottom: '4px',
-                justifyContent: 'center',
+                minWidth: '30px',
+                justifyContent: 'flex-start',
               },
               '& .MuiListItemText-root': {
-                textAlign: 'center',
+                textAlign: 'left',
                 margin: 0,
               }
             }
