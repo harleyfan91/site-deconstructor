@@ -89,35 +89,14 @@ const DashboardContent = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
               >
-                {/* Mobile: Custom layout with Overview centered in first row */}
-                <Box className="block md:hidden">
-                  <TabsList className="w-full grid grid-rows-[auto_auto] gap-1">
-                    {/* First row: Overview centered */}
-                    <Box className="flex justify-center">
-                      <TabsTrigger value="overview" className="text-xs px-3 py-1 h-7" data-tab-id="overview">Overview</TabsTrigger>
-                    </Box>
-                    
-                    {/* Second and third rows: 3x2 grid */}
-                    <Box className="grid grid-cols-3 gap-1">
-                      <TabsTrigger value="ui" className="text-xs px-2 py-1 h-7" data-tab-id="ui">UI</TabsTrigger>
-                      <TabsTrigger value="content" className="text-xs px-1 py-1 h-7" data-tab-id="content">Content</TabsTrigger>
-                      <TabsTrigger value="performance" className="text-xs px-1 py-1 h-7" data-tab-id="performance">Performance</TabsTrigger>
-                      <TabsTrigger value="seo" className="text-xs px-2 py-1 h-7" data-tab-id="seo">SEO</TabsTrigger>
-                      <TabsTrigger value="tech" className="text-xs px-2 py-1 h-7" data-tab-id="tech">Tech</TabsTrigger>
-                      <TabsTrigger value="compliance" className="text-xs px-1 py-1 h-7" data-tab-id="compliance">Compliance</TabsTrigger>
-                    </Box>
-                  </TabsList>
-                </Box>
-                
-                {/* Desktop: All tabs in single row */}
-                <TabsList className="hidden md:grid w-full grid-cols-7 gap-1 h-auto">
-                  <TabsTrigger value="overview" className="text-sm px-2 py-2" data-tab-id="overview">Overview</TabsTrigger>
-                  <TabsTrigger value="ui" className="text-sm px-2 py-2" data-tab-id="ui">UI</TabsTrigger>
-                  <TabsTrigger value="content" className="text-sm px-2 py-2" data-tab-id="content">Content</TabsTrigger>
-                  <TabsTrigger value="performance" className="text-sm px-2 py-2" data-tab-id="performance">Performance</TabsTrigger>
-                  <TabsTrigger value="seo" className="text-sm px-2 py-2" data-tab-id="seo">SEO</TabsTrigger>
-                  <TabsTrigger value="tech" className="text-sm px-2 py-2" data-tab-id="tech">Tech</TabsTrigger>
-                  <TabsTrigger value="compliance" className="text-sm px-2 py-2" data-tab-id="compliance">Compliance</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-2 md:grid-cols-7 gap-1 h-auto">
+                  <TabsTrigger value="overview" className="text-xs sm:text-sm px-2 py-2" data-tab-id="overview">Overview</TabsTrigger>
+                  <TabsTrigger value="ui" className="text-xs sm:text-sm px-2 py-2" data-tab-id="ui">UI</TabsTrigger>
+                  <TabsTrigger value="content" className="text-xs sm:text-sm px-2 py-2" data-tab-id="content">Content</TabsTrigger>
+                  <TabsTrigger value="performance" className="text-xs sm:text-sm px-2 py-2" data-tab-id="performance">Performance</TabsTrigger>
+                  <TabsTrigger value="seo" className="text-xs sm:text-sm px-2 py-2" data-tab-id="seo">SEO</TabsTrigger>
+                  <TabsTrigger value="tech" className="text-xs sm:text-sm px-2 py-2" data-tab-id="tech">Tech</TabsTrigger>
+                  <TabsTrigger value="compliance" className="text-xs sm:text-sm px-2 py-2" data-tab-id="compliance">Compliance</TabsTrigger>
                 </TabsList>
               </motion.div>
             </Box>
