@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import Wappalyzer from 'wappalyzer';
 import { createClient } from '@supabase/supabase-js';
+import { extractCssColors as parseCssColors, fetchExternalCss } from './lib/color-extractor';
 
 // Helper function to map score to letter grade
 function mapScoreToGrade(score: number): string {
@@ -186,8 +187,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Extract image URLs from HTML
       const extractedImageUrls = extractImageUrls(html);
       
-      // Extract colors dynamically from HTML with improved detection
-      const extractedColors = extractCssColors(html);
+      // Extract colors dynamically from HTML and linked stylesheets
+      const externalCss = await fetchExternalCss(html, url);
+      const extractedColors = parseCssColors(html + externalCss);
       
       // Basic mobile responsiveness check
       const hasViewportMeta = html.includes('viewport');
