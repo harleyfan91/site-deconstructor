@@ -61,6 +61,7 @@ function getColorName(hex: string): string {
 
 export function extractCssColors(html: string): Array<{name: string; hex: string; usage: string; count: number}> {
   const css = extractCssContent(html);
+  const searchSpace = css + ' ' + html; // inline <style> + external sheets already appended to html
   const allContent = html + ' ' + css;
   const colorCounts: Record<string, number> = {};
   const allColorRegex = /#[0-9a-fA-F]{3,6}/g;
@@ -76,7 +77,7 @@ export function extractCssColors(html: string): Array<{name: string; hex: string
   for (const [usage, cfg] of Object.entries(regexConfig)) {
     const found = new Set<string>();
     let m: RegExpExecArray | null;
-    while ((m = cfg.regex.exec(css)) !== null) {
+    while ((m = cfg.regex.exec(searchSpace)) !== null) {
       found.add(m[1].toUpperCase());
     }
     if (found.size === 0 && cfg.fallbackMinCount > 0) {
