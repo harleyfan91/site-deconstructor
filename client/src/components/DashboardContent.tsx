@@ -91,10 +91,10 @@ const DashboardContent = () => {
               >
                 <TabsList className="grid w-full grid-cols-3 md:grid-cols-7 gap-1 h-auto">
                   <TabsTrigger value="overview" className="col-span-3 md:col-span-1 text-xs sm:text-sm" data-tab-id="overview">Overview</TabsTrigger>
-                  <TabsTrigger value="ui" className="text-xs sm:text-sm" data-tab-id="ui">User Interface</TabsTrigger>
+                  <TabsTrigger value="ui" className="text-xs sm:text-sm" data-tab-id="ui">UI</TabsTrigger>
                   <TabsTrigger value="content" className="text-xs sm:text-sm" data-tab-id="content">Content</TabsTrigger>
-                  <TabsTrigger value="performance" className="text-xs sm:text-sm" data-tab-id="performance">Performance & Security</TabsTrigger>
-                  <TabsTrigger value="seo" className="text-xs sm:text-sm" data-tab-id="seo">SEO Analysis</TabsTrigger>
+                  <TabsTrigger value="performance" className="text-xs sm:text-sm" data-tab-id="performance">Performance</TabsTrigger>
+                  <TabsTrigger value="seo" className="text-xs sm:text-sm" data-tab-id="seo">SEO</TabsTrigger>
                   <TabsTrigger value="tech" className="text-xs sm:text-sm" data-tab-id="tech">Tech</TabsTrigger>
                   <TabsTrigger value="compliance" className="text-xs sm:text-sm" data-tab-id="compliance">Compliance</TabsTrigger>
                 </TabsList>
