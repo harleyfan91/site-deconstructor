@@ -51,12 +51,12 @@ const COLOR_CATEGORIES: Record<string, ColorConfig> = {
   // Structural colors
   'Background': {
     enabled: true,
-    regex: /(?:^|[\s{])(?:body|html)[^{]*\{[^}]*background(?:-color)?\s*:\s*(#[0-9a-fA-F]{3,6})/gi,
+    regex: /(?:^|\s)(?:body|html)(?:\s*\{[^}]*background(?:-color)?:\s*(#[0-9a-fA-F]{3,6})|(?:\s*,\s*)?\.(?:container|main|page|app|root|wrapper|bg-|background)[\w-]*\s*\{[^}]*background(?:-color)?:\s*(#[0-9a-fA-F]{3,6}))/gi,
     fallbackRegex: /(?:^|[^-\w])background(?:-color)?:\s*(#[0-9a-fA-F]{3,6})(?![^;]*(?:hover|focus|active|before|after))/gi,
     minCount: 1,
     maxResults: 3,
     useFallback: true,
-    fallbackMinCount: 1
+    fallbackMinCount: 3 // For fallback, only include colors that appear multiple times
   },
   'Header': {
     enabled: true,
@@ -190,29 +190,9 @@ function normalizeHex(hex: string): string {
   return ('#' + value).toUpperCase();
 }
 
-// Fetch external stylesheets and return their combined CSS
-async function fetchExternalCss(html: string, pageUrl: string): Promise<string> {
-  const linkRegex = /<link[^>]+rel=["']stylesheet["'][^>]*href=["']([^"']+)["'][^>]*>/gi;
-  const sheets: string[] = [];
-  let match: RegExpExecArray | null;
-  while ((match = linkRegex.exec(html)) !== null) {
-    try {
-      const href = match[1];
-      const url = new URL(href, pageUrl).toString();
-      const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' } });
-      if (res.ok) {
-        sheets.push(await res.text());
-      }
-    } catch {
-      // ignore failures
-    }
-  }
-  return sheets.join(' ');
-}
-
 // Extract CSS colors from HTML
 function extractCssColors(html: string): Array<{ name: string; hex: string; usage: string; count: number }> {
-  const css = extractCssContent(html) + ' ' + html;
+  const css = extractCssContent(html);
   const colors: Array<{ name: string; hex: string; usage: string; count: number }> = [];
   const colorCounts: Record<string, number> = {};
 
@@ -381,14 +361,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const html = await response.text();
-
+      
       // Extract image URLs from HTML
       const extractedImageUrls = extractImageUrls(html);
-
-      const externalCss = await fetchExternalCss(html, url);
-
-      // Extract colors dynamically from HTML and external CSS
-      const extractedColors = extractCssColors(html + externalCss);
+      
+      // Extract colors dynamically from HTML with improved detection
+      const extractedColors = extractCssColors(html);
       
       // Basic mobile responsiveness check
       const hasViewportMeta = html.includes('viewport');

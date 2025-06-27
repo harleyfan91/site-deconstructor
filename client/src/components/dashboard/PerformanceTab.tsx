@@ -12,7 +12,6 @@ import {
 } from '@mui/material';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart';
 import { BarChart as RechartsBarChart, Bar, XAxis, YAxis } from 'recharts';
-import { useTheme } from '@mui/material/styles';
 import { Shield, Smartphone, Zap, Activity, ShieldCheck, Gauge, BarChart } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 import { useAnalysisContext } from '../../contexts/AnalysisContext';
@@ -118,10 +117,9 @@ function MetricsSection({ performanceScore, mobileScore, securityScore }: {
 }
 
 function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["data"]["performance"] }) {
-  const theme = useTheme();
   const chartConfig = {
-    value: { label: 'Your Site', color: '#FF6B35' },
-    benchmark: { label: 'Benchmark', color: theme.palette.grey[300] }
+    value: { label: 'Your Site', color: '#2196F3' },
+    benchmark: { label: 'Industry Average', color: '#E0E0E0' }
   };
   return (
     <Card sx={{ borderRadius: 2, height: '400px', width: '100%', maxWidth: '100%', minWidth: 0 }}>
@@ -141,13 +139,16 @@ function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["
             <ChartContainer config={chartConfig} className="h-80">
               <RechartsBarChart
                 data={performance.coreWebVitals}
-                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                margin={{ top: 20, right: 30, left: 5, bottom: 5 }}
+                barCategoryGap={20}
+                barGap={8}
+                maxBarSize={30}
               >
-                <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                 <YAxis />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar dataKey="value" fill="#FF6B35" />
-                <Bar dataKey="benchmark" fill={theme.palette.grey[300]} />
+                <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                <Bar dataKey="value" fill="var(--color-value)" maxBarSize={40} />
+                <Bar dataKey="benchmark" fill="var(--color-benchmark)" maxBarSize={40} />
               </RechartsBarChart>
             </ChartContainer>
           </Box>
