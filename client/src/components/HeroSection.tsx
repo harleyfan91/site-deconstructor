@@ -218,6 +218,7 @@ const HeroSection = () => {
           <motion.div {...motionProps.heading}>
             <Typography
               variant="h1"
+              component="div"
               sx={{
                 // Reduce bottom margin
                 mb: { xs: 2, md: 2.5 },
@@ -250,6 +251,7 @@ const HeroSection = () => {
           <motion.div {...motionProps.subheading}>
             <Typography
               variant="h6"
+              component="div"
               color="text.secondary"
               sx={{
                 // Reduce bottom margin significantly
@@ -275,6 +277,7 @@ const HeroSection = () => {
             <motion.div {...motionProps.formSection}>
               <Typography
                 variant="body2"
+                component="div"
                 color="text.secondary"
                 sx={{ 
                   // Reduce margins around "Try these popular sites"
