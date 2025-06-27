@@ -116,3 +116,6 @@ For changes that affect the dashboard, follow the
 [Manual UI Review Checklist](docs/Manual_UI_Checklist.md). It walks through
 loading the app locally, verifying each tab, testing export features and checking
 responsive layout.
+
+// Run your usual "lint" and "tsc --noEmit" commands.
+// All remaining errors should be unrelated to colour extraction.

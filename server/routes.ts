@@ -3,7 +3,6 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import Wappalyzer from 'wappalyzer';
 import { createClient } from '@supabase/supabase-js';
-import { extractColours } from './lib/fetch-page-colors';
 
 // Helper function to map score to letter grade
 function mapScoreToGrade(score: number): string {
@@ -13,35 +12,6 @@ function mapScoreToGrade(score: number): string {
   if (score >= 60) return 'D';
   return 'F';
 }
-
-// Helper function to get color name
-function getColorName(hex: string): string {
-  const colorNames: Record<string, string> = {
-    '#FFFFFF': 'White',
-    '#000000': 'Black',
-    '#FF0000': 'Red',
-    '#00FF00': 'Green',
-    '#0000FF': 'Blue',
-    '#FFFF00': 'Yellow',
-    '#FF00FF': 'Magenta',
-    '#00FFFF': 'Cyan',
-    '#808080': 'Gray',
-    '#800000': 'Maroon',
-    '#008000': 'Dark Green',
-    '#000080': 'Navy',
-    '#808000': 'Olive',
-    '#800080': 'Purple',
-    '#008080': 'Teal',
-    '#C0C0C0': 'Silver',
-    '#F5F5F5': 'White Smoke',
-    '#1A1A1A': 'Dark Gray',
-    '#2D2D2D': 'Charcoal',
-    '#333333': 'Dark Charcoal'
-  };
-  return colorNames[hex.toUpperCase()] || hex;
-}
-
-
 
 // Helper function to extract image URLs from HTML
 function extractImageUrls(html: string): string[] {
@@ -93,9 +63,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Extract image URLs from HTML
       const extractedImageUrls = extractImageUrls(html);
       
-      // Extract colors using Playwright-based system
-      const extractedColors = await extractColours(url);
-      console.log('Extracted colors count:', extractedColors.length);
       
       // Basic mobile responsiveness check
       const hasViewportMeta = html.includes('viewport');
@@ -224,7 +191,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             userExperienceScore
           },
           ui: {
-            colors: extractedColors,
             fonts: [
               { name: 'Roboto', category: 'sans-serif', usage: 'Body text', weight: '400' },
               { name: 'Arial', category: 'sans-serif', usage: 'Headings', weight: '700' }
