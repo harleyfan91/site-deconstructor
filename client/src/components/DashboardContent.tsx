@@ -76,9 +76,9 @@ const DashboardContent = () => {
                 top: { xs: 40, md: 48 },
                 zIndex: 10,
                 backgroundColor: 'background.paper',
-                pt: 0.5,
-                pb: 0.5,
-                mb: 1.5,
+                pt: { xs: 0.25, md: 0.5 },
+                pb: { xs: 0.25, md: 0.5 },
+                mb: { xs: 1, md: 1.5 },
                 borderBottom: '1px solid',
                 borderColor: 'divider',
                 borderRadius: '8px'
@@ -89,14 +89,35 @@ const DashboardContent = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
               >
-                <TabsList className="grid w-full grid-cols-2 md:grid-cols-7 gap-1 h-auto">
-                  <TabsTrigger value="overview" className="text-xs sm:text-sm px-2 py-2" data-tab-id="overview">Overview</TabsTrigger>
-                  <TabsTrigger value="ui" className="text-xs sm:text-sm px-2 py-2" data-tab-id="ui">UI</TabsTrigger>
-                  <TabsTrigger value="content" className="text-xs sm:text-sm px-2 py-2" data-tab-id="content">Content</TabsTrigger>
-                  <TabsTrigger value="performance" className="text-xs sm:text-sm px-2 py-2" data-tab-id="performance">Performance</TabsTrigger>
-                  <TabsTrigger value="seo" className="text-xs sm:text-sm px-2 py-2" data-tab-id="seo">SEO</TabsTrigger>
-                  <TabsTrigger value="tech" className="text-xs sm:text-sm px-2 py-2" data-tab-id="tech">Tech</TabsTrigger>
-                  <TabsTrigger value="compliance" className="text-xs sm:text-sm px-2 py-2" data-tab-id="compliance">Compliance</TabsTrigger>
+                {/* Mobile: Overview tab in its own centered row, other tabs in 3x2 grid */}
+                <Box className="block md:hidden">
+                  {/* Overview tab - centered in its own row */}
+                  <Box className="flex justify-center mb-1">
+                    <TabsList className="w-auto h-8">
+                      <TabsTrigger value="overview" className="text-xs px-3 py-1 h-7" data-tab-id="overview">Overview</TabsTrigger>
+                    </TabsList>
+                  </Box>
+                  
+                  {/* Other tabs - 3x2 grid */}
+                  <TabsList className="grid grid-cols-3 gap-0.5 h-auto">
+                    <TabsTrigger value="ui" className="text-xs px-1 py-1 h-7" data-tab-id="ui">UI</TabsTrigger>
+                    <TabsTrigger value="content" className="text-xs px-1 py-1 h-7" data-tab-id="content">Content</TabsTrigger>
+                    <TabsTrigger value="performance" className="text-xs px-1 py-1 h-7" data-tab-id="performance">Perf</TabsTrigger>
+                    <TabsTrigger value="seo" className="text-xs px-1 py-1 h-7" data-tab-id="seo">SEO</TabsTrigger>
+                    <TabsTrigger value="tech" className="text-xs px-1 py-1 h-7" data-tab-id="tech">Tech</TabsTrigger>
+                    <TabsTrigger value="compliance" className="text-xs px-1 py-1 h-7" data-tab-id="compliance">Comp</TabsTrigger>
+                  </TabsList>
+                </Box>
+                
+                {/* Desktop: All tabs in single row */}
+                <TabsList className="hidden md:grid w-full grid-cols-7 gap-1 h-auto">
+                  <TabsTrigger value="overview" className="text-sm px-2 py-2" data-tab-id="overview">Overview</TabsTrigger>
+                  <TabsTrigger value="ui" className="text-sm px-2 py-2" data-tab-id="ui">UI</TabsTrigger>
+                  <TabsTrigger value="content" className="text-sm px-2 py-2" data-tab-id="content">Content</TabsTrigger>
+                  <TabsTrigger value="performance" className="text-sm px-2 py-2" data-tab-id="performance">Performance</TabsTrigger>
+                  <TabsTrigger value="seo" className="text-sm px-2 py-2" data-tab-id="seo">SEO</TabsTrigger>
+                  <TabsTrigger value="tech" className="text-sm px-2 py-2" data-tab-id="tech">Tech</TabsTrigger>
+                  <TabsTrigger value="compliance" className="text-sm px-2 py-2" data-tab-id="compliance">Compliance</TabsTrigger>
                 </TabsList>
               </motion.div>
             </Box>
