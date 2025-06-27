@@ -145,6 +145,7 @@ function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["
               >
                 <XAxis dataKey="name" tick={{ fontSize: 10 }} />
                 <YAxis />
+
                 <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
                 <Bar dataKey="value" fill="#FF6B35" />
                 <Bar dataKey="benchmark" fill={theme.palette.grey[300]} />
@@ -183,18 +184,7 @@ function SpeedIndexSection({ performanceScore }: { performanceScore: number }) {
             enterDelay={300}
             enterTouchDelay={300}
           >
-           <LinearProgress
-              variant="determinate"
-              value={performanceScore}
-                sx={{
-                  height: 8,
-                  borderRadius: 4,         // rounds the grey background track
-                  cursor: 'help',
-                  '& .MuiLinearProgress-bar': {
-                  borderRadius: 4,       // rounds the filled bar ends
-                },
-              }}
-            />
+            <LinearProgress variant="determinate" value={performanceScore} sx={{ height: 8, borderRadius: 4, cursor: 'help' }} />
           </Tooltip>
         </Box>
         <Typography variant="body2" color="text.secondary">
@@ -335,16 +325,10 @@ function MobileResponsivenessSection() {
               {score}%
             </Typography>
           </Box>
-          <LinearProgress
-            variant="determinate"
-            value={score}
-            sx={{
-              height: 8,
-              borderRadius: 4,
-              '& .MuiLinearProgress-bar': {
-                borderRadius: 4,
-              },
-            }}
+          <LinearProgress 
+            variant="determinate" 
+            value={score} 
+            sx={{ height: 8, borderRadius: 4 }}
           />
         </Box>
 

@@ -229,17 +229,14 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
                 enterDelay={300}
                 enterTouchDelay={300}
               >
-                <LinearProgress
-                  variant="determinate"
-                  value={readabilityScore}
-                  sx={{
-                    height: 8,
-                    borderRadius: 4,
-                    cursor: 'help',
-                    '& .MuiLinearProgress-bar': {
-                      borderRadius: 4,
-                    },
-                  }}
+                <LinearProgress 
+                  variant="determinate" 
+                  value={readabilityScore} 
+                  sx={{ 
+                    height: 8, 
+                    borderRadius: 4, 
+                    cursor: 'help'
+                  }} 
                 />
               </Tooltip>
               <Typography variant="body2" color="text.secondary">
@@ -263,17 +260,14 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
                 enterDelay={300}
                 enterTouchDelay={300}
               >
-                <LinearProgress
-                  variant="determinate"
-                  value={textAccessibilityScore}
-                  sx={{
-                    height: 8,
-                    borderRadius: 4,
-                    cursor: 'help',
-                    '& .MuiLinearProgress-bar': {
-                      borderRadius: 4,
-                    },
-                  }}
+                <LinearProgress 
+                  variant="determinate" 
+                  value={textAccessibilityScore} 
+                  sx={{ 
+                    height: 8, 
+                    borderRadius: 4, 
+                    cursor: 'help'
+                  }} 
                 />
               </Tooltip>
               <Typography variant="body2" color="text.secondary">
@@ -299,17 +293,14 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
                 enterDelay={300}
                 enterTouchDelay={300}
               >
-                <LinearProgress
-                  variant="determinate"
-                  value={totalImages > 0 ? (estimatedPhotos / totalImages) * 100 : 0}
-                  sx={{
-                    height: 8,
-                    borderRadius: 4,
-                    cursor: 'help',
-                    '& .MuiLinearProgress-bar': {
-                      borderRadius: 4,
-                    },
-                  }}
+                <LinearProgress 
+                  variant="determinate" 
+                  value={totalImages > 0 ? (estimatedPhotos / totalImages) * 100 : 0} 
+                  sx={{ 
+                    height: 8, 
+                    borderRadius: 4, 
+                    cursor: 'help'
+                  }} 
                 />
               </Tooltip>
               <Typography variant="body2" color="text.secondary">

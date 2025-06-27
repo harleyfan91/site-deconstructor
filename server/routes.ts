@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import Wappalyzer from 'wappalyzer';
 import { createClient } from '@supabase/supabase-js';
-import namer from 'color-namer';
+import { extractCssColors as parseCssColors, fetchExternalCss } from './lib/color-extractor';
 
 // Helper function to map score to letter grade
 function mapScoreToGrade(score: number): string {
@@ -14,284 +14,127 @@ function mapScoreToGrade(score: number): string {
   return 'F';
 }
 
-// Helper function to get color name using color-namer
+// Helper function to get color name
 function getColorName(hex: string): string {
-  try {
-    const result = namer(hex);
-    return result.pantone[0]?.name || result.basic[0]?.name || hex;
-  } catch {
-    return hex;
-  }
-}
-
-// ==== COLOR CATEGORY CONFIGURATION ====
-// This object controls which color categories are analyzed
-// Add/remove categories here and they'll automatically be included in the analysis
-// Type definitions for color configuration
-interface BaseColorConfig {
-  enabled: boolean;
-  regex: RegExp;
-  minCount: number;
-  maxResults: number;
-}
-
-interface ColorConfigWithFallback extends BaseColorConfig {
-  fallbackRegex: RegExp;
-  useFallback: boolean;
-  fallbackMinCount: number;
-}
-
-type ColorConfig = BaseColorConfig | ColorConfigWithFallback;
-
-function hasUseFallback(config: ColorConfig): config is ColorConfigWithFallback {
-  return 'useFallback' in config;
-}
-
-const COLOR_CATEGORIES: Record<string, ColorConfig> = {
-  // Structural colors
-  'Background': {
-    enabled: true,
-    regex: /(?:^|\s)(?:body|html)(?:\s*\{[^}]*background(?:-color)?:\s*(#[0-9a-fA-F]{3,6})|(?:\s*,\s*)?\.(?:container|main|page|app|root|wrapper|bg-|background)[\w-]*\s*\{[^}]*background(?:-color)?:\s*(#[0-9a-fA-F]{3,6}))/gi,
-    fallbackRegex: /(?:^|[^-\w])background(?:-color)?:\s*(#[0-9a-fA-F]{3,6})(?![^;]*(?:hover|focus|active|before|after))/gi,
-    minCount: 1,
-    maxResults: 3,
-    useFallback: true,
-    fallbackMinCount: 3 // For fallback, only include colors that appear multiple times
-  },
-  'Header': {
-    enabled: true,
-    regex: /(?:header|\.header|\.navbar|\.nav-bar|\.top-bar|\.site-header)[^}]*?background-color:\s*(#[0-9a-fA-F]{3,6})/gi,
-    minCount: 1,
-    maxResults: 2
-  },
-  'Footer': {
-    enabled: false, // Disabled by default - enable if needed
-    regex: /(?:footer|\.footer|\.site-footer|\.bottom)[^}]*?background-color:\s*(#[0-9a-fA-F]{3,6})/gi,
-    minCount: 1,
-    maxResults: 2
-  },
-  'Card': {
-    enabled: true,
-    regex: /(?:\.card|\.panel|\.box|\.container|\.wrapper|\.content)[^}]*?background-color:\s*(#[0-9a-fA-F]{3,6})/gi,
-    minCount: 1,
-    maxResults: 4
-  },
-
-  // Content colors
-  'Text': {
-    enabled: true,
-    regex: /(?:^|[^-])color:\s*(#[0-9a-fA-F]{3,6})(?![^}]*(?:hover|focus|active|before|after))/gi,
-    minCount: 2, // Text colors should appear multiple times
-    maxResults: 5
-  },
-  'Theme': {
-    enabled: true,
-    regex: /(?:--primary|--theme|--brand|--accent|\.primary|\.theme|\.brand)[^}]*?(?:background-color|color):\s*(#[0-9a-fA-F]{3,6})/gi,
-    minCount: 1,
-    maxResults: 3
-  },
-  'Border': {
-    enabled: true,
-    regex: /(?:\.card|\.container|\.box|\.panel|table|input|\.border)[^}]*?border(?:-\w+)?-color:\s*(#[0-9a-fA-F]{3,6})/gi,
-    minCount: 1,
-    maxResults: 3
-  },
-
-  // Interactive colors
-  'Button': {
-    enabled: true,
-    regex: /(?:\.btn|\.button|button|\.cta|\.action)[^}]*?(?:background-color|color):\s*(#[0-9a-fA-F]{3,6})/gi,
-    minCount: 1,
-    maxResults: 4
-  },
-  'Link': {
-    enabled: true,
-    regex: /(?:a:|\.link|\.url)[^}]*?color:\s*(#[0-9a-fA-F]{3,6})(?![^}]*(?:hover|focus|active))/gi,
-    minCount: 1,
-    maxResults: 3
-  },
-  'Hover': {
-    enabled: false, // Disabled by default as it can be noisy
-    regex: /(?:hover|:hover)[^}]*?(?:background-color|color):\s*(#[0-9a-fA-F]{3,6})/gi,
-    minCount: 1,
-    maxResults: 3
-  },
-
-  // Status colors
-  'Success': {
-    enabled: true,
-    regex: /(?:\.success|\.valid|\.ok|\.green|\.positive)[^}]*?(?:background-color|color|border-color):\s*(#[0-9a-fA-F]{3,6})/gi,
-    minCount: 1,
-    maxResults: 2
-  },
-  'Warning': {
-    enabled: true,
-    regex: /(?:\.warning|\.warn|\.caution|\.yellow|\.alert)[^}]*?(?:background-color|color|border-color):\s*(#[0-9a-fA-F]{3,6})/gi,
-    minCount: 1,
-    maxResults: 2
-  },
-  'Error': {
-    enabled: true,
-    regex: /(?:\.error|\.danger|\.invalid|\.red|\.negative)[^}]*?(?:background-color|color|border-color):\s*(#[0-9a-fA-F]{3,6})/gi,
-    minCount: 1,
-    maxResults: 2
-  },
-  'Info': {
-    enabled: false, // Disabled by default
-    regex: /(?:\.info|\.notice|\.blue|\.information)[^}]*?(?:background-color|color|border-color):\s*(#[0-9a-fA-F]{3,6})/gi,
-    minCount: 1,
-    maxResults: 2
-  },
-
-  // Additional UI elements
-  'Badge': {
-    enabled: false, // Disabled by default
-    regex: /(?:\.badge|\.tag|\.label|\.chip)[^}]*?(?:background-color|color):\s*(#[0-9a-fA-F]{3,6})/gi,
-    minCount: 1,
-    maxResults: 3
-  },
-  'Icon': {
-    enabled: false, // Disabled by default
-    regex: /(?:\.icon|\.fa|\.material-icons|svg)[^}]*?(?:color|fill):\s*(#[0-9a-fA-F]{3,6})/gi,
-    minCount: 1,
-    maxResults: 3
-  },
-  'Accent': {
-    enabled: true,
-    regex: /(?:\.accent|box-shadow:[^;]*?)(?:background-color|color|):\s*(#[0-9a-fA-F]{3,6})/gi,
-    minCount: 1,
-    maxResults: 3
-  }
-};
-
-// Extract CSS colors from HTML
-// Helper to gather CSS content from style tags and inline styles
-function extractCssContent(html: string): string {
-  let css = '';
-  const styleTagRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
-  const inlineStyleRegex = /style="([^"]+)"/gi;
-  let match;
-
-  while ((match = styleTagRegex.exec(html)) !== null) {
-    css += ' ' + match[1];
-  }
-  while ((match = inlineStyleRegex.exec(html)) !== null) {
-    css += ' ' + match[1];
-  }
-  return css;
-}
-
-// Normalize hex codes to 6 character uppercase form
-function normalizeHex(hex: string): string {
-  const value = hex.replace('#', '');
-  if (value.length === 3) {
-    return ('#' + value[0] + value[0] + value[1] + value[1] + value[2] + value[2]).toUpperCase();
-  }
-  return ('#' + value).toUpperCase();
+  const colorNames: Record<string, string> = {
+    '#FFFFFF': 'White',
+    '#000000': 'Black',
+    '#FF0000': 'Red',
+    '#00FF00': 'Green',
+    '#0000FF': 'Blue',
+    '#FFFF00': 'Yellow',
+    '#FF00FF': 'Magenta',
+    '#00FFFF': 'Cyan',
+    '#808080': 'Gray',
+    '#800000': 'Maroon',
+    '#008000': 'Dark Green',
+    '#000080': 'Navy',
+    '#808000': 'Olive',
+    '#800080': 'Purple',
+    '#008080': 'Teal',
+    '#C0C0C0': 'Silver',
+    '#F5F5F5': 'White Smoke',
+    '#1A1A1A': 'Dark Gray',
+    '#2D2D2D': 'Charcoal',
+    '#333333': 'Dark Charcoal'
+  };
+  return colorNames[hex.toUpperCase()] || hex;
 }
 
 // Extract CSS colors from HTML
-function extractCssColors(html: string): Array<{ name: string; hex: string; usage: string; count: number }> {
-  const css = extractCssContent(html);
-  const colors: Array<{ name: string; hex: string; usage: string; count: number }> = [];
+function extractCssColors(html: string): Array<{name: string, hex: string, usage: string, count: number}> {
+  const colors: Array<{name: string, hex: string, usage: string, count: number}> = [];
   const colorCounts: Record<string, number> = {};
-
   try {
+    // Count all hex colors
     const allColorRegex = /#[0-9a-fA-F]{3,6}/g;
-    let m: RegExpExecArray | null;
-    while ((m = allColorRegex.exec(css)) !== null) {
-      const hex = normalizeHex(m[0]);
-      colorCounts[hex] = (colorCounts[hex] || 0) + 1;
-    }
-
-    const processed = new Set<string>();
-
-    Object.entries(COLOR_CATEGORIES).forEach(([categoryName, config]) => {
-      if (!config.enabled) return;
-
-      const categoryColors = new Set<string>();
-      while ((m = config.regex.exec(css)) !== null) {
-        categoryColors.add(normalizeHex(m[1]));
-      }
-
-      if (hasUseFallback(config) && categoryColors.size === 0) {
-        const fallbackMatches = css.match(config.fallbackRegex) || [];
-        const fallbackCounts: Record<string, number> = {};
-
-        fallbackMatches.forEach(f => {
-          const hx = f.match(/#[0-9a-fA-F]{3,6}/)?.[0];
-          if (hx) {
-            const norm = normalizeHex(hx);
-            fallbackCounts[norm] = (fallbackCounts[norm] || 0) + 1;
-          }
-        });
-
-        Object.entries(fallbackCounts)
-          .filter(([_, cnt]) => cnt >= config.fallbackMinCount)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, config.maxResults)
-          .forEach(([hx]) => categoryColors.add(hx));
-      }
-
-      Array.from(categoryColors)
-        .filter(hex => !processed.has(hex) && (colorCounts[hex] || 0) >= config.minCount)
-        .sort((a, b) => (colorCounts[b] || 0) - (colorCounts[a] || 0))
-        .slice(0, config.maxResults || 5)
-        .forEach(hex => {
-          colors.push({ name: getColorName(hex), hex, usage: categoryName, count: colorCounts[hex] || 0 });
-          processed.add(hex);
-        });
+    const matches = html.match(allColorRegex) || [];
+    matches.forEach(hex => {
+      const normalized = hex.toUpperCase();
+      colorCounts[normalized] = (colorCounts[normalized] || 0) + 1;
     });
 
-    if (COLOR_CATEGORIES['Theme']?.enabled) {
-      Object.entries(colorCounts)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 5)
-        .forEach(([hex, cnt]) => {
-          if (!processed.has(hex) && cnt > 2) {
-            colors.push({ name: getColorName(hex), hex, usage: 'Theme', count: cnt });
-            processed.add(hex);
-          }
-        });
+    // Prepare regexes for usage
+    const backgroundColorRegex = /background-color:\s*(#[0-9a-fA-F]{3,6})/gi;
+    const colorRegex           = /(?:^|[^-])color:\s*(#[0-9a-fA-F]{3,6})/gi;
+    const borderColorRegex     = /border(?:-\w+)?-color:\s*(#[0-9a-fA-F]{3,6})/gi;
+    const boxShadowRegex       = /box-shadow:[^;]*?(#[0-9a-fA-F]{3,6})/gi;
+
+    // Extract each usage set
+    let match;
+    const backgroundColors = new Set<string>();
+    while ((match = backgroundColorRegex.exec(html)) !== null) {
+      backgroundColors.add(match[1].toUpperCase());
+    }
+    const textColors = new Set<string>();
+    while ((match = colorRegex.exec(html)) !== null) {
+      textColors.add(match[1].toUpperCase());
+    }
+    const borderColors = new Set<string>();
+    while ((match = borderColorRegex.exec(html)) !== null) {
+      borderColors.add(match[1].toUpperCase());
+    }
+    const accentColors = new Set<string>();
+    while ((match = boxShadowRegex.exec(html)) !== null) {
+      accentColors.add(match[1].toUpperCase());
     }
 
+    // Helper to avoid duplicates
+    const processed = new Set<string>();
+
+    // Push by usage in order: Background → Text → Border → Accent
+    backgroundColors.forEach(hex => {
+      if (!processed.has(hex)) {
+        colors.push({ name: getColorName(hex), hex, usage: 'Background', count: colorCounts[hex] || 0 });
+        processed.add(hex);
+      }
+    });
+    textColors.forEach(hex => {
+      if (!processed.has(hex)) {
+        colors.push({ name: getColorName(hex), hex, usage: 'Text', count: colorCounts[hex] || 0 });
+        processed.add(hex);
+      }
+    });
+    borderColors.forEach(hex => {
+      if (!processed.has(hex)) {
+        colors.push({ name: getColorName(hex), hex, usage: 'Border', count: colorCounts[hex] || 0 });
+        processed.add(hex);
+      }
+    });
+    accentColors.forEach(hex => {
+      if (!processed.has(hex)) {
+        colors.push({ name: getColorName(hex), hex, usage: 'Accent', count: colorCounts[hex] || 0 });
+        processed.add(hex);
+      }
+    });
+
+    // Remaining frequent colors → Theme
+    Object.entries(colorCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .forEach(([hex, cnt]) => {
+        const upper = hex.toUpperCase();
+        if (!processed.has(upper) && cnt > 1) {
+          colors.push({ name: getColorName(upper), hex: upper, usage: 'Theme', count: cnt });
+          processed.add(upper);
+        }
+      });
+
+    // Fallback if nothing found
     if (colors.length === 0) {
       colors.push(
-        { name: 'Primary Text', hex: '#000000', usage: 'Text', count: 0 },
-        { name: 'Background', hex: '#FFFFFF', usage: 'Background', count: 0 }
+        { name: 'Primary Text',  hex: '#000000', usage: 'Text',       count: 0 },
+        { name: 'Background',    hex: '#FFFFFF', usage: 'Background', count: 0 }
       );
     }
   } catch (e) {
     console.error('Color extraction error:', e);
     return [
-      { name: 'Primary Text', hex: '#000000', usage: 'Text', count: 0 },
-      { name: 'Background', hex: '#FFFFFF', usage: 'Background', count: 0 }
+      { name: 'Primary Text',  hex: '#000000', usage: 'Text',       count: 0 },
+      { name: 'Background',    hex: '#FFFFFF', usage: 'Background', count: 0 }
     ];
   }
-
   return colors;
-}
-
-function getEnabledCategories(): string[] {
-  return Object.entries(COLOR_CATEGORIES)
-    .filter(([_, config]) => config.enabled)
-    .map(([category, _]) => category);
-}
-
-function setCategoryEnabled(category: string, enabled: boolean): void {
-  if (COLOR_CATEGORIES[category]) {
-    COLOR_CATEGORIES[category].enabled = enabled;
-  }
-}
-
-function getCategoryConfig(category: string) {
-  return COLOR_CATEGORIES[category] || null;
-}
-
-function updateCategoryConfig(category: string, updates: Partial<typeof COLOR_CATEGORIES[string]>): void {
-  if (COLOR_CATEGORIES[category]) {
-    COLOR_CATEGORIES[category] = { ...COLOR_CATEGORIES[category], ...updates };
-  }
 }
 
 // Helper function to extract image URLs from HTML
@@ -317,27 +160,6 @@ function extractImageUrls(html: string): string[] {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Color categories configuration API
-  app.get('/api/color-categories', (req, res) => {
-    const categories = Object.entries(COLOR_CATEGORIES).map(([name, config]) => ({
-      name,
-      enabled: config.enabled
-    }));
-    res.json({ categories });
-  });
-
-  app.post('/api/color-categories/:categoryName/toggle', (req, res) => {
-    const { categoryName } = req.params;
-    const { enabled } = req.body;
-    
-    if (!COLOR_CATEGORIES[categoryName]) {
-      return res.status(404).json({ error: 'Category not found' });
-    }
-    
-    COLOR_CATEGORIES[categoryName].enabled = enabled;
-    res.json({ success: true, category: categoryName, enabled });
-  });
-
   // Analysis API route
   app.get('/api/analyze', async (req, res) => {
     try {
@@ -365,8 +187,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Extract image URLs from HTML
       const extractedImageUrls = extractImageUrls(html);
       
-      // Extract colors dynamically from HTML with improved detection
-      const extractedColors = extractCssColors(html);
+      // Extract colors dynamically from HTML and linked stylesheets
+      const externalCss = await fetchExternalCss(html, url);
+      const extractedColors = parseCssColors(html + externalCss);
       
       // Basic mobile responsiveness check
       const hasViewportMeta = html.includes('viewport');
