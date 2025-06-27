@@ -70,10 +70,16 @@ const AccessibilitySnapshot = () => {
               {Math.max(0, score)}%
             </Typography>
             <Box flexGrow={1}>
-              <LinearProgress 
-                variant="determinate" 
-                value={Math.max(0, score)} 
-                sx={{ height: 8, borderRadius: 4 }}
+              <LinearProgress
+                variant="determinate"
+                value={Math.max(0, score)}
+                sx={{
+                  height: 8,
+                  borderRadius: 4,
+                  '& .MuiLinearProgress-bar': {
+                    borderRadius: 4,
+                  },
+                }}
               />
             </Box>
           </Box>
