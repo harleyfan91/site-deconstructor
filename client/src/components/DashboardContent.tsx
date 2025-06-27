@@ -67,18 +67,18 @@ const DashboardContent = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.3 }}
       >
-        <Paper elevation={3} sx={{ p: { xs: 1.5, sm: 2 }, borderRadius: 2 }}>
+        <Paper elevation={3} sx={{ p: { xs: 1, sm: 1.5 }, borderRadius: 2 }}>
           <Tabs defaultValue="overview" className="w-full">
             {/* Sticky navigation container */}
             <Box
               sx={{
                 position: 'sticky',
-                top: { xs: 40, md: 48 }, // Account for fixed header height
+                top: { xs: 40, md: 48 },
                 zIndex: 10,
                 backgroundColor: 'background.paper',
-                pt: 1,
-                pb: 1,
-                mb: 2,
+                pt: 0.5,
+                pb: 0.5,
+                mb: 1.5,
                 borderBottom: '1px solid',
                 borderColor: 'divider',
                 borderRadius: '8px'
@@ -89,14 +89,14 @@ const DashboardContent = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
               >
-                <TabsList className="grid w-full grid-cols-3 md:grid-cols-7 gap-1 h-auto">
-                  <TabsTrigger value="overview" className="col-span-3 md:col-span-1 text-xs sm:text-sm" data-tab-id="overview">Overview</TabsTrigger>
-                  <TabsTrigger value="ui" className="text-xs sm:text-sm" data-tab-id="ui">User Interface</TabsTrigger>
-                  <TabsTrigger value="content" className="text-xs sm:text-sm" data-tab-id="content">Content</TabsTrigger>
-                  <TabsTrigger value="performance" className="text-xs sm:text-sm" data-tab-id="performance">Performance & Security</TabsTrigger>
-                  <TabsTrigger value="seo" className="text-xs sm:text-sm" data-tab-id="seo">SEO Analysis</TabsTrigger>
-                  <TabsTrigger value="tech" className="text-xs sm:text-sm" data-tab-id="tech">Tech</TabsTrigger>
-                  <TabsTrigger value="compliance" className="text-xs sm:text-sm" data-tab-id="compliance">Compliance</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-2 md:grid-cols-7 gap-1 h-auto">
+                  <TabsTrigger value="overview" className="text-xs sm:text-sm px-2 py-2" data-tab-id="overview">Overview</TabsTrigger>
+                  <TabsTrigger value="ui" className="text-xs sm:text-sm px-2 py-2" data-tab-id="ui">UI</TabsTrigger>
+                  <TabsTrigger value="content" className="text-xs sm:text-sm px-2 py-2" data-tab-id="content">Content</TabsTrigger>
+                  <TabsTrigger value="performance" className="text-xs sm:text-sm px-2 py-2" data-tab-id="performance">Performance</TabsTrigger>
+                  <TabsTrigger value="seo" className="text-xs sm:text-sm px-2 py-2" data-tab-id="seo">SEO</TabsTrigger>
+                  <TabsTrigger value="tech" className="text-xs sm:text-sm px-2 py-2" data-tab-id="tech">Tech</TabsTrigger>
+                  <TabsTrigger value="compliance" className="text-xs sm:text-sm px-2 py-2" data-tab-id="compliance">Compliance</TabsTrigger>
                 </TabsList>
               </motion.div>
             </Box>
