@@ -177,7 +177,7 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
               <BarChart data={contentStructureData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                 <XAxis dataKey="metric" tick={{ fontSize: 10 }} />
                 <YAxis domain={[0, 100]} />
-                <ChartTooltip content={<ChartTooltipContent />} />
+                <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
                 <Bar dataKey="score" fill="#FF6B35" />
                 <Bar dataKey="benchmark" fill={theme.palette.grey[300]} />
               </BarChart>

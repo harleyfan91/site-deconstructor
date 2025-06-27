@@ -145,7 +145,8 @@ function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["
               >
                 <XAxis dataKey="name" tick={{ fontSize: 10 }} />
                 <YAxis />
-                <ChartTooltip content={<ChartTooltipContent />} />
+
+                <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
                 <Bar dataKey="value" fill="#FF6B35" />
                 <Bar dataKey="benchmark" fill={theme.palette.grey[300]} />
               </RechartsBarChart>
