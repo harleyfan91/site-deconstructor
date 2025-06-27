@@ -60,15 +60,15 @@ const AppHeader = ({ darkMode, toggleDarkMode }: { darkMode: boolean; toggleDark
           backgroundColor: darkMode ? 'rgba(0, 0, 0, 0.8)' : 'rgba(255, 255, 255, 0.8)',
           boxShadow: darkMode ? '0 8px 32px rgba(0, 0, 0, 0.3)' : '0 8px 32px rgba(0, 0, 0, 0.1)',
           color: darkMode ? '#FFFFFF' : '#000000',
-          // Further reduce header height so hero content can sit higher
-          minHeight: { xs: 40, md: 48 },
+          // Minimize header height on mobile to save vertical space
+          minHeight: { xs: 32, md: 48 },
         }}
       >
         <Toolbar
           sx={{
-            // Reduce toolbar height to match the smaller header
-            minHeight: { xs: 40, md: 48 },
-            px: { xs: 2, md: 3 },
+            // Minimize toolbar height on mobile
+            minHeight: { xs: 32, md: 48 },
+            px: { xs: 1.5, md: 3 },
           }}
         >
           <Typography
@@ -79,8 +79,8 @@ const AppHeader = ({ darkMode, toggleDarkMode }: { darkMode: boolean; toggleDark
               flexGrow: 1,
               fontWeight: 700,
               textDecoration: 'none',
-              // Slightly reduce font size
-              fontSize: { xs: '1.1rem', md: '1.25rem' },
+              // Minimize font size on mobile
+              fontSize: { xs: '1rem', md: '1.25rem' },
             }}
           >
             <span
@@ -119,10 +119,10 @@ const AppHeader = ({ darkMode, toggleDarkMode }: { darkMode: boolean; toggleDark
         </Toolbar>
       </AppBar>
 
-      {/* Reduce the spacing toolbar height to match the further reduced header */}
+      {/* Minimize spacing toolbar height on mobile */}
       <Toolbar
         sx={{
-          minHeight: { xs: 40, md: 48 },
+          minHeight: { xs: 32, md: 48 },
         }}
       />
     </>
