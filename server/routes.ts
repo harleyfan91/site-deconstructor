@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import Wappalyzer from 'wappalyzer';
 import { createClient } from '@supabase/supabase-js';
-import { extractCssColors as parseCssColors, fetchExternalCss } from './lib/color-extractor';
+import { extractColours } from './lib/fetch-page-colors';
 
 // Helper function to map score to letter grade
 function mapScoreToGrade(score: number): string {
@@ -41,101 +41,7 @@ function getColorName(hex: string): string {
   return colorNames[hex.toUpperCase()] || hex;
 }
 
-// Extract CSS colors from HTML
-function extractCssColors(html: string): Array<{name: string, hex: string, usage: string, count: number}> {
-  const colors: Array<{name: string, hex: string, usage: string, count: number}> = [];
-  const colorCounts: Record<string, number> = {};
-  try {
-    // Count all hex colors
-    const allColorRegex = /#[0-9a-fA-F]{3,6}/g;
-    const matches = html.match(allColorRegex) || [];
-    matches.forEach(hex => {
-      const normalized = hex.toUpperCase();
-      colorCounts[normalized] = (colorCounts[normalized] || 0) + 1;
-    });
 
-    // Prepare regexes for usage
-    const backgroundColorRegex = /background-color:\s*(#[0-9a-fA-F]{3,6})/gi;
-    const colorRegex           = /(?:^|[^-])color:\s*(#[0-9a-fA-F]{3,6})/gi;
-    const borderColorRegex     = /border(?:-\w+)?-color:\s*(#[0-9a-fA-F]{3,6})/gi;
-    const boxShadowRegex       = /box-shadow:[^;]*?(#[0-9a-fA-F]{3,6})/gi;
-
-    // Extract each usage set
-    let match;
-    const backgroundColors = new Set<string>();
-    while ((match = backgroundColorRegex.exec(html)) !== null) {
-      backgroundColors.add(match[1].toUpperCase());
-    }
-    const textColors = new Set<string>();
-    while ((match = colorRegex.exec(html)) !== null) {
-      textColors.add(match[1].toUpperCase());
-    }
-    const borderColors = new Set<string>();
-    while ((match = borderColorRegex.exec(html)) !== null) {
-      borderColors.add(match[1].toUpperCase());
-    }
-    const accentColors = new Set<string>();
-    while ((match = boxShadowRegex.exec(html)) !== null) {
-      accentColors.add(match[1].toUpperCase());
-    }
-
-    // Helper to avoid duplicates
-    const processed = new Set<string>();
-
-    // Push by usage in order: Background → Text → Border → Accent
-    backgroundColors.forEach(hex => {
-      if (!processed.has(hex)) {
-        colors.push({ name: getColorName(hex), hex, usage: 'Background', count: colorCounts[hex] || 0 });
-        processed.add(hex);
-      }
-    });
-    textColors.forEach(hex => {
-      if (!processed.has(hex)) {
-        colors.push({ name: getColorName(hex), hex, usage: 'Text', count: colorCounts[hex] || 0 });
-        processed.add(hex);
-      }
-    });
-    borderColors.forEach(hex => {
-      if (!processed.has(hex)) {
-        colors.push({ name: getColorName(hex), hex, usage: 'Border', count: colorCounts[hex] || 0 });
-        processed.add(hex);
-      }
-    });
-    accentColors.forEach(hex => {
-      if (!processed.has(hex)) {
-        colors.push({ name: getColorName(hex), hex, usage: 'Accent', count: colorCounts[hex] || 0 });
-        processed.add(hex);
-      }
-    });
-
-    // Remaining frequent colors → Theme
-    Object.entries(colorCounts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 10)
-      .forEach(([hex, cnt]) => {
-        const upper = hex.toUpperCase();
-        if (!processed.has(upper) && cnt > 1) {
-          colors.push({ name: getColorName(upper), hex: upper, usage: 'Theme', count: cnt });
-          processed.add(upper);
-        }
-      });
-
-    // Fallback if nothing found
-    if (colors.length === 0) {
-      colors.push(
-        { name: 'Primary Text',  hex: '#000000', usage: 'Text',       count: 0 },
-        { name: 'Background',    hex: '#FFFFFF', usage: 'Background', count: 0 }
-      );
-    }
-  } catch (e) {
-    console.error('Color extraction error:', e);
-    return [
-      { name: 'Primary Text',  hex: '#000000', usage: 'Text',       count: 0 },
-      { name: 'Background',    hex: '#FFFFFF', usage: 'Background', count: 0 }
-    ];
-  }
-  return colors;
-}
 
 // Helper function to extract image URLs from HTML
 function extractImageUrls(html: string): string[] {
@@ -187,9 +93,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Extract image URLs from HTML
       const extractedImageUrls = extractImageUrls(html);
       
-      // Extract colors dynamically from HTML and linked stylesheets
-      const externalCss = await fetchExternalCss(html, url);
-      const extractedColors = parseCssColors(html + externalCss);
+      // Extract colors using Playwright-based system
+      const extractedColors = await extractColours(url);
       
       // Basic mobile responsiveness check
       const hasViewportMeta = html.includes('viewport');

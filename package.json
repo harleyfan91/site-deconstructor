@@ -4,15 +4,13 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "dev":  "NODE_ENV=development tsx server/index.ts",
+    "dev": "NODE_ENV=development tsx server/index.ts",
     "dev:ui": "vite",
     "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
     "start": "NODE_ENV=production node dist/index.js",
     "check": "tsc",
     "db:push": "drizzle-kit push",
-    "test":  "bash tests/run-tests.sh"
-
-    
+    "test": "bash tests/run-tests.sh"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -57,6 +55,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
+    "color": "^5.0.0",
     "color-namer": "^1.4.0",
     "connect-pg-simple": "^10.0.0",
     "date-fns": "^3.6.0",
@@ -74,6 +73,7 @@
     "next-themes": "^0.4.6",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
+    "playwright": "^1.53.1",
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",
     "react-dom": "^18.3.1",

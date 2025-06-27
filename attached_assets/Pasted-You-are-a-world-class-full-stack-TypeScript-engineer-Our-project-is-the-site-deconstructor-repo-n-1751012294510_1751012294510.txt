@@ -1,0 +1,102 @@
+You are a world-class full-stack TypeScript engineer.
+Our project is the “site-deconstructor” repo now open in Replit.
+Goal: swap out the legacy regex colour-extraction backend for a Playwright-based solution, while leaving every front-end component exactly as it is.
+1 ▪ Add dependencies
+
+Install
+"playwright": "^1.44.0",
+"color": "^4.2.3",
+"color-namer": "^1.4.0"
+Add
+"postinstall": "playwright install --with-deps chromium"
+to package.json so Replit fetches the browser.
+2 ▪ Create new extractor
+
+Add /lib/fetch-page-colors.ts exactly as below (this is the Playwright code; keep comments):
+import { chromium } from 'playwright';
+import Color from 'color';
+import colorNamer from 'color-namer';
+
+export interface HarmonyGroup { [hex: string]: { name: string; count: number } }
+export interface UsageGroups {
+  background: HarmonyGroup;
+  text: HarmonyGroup;
+  icon: HarmonyGroup;
+  border: HarmonyGroup;
+}
+
+/**  Main entry: given a URL, return the same JSON shape that the old API sent. */
+export async function extractColours(url: string): Promise<UsageGroups> {
+  const browser = await chromium.launch();
+  const page    = await browser.newPage({ userAgent: 'Mozilla/5.0' });
+  await page.goto(url, { waitUntil: 'load', timeout: 45000 });
+
+  // 1. In-browser collection
+  const raw = await page.evaluate(() => {
+    const buckets = { background: {} as Record<string, number>,
+                      text:       {} as Record<string, number>,
+                      icon:       {} as Record<string, number>,
+                      border:     {} as Record<string, number> };
+    const push = (b: Record<string, number>, c: string) =>
+      (b[c] = (b[c] || 0) + 1);
+
+    for (const el of Array.from(document.querySelectorAll('*'))) {
+      const cs = getComputedStyle(el as Element);
+      if (cs.backgroundColor) push(buckets.background, cs.backgroundColor);
+      if (cs.color)           push(buckets.text,       cs.color);
+      if ((cs as any).fill)   push(buckets.icon,       (cs as any).fill);
+      if ((cs as any).stroke) push(buckets.icon,       (cs as any).stroke);
+      ['Top','Right','Bottom','Left'].forEach(side=>{
+        const c = cs.getPropertyValue(`border-${side.toLowerCase()}-color`);
+        if (c) push(buckets.border,c);
+      });
+    }
+    return buckets;
+  });
+  await browser.close();
+
+  // 2. Normalise + name
+  const normalise = (rawCol:string) => {
+    try { const col=Color(rawCol); if(col.alpha()===0) return null; return col.hex().toUpperCase(); }
+    catch { return null; }
+  };
+
+  const named: UsageGroups = { background:{}, text:{}, icon:{}, border:{} };
+  for (const usage of Object.keys(raw) as (keyof UsageGroups)[]) {
+    for (const [rawCol,count] of Object.entries(raw[usage])) {
+      const hex = normalise(rawCol);
+      if(!hex) continue;
+      const name = colorNamer(hex).ntc[0].name;
+      named[usage][hex] = { name, count };
+    }
+  }
+  return named;
+}
+3 ▪ Replace API route
+
+Open /pages/api/colors.ts (if it’s named differently, locate the route used by the front-end colour panel)
+Replace its handler body so it imports the new extractor and returns its result with the exact same key names as before:
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { extractColours } from '@/lib/fetch-page-colors';
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const { url } = req.query;
+  if (typeof url !== 'string') return res.status(400).json({ error: 'url param required' });
+  try {
+    const data = await extractColours(url);
+    res.status(200).json(data);   // matches previous shape, so UI unchanged
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Colour extraction failed' });
+  }
+}
+4 ▪ Delete legacy files / imports
+
+Remove /lib/color-extractor.ts and any other file that existed solely for regex extraction.
+Replace all import … from '@/lib/color-extractor' lines with the new extractColours import above (search-and-replace).
+5 ▪ Verify build
+
+npm install (Replit auto-runs)
+npm run dev — front-end colour panel should work unchanged.
+Deliverable: unified diffs for every file you changed/created/deleted, ready for git apply.
+No extra explanations.
