@@ -51,12 +51,12 @@ const COLOR_CATEGORIES: Record<string, ColorConfig> = {
   // Structural colors
   'Background': {
     enabled: true,
-    regex: /(?:body|html|\.container|\.main|\.page|\.app|\.root|\.wrapper)[^}]*?background-color:\s*(#[0-9a-fA-F]{3,6})/gi,
-    fallbackRegex: /background-color:\s*(#[0-9a-fA-F]{3,6})/gi,
+    regex: /(?:^|\s)(?:body|html)(?:\s*\{[^}]*background(?:-color)?:\s*(#[0-9a-fA-F]{3,6})|(?:\s*,\s*)?\.(?:container|main|page|app|root|wrapper|bg-|background)[\w-]*\s*\{[^}]*background(?:-color)?:\s*(#[0-9a-fA-F]{3,6}))/gi,
+    fallbackRegex: /(?:^|[^-\w])background(?:-color)?:\s*(#[0-9a-fA-F]{3,6})(?![^;]*(?:hover|focus|active|before|after))/gi,
     minCount: 1,
     maxResults: 3,
     useFallback: true,
-    fallbackMinCount: 2 // For fallback, only include colors that appear multiple times
+    fallbackMinCount: 3 // For fallback, only include colors that appear multiple times
   },
   'Header': {
     enabled: true,
@@ -165,93 +165,102 @@ const COLOR_CATEGORIES: Record<string, ColorConfig> = {
 };
 
 // Extract CSS colors from HTML
-function extractCssColors(html: string): Array<{name: string, hex: string, usage: string, count: number}> {
-  const colors: Array<{name: string, hex: string, usage: string, count: number}> = [];
+// Helper to gather CSS content from style tags and inline styles
+function extractCssContent(html: string): string {
+  let css = '';
+  const styleTagRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
+  const inlineStyleRegex = /style="([^"]+)"/gi;
+  let match;
+
+  while ((match = styleTagRegex.exec(html)) !== null) {
+    css += ' ' + match[1];
+  }
+  while ((match = inlineStyleRegex.exec(html)) !== null) {
+    css += ' ' + match[1];
+  }
+  return css;
+}
+
+// Normalize hex codes to 6 character uppercase form
+function normalizeHex(hex: string): string {
+  const value = hex.replace('#', '');
+  if (value.length === 3) {
+    return ('#' + value[0] + value[0] + value[1] + value[1] + value[2] + value[2]).toUpperCase();
+  }
+  return ('#' + value).toUpperCase();
+}
+
+// Extract CSS colors from HTML
+function extractCssColors(html: string): Array<{ name: string; hex: string; usage: string; count: number }> {
+  const css = extractCssContent(html);
+  const colors: Array<{ name: string; hex: string; usage: string; count: number }> = [];
   const colorCounts: Record<string, number> = {};
 
   try {
-    // Count all hex colors for frequency analysis
     const allColorRegex = /#[0-9a-fA-F]{3,6}/g;
-    const matches = html.match(allColorRegex) || [];
-    matches.forEach(hex => {
-      const normalized = hex.toUpperCase();
-      colorCounts[normalized] = (colorCounts[normalized] || 0) + 1;
-    });
+    let m: RegExpExecArray | null;
+    while ((m = allColorRegex.exec(css)) !== null) {
+      const hex = normalizeHex(m[0]);
+      colorCounts[hex] = (colorCounts[hex] || 0) + 1;
+    }
 
     const processed = new Set<string>();
 
-    // Process each enabled category
     Object.entries(COLOR_CATEGORIES).forEach(([categoryName, config]) => {
       if (!config.enabled) return;
 
       const categoryColors = new Set<string>();
-      let match;
-
-      // Primary regex extraction
-      while ((match = config.regex.exec(html)) !== null) {
-        categoryColors.add(match[1].toUpperCase());
+      while ((m = config.regex.exec(css)) !== null) {
+        categoryColors.add(normalizeHex(m[1]));
       }
 
-      // Fallback logic for categories that support it (like Background)
       if (hasUseFallback(config) && categoryColors.size === 0) {
-        const fallbackMatches = html.match(config.fallbackRegex) || [];
-        const fallbackColorCounts: Record<string, number> = {};
+        const fallbackMatches = css.match(config.fallbackRegex) || [];
+        const fallbackCounts: Record<string, number> = {};
 
-        fallbackMatches.forEach(match => {
-          const hex = match.match(/#[0-9a-fA-F]{3,6}/)?.[0]?.toUpperCase();
-          if (hex) {
-            fallbackColorCounts[hex] = (fallbackColorCounts[hex] || 0) + 1;
+        fallbackMatches.forEach(f => {
+          const hx = f.match(/#[0-9a-fA-F]{3,6}/)?.[0];
+          if (hx) {
+            const norm = normalizeHex(hx);
+            fallbackCounts[norm] = (fallbackCounts[norm] || 0) + 1;
           }
         });
 
-        // Only include fallback colors that meet minimum count threshold
-        Object.entries(fallbackColorCounts)
-          .filter(([_, count]) => count >= config.fallbackMinCount)
+        Object.entries(fallbackCounts)
+          .filter(([_, cnt]) => cnt >= config.fallbackMinCount)
           .sort((a, b) => b[1] - a[1])
           .slice(0, config.maxResults)
-          .forEach(([hex, _]) => {
-            categoryColors.add(hex);
-          });
+          .forEach(([hx]) => categoryColors.add(hx));
       }
 
-      // Add colors from this category
       Array.from(categoryColors)
         .filter(hex => !processed.has(hex) && (colorCounts[hex] || 0) >= config.minCount)
         .sort((a, b) => (colorCounts[b] || 0) - (colorCounts[a] || 0))
         .slice(0, config.maxResults || 5)
         .forEach(hex => {
-          colors.push({
-            name: getColorName(hex),
-            hex,
-            usage: categoryName,
-            count: colorCounts[hex] || 0
-          });
+          colors.push({ name: getColorName(hex), hex, usage: categoryName, count: colorCounts[hex] || 0 });
           processed.add(hex);
         });
     });
 
-    // Add remaining frequent colors as Theme colors (if Theme category is enabled)
     if (COLOR_CATEGORIES['Theme']?.enabled) {
       Object.entries(colorCounts)
         .sort((a, b) => b[1] - a[1])
         .slice(0, 5)
-        .forEach(([hex, count]) => {
-          const upper = hex.toUpperCase();
-          if (!processed.has(upper) && count > 2) {
-            colors.push({ name: getColorName(upper), hex: upper, usage: 'Theme', count });
-            processed.add(upper);
+        .forEach(([hex, cnt]) => {
+          if (!processed.has(hex) && cnt > 2) {
+            colors.push({ name: getColorName(hex), hex, usage: 'Theme', count: cnt });
+            processed.add(hex);
           }
         });
     }
 
-    // Fallback if no colors found
     if (colors.length === 0) {
       colors.push(
         { name: 'Primary Text', hex: '#000000', usage: 'Text', count: 0 },
         { name: 'Background', hex: '#FFFFFF', usage: 'Background', count: 0 }
       );
     }
-
   } catch (e) {
     console.error('Color extraction error:', e);
     return [
