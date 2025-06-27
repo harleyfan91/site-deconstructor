@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { Box, Typography, Collapse, IconButton, Chip, Stack } from '@mui/material';
-import { Palette, ChevronDown, ChevronUp, Filter } from 'lucide-react';
+import { Box, Typography, Collapse, IconButton, Chip, Stack, Popover, FormControlLabel, Checkbox, FormGroup } from '@mui/material';
+import { Palette, ChevronDown, ChevronUp, Settings } from 'lucide-react';
 import namer from 'color-namer';
 import type { AnalysisResponse } from '@/types/analysis';
 import { useSessionState } from '@/hooks/useSessionState';
@@ -28,8 +28,9 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
   const [glowingSections, setGlowingSections] = React.useState<Record<string, boolean>>({});
   const [selectedUsageTypes, setSelectedUsageTypes] = useSessionState<string[]>(
     'ui-color-usage-filters',
-    ['Background', 'Text', 'Theme', 'Icon', 'Border']
+    ['Background', 'Text', 'Theme/Brand', 'Button', 'Link', 'Border', 'Success', 'Warning', 'Error', 'Header', 'Card', 'Accent']
   );
+  const [filterAnchorEl, setFilterAnchorEl] = React.useState<HTMLButtonElement | null>(null);
 
   const toggleSection = (sectionName: string) => {
     setExpandedSections(prev => ({
@@ -45,6 +46,16 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
         : [...prev, usageType]
     );
   };
+
+  const handleFilterClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setFilterAnchorEl(event.currentTarget);
+  };
+
+  const handleFilterClose = () => {
+    setFilterAnchorEl(null);
+  };
+
+  const allUsageTypes = ['Background', 'Text', 'Theme/Brand', 'Button', 'Link', 'Border', 'Success', 'Warning', 'Error', 'Header', 'Card', 'Accent'];
 
   // Helper function to get color name using color-namer
   const getColorName = (hex: string): string => {
@@ -144,7 +155,7 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
     });
 
     // Filter by selected usage types and sort by importance
-    const usageOrder = ['Background', 'Text', 'Theme', 'Icon', 'Border'];
+    const usageOrder = ['Background', 'Text', 'Theme/Brand', 'Button', 'Link', 'Border', 'Success', 'Warning', 'Error', 'Header', 'Card', 'Accent'];
     const sortedGroups = usageOrder
       .filter(usage => usageGroups[usage] && selectedUsageTypes.includes(usage))
       .map(usage => ({
@@ -204,42 +215,69 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
 
   return (
     <Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-          <Palette size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-            Color Extraction
-          </Typography>
-        </Box>
-        
-        {/* Usage Type Filters */}
-        <Box sx={{ mb: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-            <Filter size={16} style={{ marginRight: 6 }} />
-            <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: 'text.secondary' }}>
-              Filter by Usage Type
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Palette size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+              Color Extraction
             </Typography>
           </Box>
-          <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
-            {['Background', 'Text', 'Theme', 'Icon', 'Border'].map((usageType) => (
-              <Chip
-                key={usageType}
-                label={usageType}
-                variant={selectedUsageTypes.includes(usageType) ? 'filled' : 'outlined'}
-                color={selectedUsageTypes.includes(usageType) ? 'primary' : 'default'}
-                size="small"
-                onClick={() => toggleUsageType(usageType)}
-                sx={{
-                  cursor: 'pointer',
-                  '&:hover': {
-                    bgcolor: selectedUsageTypes.includes(usageType) 
-                      ? 'primary.dark' 
-                      : 'action.hover'
-                  }
-                }}
-              />
-            ))}
-          </Stack>
+          
+          {/* Minimal Filter Toggle */}
+          <IconButton
+            size="small"
+            onClick={handleFilterClick}
+            sx={{
+              bgcolor: 'rgba(255, 107, 53, 0.1)',
+              '&:hover': {
+                bgcolor: 'rgba(255, 107, 53, 0.2)',
+              }
+            }}
+          >
+            <Settings size={16} />
+          </IconButton>
         </Box>
+
+        {/* Filter Popover */}
+        <Popover
+          open={Boolean(filterAnchorEl)}
+          anchorEl={filterAnchorEl}
+          onClose={handleFilterClose}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+        >
+          <Box sx={{ p: 2, minWidth: 200 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 2 }}>
+              Filter by Usage Type
+            </Typography>
+            <FormGroup>
+              {allUsageTypes.map((usageType) => (
+                <FormControlLabel
+                  key={usageType}
+                  control={
+                    <Checkbox
+                      size="small"
+                      checked={selectedUsageTypes.includes(usageType)}
+                      onChange={() => toggleUsageType(usageType)}
+                    />
+                  }
+                  label={usageType}
+                  sx={{ 
+                    '& .MuiFormControlLabel-label': { 
+                      fontSize: '0.875rem' 
+                    } 
+                  }}
+                />
+              ))}
+            </FormGroup>
+          </Box>
+        </Popover>
         
         <Box>
           {usageGroups.map((usageGroup, usageIndex) => (
