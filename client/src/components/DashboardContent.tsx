@@ -91,9 +91,9 @@ const DashboardContent = () => {
               >
                 {/* Mobile: Custom layout with Overview centered in first row */}
                 <Box className="block md:hidden">
-                  <TabsList className="w-full">
+                  <TabsList className="w-full grid grid-rows-[auto_auto] gap-1">
                     {/* First row: Overview centered */}
-                    <Box className="flex justify-center mb-1">
+                    <Box className="flex justify-center">
                       <TabsTrigger value="overview" className="text-xs px-3 py-1 h-7" data-tab-id="overview">Overview</TabsTrigger>
                     </Box>
                     
