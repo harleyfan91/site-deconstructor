@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { Box, Typography, Collapse, IconButton } from '@mui/material';
-import { Palette, ChevronDown, ChevronUp } from 'lucide-react';
+import { Box, Typography, Collapse, IconButton, Chip, Stack } from '@mui/material';
+import { Palette, ChevronDown, ChevronUp, Filter } from 'lucide-react';
 import namer from 'color-namer';
 import type { AnalysisResponse } from '@/types/analysis';
 import { useSessionState } from '@/hooks/useSessionState';
@@ -26,12 +26,24 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
     {}
   );
   const [glowingSections, setGlowingSections] = React.useState<Record<string, boolean>>({});
+  const [selectedUsageTypes, setSelectedUsageTypes] = useSessionState<string[]>(
+    'ui-color-usage-filters',
+    ['Background', 'Text', 'Theme', 'Icon', 'Border']
+  );
 
   const toggleSection = (sectionName: string) => {
     setExpandedSections(prev => ({
       ...prev,
       [sectionName]: !prev[sectionName]
     }));
+  };
+
+  const toggleUsageType = (usageType: string) => {
+    setSelectedUsageTypes(prev => 
+      prev.includes(usageType) 
+        ? prev.filter(type => type !== usageType)
+        : [...prev, usageType]
+    );
   };
 
   // Helper function to get color name using color-namer
@@ -131,10 +143,10 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
       usageGroups[usage].push(color as any);
     });
 
-    // Sort usage groups by importance
-    const usageOrder = ['Background', 'Text', 'Theme', 'Accent'];
+    // Filter by selected usage types and sort by importance
+    const usageOrder = ['Background', 'Text', 'Theme', 'Icon', 'Border'];
     const sortedGroups = usageOrder
-      .filter(usage => usageGroups[usage])
+      .filter(usage => usageGroups[usage] && selectedUsageTypes.includes(usage))
       .map(usage => ({
         name: usage,
         groups: groupByHarmony(usageGroups[usage])
@@ -197,6 +209,36 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
           <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
             Color Extraction
           </Typography>
+        </Box>
+        
+        {/* Usage Type Filters */}
+        <Box sx={{ mb: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+            <Filter size={16} style={{ marginRight: 6 }} />
+            <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: 'text.secondary' }}>
+              Filter by Usage Type
+            </Typography>
+          </Box>
+          <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
+            {['Background', 'Text', 'Theme', 'Icon', 'Border'].map((usageType) => (
+              <Chip
+                key={usageType}
+                label={usageType}
+                variant={selectedUsageTypes.includes(usageType) ? 'filled' : 'outlined'}
+                color={selectedUsageTypes.includes(usageType) ? 'primary' : 'default'}
+                size="small"
+                onClick={() => toggleUsageType(usageType)}
+                sx={{
+                  cursor: 'pointer',
+                  '&:hover': {
+                    bgcolor: selectedUsageTypes.includes(usageType) 
+                      ? 'primary.dark' 
+                      : 'action.hover'
+                  }
+                }}
+              />
+            ))}
+          </Stack>
         </Box>
         
         <Box>

@@ -95,6 +95,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Extract colors using Playwright-based system
       const extractedColors = await extractColours(url);
+      console.log('Extracted colors count:', extractedColors.length);
       
       // Basic mobile responsiveness check
       const hasViewportMeta = html.includes('viewport');
