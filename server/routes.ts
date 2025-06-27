@@ -308,6 +308,27 @@ function extractImageUrls(html: string): string[] {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Color categories configuration API
+  app.get('/api/color-categories', (req, res) => {
+    const categories = Object.entries(COLOR_CATEGORIES).map(([name, config]) => ({
+      name,
+      enabled: config.enabled
+    }));
+    res.json({ categories });
+  });
+
+  app.post('/api/color-categories/:categoryName/toggle', (req, res) => {
+    const { categoryName } = req.params;
+    const { enabled } = req.body;
+    
+    if (!COLOR_CATEGORIES[categoryName]) {
+      return res.status(404).json({ error: 'Category not found' });
+    }
+    
+    COLOR_CATEGORIES[categoryName].enabled = enabled;
+    res.json({ success: true, category: categoryName, enabled });
+  });
+
   // Analysis API route
   app.get('/api/analyze', async (req, res) => {
     try {

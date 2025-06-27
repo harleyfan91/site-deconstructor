@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { Box, Typography, Collapse, IconButton } from '@mui/material';
-import { Palette, ChevronDown, ChevronUp } from 'lucide-react';
+import { Box, Typography, Collapse, IconButton, Popover, FormGroup, FormControlLabel, Checkbox, Chip, Tooltip } from '@mui/material';
+import { Palette, ChevronDown, ChevronUp, Settings } from 'lucide-react';
 import namer from 'color-namer';
 import type { AnalysisResponse } from '@/types/analysis';
 import { useSessionState } from '@/hooks/useSessionState';
@@ -26,6 +26,57 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
     {}
   );
   const [glowingSections, setGlowingSections] = React.useState<Record<string, boolean>>({});
+  const [categoryAnchorEl, setCategoryAnchorEl] = React.useState<HTMLButtonElement | null>(null);
+  const [categories, setCategories] = React.useState<Array<{name: string, enabled: boolean}>>([]);
+  const [loadingCategories, setLoadingCategories] = React.useState(false);
+
+  // Fetch available color categories
+  React.useEffect(() => {
+    fetchColorCategories();
+  }, []);
+
+  const fetchColorCategories = async () => {
+    try {
+      setLoadingCategories(true);
+      const response = await fetch('/api/color-categories');
+      const data = await response.json();
+      setCategories(data.categories);
+    } catch (error) {
+      console.error('Failed to fetch color categories:', error);
+    } finally {
+      setLoadingCategories(false);
+    }
+  };
+
+  const toggleCategory = async (categoryName: string, enabled: boolean) => {
+    try {
+      const response = await fetch(`/api/color-categories/${categoryName}/toggle`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled })
+      });
+      
+      if (response.ok) {
+        setCategories(prev => 
+          prev.map(cat => 
+            cat.name === categoryName ? { ...cat, enabled } : cat
+          )
+        );
+      }
+    } catch (error) {
+      console.error('Failed to toggle category:', error);
+    }
+  };
+
+  const handleCategoryClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setCategoryAnchorEl(event.currentTarget);
+  };
+
+  const handleCategoryClose = () => {
+    setCategoryAnchorEl(null);
+  };
+
+  const categoryPopoverOpen = Boolean(categoryAnchorEl);
 
   const toggleSection = (sectionName: string) => {
     setExpandedSections(prev => ({
@@ -194,9 +245,99 @@ const ColorExtractionCard: React.FC<ColorExtractionCardProps> = ({ colors }) => 
     <Box>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
           <Palette size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+          <Typography variant="h6" sx={{ fontWeight: 'bold', flexGrow: 1 }}>
             Color Extraction
           </Typography>
+          
+          {/* Color Category Settings Button */}
+          <Tooltip title="Configure color categories" arrow>
+            <IconButton
+              size="small"
+              onClick={handleCategoryClick}
+              disabled={loadingCategories}
+              sx={{
+                width: 28,
+                height: 28,
+                color: 'text.secondary',
+                '&:hover': {
+                  color: '#FF6B35',
+                  bgcolor: 'rgba(255, 107, 53, 0.08)',
+                },
+              }}
+            >
+              <Settings size={16} />
+            </IconButton>
+          </Tooltip>
+          
+          {/* Color Categories Popover */}
+          <Popover
+            open={categoryPopoverOpen}
+            anchorEl={categoryAnchorEl}
+            onClose={handleCategoryClose}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right',
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            PaperProps={{
+              sx: {
+                p: 2,
+                minWidth: 220,
+                maxWidth: 280,
+                boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+              }
+            }}
+          >
+            <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600 }}>
+              Color Categories
+            </Typography>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 2 }}>
+              {categories.filter(cat => cat.enabled).map(cat => (
+                <Chip
+                  key={cat.name}
+                  label={cat.name}
+                  size="small"
+                  variant="outlined"
+                  sx={{
+                    fontSize: '0.75rem',
+                    height: 24,
+                    color: '#FF6B35',
+                    borderColor: 'rgba(255, 107, 53, 0.3)',
+                  }}
+                />
+              ))}
+            </Box>
+            <FormGroup>
+              {categories.map((category) => (
+                <FormControlLabel
+                  key={category.name}
+                  control={
+                    <Checkbox
+                      checked={category.enabled}
+                      onChange={(e) => toggleCategory(category.name, e.target.checked)}
+                      size="small"
+                      sx={{
+                        color: 'text.secondary',
+                        '&.Mui-checked': {
+                          color: '#FF6B35',
+                        },
+                      }}
+                    />
+                  }
+                  label={
+                    <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>
+                      {category.name}
+                    </Typography>
+                  }
+                  sx={{ mb: 0.5 }}
+                />
+              ))}
+            </FormGroup>
+          </Popover>
         </Box>
         
         <Box>
