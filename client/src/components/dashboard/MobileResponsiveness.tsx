@@ -59,10 +59,16 @@ const MobileResponsiveness = () => {
               {score}%
             </Typography>
             <Box flexGrow={1}>
-              <LinearProgress 
-                variant="determinate" 
-                value={score} 
-                sx={{ height: 8, borderRadius: 4 }}
+              <LinearProgress
+                variant="determinate"
+                value={score}
+                sx={{
+                  height: 8,
+                  borderRadius: 4,
+                  '& .MuiLinearProgress-bar': {
+                    borderRadius: 4,
+                  },
+                }}
               />
             </Box>
           </Box>
