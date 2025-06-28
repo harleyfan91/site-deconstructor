@@ -2,7 +2,7 @@
 import React from 'react';
 import { Box, Typography, Card, CardContent, CircularProgress, Alert } from '@mui/material';
 import type { AnalysisResponse } from '@/types/analysis';
-import ColorExtractionCardDUMMY from './ui-analysis/ColorExtractionCard';
+import ColorExtractionCard from './ui-analysis/ColorExtractionCard';
 import FontAnalysisCard from './ui-analysis/FontAnalysisCard';
 import ImageAnalysisCard from './ui-analysis/ImageAnalysisCard';
 import ContrastWarningsCard from './ui-analysis/ContrastWarningsCard';
@@ -63,7 +63,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
         {/* Color Extraction */}
         <Card sx={{ borderRadius: 2, width: '100%' }}>
           <CardContent sx={{ p: 2 }}>
-            <ColorExtractionCardDUMMY />
+            <ColorExtractionCard url={data?.url} />
           </CardContent>
         </Card>
 

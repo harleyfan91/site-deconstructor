@@ -1,9 +1,8 @@
 /**
- * DUMMY placeholder – real colour extraction removed.
- * Populates two fake colours so the UI layout and animations remain intact.
+ * Real color extraction component that fetches live data from Playwright backend.
  */
-import React from 'react';
-import { Box, Typography, Collapse, IconButton } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Collapse, IconButton, CircularProgress, Alert } from '@mui/material';
 import { Palette, ChevronDown, ChevronUp } from 'lucide-react';
 import { useSessionState } from '@/hooks/useSessionState';
 
@@ -17,33 +16,26 @@ interface UsageGroup {
   groups: HarmonyGroup[];
 }
 
-const PLACEHOLDER_USAGE_GROUPS: UsageGroup[] = [
-  {
-    name: 'DUMMYbackground',
-    groups: [
-      {
-        name: 'Placeholder',
-        colors: [{ hex: '#FFFFFF' }]
-      }
-    ]
-  },
-  {
-    name: 'DUMMYtext',
-    groups: [
-      {
-        name: 'Placeholder',
-        colors: [{ hex: '#000000' }]
-      }
-    ]
-  }
-];
+interface ColorResult {
+  hex: string;
+  name: string;
+  property: string;
+  occurrences: number;
+}
 
-export default function ColorExtractionCardDUMMY() {
+interface ColorExtractionCardProps {
+  url?: string;
+}
+
+export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
+  const [usageGroups, setUsageGroups] = useState<UsageGroup[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [expandedSections, setExpandedSections] = useSessionState<Record<string, boolean>>(
     'ui-color-extraction-expanded',
     {}
   );
-  const [glowingSections, setGlowingSections] = React.useState<Record<string, boolean>>({});
+  const [glowingSections, setGlowingSections] = useState<Record<string, boolean>>({});
 
   const toggleSection = (sectionName: string) => {
     setExpandedSections(prev => ({
@@ -52,56 +44,119 @@ export default function ColorExtractionCardDUMMY() {
     }));
   };
 
-  React.useEffect(() => {
-    const hadStoredState = Object.keys(expandedSections).length > 0;
+  useEffect(() => {
+    let glowTimer: NodeJS.Timeout;
+    let collapseTimer: NodeJS.Timeout;
 
-    if (!hadStoredState) {
-      const initialState: Record<string, boolean> = {};
-      PLACEHOLDER_USAGE_GROUPS.forEach(group => {
-        initialState[group.name] = true;
-      });
-      setExpandedSections(initialState);
+    (async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const res = await fetch('/api/colors', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: url ?? window.location.href })
+        });
+        
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const flat: ColorResult[] = await res.json();
 
-      const glowTimer = setTimeout(() => {
-        const glowState: Record<string, boolean> = {};
-        PLACEHOLDER_USAGE_GROUPS.forEach(group => {
-          if (group.name !== 'DUMMYbackground') {
-            glowState[group.name] = true;
+        // Map flat response to grouped structure expected by the UI
+        const groups: Record<string, { name: string; colors: { hex: string }[] }[]> = {};
+        flat.forEach(({ hex, property }) => {
+          const key = property.startsWith('background') ? 'background'
+                    : property === 'color'              ? 'text'
+                    : /border/.test(property)            ? 'border'
+                    : /fill|stroke/.test(property)       ? 'icons'
+                    : 'other';
+          groups[key] ??= [{ name: 'All', colors: [] }];
+          
+          // Avoid duplicates
+          if (!groups[key][0].colors.some(c => c.hex === hex)) {
+            groups[key][0].colors.push({ hex });
           }
         });
-        setGlowingSections(glowState);
-      }, 1500);
 
-      const collapseTimer = setTimeout(() => {
-        setExpandedSections(prev => {
-          const updated = { ...prev };
-          Object.keys(updated).forEach(name => {
-            if (name !== 'DUMMYbackground') {
-              updated[name] = false;
+        const arr = Object.entries(groups).map(([name, groups]) => ({ name, groups }));
+        setUsageGroups(arr);
+
+        // Initialize expanded sections for new data
+        const initialState: Record<string, boolean> = {};
+        arr.forEach(group => {
+          initialState[group.name] = true;
+        });
+        setExpandedSections(initialState);
+
+        // Apply glow effect after data loads
+        glowTimer = setTimeout(() => {
+          const glowState: Record<string, boolean> = {};
+          arr.forEach(group => {
+            if (group.name !== 'background') {
+              glowState[group.name] = true;
             }
           });
-          return updated;
-        });
-        setGlowingSections({});
-      }, 2500);
+          setGlowingSections(glowState);
+        }, 1500);
 
-      return () => {
-        clearTimeout(glowTimer);
-        clearTimeout(collapseTimer);
-      };
-    }
-  }, []);
+        collapseTimer = setTimeout(() => {
+          setExpandedSections(prev => {
+            const updated = { ...prev };
+            Object.keys(updated).forEach(name => {
+              if (name !== 'background') {
+                updated[name] = false;
+              }
+            });
+            return updated;
+          });
+          setGlowingSections({});
+        }, 2500);
+
+      } catch (err) {
+        console.error('Color extraction error:', err);
+        setError('Failed to extract colors from website');
+        setUsageGroups([]);
+      } finally {
+        setLoading(false);
+      }
+    })();
+
+    return () => {
+      clearTimeout(glowTimer);
+      clearTimeout(collapseTimer);
+    };
+  }, [url]);
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', py: 4 }}>
+        <CircularProgress size={32} sx={{ color: '#FF6B35', mr: 2 }} />
+        <Typography variant="body2" color="text.secondary">
+          Extracting colors from website...
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (error || usageGroups.length === 0) {
+    return (
+      <Alert severity="error" sx={{ mt: 2 }}>
+        {error || 'No colors could be extracted from this website'}
+      </Alert>
+    );
+  }
 
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
         <Palette size={24} color="#FF6B35" style={{ marginRight: 8 }} />
         <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-          Colour Extraction
+          Color Extraction
         </Typography>
       </Box>
+      
       <Box>
-        {PLACEHOLDER_USAGE_GROUPS.map((usageGroup, usageIndex) => (
+        {usageGroups.map((usageGroup, usageIndex) => (
           <Box key={usageIndex} sx={{ mb: 2 }}>
             <Box
               sx={{
@@ -128,53 +183,33 @@ export default function ColorExtractionCardDUMMY() {
                 {expandedSections[usageGroup.name] ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
               </IconButton>
             </Box>
-
+            
             <Collapse in={expandedSections[usageGroup.name]}>
-              <Box sx={{ mt: 2, ml: 2 }}>
+              <Box sx={{ pt: 2 }}>
                 {usageGroup.groups.map((harmonyGroup, harmonyIndex) => (
                   <Box key={harmonyIndex} sx={{ mb: 2 }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
+                    <Typography variant="subtitle2" sx={{ mb: 1, color: 'text.secondary' }}>
                       {harmonyGroup.name}
                     </Typography>
-                    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(3, 1fr)', md: 'repeat(6, 1fr)' }, gap: 1, mb: 2 }}>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                       {harmonyGroup.colors.map((color, colorIndex) => (
                         <Box
                           key={colorIndex}
                           sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            bgcolor: 'background.paper',
-                            border: '1px solid rgba(0,0,0,0.1)',
+                            width: 32,
+                            height: 32,
+                            backgroundColor: color.hex,
                             borderRadius: 1,
-                            p: 1
+                            border: '1px solid rgba(0,0,0,0.1)',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                            '&:hover': {
+                              transform: 'scale(1.1)',
+                              boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                            }
                           }}
-                        >
-                          <Box
-                            sx={{
-                              width: 24,
-                              height: 24,
-                              backgroundColor: color.hex,
-                              borderRadius: 0.5,
-                              mr: 1,
-                              border: '1px solid rgba(0,0,0,0.1)',
-                              flexShrink: 0
-                            }}
-                          />
-                          <Box sx={{ flex: 1, minWidth: 0 }}>
-                            <Typography
-                              variant="caption"
-                              sx={{
-                                fontWeight: 'bold',
-                                display: 'block',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                fontSize: { xs: '0.65rem', sm: '0.75rem' }
-                              }}
-                            >
-                              {color.hex}
-                            </Typography>
-                          </Box>
-                        </Box>
+                          title={color.hex}
+                        />
                       ))}
                     </Box>
                   </Box>
