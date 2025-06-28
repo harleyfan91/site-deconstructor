@@ -48,17 +48,8 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
     {}
   );
   const [glowingSections, setGlowingSections] = useState<Record<string, boolean>>({});
-  const [selectedColor, setSelectedColor] = useState<ColorDetail | null>(null);
-  const [chipPosition, setChipPosition] = useState<{ x: number; y: number } | null>(null);
-
-  const handleColorClick = (color: { hex: string; name: string }, event: React.MouseEvent) => {
-    const rect = (event.target as HTMLElement).getBoundingClientRect();
-    setChipPosition({
-      x: rect.left,
-      y: rect.top
-    });
-    setSelectedColor({ hex: color.hex, name: color.name });
-  };
+  const [expandedColor, setExpandedColor] = useState<string | null>(null);
+  const [expandedName, setExpandedName] = useState<string | null>(null);
 
   const toggleSection = (sectionName: string) => {
     setExpandedSections(prev => ({
@@ -230,7 +221,10 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
                             }
                           }}
                           title={color.hex}
-                          onClick={(e) => handleColorClick(color, e)}
+                          onClick={() => {
+                            setExpandedColor(color.hex);
+                            setExpandedName(color.name);
+                          }}
                         />
                       ))}
                     </Box>
@@ -242,100 +236,40 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
         ))}
       </Box>
 
-      {/* Color Detail Popup - Seamless expansion from clicked chip position */}
-      {selectedColor && chipPosition && (
+      {/* Full-screen overlay for expanded color */}
+      {expandedColor && (
         <Box
+          onClick={() => { setExpandedColor(null); setExpandedName(null); }}
           sx={{
             position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
+            top: 0, left: 0,
+            width: '100%',
+            height: '100%',
             zIndex: 1300,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            animation: 'fadeIn 0.2s ease-out',
-            '@keyframes fadeIn': {
-              '0%': { opacity: 0 },
-              '100%': { opacity: 1 }
-            }
-          }}
-          onClick={() => {
-            setSelectedColor(null);
-            setChipPosition(null);
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
           <Box
             sx={{
-              position: 'absolute',
-              left: chipPosition.x,
-              top: chipPosition.y,
-              width: 280,
-              height: 80,
-              backgroundColor: selectedColor.hex,
+              width: 300,
+              height: 150,
               borderRadius: 2,
+              boxShadow: 3,
+              bgcolor: expandedColor,
               display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
-              padding: 2,
-              boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-              transformOrigin: 'top left',
-              animation: 'expandFromChip 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
-              cursor: 'pointer',
-              '@keyframes expandFromChip': {
-                '0%': { 
-                  width: 32,
-                  height: 32,
-                  borderRadius: '4px',
-                  padding: 0,
-                  transform: 'scale(1)'
-                },
-                '100%': { 
-                  width: 280,
-                  height: 80,
-                  borderRadius: '8px',
-                  padding: '16px',
-                  transform: 'scale(1)'
-                }
-              }
+              justifyContent: 'center',
+              p: 2,
             }}
-            onClick={(e) => e.stopPropagation()}
           >
-            <Box 
-              sx={{ 
-                textAlign: 'left', 
-                width: '100%',
-                opacity: 0,
-                animation: 'fadeInText 0.2s ease-out 0.15s forwards',
-                '@keyframes fadeInText': {
-                  '0%': { opacity: 0, transform: 'translateY(8px)' },
-                  '100%': { opacity: 1, transform: 'translateY(0)' }
-                }
-              }}
-            >
-              <Typography
-                variant="h6"
-                sx={{
-                  fontWeight: 'bold',
-                  color: '#fff',
-                  textShadow: '1px 1px 2px rgba(0,0,0,0.7)',
-                  fontFamily: 'monospace',
-                  fontSize: '1.1rem',
-                  lineHeight: 1.2,
-                  mb: 0.5
-                }}
-              >
-                {selectedColor.hex}
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: '#fff',
-                  textShadow: '1px 1px 2px rgba(0,0,0,0.7)',
-                  fontSize: '0.875rem',
-                  opacity: 0.9
-                }}
-              >
-                {selectedColor.name}
-              </Typography>
+            <Box fontWeight="bold" fontSize="h6.fontSize">
+              {expandedColor}
+            </Box>
+            <Box fontSize="subtitle1.fontSize">
+              {expandedName}
             </Box>
           </Box>
         </Box>
