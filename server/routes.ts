@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import Wappalyzer from 'wappalyzer';
 import { createClient } from '@supabase/supabase-js';
+import { extractColors, type ColorResult } from './lib/color-extraction';
 
 // Helper function to map score to letter grade
 function mapScoreToGrade(score: number): string {
@@ -36,6 +37,45 @@ function extractImageUrls(html: string): string[] {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Color extraction API route
+  app.post('/api/colors', async (req, res) => {
+    try {
+      const { url } = req.body;
+      
+      if (!url || typeof url !== 'string') {
+        return res.status(400).json({ error: 'URL is required in request body' });
+      }
+
+      // Validate URL format
+      try {
+        new URL(url);
+      } catch {
+        return res.status(400).json({ error: 'Invalid URL format' });
+      }
+
+      console.log(`Extracting colors for: ${url}`);
+      
+      const colors = await extractColors(url);
+      
+      console.log(`Extracted ${colors.length} unique colors`);
+      res.json(colors);
+      
+    } catch (error) {
+      console.error('Color extraction failed:', error);
+      
+      if (error instanceof Error) {
+        if (error.message.includes('timeout') || error.message.includes('TimeoutError')) {
+          return res.status(504).json({ error: 'Request timeout while extracting colors' });
+        }
+        if (error.message.includes('net::ERR_') || error.message.includes('Navigation failed')) {
+          return res.status(400).json({ error: 'Unable to access the provided URL' });
+        }
+      }
+      
+      res.status(500).json({ error: 'Color extraction failed' });
+    }
+  });
+
   // Analysis API route
   app.get('/api/analyze', async (req, res) => {
     try {
