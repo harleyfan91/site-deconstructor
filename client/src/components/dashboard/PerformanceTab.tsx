@@ -132,27 +132,19 @@ function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["
             Core Web Vitals
           </Typography>
         </Box>
-        <Box sx={{ overflowX: 'auto', width: '100%', pb: 1 }}>
-          <Box sx={{
-            minWidth: { xs: 320, sm: 400 },
-            width: { xs: 320, sm: 400, md: '100%' },
-            maxWidth: 'none'
-          }}>
-            <ChartContainer config={chartConfig} className="h-80">
-              <RechartsBarChart
-                data={performance.coreWebVitals}
-                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-              >
-                <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-                <YAxis />
+        <ChartContainer config={chartConfig} className="h-80 w-full">
+          <RechartsBarChart
+            data={performance.coreWebVitals}
+            margin={{ top: 20, right: 30, left: 10, bottom: 5 }}
+          >
+            <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+            <YAxis domain={[0, 100]} />
 
-                <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-                <Bar dataKey="value" fill="#FF6B35" />
-                <Bar dataKey="benchmark" fill={theme.palette.grey[300]} />
-              </RechartsBarChart>
-            </ChartContainer>
-          </Box>
-        </Box>
+            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+            <Bar dataKey="value" fill="#FF6B35" />
+            <Bar dataKey="benchmark" fill={theme.palette.grey[300]} />
+          </RechartsBarChart>
+        </ChartContainer>
       </CardContent>
     </Card>
   );
