@@ -173,8 +173,8 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
                   Content Structure Analysis
                 </Typography>
               </Box>
-            <ChartContainer config={chartConfig} className="h-80">
-              <BarChart data={contentStructureData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+            <ChartContainer config={chartConfig} className="h-80 w-full">
+              <BarChart data={contentStructureData} margin={{ top: 20, right: 30, left: 10, bottom: 5 }}>
                 <XAxis dataKey="metric" tick={{ fontSize: 10 }} />
                 <YAxis domain={[0, 100]} />
                 <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
