@@ -232,83 +232,87 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
         ))}
       </Box>
 
-      {/* Color Detail Modal */}
-      <Dialog
-        open={!!selectedColor}
-        onClose={() => setSelectedColor(null)}
-        maxWidth="sm"
-        fullWidth
-        PaperProps={{
-          sx: {
-            borderRadius: 2,
-            overflow: 'hidden'
-          }
-        }}
-      >
-        {selectedColor && (
-          <DialogContent sx={{ p: 0 }}>
-            {/* Full-width header with color background */}
-            <Box
-              sx={{
-                width: '100%',
-                height: 120,
-                backgroundColor: selectedColor.hex,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                position: 'relative'
-              }}
-            >
-              {/* Semi-transparent overlay for better text readability */}
-              <Box
-                sx={{
-                  position: 'absolute',
-                  inset: 0,
-                  backgroundColor: 'rgba(0, 0, 0, 0.1)',
-                  backdropFilter: 'blur(1px)'
-                }}
-              />
-              <Box sx={{ textAlign: 'center', position: 'relative', zIndex: 1 }}>
-                <Typography
-                  variant="h4"
-                  sx={{
-                    fontWeight: 'bold',
-                    color: '#fff',
-                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
-                    fontFamily: 'monospace'
-                  }}
-                >
-                  {selectedColor.hex}
-                </Typography>
-              </Box>
-            </Box>
-            
-            {/* Color details */}
-            <Box sx={{ p: 3 }}>
+      {/* Color Detail Popup - Seamless expansion from chip */}
+      {selectedColor && (
+        <Box
+          sx={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 1300,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            animation: 'fadeIn 0.2s ease-out'
+          }}
+          onClick={() => setSelectedColor(null)}
+        >
+          <Box
+            sx={{
+              width: 280,
+              height: 80,
+              backgroundColor: selectedColor.hex,
+              borderRadius: 2,
+              display: 'flex',
+              alignItems: 'center',
+              padding: 2,
+              boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+              animation: 'expandChip 0.3s ease-out',
+              cursor: 'pointer',
+              '@keyframes fadeIn': {
+                '0%': { opacity: 0 },
+                '100%': { opacity: 1 }
+              },
+              '@keyframes expandChip': {
+                '0%': { 
+                  width: 32,
+                  height: 32,
+                  borderRadius: 1,
+                  padding: 0
+                },
+                '100%': { 
+                  width: 280,
+                  height: 80,
+                  borderRadius: 2,
+                  padding: 2
+                }
+              }
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Box sx={{ textAlign: 'left', width: '100%' }}>
               <Typography
                 variant="h6"
                 sx={{
                   fontWeight: 'bold',
-                  color: 'text.primary',
-                  textAlign: 'center'
+                  color: '#fff',
+                  textShadow: '1px 1px 2px rgba(0,0,0,0.7)',
+                  fontFamily: 'monospace',
+                  fontSize: '1.1rem',
+                  lineHeight: 1.2,
+                  mb: 0.5
                 }}
               >
-                {selectedColor.name}
+                {selectedColor.hex}
               </Typography>
               <Typography
                 variant="body2"
                 sx={{
-                  color: 'text.secondary',
-                  textAlign: 'center',
-                  mt: 1
+                  color: '#fff',
+                  textShadow: '1px 1px 2px rgba(0,0,0,0.7)',
+                  fontSize: '0.875rem',
+                  opacity: 0.9
                 }}
               >
-                Click outside to close
+                {selectedColor.name}
               </Typography>
             </Box>
-          </DialogContent>
-        )}
-      </Dialog>
+          </Box>
+        </Box>
+      )}
     </Box>
   );
 }
