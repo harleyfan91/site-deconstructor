@@ -1,10 +1,17 @@
 /**
  * Real color extraction component that fetches live data from Playwright backend.
+ * Now supports 11 semantic color buckets for comprehensive analysis.
  */
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Collapse, IconButton, CircularProgress, Alert } from '@mui/material';
 import { Palette, ChevronDown, ChevronUp } from 'lucide-react';
 import { useSessionState } from '@/hooks/useSessionState';
+
+const SECTION_ORDER = [
+  'background', 'text', 'border', 'icons',
+  'accent', 'decoration', 'shadow', 'gradient',
+  'svg', 'link', 'highlight', 'other',
+] as const;
 
 interface HarmonyGroup {
   name: string;
@@ -65,11 +72,7 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
         // Map flat response to grouped structure expected by the UI
         const groups: Record<string, { name: string; colors: { hex: string }[] }[]> = {};
         flat.forEach(({ hex, property }) => {
-          const key = property.startsWith('background') ? 'background'
-                    : property === 'color'              ? 'text'
-                    : /border/.test(property)            ? 'border'
-                    : /fill|stroke/.test(property)       ? 'icons'
-                    : 'other';
+          const key = property; // Backend now returns bucket name directly
           groups[key] ??= [{ name: 'All', colors: [] }];
           
           // Avoid duplicates
@@ -78,7 +81,9 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
           }
         });
 
-        const arr = Object.entries(groups).map(([name, groups]) => ({ name, groups }));
+        // Filter to only include non-empty buckets in the specified order
+        const sections = SECTION_ORDER.filter(bucket => groups[bucket] && groups[bucket][0].colors.length > 0);
+        const arr = sections.map(name => ({ name, groups: groups[name] }));
         setUsageGroups(arr);
 
         // Initialize expanded sections for new data

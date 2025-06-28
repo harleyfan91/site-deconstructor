@@ -81,6 +81,64 @@ function getColorName(hex: string): string {
   }
 }
 
+/**
+ * Maps CSS property and element context to semantic color buckets
+ */
+function getBucketForProperty(property: string, elementTag?: string, value?: string): string {
+  // Background colors
+  if (property === 'background-color') return 'background';
+  if (property === 'background' && value && !value.includes('gradient(')) return 'background';
+  
+  // Text colors
+  if (property === 'color') return 'text';
+  if (property.startsWith('text-') && !['text-decoration-color', 'text-emphasis-color', 'text-stroke-color'].includes(property)) {
+    return 'text';
+  }
+  
+  // Border colors
+  if (property.includes('border') && property.includes('color')) return 'border';
+  if (property === 'outline-color' || property === 'column-rule-color') return 'border';
+  
+  // Icon colors (SVG on icon-like elements)
+  if ((property === 'fill' || property === 'stroke') && 
+      (elementTag === 'svg' || elementTag === 'path' || elementTag === 'circle' || elementTag === 'rect')) {
+    return 'icons';
+  }
+  
+  // Accent colors
+  if (property === 'accent-color' || property === 'caret-color') return 'accent';
+  
+  // Decoration colors
+  if (['text-decoration-color', 'text-emphasis-color', 'text-stroke-color'].includes(property)) {
+    return 'decoration';
+  }
+  
+  // Shadow colors
+  if (property === 'box-shadow' || property === 'text-shadow') return 'shadow';
+  if (property === 'filter' && value && value.includes('drop-shadow(')) return 'shadow';
+  
+  // Gradient colors
+  if ((property === 'background' || property === 'background-image' || property === 'mask-image') && 
+      value && value.includes('gradient(')) {
+    return 'gradient';
+  }
+  
+  // SVG-specific colors (non-icon SVG elements)
+  if (['fill', 'stroke', 'stop-color', 'flood-color', 'lighting-color'].includes(property) && 
+      elementTag && !['svg', 'path', 'circle', 'rect'].includes(elementTag)) {
+    return 'svg';
+  }
+  
+  // Link colors (handled in DOM evaluation for pseudo-classes)
+  if (property.includes('link') || elementTag === 'a') return 'link';
+  
+  // Highlight colors
+  if (property === 'highlight-color' || elementTag === 'mark') return 'highlight';
+  
+  // Default fallback
+  return 'other';
+}
+
 async function extractColorsFromPage(url: string): Promise<ColorResult[]> {
   const browser = await initBrowser();
   let context: BrowserContext | null = null;
@@ -105,17 +163,34 @@ async function extractColorsFromPage(url: string): Promise<ColorResult[]> {
     
     // Extract colors from up to 5000 DOM nodes
     const colors = await page.evaluate(() => {
-      const extractedColors: { hex: string; property: string }[] = [];
+      const extractedColors: { hex: string; property: string; elementTag: string; value: string }[] = [];
       const colorProperties = [
         'color',
         'background-color',
+        'background',
+        'background-image',
         'border-top-color',
         'border-right-color',
         'border-bottom-color',
         'border-left-color',
         'border-color',
+        'outline-color',
+        'column-rule-color',
         'fill',
-        'stroke'
+        'stroke',
+        'accent-color',
+        'caret-color',
+        'text-decoration-color',
+        'text-emphasis-color',
+        'text-stroke-color',
+        'box-shadow',
+        'text-shadow',
+        'filter',
+        'mask-image',
+        'stop-color',
+        'flood-color',
+        'lighting-color',
+        'highlight-color'
       ];
       
       // Get all elements, limited to 5000
@@ -123,23 +198,79 @@ async function extractColorsFromPage(url: string): Promise<ColorResult[]> {
       
       elements.forEach(element => {
         const computedStyle = window.getComputedStyle(element);
+        const tagName = element.tagName.toLowerCase();
         
         colorProperties.forEach(property => {
           let value = computedStyle.getPropertyValue(property);
           if (!value || value === 'none' || value === 'transparent') return;
+          
+          // Extract colors from shadow values
+          if (property === 'box-shadow' || property === 'text-shadow') {
+            const shadowColors = value.match(/(rgb|hsl|#)[^,\s)]+/g);
+            if (shadowColors) {
+              shadowColors.forEach(color => {
+                extractedColors.push({ hex: color.trim(), property, elementTag: tagName, value });
+              });
+            }
+            return;
+          }
+          
+          // Extract colors from filter drop-shadow
+          if (property === 'filter' && value.includes('drop-shadow(')) {
+            const filterColors = value.match(/drop-shadow\([^)]*?(rgb|hsl|#)[^)]+\)/g);
+            if (filterColors) {
+              filterColors.forEach(filter => {
+                const color = filter.match(/(rgb|hsl|#)[^,\s)]+/);
+                if (color) {
+                  extractedColors.push({ hex: color[0].trim(), property, elementTag: tagName, value });
+                }
+              });
+            }
+            return;
+          }
+          
+          // Extract colors from gradients
+          if ((property === 'background' || property === 'background-image' || property === 'mask-image') && 
+              value.includes('gradient(')) {
+            const gradientColors = value.match(/(rgb|hsl|#)[^,\s)]+/g);
+            if (gradientColors) {
+              gradientColors.forEach(color => {
+                extractedColors.push({ hex: color.trim(), property, elementTag: tagName, value });
+              });
+            }
+            return;
+          }
           
           // Handle multiple border colors
           if (property === 'border-color') {
             const colors = value.split(' ');
             colors.forEach(color => {
               if (color && color !== 'none' && color !== 'transparent') {
-                extractedColors.push({ hex: color.trim(), property });
+                extractedColors.push({ hex: color.trim(), property, elementTag: tagName, value });
               }
             });
           } else {
-            extractedColors.push({ hex: value.trim(), property });
+            // Check for single color values
+            if (value.match(/(rgb|hsl|#)/)) {
+              extractedColors.push({ hex: value.trim(), property, elementTag: tagName, value });
+            }
           }
         });
+        
+        // Special handling for link pseudo-classes and mark elements
+        if (tagName === 'a') {
+          const linkColor = computedStyle.getPropertyValue('color');
+          if (linkColor && linkColor !== 'none' && linkColor !== 'transparent') {
+            extractedColors.push({ hex: linkColor, property: 'color', elementTag: 'a', value: linkColor });
+          }
+        }
+        
+        if (tagName === 'mark') {
+          const markBg = computedStyle.getPropertyValue('background-color');
+          if (markBg && markBg !== 'none' && markBg !== 'transparent') {
+            extractedColors.push({ hex: markBg, property: 'background-color', elementTag: 'mark', value: markBg });
+          }
+        }
       });
       
       return extractedColors;
@@ -148,19 +279,20 @@ async function extractColorsFromPage(url: string): Promise<ColorResult[]> {
     // Process and normalize colors
     const colorMap = new Map<string, ExtractedColor>();
     
-    colors.forEach(({ hex, property }) => {
+    colors.forEach(({ hex, property, elementTag, value }) => {
       const normalizedHex = normalizeHex(hex);
       if (!normalizedHex || normalizedHex === '#000000' && hex.includes('transparent')) {
         return;
       }
       
-      const key = `${normalizedHex}-${property}`;
+      const bucket = getBucketForProperty(property, elementTag, value);
+      const key = `${normalizedHex}-${bucket}`;
       if (colorMap.has(key)) {
         colorMap.get(key)!.count++;
       } else {
         colorMap.set(key, {
           hex: normalizedHex,
-          property,
+          property: bucket, // Store the bucket instead of raw property
           count: 1
         });
       }

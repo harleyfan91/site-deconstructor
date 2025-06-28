@@ -89,14 +89,20 @@ describe('ColorExtractionCard', () => {
     });
   });
 
-  test('correctly maps CSS properties to usage groups', async () => {
+  test('correctly displays all 11 semantic buckets when present', async () => {
     const testColors = [
-      { hex: '#000000', name: 'Black', property: 'color', occurrences: 1 },
-      { hex: '#ffffff', name: 'White', property: 'background-color', occurrences: 1 },
-      { hex: '#ff0000', name: 'Red', property: 'border-top-color', occurrences: 1 },
-      { hex: '#00ff00', name: 'Green', property: 'fill', occurrences: 1 },
-      { hex: '#0000ff', name: 'Blue', property: 'stroke', occurrences: 1 },
-      { hex: '#ffff00', name: 'Yellow', property: 'outline-color', occurrences: 1 }
+      { hex: '#000000', name: 'Black', property: 'text', occurrences: 1 },
+      { hex: '#ffffff', name: 'White', property: 'background', occurrences: 1 },
+      { hex: '#ff0000', name: 'Red', property: 'border', occurrences: 1 },
+      { hex: '#00ff00', name: 'Green', property: 'icons', occurrences: 1 },
+      { hex: '#0000ff', name: 'Blue', property: 'accent', occurrences: 1 },
+      { hex: '#ffff00', name: 'Yellow', property: 'decoration', occurrences: 1 },
+      { hex: '#ff00ff', name: 'Magenta', property: 'shadow', occurrences: 1 },
+      { hex: '#00ffff', name: 'Cyan', property: 'gradient', occurrences: 1 },
+      { hex: '#808080', name: 'Gray', property: 'svg', occurrences: 1 },
+      { hex: '#800080', name: 'Purple', property: 'link', occurrences: 1 },
+      { hex: '#008080', name: 'Teal', property: 'highlight', occurrences: 1 },
+      { hex: '#ffa500', name: 'Orange', property: 'other', occurrences: 1 }
     ];
 
     fetch.mockResolvedValueOnce({
@@ -110,8 +116,41 @@ describe('ColorExtractionCard', () => {
       expect(screen.getByText(/text \(1\)/)).toBeInTheDocument();
       expect(screen.getByText(/background \(1\)/)).toBeInTheDocument();
       expect(screen.getByText(/border \(1\)/)).toBeInTheDocument();
-      expect(screen.getByText(/icons \(2\)/)).toBeInTheDocument(); // fill + stroke
-      expect(screen.getByText(/other \(1\)/)).toBeInTheDocument(); // outline-color
+      expect(screen.getByText(/icons \(1\)/)).toBeInTheDocument();
+      expect(screen.getByText(/accent \(1\)/)).toBeInTheDocument();
+      expect(screen.getByText(/decoration \(1\)/)).toBeInTheDocument();
+      expect(screen.getByText(/shadow \(1\)/)).toBeInTheDocument();
+      expect(screen.getByText(/gradient \(1\)/)).toBeInTheDocument();
+      expect(screen.getByText(/svg \(1\)/)).toBeInTheDocument();
+      expect(screen.getByText(/link \(1\)/)).toBeInTheDocument();
+      expect(screen.getByText(/highlight \(1\)/)).toBeInTheDocument();
+      expect(screen.getByText(/other \(1\)/)).toBeInTheDocument();
+    });
+  });
+
+  test('filters out empty buckets and maintains section order', async () => {
+    const testColors = [
+      { hex: '#000000', name: 'Black', property: 'background', occurrences: 1 },
+      { hex: '#ffffff', name: 'White', property: 'icons', occurrences: 1 },
+      { hex: '#ff0000', name: 'Red', property: 'shadow', occurrences: 1 }
+    ];
+
+    fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => testColors
+    });
+
+    render(<ColorExtractionCard url="https://example.com" />);
+
+    await waitFor(() => {
+      // Should only show the 3 buckets with data
+      expect(screen.getByText(/background \(1\)/)).toBeInTheDocument();
+      expect(screen.getByText(/icons \(1\)/)).toBeInTheDocument();
+      expect(screen.getByText(/shadow \(1\)/)).toBeInTheDocument();
+      
+      // Should not show empty buckets
+      expect(screen.queryByText(/text \(/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/border \(/)).not.toBeInTheDocument();
     });
   });
 });
