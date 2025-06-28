@@ -3,7 +3,7 @@
  * Now supports 11 semantic color buckets for comprehensive analysis.
  */
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Collapse, IconButton, CircularProgress, Alert } from '@mui/material';
+import { Box, Typography, Collapse, IconButton, CircularProgress, Alert, Dialog, DialogContent } from '@mui/material';
 import { Palette, ChevronDown, ChevronUp } from 'lucide-react';
 import { useSessionState } from '@/hooks/useSessionState';
 
@@ -15,7 +15,7 @@ const SECTION_ORDER = [
 
 interface HarmonyGroup {
   name: string;
-  colors: Array<{ hex: string }>;
+  colors: Array<{ hex: string; name: string }>;
 }
 
 interface UsageGroup {
@@ -34,6 +34,11 @@ interface ColorExtractionCardProps {
   url?: string;
 }
 
+interface ColorDetail {
+  hex: string;
+  name: string;
+}
+
 export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
   const [usageGroups, setUsageGroups] = useState<UsageGroup[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,6 +48,7 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
     {}
   );
   const [glowingSections, setGlowingSections] = useState<Record<string, boolean>>({});
+  const [selectedColor, setSelectedColor] = useState<ColorDetail | null>(null);
 
   const toggleSection = (sectionName: string) => {
     setExpandedSections(prev => ({
@@ -70,14 +76,14 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
         const flat: ColorResult[] = await res.json();
 
         // Map flat response to grouped structure expected by the UI
-        const groups: Record<string, { name: string; colors: { hex: string }[] }[]> = {};
-        flat.forEach(({ hex, property }) => {
+        const groups: Record<string, { name: string; colors: { hex: string; name: string }[] }[]> = {};
+        flat.forEach(({ hex, property, name }) => {
           const key = property; // Backend now returns bucket name directly
           groups[key] ??= [{ name: 'All', colors: [] }];
           
           // Avoid duplicates
           if (!groups[key][0].colors.some(c => c.hex === hex)) {
-            groups[key][0].colors.push({ hex });
+            groups[key][0].colors.push({ hex, name });
           }
         });
 
@@ -214,6 +220,7 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
                             }
                           }}
                           title={color.hex}
+                          onClick={() => setSelectedColor({ hex: color.hex, name: color.name })}
                         />
                       ))}
                     </Box>
@@ -224,6 +231,84 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
           </Box>
         ))}
       </Box>
+
+      {/* Color Detail Modal */}
+      <Dialog
+        open={!!selectedColor}
+        onClose={() => setSelectedColor(null)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 2,
+            overflow: 'hidden'
+          }
+        }}
+      >
+        {selectedColor && (
+          <DialogContent sx={{ p: 0 }}>
+            {/* Full-width header with color background */}
+            <Box
+              sx={{
+                width: '100%',
+                height: 120,
+                backgroundColor: selectedColor.hex,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                position: 'relative'
+              }}
+            >
+              {/* Semi-transparent overlay for better text readability */}
+              <Box
+                sx={{
+                  position: 'absolute',
+                  inset: 0,
+                  backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                  backdropFilter: 'blur(1px)'
+                }}
+              />
+              <Box sx={{ textAlign: 'center', position: 'relative', zIndex: 1 }}>
+                <Typography
+                  variant="h4"
+                  sx={{
+                    fontWeight: 'bold',
+                    color: '#fff',
+                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
+                    fontFamily: 'monospace'
+                  }}
+                >
+                  {selectedColor.hex}
+                </Typography>
+              </Box>
+            </Box>
+            
+            {/* Color details */}
+            <Box sx={{ p: 3 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 'bold',
+                  color: 'text.primary',
+                  textAlign: 'center'
+                }}
+              >
+                {selectedColor.name}
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: 'text.secondary',
+                  textAlign: 'center',
+                  mt: 1
+                }}
+              >
+                Click outside to close
+              </Typography>
+            </Box>
+          </DialogContent>
+        )}
+      </Dialog>
     </Box>
   );
 }

@@ -58,6 +58,9 @@ A comprehensive website analysis tool that provides insights into performance, S
 - ✓ Enhanced extraction for shadows, gradients, SVG elements, links, and highlights
 - ✓ Dynamic frontend filtering showing only non-empty buckets in specified order
 - ✓ Created comprehensive test suite for bucket mapping functionality
+- ✓ Added HSL hue-based sorting within each color bucket for harmony ordering
+- ✓ Implemented interactive color detail modal popup with click-to-view functionality
+- ✓ Enhanced UI with full-width color headers and human-friendly color names
 
 ## Technical Stack
 - **Frontend**: React, TypeScript, MUI, Framer Motion

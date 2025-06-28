@@ -298,15 +298,37 @@ async function extractColorsFromPage(url: string): Promise<ColorResult[]> {
       }
     });
     
-    // Convert to result format with names
-    const results: ColorResult[] = Array.from(colorMap.values())
-      .map(color => ({
+    // Convert to result format with names and sort by hue within each bucket
+    const colorsByBucket: Record<string, ColorResult[]> = {};
+    
+    Array.from(colorMap.values()).forEach(color => {
+      const colorResult: ColorResult = {
         hex: color.hex,
         name: getColorName(color.hex),
         property: color.property,
         occurrences: color.count
-      }))
-      .sort((a, b) => b.occurrences - a.occurrences);
+      };
+      
+      if (!colorsByBucket[color.property]) {
+        colorsByBucket[color.property] = [];
+      }
+      colorsByBucket[color.property].push(colorResult);
+    });
+    
+    // Sort each bucket by HSL hue (0°→360°)
+    Object.keys(colorsByBucket).forEach(bucket => {
+      colorsByBucket[bucket].sort((a, b) => {
+        const hueA = colord(a.hex).toHsl().h;
+        const hueB = colord(b.hex).toHsl().h;
+        return hueA - hueB;
+      });
+    });
+    
+    // Flatten back to single array while preserving bucket order and hue sorting
+    const results: ColorResult[] = [];
+    Object.values(colorsByBucket).forEach(bucketColors => {
+      results.push(...bucketColors);
+    });
     
     return results;
     
