@@ -49,6 +49,16 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
   );
   const [glowingSections, setGlowingSections] = useState<Record<string, boolean>>({});
   const [selectedColor, setSelectedColor] = useState<ColorDetail | null>(null);
+  const [chipPosition, setChipPosition] = useState<{ x: number; y: number } | null>(null);
+
+  const handleColorClick = (color: { hex: string; name: string }, event: React.MouseEvent) => {
+    const rect = (event.target as HTMLElement).getBoundingClientRect();
+    setChipPosition({
+      x: rect.left,
+      y: rect.top
+    });
+    setSelectedColor({ hex: color.hex, name: color.name });
+  };
 
   const toggleSection = (sectionName: string) => {
     setExpandedSections(prev => ({
@@ -220,7 +230,7 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
                             }
                           }}
                           title={color.hex}
-                          onClick={() => setSelectedColor({ hex: color.hex, name: color.name })}
+                          onClick={(e) => handleColorClick(color, e)}
                         />
                       ))}
                     </Box>
@@ -232,8 +242,8 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
         ))}
       </Box>
 
-      {/* Color Detail Popup - Seamless expansion from chip */}
-      {selectedColor && (
+      {/* Color Detail Popup - Seamless expansion from clicked chip position */}
+      {selectedColor && chipPosition && (
         <Box
           sx={{
             position: 'fixed',
@@ -242,16 +252,23 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
             right: 0,
             bottom: 0,
             zIndex: 1300,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
             backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            animation: 'fadeIn 0.2s ease-out'
+            animation: 'fadeIn 0.2s ease-out',
+            '@keyframes fadeIn': {
+              '0%': { opacity: 0 },
+              '100%': { opacity: 1 }
+            }
           }}
-          onClick={() => setSelectedColor(null)}
+          onClick={() => {
+            setSelectedColor(null);
+            setChipPosition(null);
+          }}
         >
           <Box
             sx={{
+              position: 'absolute',
+              left: chipPosition.x,
+              top: chipPosition.y,
               width: 280,
               height: 80,
               backgroundColor: selectedColor.hex,
@@ -260,30 +277,40 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
               alignItems: 'center',
               padding: 2,
               boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-              animation: 'expandChip 0.3s ease-out',
+              transformOrigin: 'top left',
+              animation: 'expandFromChip 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
               cursor: 'pointer',
-              '@keyframes fadeIn': {
-                '0%': { opacity: 0 },
-                '100%': { opacity: 1 }
-              },
-              '@keyframes expandChip': {
+              '@keyframes expandFromChip': {
                 '0%': { 
                   width: 32,
                   height: 32,
-                  borderRadius: 1,
-                  padding: 0
+                  borderRadius: '4px',
+                  padding: 0,
+                  transform: 'scale(1)'
                 },
                 '100%': { 
                   width: 280,
                   height: 80,
-                  borderRadius: 2,
-                  padding: 2
+                  borderRadius: '8px',
+                  padding: '16px',
+                  transform: 'scale(1)'
                 }
               }
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <Box sx={{ textAlign: 'left', width: '100%' }}>
+            <Box 
+              sx={{ 
+                textAlign: 'left', 
+                width: '100%',
+                opacity: 0,
+                animation: 'fadeInText 0.2s ease-out 0.15s forwards',
+                '@keyframes fadeInText': {
+                  '0%': { opacity: 0, transform: 'translateY(8px)' },
+                  '100%': { opacity: 1, transform: 'translateY(0)' }
+                }
+              }}
+            >
               <Typography
                 variant="h6"
                 sx={{
