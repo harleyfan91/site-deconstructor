@@ -2,7 +2,7 @@
  * Real color extraction component that fetches live data from Playwright backend.
  * Now supports 11 semantic color buckets for comprehensive analysis.
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Box, Typography, Collapse, IconButton, CircularProgress, Alert, Dialog, DialogContent, SxProps, Theme } from '@mui/material';
 import { Palette, ChevronDown, ChevronUp } from 'lucide-react';
 import { useSessionState } from '@/hooks/useSessionState';
@@ -15,7 +15,34 @@ const SECTION_ORDER = [
 
 const ITEM_SIZE = 32;
 
-function getSquareStyles(isExpanded: boolean): SxProps<Theme> {
+function getOptimalTransformOrigin(element: HTMLElement): string {
+  const rect = element.getBoundingClientRect();
+  const containerRect = element.closest('[data-color-container]')?.getBoundingClientRect();
+  
+  if (!containerRect) return 'top left';
+  
+  const elementCenterX = rect.left + rect.width / 2;
+  const containerCenterX = containerRect.left + containerRect.width / 2;
+  const containerWidth = containerRect.width;
+  
+  // Calculate position as percentage from left edge
+  const positionPercent = (elementCenterX - containerRect.left) / containerWidth;
+  
+  // Left third: expand right and down (top left origin)
+  if (positionPercent < 0.33) {
+    return 'top left';
+  }
+  // Right third: expand left and down (top right origin)
+  else if (positionPercent > 0.67) {
+    return 'top right';
+  }
+  // Middle third: expand outward from center
+  else {
+    return 'top center';
+  }
+}
+
+function getSquareStyles(isExpanded: boolean, element?: HTMLElement | null): SxProps<Theme> {
   const base = {
     width: ITEM_SIZE,
     height: ITEM_SIZE,
@@ -23,9 +50,17 @@ function getSquareStyles(isExpanded: boolean): SxProps<Theme> {
     cursor: 'pointer',
     transition: 'transform 160ms ease',
   };
-  return isExpanded
-    ? { ...base, transform: 'scale(3.5, 2.3)', transformOrigin: 'top left', zIndex: (theme: Theme) => theme.zIndex.modal + 1 }
-    : base;
+  
+  if (!isExpanded) return base;
+  
+  const transformOrigin = element ? getOptimalTransformOrigin(element) : 'top left';
+  
+  return { 
+    ...base, 
+    transform: 'scale(3, 2)', 
+    transformOrigin, 
+    zIndex: (theme: Theme) => theme.zIndex.modal + 1 
+  };
 }
 
 interface HarmonyGroup {
@@ -64,6 +99,7 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
   );
   const [glowingSections, setGlowingSections] = useState<Record<string, boolean>>({});
   const [expandedHex, setExpandedHex] = useState<string | null>(null);
+  const [expandedElement, setExpandedElement] = useState<HTMLElement | null>(null);
 
 
   const toggleSection = (sectionName: string) => {
@@ -174,7 +210,10 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
   }
 
   return (
-    <Box onClick={() => setExpandedHex(null)}>
+    <Box onClick={() => {
+      setExpandedHex(null);
+      setExpandedElement(null);
+    }}>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
         <Palette size={24} color="#FF6B35" style={{ marginRight: 8 }} />
         <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
@@ -218,12 +257,12 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
                     <Typography variant="subtitle2" sx={{ mb: 1, color: 'text.secondary' }}>
                       {harmonyGroup.name}
                     </Typography>
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }} data-color-container>
                       {harmonyGroup.colors.map((color, colorIndex) => (
                         <Box
                           key={colorIndex}
                           sx={{
-                            ...getSquareStyles(color.hex === expandedHex),
+                            ...getSquareStyles(color.hex === expandedHex, expandedElement),
                             backgroundColor: color.hex,
                             '&:hover': {
                               boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
@@ -232,7 +271,17 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
                           title={color.hex}
                           onClick={(e) => {
                             e.stopPropagation();
-                            setExpandedHex(prev => (prev === color.hex ? null : color.hex));
+                            const element = e.currentTarget as HTMLElement;
+                            
+                            if (expandedHex === color.hex) {
+                              // Collapse
+                              setExpandedHex(null);
+                              setExpandedElement(null);
+                            } else {
+                              // Expand
+                              setExpandedHex(color.hex);
+                              setExpandedElement(element);
+                            }
                           }}
                         />
                       ))}
