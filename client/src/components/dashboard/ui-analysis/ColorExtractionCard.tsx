@@ -48,8 +48,7 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
     {}
   );
   const [glowingSections, setGlowingSections] = useState<Record<string, boolean>>({});
-  const [expandedColor, setExpandedColor] = useState<string | null>(null);
-  const [expandedName, setExpandedName] = useState<string | null>(null);
+
 
   const toggleSection = (sectionName: string) => {
     setExpandedSections(prev => ({
@@ -221,10 +220,7 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
                             }
                           }}
                           title={color.hex}
-                          onClick={() => {
-                            setExpandedColor(color.hex);
-                            setExpandedName(color.name);
-                          }}
+
                         />
                       ))}
                     </Box>
@@ -236,44 +232,7 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
         ))}
       </Box>
 
-      {/* Full-screen overlay for expanded color */}
-      {expandedColor && (
-        <Box
-          onClick={() => { setExpandedColor(null); setExpandedName(null); }}
-          sx={{
-            position: 'fixed',
-            top: 0, left: 0,
-            width: '100%',
-            height: '100%',
-            zIndex: 1300,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Box
-            sx={{
-              width: 300,
-              height: 150,
-              borderRadius: 2,
-              boxShadow: 3,
-              bgcolor: expandedColor,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              p: 2,
-            }}
-          >
-            <Box fontWeight="bold" fontSize="h6.fontSize">
-              {expandedColor}
-            </Box>
-            <Box fontSize="subtitle1.fontSize">
-              {expandedName}
-            </Box>
-          </Box>
-        </Box>
-      )}
+
     </Box>
   );
 }
