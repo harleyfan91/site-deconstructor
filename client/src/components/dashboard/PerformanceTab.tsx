@@ -622,23 +622,45 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
           </Card>
         </Box>
 
-        {/* Core Web Vitals and Speed Index */}
+        {/* Core Web Vitals, Speed Index, and Mobile Responsiveness */}
         <Box sx={{ 
           display: 'grid', 
-          gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, 
+          gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, 
+          gridTemplateRows: { xs: 'auto', md: 'auto auto' },
           gap: 2,
           width: '100%',
           maxWidth: '100%'
         }}>
-          <Box sx={{ gridColumn: { xs: '1', md: '1 / 3' }, width: '100%', maxWidth: '100%', minWidth: 0 }}>
+          <Box sx={{ 
+            gridColumn: { xs: '1', md: '1' }, 
+            gridRow: { xs: 'auto', md: '1 / 3' },
+            width: '100%', 
+            maxWidth: '100%', 
+            minWidth: 0 
+          }}>
             <CoreWebVitalsSection performance={performance} />
           </Box>
-          <Box sx={{ width: '100%', maxWidth: '100%', minWidth: 0 }}>
+          <Box sx={{ 
+            gridColumn: { xs: '1', md: '2' }, 
+            gridRow: { xs: 'auto', md: '1' },
+            width: '100%', 
+            maxWidth: '100%', 
+            minWidth: 0 
+          }}>
             <SpeedIndexSection performanceScore={performance.performanceScore} />
+          </Box>
+          <Box sx={{ 
+            gridColumn: { xs: '1', md: '2' }, 
+            gridRow: { xs: 'auto', md: '2' },
+            width: '100%', 
+            maxWidth: '100%', 
+            minWidth: 0 
+          }}>
+            <MobileResponsivenessSection />
           </Box>
         </Box>
 
-        {/* Mobile and Security Details */}
+        {/* Security Details */}
         <Box sx={{ 
           display: 'grid', 
           gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, 
@@ -646,9 +668,6 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
           width: '100%',
           maxWidth: '100%'
         }}>
-          <Box sx={{ width: '100%', maxWidth: '100%', minWidth: 0 }}>
-            <MobileResponsivenessSection />
-          </Box>
           <Box sx={{ width: '100%', maxWidth: '100%', minWidth: 0 }}>
             <SecurityScoreSection />
           </Box>
