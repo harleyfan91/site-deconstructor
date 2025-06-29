@@ -106,31 +106,31 @@ const DashboardContent = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.5 }}
             >
-              <TabsContent value="overview" data-tab-panel-id="overview">
+              <TabsContent value="overview" data-tab-panel-id="overview" forceMount>
                 <OverviewTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
               
-              <TabsContent value="ui" data-tab-panel-id="ui">
+              <TabsContent value="ui" data-tab-panel-id="ui" forceMount>
                 <UIAnalysisTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
               
-              <TabsContent value="content" data-tab-panel-id="content">
+              <TabsContent value="content" data-tab-panel-id="content" forceMount>
                 <ContentAnalysisTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
               
-              <TabsContent value="performance" data-tab-panel-id="performance">
+              <TabsContent value="performance" data-tab-panel-id="performance" forceMount>
                 <PerformanceTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
               
-              <TabsContent value="seo" data-tab-panel-id="seo">
+              <TabsContent value="seo" data-tab-panel-id="seo" forceMount>
                 <SEOAnalysisTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
               
-              <TabsContent value="tech" data-tab-panel-id="tech">
+              <TabsContent value="tech" data-tab-panel-id="tech" forceMount>
                 <TechTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
 
-              <TabsContent value="compliance" data-tab-panel-id="compliance">
+              <TabsContent value="compliance" data-tab-panel-id="compliance" forceMount>
                 <ComplianceTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
             </motion.div>
