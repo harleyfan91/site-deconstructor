@@ -121,6 +121,7 @@ export const createAppTheme = (darkMode: boolean) => createTheme({
         root: {
           borderRadius: 4,
           overflow: 'hidden',
+          // 👇 Opt‑out class for rare cases that must show square ends
           '&.noClip': { overflow: 'visible' },
         },
         bar: {
