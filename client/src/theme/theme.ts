@@ -116,6 +116,18 @@ export const createAppTheme = (darkMode: boolean) => createTheme({
         },
       },
     },
+    MuiLinearProgress: {
+      styleOverrides: {
+        root: {
+          borderRadius: 4,
+          overflow: 'hidden',
+          '&.noClip': { overflow: 'visible' },
+        },
+        bar: {
+          borderRadius: 4,
+        },
+      },
+    },
   },
 });
 
