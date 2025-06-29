@@ -59,7 +59,13 @@ function getSquareStyles(isExpanded: boolean, element?: HTMLElement | null): SxP
     ...base, 
     transform: 'scale(3.5, 2.3)', 
     transformOrigin, 
-    zIndex: (theme: Theme) => theme.zIndex.modal + 1 
+    zIndex: (theme: Theme) => theme.zIndex.modal + 1,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: 'white',
+    textShadow: '0 1px 2px rgba(0,0,0,0.8)'
   };
 }
 
@@ -283,7 +289,33 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
                               setExpandedElement(element);
                             }
                           }}
-                        />
+                        >
+                          {color.hex === expandedHex && (
+                            <Box sx={{ 
+                              opacity: 1,
+                              transition: 'opacity 200ms ease-in-out 100ms',
+                              textAlign: 'center',
+                              transform: 'scale(0.286, 0.435)', // Inverse of the box scale to make text normal size
+                              transformOrigin: 'center'
+                            }}>
+                              <Typography variant="body2" sx={{ 
+                                fontWeight: 'bold',
+                                fontSize: '14px',
+                                lineHeight: 1.2,
+                                mb: 0.5
+                              }}>
+                                {color.hex.toUpperCase()}
+                              </Typography>
+                              <Typography variant="body2" sx={{ 
+                                fontSize: '12px',
+                                lineHeight: 1.2,
+                                opacity: 0.9
+                              }}>
+                                {color.name}
+                              </Typography>
+                            </Box>
+                          )}
+                        </Box>
                       ))}
                     </Box>
                   </Box>
