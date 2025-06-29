@@ -225,7 +225,6 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
                           sx={{
                             ...getSquareStyles(color.hex === expandedHex),
                             backgroundColor: color.hex,
-                            border: '1px solid rgba(0,0,0,0.1)',
                             '&:hover': {
                               boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
                             }
