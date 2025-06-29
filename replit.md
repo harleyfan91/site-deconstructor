@@ -71,8 +71,6 @@ A comprehensive website analysis tool that provides insights into performance, S
 - ✓ Implemented intelligent bounding box positioning for color square expansion (June 29, 2025)
 - ✓ Added dynamic transform origin detection: left third (top-left), right third (top-right), middle (center)
 - ✓ Enhanced expansion size to scale(3.5, 2.3) for optimal visibility while preventing off-screen overflow
-- ✓ Added centered text overlay to expanded color squares with hex codes and human-friendly names (June 29, 2025)
-- ✓ Reorganized Performance tab layout: Core Web Vitals (2x2), Speed Index and Mobile Responsiveness stacked (1x1 each)
 
 ## Technical Stack
 - **Frontend**: React, TypeScript, MUI, Framer Motion

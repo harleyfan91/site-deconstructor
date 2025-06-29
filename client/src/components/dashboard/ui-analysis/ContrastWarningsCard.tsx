@@ -97,6 +97,11 @@ const ContrastWarningsCard: React.FC<ContrastWarningsCardProps> = ({ issues, dat
           sx={{
             height: 8,
             borderRadius: 4,
+            backgroundColor: 'grey.200',
+            '& .MuiLinearProgress-bar': {
+              backgroundColor: score >= 80 ? 'success.main' : score >= 60 ? 'warning.main' : 'error.main',
+              borderRadius: 4,
+            },
           }}
         />
       </Box>
