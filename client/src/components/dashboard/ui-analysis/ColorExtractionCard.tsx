@@ -24,7 +24,7 @@ function getSquareStyles(isExpanded: boolean): SxProps<Theme> {
     transition: 'transform 160ms ease',
   };
   return isExpanded
-    ? { ...base, transform: 'scale(3, 2)', transformOrigin: 'top left', zIndex: (theme: Theme) => theme.zIndex.modal + 1 }
+    ? { ...base, transform: 'scale(3.5, 2.2)', transformOrigin: 'top left', zIndex: (theme: Theme) => theme.zIndex.modal + 1 }
     : base;
 }
 
