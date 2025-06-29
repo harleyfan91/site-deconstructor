@@ -84,7 +84,8 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
           mb: 3,
           mx: -3, // Extend beyond card padding
           px: 3, // Add padding back for content
-          py: 2,
+          // Slightly reduced padding to make the gradient header shorter
+          py: 1.5,
         }}
       >
         {/* Orange gradient background - stops before edge, larger transparent section */}
