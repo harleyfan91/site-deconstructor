@@ -57,7 +57,7 @@ function getSquareStyles(isExpanded: boolean, element?: HTMLElement | null): SxP
   
   return { 
     ...base, 
-    transform: 'scale(3, 2)', 
+    transform: 'scale(3.5, 2.3)', 
     transformOrigin, 
     zIndex: (theme: Theme) => theme.zIndex.modal + 1 
   };
