@@ -3,7 +3,7 @@
  * Now supports 11 semantic color buckets for comprehensive analysis.
  */
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Collapse, IconButton, CircularProgress, Alert, Dialog, DialogContent } from '@mui/material';
+import { Box, Typography, Collapse, IconButton, CircularProgress, Alert, Dialog, DialogContent, SxProps, Theme } from '@mui/material';
 import { Palette, ChevronDown, ChevronUp } from 'lucide-react';
 import { useSessionState } from '@/hooks/useSessionState';
 
@@ -12,6 +12,21 @@ const SECTION_ORDER = [
   'accent', 'decoration', 'shadow', 'gradient',
   'svg', 'link', 'highlight', 'other',
 ] as const;
+
+const ITEM_SIZE = 32;
+
+function getSquareStyles(isExpanded: boolean): SxProps<Theme> {
+  const base = {
+    width: ITEM_SIZE,
+    height: ITEM_SIZE,
+    borderRadius: 0.5,
+    cursor: 'pointer',
+    transition: 'transform 160ms ease',
+  };
+  return isExpanded
+    ? { ...base, transform: 'scale(3, 2)', transformOrigin: 'top left', zIndex: (theme: Theme) => theme.zIndex.modal + 1 }
+    : base;
+}
 
 interface HarmonyGroup {
   name: string;
@@ -48,6 +63,7 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
     {}
   );
   const [glowingSections, setGlowingSections] = useState<Record<string, boolean>>({});
+  const [expandedHex, setExpandedHex] = useState<string | null>(null);
 
 
   const toggleSection = (sectionName: string) => {
@@ -158,7 +174,7 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
   }
 
   return (
-    <Box>
+    <Box onClick={() => setExpandedHex(null)}>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
         <Palette size={24} color="#FF6B35" style={{ marginRight: 8 }} />
         <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
@@ -207,20 +223,18 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
                         <Box
                           key={colorIndex}
                           sx={{
-                            width: 32,
-                            height: 32,
+                            ...getSquareStyles(color.hex === expandedHex),
                             backgroundColor: color.hex,
-                            borderRadius: 1,
                             border: '1px solid rgba(0,0,0,0.1)',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s ease',
                             '&:hover': {
-                              transform: 'scale(1.1)',
                               boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
                             }
                           }}
                           title={color.hex}
-
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setExpandedHex(prev => (prev === color.hex ? null : color.hex));
+                          }}
                         />
                       ))}
                     </Box>
