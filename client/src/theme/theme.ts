@@ -116,7 +116,7 @@ export const createAppTheme = (darkMode: boolean) => createTheme({
         },
       },
     },
-    MuiLinearProgress: {Add commentMore actions
+    MuiLinearProgress: {
       styleOverrides: {
         root: {
           borderRadius: 4,
