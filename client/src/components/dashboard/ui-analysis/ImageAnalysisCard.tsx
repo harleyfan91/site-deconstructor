@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Box, Typography, List, ListItem, Link, Collapse, IconButton } from '@mui/material';
 import { Image, ChevronDown, ChevronUp } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
@@ -16,6 +16,79 @@ interface ImageAnalysisCardProps {
     iconUrls?: string[];
   };
 }
+
+interface AdaptiveLinkProps {
+  url: string;
+  index: number;
+}
+
+const AdaptiveLink: React.FC<AdaptiveLinkProps> = ({ url, index }) => {
+  const [displayUrl, setDisplayUrl] = useState(url);
+  const textRef = useRef<HTMLAnchorElement>(null);
+
+  useEffect(() => {
+    const el = textRef.current;
+    if (!el) return;
+
+    const updateDisplay = () => {
+      if (!el) return;
+      el.textContent = url;
+      if (el.scrollWidth <= el.clientWidth) {
+        if (displayUrl !== url) {
+          setDisplayUrl(url);
+        }
+        return;
+      }
+
+      let start = 0;
+      let end = url.length;
+      let truncated = url;
+
+      while (start < end) {
+        const mid = Math.floor((start + end) / 2);
+        const candidate = `${url.slice(0, mid)}...`;
+        el.textContent = candidate;
+        if (el.scrollWidth <= el.clientWidth) {
+          truncated = candidate;
+          start = mid + 1;
+        } else {
+          end = mid;
+        }
+      }
+
+      if (displayUrl !== truncated) {
+        setDisplayUrl(truncated);
+      }
+    };
+
+    updateDisplay();
+    window.addEventListener('resize', updateDisplay);
+    return () => {
+      window.removeEventListener('resize', updateDisplay);
+    };
+  }, [url, displayUrl]);
+
+  return (
+    <Link
+      ref={textRef}
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      underline="hover"
+      title={url}
+      sx={{ 
+        maxWidth: '100%',
+        overflow: 'hidden',
+        whiteSpace: 'nowrap',
+        fontSize: '0.875rem',
+        minWidth: 0,
+        display: 'block'
+      }}
+    >
+      {displayUrl}
+    </Link>
+  );
+};
 
 const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnalysis }) => {
   const [expandedSections, setExpandedSections] = useSessionState<Record<string, boolean>>(
@@ -38,9 +111,6 @@ const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnal
   const imageUrls = imageAnalysis?.imageUrls || [];
   const photoUrls = imageAnalysis?.photoUrls || [];
   const iconUrls = imageAnalysis?.iconUrls || [];
-
-  const truncateUrl = (url: string, length = 80) =>
-    url.length > length ? `${url.slice(0, length)}...` : url;
 
   const totalImagesCount = imageAnalysis?.totalImages || images?.length || 0;
   const photosCount = imageAnalysis?.estimatedPhotos || 0;
@@ -90,21 +160,8 @@ const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnal
                   {section.urls && section.urls.length > 0 ? (
                     <List dense>
                       {section.urls.map((url: string, idx: number) => (
-                        <ListItem key={idx} disableGutters sx={{ py: 0.5 }}>
-                          <Link
-                            href={url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            underline="hover"
-                            title={url}
-                            sx={{ 
-                              maxWidth: '100%',
-                              wordBreak: 'break-all',
-                              fontSize: '0.875rem'
-                            }}
-                          >
-                            {truncateUrl(url)}
-                          </Link>
+                        <ListItem key={idx} disableGutters sx={{ py: 0.5, minWidth: 0 }}>
+                          <AdaptiveLink url={url} index={idx} />
                         </ListItem>
                       ))}
                     </List>
