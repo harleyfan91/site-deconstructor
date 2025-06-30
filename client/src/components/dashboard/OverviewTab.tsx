@@ -111,9 +111,13 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
             gap: 2 
           }}
         >
-          <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'white', textShadow: '0 1px 2px rgba(0,0,0,0.3)'
-              // Slightly smaller heading on mobile
-              fontSize: { xs: '1.1rem', sm: '1.25rem' }}>
+          <Typography variant="h5" sx={{ 
+            fontWeight: 'bold', 
+            color: 'white', 
+            textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+            // Slightly smaller heading on mobile
+            fontSize: { xs: '1.1rem', sm: '1.25rem' }
+          }}>
             Website Overview
           </Typography>
           <UrlDisplayBox url={data.url ?? ''} />
