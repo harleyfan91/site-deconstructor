@@ -3,8 +3,8 @@
  * Now supports 11 semantic color buckets for comprehensive analysis.
  */
 import React, { useState, useEffect, useRef } from 'react';
-import { Box, Typography, Collapse, IconButton, CircularProgress, Alert, Dialog, DialogContent, SxProps, Theme } from '@mui/material';
-import { Palette, ChevronDown, ChevronUp } from 'lucide-react';
+import { Box, Typography, Collapse, IconButton, CircularProgress, Alert, Dialog, DialogContent, SxProps, Theme, Popover, FormControlLabel, Checkbox, FormGroup } from '@mui/material';
+import { Palette, ChevronDown, ChevronUp, Settings } from 'lucide-react';
 import { useSessionState } from '@/hooks/useSessionState';
 
 const SECTION_ORDER = [
@@ -12,6 +12,8 @@ const SECTION_ORDER = [
   'accent', 'decoration', 'shadow', 'gradient',
   'svg', 'link', 'highlight', 'other',
 ] as const;
+
+const PRIORITY_CATEGORIES = new Set(['background', 'text', 'accent', 'border', 'icons']);
 
 const ITEM_SIZE = 32;
 
@@ -106,6 +108,14 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
   const [glowingSections, setGlowingSections] = useState<Record<string, boolean>>({});
   const [expandedHex, setExpandedHex] = useState<string | null>(null);
   const [expandedElement, setExpandedElement] = useState<HTMLElement | null>(null);
+  
+  // Filter state and popover controls
+  const [categoryFilters, setCategoryFilters] = useSessionState<Record<string, boolean>>(
+    'ui-color-category-filters',
+    Object.fromEntries(SECTION_ORDER.map(cat => [cat, PRIORITY_CATEGORIES.has(cat)]))
+  );
+  const [filterAnchor, setFilterAnchor] = useState<HTMLElement | null>(null);
+  const [cogGlowing, setCogGlowing] = useState(false);
 
 
   const toggleSection = (sectionName: string) => {
@@ -113,6 +123,21 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
       ...prev,
       [sectionName]: !prev[sectionName]
     }));
+  };
+
+  const toggleCategoryFilter = (category: string) => {
+    setCategoryFilters(prev => ({
+      ...prev,
+      [category]: !prev[category]
+    }));
+  };
+
+  const handleFilterClick = (event: React.MouseEvent<HTMLElement>) => {
+    setFilterAnchor(event.currentTarget);
+  };
+
+  const handleFilterClose = () => {
+    setFilterAnchor(null);
   };
 
   useEffect(() => {
@@ -166,6 +191,8 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
             }
           });
           setGlowingSections(glowState);
+          // Also glow the cog icon to indicate filtering capability
+          setCogGlowing(true);
         }, 1500);
 
         collapseTimer = setTimeout(() => {
@@ -179,6 +206,7 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
             return updated;
           });
           setGlowingSections({});
+          setCogGlowing(false);
         }, 2500);
 
       } catch (err) {
@@ -220,15 +248,35 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
       setExpandedHex(null);
       setExpandedElement(null);
     }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-        <Palette size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-          Color Extraction
-        </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Palette size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+            Color Extraction
+          </Typography>
+        </Box>
+        <IconButton
+          size="small"
+          onClick={handleFilterClick}
+          sx={{
+            color: '#FF6B35',
+            animation: cogGlowing ? 'pulse 1s ease-in-out infinite' : 'none',
+            '@keyframes pulse': {
+              '0%, 100%': { boxShadow: '0 0 5px rgba(255, 107, 53, 0.3)' },
+              '50%': { boxShadow: '0 0 15px rgba(255, 107, 53, 0.6)' }
+            },
+            '&:hover': { 
+              backgroundColor: 'rgba(255, 107, 53, 0.1)',
+              transform: 'scale(1.1)'
+            }
+          }}
+        >
+          <Settings size={18} />
+        </IconButton>
       </Box>
       
       <Box>
-        {usageGroups.map((usageGroup, usageIndex) => (
+        {usageGroups.filter(usageGroup => categoryFilters[usageGroup.name]).map((usageGroup, usageIndex) => (
           <Box key={usageIndex} sx={{ mb: 2 }}>
             <Box
               sx={{
@@ -326,6 +374,52 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
         ))}
       </Box>
 
+      {/* Filter Dropdown Popover */}
+      <Popover
+        open={Boolean(filterAnchor)}
+        anchorEl={filterAnchor}
+        onClose={handleFilterClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <Box sx={{ p: 2, minWidth: 200 }}>
+          <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold', color: '#FF6B35' }}>
+            Show Categories
+          </Typography>
+          <FormGroup>
+            {SECTION_ORDER.map((category) => (
+              <FormControlLabel
+                key={category}
+                control={
+                  <Checkbox
+                    checked={categoryFilters[category]}
+                    onChange={() => toggleCategoryFilter(category)}
+                    size="small"
+                    sx={{
+                      color: '#FF6B35',
+                      '&.Mui-checked': {
+                        color: '#FF6B35',
+                      },
+                    }}
+                  />
+                }
+                label={
+                  <Typography variant="body2" sx={{ textTransform: 'capitalize' }}>
+                    {category}
+                  </Typography>
+                }
+              />
+            ))}
+          </FormGroup>
+        </Box>
+      </Popover>
 
     </Box>
   );
