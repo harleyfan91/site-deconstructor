@@ -83,11 +83,13 @@ Copy `.env.example` to `.env` in the project root and fill in your Supabase cred
 VITE_SUPABASE_URL=<your-supabase-url>
 VITE_SUPABASE_ANON_KEY=<your-supabase-anon-key>
 SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key>
+PSI_API_KEY=<your-google-psi-key>
 ```
 
 * `VITE_SUPABASE_URL`: Your Supabase project URL
 * `VITE_SUPABASE_ANON_KEY`: Public anon key for client-side operations
 * `SUPABASE_SERVICE_ROLE_KEY`: Service role key for server-side operations (optional)
+* `PSI_API_KEY`: Google PageSpeed Insights API key (optional but recommended)
 
 To enable color palette extraction with `node-vibrant`, install the optional dependency pinned to version `^4.0.3`:
 

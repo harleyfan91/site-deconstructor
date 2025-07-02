@@ -36,6 +36,55 @@ function extractImageUrls(html: string): string[] {
   return imageUrls;
 }
 
+const PSI_CACHE_TTL = 60 * 60 * 1000; // 1 hour
+
+const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const cacheClient = supabaseUrl && serviceKey ? createClient(supabaseUrl, serviceKey) : null;
+
+async function fetchPageSpeedOverview(url: string) {
+  const now = Date.now();
+
+  if (cacheClient) {
+    const { data } = await cacheClient
+      .from('analysis_cache')
+      .select('metrics, fetched_at')
+      .eq('url', url)
+      .single();
+    if (data) {
+      const cachedAt = new Date(data.fetched_at).getTime();
+      if (now - cachedAt < PSI_CACHE_TTL) {
+        return data.metrics;
+      }
+    }
+  }
+
+  const apiKey = process.env.PSI_API_KEY;
+  const apiUrl =
+    `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&category=performance` +
+    (apiKey ? `&key=${apiKey}` : "");
+  const res = await fetch(apiUrl);
+  if (!res.ok) {
+    throw new Error(`PSI request failed: ${res.status}`);
+  }
+  const json = await res.json();
+  const audits = json.lighthouseResult?.audits || {};
+  const metrics = audits['metrics']?.details?.items?.[0] || {};
+  const overview = {
+    pageLoadTime: Number(((metrics.observedLoad || 0) / 1000).toFixed(1)),
+    coreWebVitals: {
+      lcpMs: Math.round(audits['largest-contentful-paint']?.numericValue || 0),
+      inpMs: Math.round(audits['total-blocking-time']?.numericValue || 0),
+      cls: audits['cumulative-layout-shift']?.numericValue || 0,
+    },
+  };
+
+  if (cacheClient) {
+    await cacheClient.from('analysis_cache').upsert({ url, metrics: overview, fetched_at: new Date().toISOString() });
+  }
+  return overview;
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Color extraction API route
   app.post('/api/colors', async (req, res) => {
@@ -190,15 +239,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`Analysis completed for ${url}`);
 
+      const psiOverview = await fetchPageSpeedOverview(url);
+
       const analysisResult = {
         id: crypto.randomUUID(),
         url,
         timestamp: new Date().toISOString(),
         status: 'complete',
         coreWebVitals: {
-          lcp: 2.5,
-          fid: 100,
-          cls: 0.1
+          lcp: psiOverview.coreWebVitals.lcpMs,
+          fid: psiOverview.coreWebVitals.inpMs,
+          cls: psiOverview.coreWebVitals.cls
         },
         securityHeaders: {
           csp: response.headers.get('content-security-policy') || '',
@@ -226,7 +277,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         data: {
           overview: {
             overallScore,
-            pageLoadTime: '2.3s',
+            pageLoadTime: psiOverview.pageLoadTime,
+            coreWebVitals: psiOverview.coreWebVitals,
             seoScore,
             userExperienceScore
           },
@@ -251,9 +303,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           },
           performance: {
             coreWebVitals: [
-              { name: 'LCP', value: 2.5, benchmark: 2.5 },
-              { name: 'FID', value: 100, benchmark: 100 },
-              { name: 'CLS', value: 0.1, benchmark: 0.1 }
+              { name: 'LCP', value: Number((psiOverview.coreWebVitals.lcpMs / 1000).toFixed(1)), benchmark: 2.5 },
+              { name: 'FID', value: psiOverview.coreWebVitals.inpMs, benchmark: 100 },
+              { name: 'CLS', value: psiOverview.coreWebVitals.cls, benchmark: 0.1 }
             ],
             performanceScore: overallScore,
             mobileResponsive: mobileScore >= 50,
