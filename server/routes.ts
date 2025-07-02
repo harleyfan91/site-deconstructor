@@ -44,7 +44,10 @@ async function fetchPageSpeedOverview(url: string) {
   if (cached && cached.expires > Date.now()) {
     return cached.overview;
   }
-  const apiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&category=performance`;
+  const apiKey = process.env.PSI_API_KEY;
+  const apiUrl =
+    `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&category=performance` +
+    (apiKey ? `&key=${apiKey}` : "");
   const res = await fetch(apiUrl);
   if (!res.ok) {
     throw new Error(`PSI request failed: ${res.status}`);
