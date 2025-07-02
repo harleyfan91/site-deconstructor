@@ -61,7 +61,6 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
   const overview = data.data.overview;
   if (!overview) return null;
 
-  // REPLACED PLACEHOLDER: now pulls real data from overview.pageLoadTime and overview.coreWebVitals
   const metrics = getMetricDefinitions(overview, theme);
 
   // Handler for launching metric info popover
