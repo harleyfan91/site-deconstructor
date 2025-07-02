@@ -135,6 +135,14 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
       {/* Metric card grid */}
       <MetricCards metrics={metrics} onInfo={handleMetricInfo} />
 
+      // REPLIT TO CREATE UI ELEMENTS: compare mobile vs desktop metrics here
+      /* 
+        <MetricsComparison
+          mobile={overview.mobile}
+          desktop={overview.desktop}
+        />
+      */
+
       {/* Popover for metric info (shows only when infoAnchor is set) */}
       <MetricInfoPopover anchorEl={infoAnchor} infoText={infoText} onClose={handleClosePopover} />
 
