@@ -26,7 +26,7 @@ export const getMetricDefinitions = (overview: AnalysisResponse['data']['overvie
   },
   {
     titleLines: ['Page Load', 'Time'],
-    value: overview.mobile ? `${(overview.mobile.pageLoadTime / 1000).toFixed(1)}s` : 'Unknown',
+    value: overview.pageLoadTime ?? 'Unknown',
     icon: Clock,
     color: theme.palette.warning.main,
     description: 'Page loading performance',

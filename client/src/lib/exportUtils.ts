@@ -355,7 +355,7 @@ const exportToPDF = async (data: AnalysisResponse, baseFileName: string, section
     
       addMetricCard(
         'Page Load Time',
-        overview.mobile ? `${(overview.mobile.pageLoadTime / 1000).toFixed(1)}s` : '',
+        overview.pageLoadTime || '',
         colors.info,
         'Time taken for the page to fully load'
       );
