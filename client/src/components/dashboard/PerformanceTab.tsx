@@ -9,7 +9,6 @@ import {
   Alert,
   Chip,
   Tooltip,
-  GridLegacy as Grid,
 } from '@mui/material';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart';
 import { BarChart as RechartsBarChart, Bar, XAxis, YAxis } from 'recharts';
@@ -662,21 +661,33 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
         </Box>
 
         {/* Security Details */}
-        <Grid container spacing={2}>
-          <Grid item xs={12} md={6}>
+        <Box sx={{ 
+          display: 'grid', 
+          gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, 
+          gap: 2,
+          width: '100%',
+          maxWidth: '100%'
+        }}>
+          <Box sx={{ width: '100%', maxWidth: '100%', minWidth: 0 }}>
             <SecurityScoreSection />
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
 
         {/* Security Audits and Performance Recommendations */}
-        <Grid container spacing={2}>
-          <Grid item xs={12} md={6}>
+        <Box sx={{ 
+          display: 'grid', 
+          gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, 
+          gap: 2,
+          width: '100%',
+          maxWidth: '100%'
+        }}>
+          <Box sx={{ width: '100%', maxWidth: '100%', minWidth: 0 }}>
             <SecurityAuditsSection />
-          </Grid>
-          <Grid item xs={12} md={6}>
+          </Box>
+          <Box sx={{ width: '100%', maxWidth: '100%', minWidth: 0 }}>
             <RecommendationsSection recommendations={performance.recommendations} />
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
       </Box>
     </Box>
   );
