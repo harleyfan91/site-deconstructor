@@ -26,10 +26,9 @@ export function createDefaultAnalysis(url: string): AnalysisResponse {
     data: {
       overview: {
         overallScore: 0,
+        pageLoadTime: '',
         seoScore: 0,
         userExperienceScore: 0,
-        mobile: { pageLoadTime: 0, lcpMs: 0, inpMs: 0, cls: 0 },
-        desktop: { pageLoadTime: 0, lcpMs: 0, inpMs: 0, cls: 0 },
       },
       ui: {
         colors: [

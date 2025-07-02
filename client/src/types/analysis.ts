@@ -26,19 +26,11 @@ export interface SecurityHeaders {
   referrer: string;
 }
 
-export interface DeviceMetrics {
-  pageLoadTime: number;
-  lcpMs: number;
-  inpMs: number;
-  cls: number;
-}
-
 export interface AnalysisOverview {
   overallScore: number;
+  pageLoadTime?: string;
   seoScore?: number;
   userExperienceScore?: number;
-  mobile?: DeviceMetrics;
-  desktop?: DeviceMetrics;
   colors?: string[];
   fonts?: string[];
   images?: string[];

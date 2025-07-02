@@ -50,7 +50,7 @@ const KeyFindingsGrid: React.FC<KeyFindingsGridProps> = ({ overview, theme }) =>
           enterTouchDelay={300}
         >
           <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#FF9800', cursor: 'help' }}>
-            {overview.mobile ? `${(overview.mobile.pageLoadTime / 1000).toFixed(1)}s` : 'Unknown'}
+            {overview.pageLoadTime ?? 'Unknown'}
           </Typography>
         </Tooltip>
       </Box>
