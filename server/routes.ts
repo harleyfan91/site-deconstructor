@@ -36,34 +36,6 @@ function extractImageUrls(html: string): string[] {
   return imageUrls;
 }
 
-const PSI_CACHE_TTL = 60 * 60 * 1000; // 1 hour
-const psiCache = new Map<string, { overview: { pageLoadTime: number; coreWebVitals: { lcpMs: number; inpMs: number; cls: number; } }; expires: number }>();
-
-async function fetchPageSpeedOverview(url: string) {
-  const cached = psiCache.get(url);
-  if (cached && cached.expires > Date.now()) {
-    return cached.overview;
-  }
-  const apiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&category=performance`;
-  const res = await fetch(apiUrl);
-  if (!res.ok) {
-    throw new Error(`PSI request failed: ${res.status}`);
-  }
-  const json = await res.json();
-  const audits = json.lighthouseResult?.audits || {};
-  const metrics = audits['metrics']?.details?.items?.[0] || {};
-  const overview = {
-    pageLoadTime: Number(((metrics.observedLoad || 0) / 1000).toFixed(1)),
-    coreWebVitals: {
-      lcpMs: Math.round(audits['largest-contentful-paint']?.numericValue || 0),
-      inpMs: Math.round(audits['total-blocking-time']?.numericValue || 0),
-      cls: audits['cumulative-layout-shift']?.numericValue || 0,
-    },
-  };
-  psiCache.set(url, { overview, expires: Date.now() + PSI_CACHE_TTL });
-  return overview;
-}
-
 export async function registerRoutes(app: Express): Promise<Server> {
   // Color extraction API route
   app.post('/api/colors', async (req, res) => {
@@ -218,17 +190,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`Analysis completed for ${url}`);
 
-      const psiOverview = await fetchPageSpeedOverview(url);
-
       const analysisResult = {
         id: crypto.randomUUID(),
         url,
         timestamp: new Date().toISOString(),
         status: 'complete',
         coreWebVitals: {
-          lcp: psiOverview.coreWebVitals.lcpMs,
-          fid: psiOverview.coreWebVitals.inpMs,
-          cls: psiOverview.coreWebVitals.cls
+          lcp: 2.5,
+          fid: 100,
+          cls: 0.1
         },
         securityHeaders: {
           csp: response.headers.get('content-security-policy') || '',
@@ -256,8 +226,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         data: {
           overview: {
             overallScore,
-            pageLoadTime: psiOverview.pageLoadTime,
-            coreWebVitals: psiOverview.coreWebVitals,
+            pageLoadTime: '2.3s',
             seoScore,
             userExperienceScore
           },
@@ -282,9 +251,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           },
           performance: {
             coreWebVitals: [
-              { name: 'LCP', value: Number((psiOverview.coreWebVitals.lcpMs / 1000).toFixed(1)), benchmark: 2.5 },
-              { name: 'FID', value: psiOverview.coreWebVitals.inpMs, benchmark: 100 },
-              { name: 'CLS', value: psiOverview.coreWebVitals.cls, benchmark: 0.1 }
+              { name: 'LCP', value: 2.5, benchmark: 2.5 },
+              { name: 'FID', value: 100, benchmark: 100 },
+              { name: 'CLS', value: 0.1, benchmark: 0.1 }
             ],
             performanceScore: overallScore,
             mobileResponsive: mobileScore >= 50,
