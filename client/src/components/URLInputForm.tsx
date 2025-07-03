@@ -40,17 +40,13 @@ const URLInputForm = ({ onAnalysisStart, onAnalysisComplete }: URLInputFormProps
         fullUrl = `https://${url}`;
       }
 
-      // Call the onAnalysisStart callback if it exists
+      // Call the onAnalysisStart callback immediately (for navigation)
       if (onAnalysisStart) {
         onAnalysisStart();
       }
 
-      const result = await analyzeWebsite(fullUrl);
-
-      // Call the callback if analysis was successful and we're on the landing page
-      if (result && !error && onAnalysisComplete) {
-        onAnalysisComplete(result);
-      }
+      // Start the analysis (this will continue in the background)
+      analyzeWebsite(fullUrl);
     }
   };
 
