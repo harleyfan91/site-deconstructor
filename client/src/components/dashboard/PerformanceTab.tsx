@@ -132,7 +132,7 @@ function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["
             Core Web Vitals
           </Typography>
         </Box>
-        <ChartContainer config={chartConfig} className="h-80 w-full">
+        <ChartContainer config={chartConfig} className="h-80 w-full" style={{ minHeight: '320px', minWidth: '300px' }}>
           <RechartsBarChart
             data={performance.coreWebVitals}
             margin={{ top: 20, right: 30, left: 10, bottom: 5 }}

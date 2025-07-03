@@ -38,21 +38,11 @@ const URLInputForm = ({ onAnalysisComplete }: URLInputFormProps) => {
       if (!url.startsWith('http://') && !url.startsWith('https://')) {
         fullUrl = `https://${url}`;
       }
-      console.log('Starting analysis for:', fullUrl);
       const result = await analyzeWebsite(fullUrl);
-      
-      console.log('Analysis result received:', !!result);
-      console.log('Current error state:', error);
       
       // Call the callback if analysis was successful and we're on the landing page
       if (result && !error && onAnalysisComplete) {
-        console.log('Calling onAnalysisComplete callback');
         onAnalysisComplete(result);
-      } else if (result && !onAnalysisComplete) {
-        // If we're already on dashboard page and no callback, that's normal
-        console.log('Analysis completed, already on dashboard');
-      } else {
-        console.log('Analysis failed or error occurred');
       }
     }
   };
