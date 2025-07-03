@@ -39,7 +39,7 @@ const URLInputForm = ({ onAnalysisComplete }: URLInputFormProps) => {
         fullUrl = `https://${url}`;
       }
       const result = await analyzeWebsite(fullUrl);
-      
+
       // Call the callback if analysis was successful and we're on the landing page
       if (result && !error && onAnalysisComplete) {
         onAnalysisComplete(result);
@@ -65,7 +65,7 @@ const URLInputForm = ({ onAnalysisComplete }: URLInputFormProps) => {
             scroll-behavior: smooth;
             scroll-padding-top: 0;
           }
-          
+
           @media (prefers-reduced-motion: no-preference) {
             html {
               scroll-behavior: smooth;
@@ -73,7 +73,7 @@ const URLInputForm = ({ onAnalysisComplete }: URLInputFormProps) => {
           }
         `}
       </style>
-      
+
       {error && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -85,7 +85,7 @@ const URLInputForm = ({ onAnalysisComplete }: URLInputFormProps) => {
           </Alert>
         </motion.div>
       )}
-      
+
       <Box
         component="form"
         onSubmit={handleSubmit}
@@ -137,7 +137,7 @@ const URLInputForm = ({ onAnalysisComplete }: URLInputFormProps) => {
             }}
           />
         </motion.div>
-        
+
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}

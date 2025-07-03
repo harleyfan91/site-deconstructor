@@ -309,7 +309,7 @@ function MobileResponsivenessSection() {
             Mobile Responsiveness Details
           </Typography>
         </Box>
-        
+
         <Box mb={3}>
           <Box display="flex" alignItems="center" mb={1}>
             <Typography variant="body2" sx={{ mr: 2 }}>Mobile Performance Score</Typography>
@@ -327,7 +327,7 @@ function MobileResponsivenessSection() {
         <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
           Detected Issues
         </Typography>
-        
+
         {issues.length > 0 ? (
           issues.map((issue, idx) => (
             <Card key={idx} sx={{ mb: 1, backgroundColor: 'warning.light' }}>
@@ -398,7 +398,7 @@ function SecurityScoreSection() {
             Security Score Details
           </Typography>
         </Box>
-        
+
         <Box sx={{ textAlign: 'center', mb: 3 }}>
           <Chip 
             label={`Grade: ${grade}`} 
@@ -419,7 +419,7 @@ function SecurityScoreSection() {
         <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
           Security Findings
         </Typography>
-        
+
         {findings.length > 0 ? (
           findings.map((finding, i) => (
             <Card key={i} sx={{ mb: 1, backgroundColor: 'error.light' }}>
