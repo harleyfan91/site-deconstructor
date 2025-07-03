@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Box, Typography, Grid, Card, CardContent, LinearProgress, CircularProgress, Alert, Chip, Tooltip } from '@mui/material';
+import { Box, Typography, Card, CardContent, LinearProgress, CircularProgress, Alert, Chip, Tooltip } from '@mui/material';
 import { FileText, PieChart, BarChart3, Tags } from 'lucide-react';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart';
 import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis } from 'recharts';
