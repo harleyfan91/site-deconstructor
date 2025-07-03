@@ -19,6 +19,7 @@ interface URLInputFormProps {
 const URLInputForm: React.FC<URLInputFormProps> = ({ onAnalysisComplete }) => {
   const [url, setUrl] = useState('');
   const [localLoading, setLocalLoading] = useState(false);
+  const [isValid, setIsValid] = useState(true);
   const { analyzeWebsite, loading, error } = useAnalysisContext();
   const navigate = useNavigate();
 
