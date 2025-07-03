@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode, useMemo } from 'react';
 import { useAnalysisApi, AnalysisResponse } from '../hooks/useAnalysisApi';
 
 interface AnalysisContextType {
@@ -18,8 +18,16 @@ interface AnalysisProviderProps {
 export const AnalysisProvider: React.FC<AnalysisProviderProps> = ({ children }) => {
   const analysisApi = useAnalysisApi();
 
+  // Memoize the context value to prevent unnecessary re-renders
+  const contextValue = useMemo(() => ({
+    data: analysisApi.data,
+    loading: analysisApi.loading,
+    error: analysisApi.error,
+    analyzeWebsite: analysisApi.analyzeWebsite,
+  }), [analysisApi.data, analysisApi.loading, analysisApi.error, analysisApi.analyzeWebsite]);
+
   return (
-    <AnalysisContext.Provider value={analysisApi}>
+    <AnalysisContext.Provider value={contextValue}>
       {children}
     </AnalysisContext.Provider>
   );

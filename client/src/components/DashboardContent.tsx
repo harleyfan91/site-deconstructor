@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Box, Typography, Paper, Button } from '@mui/material';
 import { motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { useAnalysisContext } from '../contexts/AnalysisContext';
+import { useSessionState } from '../hooks/useSessionState';
 import OverviewTab from './dashboard/OverviewTab';
 import PerformanceTab from './dashboard/PerformanceTab';
 import SEOAnalysisTab from './dashboard/SEOAnalysisTab';
@@ -10,15 +12,40 @@ import UIAnalysisTab from './dashboard/UIAnalysisTab';
 import ComplianceTab from './dashboard/ComplianceTab';
 import ContentAnalysisTab from './dashboard/ContentAnalysisTab';
 import ExportModal from './export/ExportModal';
-import { useAnalysisContext } from '../contexts/AnalysisContext';
 
 const DashboardContent = () => {
   const { data: analysisData, loading, error } = useAnalysisContext();
   const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
+  const [visitedTabs, setVisitedTabs] = useSessionState('dashboard-visited-tabs', new Set(['overview']));
+  const [backgroundLoadingStarted, setBackgroundLoadingStarted] = useState(false);
 
   const handleExportClick = () => {
     setExportModalOpen(true);
   };
+
+  // Track visited tabs
+  const handleTabChange = useCallback((value: string) => {
+    setActiveTab(value);
+    setVisitedTabs(prev => new Set([...prev, value]));
+  }, [setVisitedTabs]);
+
+  // Background loading: Start prefetching other data after overview is loaded and visible
+  useEffect(() => {
+    if (analysisData && !backgroundLoadingStarted && activeTab === 'overview') {
+      setBackgroundLoadingStarted(true);
+
+      // Delay background prefetching to allow overview to render smoothly
+      const timer = setTimeout(() => {
+        // Trigger any additional API calls that other tabs might need
+        // For now, the main analysis already contains most data, 
+        // but this is where you'd add calls for tab-specific data
+        console.log('Background prefetching started for additional tab data');
+      }, 1500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [analysisData, backgroundLoadingStarted, activeTab]);
 
   return (
     <Box id="dashboard-root" data-dashboard="true">
@@ -68,7 +95,7 @@ const DashboardContent = () => {
         transition={{ duration: 0.8, delay: 0.3 }}
       >
         <Paper elevation={3} sx={{ p: { xs: 1.5, sm: 2 }, borderRadius: 2 }}>
-          <Tabs defaultValue="overview" className="w-full">
+          <Tabs defaultValue="overview" className="w-full" value={activeTab} onValueChange={handleTabChange}>
             {/* Sticky navigation container */}
             <Box
               sx={{
@@ -106,31 +133,31 @@ const DashboardContent = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.5 }}
             >
-              <TabsContent value="overview" data-tab-panel-id="overview" forceMount>
+              <TabsContent value="overview" data-tab-panel-id="overview" forceMount={visitedTabs.has('overview')}>
                 <OverviewTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
-              
-              <TabsContent value="ui" data-tab-panel-id="ui" forceMount>
+
+              <TabsContent value="ui" data-tab-panel-id="ui" forceMount={visitedTabs.has('ui')}>
                 <UIAnalysisTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
-              
-              <TabsContent value="content" data-tab-panel-id="content" forceMount>
+
+              <TabsContent value="content" data-tab-panel-id="content" forceMount={visitedTabs.has('content')}>
                 <ContentAnalysisTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
-              
-              <TabsContent value="performance" data-tab-panel-id="performance" forceMount>
+
+              <TabsContent value="performance" data-tab-panel-id="performance" forceMount={visitedTabs.has('performance')}>
                 <PerformanceTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
-              
-              <TabsContent value="seo" data-tab-panel-id="seo" forceMount>
+
+              <TabsContent value="seo" data-tab-panel-id="seo" forceMount={visitedTabs.has('seo')}>
                 <SEOAnalysisTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
-              
-              <TabsContent value="tech" data-tab-panel-id="tech" forceMount>
+
+              <TabsContent value="tech" data-tab-panel-id="tech" forceMount={visitedTabs.has('tech')}>
                 <TechTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
 
-              <TabsContent value="compliance" data-tab-panel-id="compliance" forceMount>
+              <TabsContent value="compliance" data-tab-panel-id="compliance" forceMount={visitedTabs.has('compliance')}>
                 <ComplianceTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
             </motion.div>

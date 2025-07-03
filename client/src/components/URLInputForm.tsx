@@ -10,15 +10,17 @@ import {
 import { Search, Link as LinkIcon } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useAnalysisContext } from '../contexts/AnalysisContext';
+import { useNavigate } from 'react-router-dom';
 
 interface URLInputFormProps {
-  onAnalysisComplete?: (result: any) => void;
+  onAnalysisComplete?: (data: any) => void;
 }
 
-const URLInputForm = ({ onAnalysisComplete }: URLInputFormProps) => {
+const URLInputForm: React.FC<URLInputFormProps> = ({ onAnalysisComplete }) => {
   const [url, setUrl] = useState('');
-  const [isValid, setIsValid] = useState(true);
+  const [localLoading, setLocalLoading] = useState(false);
   const { analyzeWebsite, loading, error } = useAnalysisContext();
+  const navigate = useNavigate();
 
   const validateUrl = (value: string) => {
     const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]*)*\/?$/i;
@@ -31,19 +33,27 @@ const URLInputForm = ({ onAnalysisComplete }: URLInputFormProps) => {
     setIsValid(validateUrl(value));
   };
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    if (url && isValid) {
-      let fullUrl = url;
-      if (!url.startsWith('http://') && !url.startsWith('https://')) {
-        fullUrl = `https://${url}`;
-      }
-      const result = await analyzeWebsite(fullUrl);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!url.trim()) return;
 
-      // Call the callback if analysis was successful and we're on the landing page
-      if (result && !error && onAnalysisComplete) {
+    setLocalLoading(true);
+
+    // Start analysis in background
+    const analysisPromise = analyzeWebsite(url.trim());
+
+    // Navigate immediately to dashboard for better UX
+    navigate(`/dashboard?url=${encodeURIComponent(url.trim())}`);
+
+    try {
+      const result = await analysisPromise;
+      if (result && onAnalysisComplete) {
         onAnalysisComplete(result);
       }
+    } catch (err) {
+      console.error('Analysis failed:', err);
+    } finally {
+      setLocalLoading(false);
     }
   };
 
