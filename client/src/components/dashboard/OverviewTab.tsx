@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Box,
@@ -121,7 +120,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
           }}>
             Website Overview
           </Typography>
-          <UrlDisplayBox url={data.url ?? ''} />
+          <UrlDisplayBox url={data.url ?? ''} loading={loading} />
         </Box>
       </Box>
 

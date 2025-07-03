@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Box, Typography, Card, CardContent, Chip, CircularProgress, Alert, Tooltip } from '@mui/material';
 import { CheckCircle, AlertCircle, XCircle, Search, Target, TrendingUp } from 'lucide-react';
@@ -14,11 +13,13 @@ interface SEOAnalysisTabProps {
 const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error }) => {
   const theme = useTheme();
 
-  if (loading) {
+  if (loading && !data) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
         <CircularProgress size={60} />
-        <Typography variant="h6" sx={{ ml: 2 }}>Analyzing SEO...</Typography>
+        <Typography variant="h6" sx={{ ml: 2 }}>
+          Analyzing SEO...
+        </Typography>
       </Box>
     );
   }

@@ -12,10 +12,11 @@ import { motion } from 'framer-motion';
 import { useAnalysisContext } from '../contexts/AnalysisContext';
 
 interface URLInputFormProps {
+  onAnalysisStart?: () => void;
   onAnalysisComplete?: (result: any) => void;
 }
 
-const URLInputForm = ({ onAnalysisComplete }: URLInputFormProps) => {
+const URLInputForm = ({ onAnalysisStart, onAnalysisComplete }: URLInputFormProps) => {
   const [url, setUrl] = useState('');
   const [isValid, setIsValid] = useState(true);
   const { analyzeWebsite, loading, error } = useAnalysisContext();
@@ -38,8 +39,14 @@ const URLInputForm = ({ onAnalysisComplete }: URLInputFormProps) => {
       if (!url.startsWith('http://') && !url.startsWith('https://')) {
         fullUrl = `https://${url}`;
       }
+
+      // Call the onAnalysisStart callback if it exists
+      if (onAnalysisStart) {
+        onAnalysisStart();
+      }
+
       const result = await analyzeWebsite(fullUrl);
-      
+
       // Call the callback if analysis was successful and we're on the landing page
       if (result && !error && onAnalysisComplete) {
         onAnalysisComplete(result);
@@ -65,7 +72,7 @@ const URLInputForm = ({ onAnalysisComplete }: URLInputFormProps) => {
             scroll-behavior: smooth;
             scroll-padding-top: 0;
           }
-          
+
           @media (prefers-reduced-motion: no-preference) {
             html {
               scroll-behavior: smooth;
@@ -73,7 +80,7 @@ const URLInputForm = ({ onAnalysisComplete }: URLInputFormProps) => {
           }
         `}
       </style>
-      
+
       {error && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -85,7 +92,7 @@ const URLInputForm = ({ onAnalysisComplete }: URLInputFormProps) => {
           </Alert>
         </motion.div>
       )}
-      
+
       <Box
         component="form"
         onSubmit={handleSubmit}
@@ -137,7 +144,7 @@ const URLInputForm = ({ onAnalysisComplete }: URLInputFormProps) => {
             }}
           />
         </motion.div>
-        
+
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
