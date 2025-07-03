@@ -51,7 +51,7 @@ export const useAnalysisApi = () => {
     setError(null);
     
     try {
-      console.log('Analyzing URL:', url);
+      console.log('Starting API call for URL:', url);
       
       // Call the server API route
       const response = await fetch(
@@ -64,7 +64,7 @@ export const useAnalysisApi = () => {
         }
       );
 
-      console.log('Response status:', response.status);
+      console.log('Response received with status:', response.status);
 
       if (!response.ok) {
         const errorData = await response.text();
@@ -73,7 +73,8 @@ export const useAnalysisApi = () => {
       }
 
       const analysisResult: ExtendedAnalysisResponse = await response.json();
-      console.log('Analysis result:', analysisResult);
+      console.log('Analysis result parsed successfully:', !!analysisResult);
+      console.log('Result has data:', !!analysisResult.data);
       
       // Validate that the response contains the expected new data structure
       if (analysisResult.mobileResponsiveness || analysisResult.securityScore || 
@@ -81,16 +82,21 @@ export const useAnalysisApi = () => {
         console.log('New analysis data structure detected and parsed successfully');
       }
       
+      // Clear any previous errors since we got a successful result
+      setError(null);
       setData(analysisResult);
+      console.log('Data set in state, returning result');
       return analysisResult;
       
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
       console.error('Analysis API Error:', err);
       setError(errorMessage);
+      setData(null);
       return null;
     } finally {
       setLoading(false);
+      console.log('Analysis API call completed, loading set to false');
     }
   };
 
