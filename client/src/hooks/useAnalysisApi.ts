@@ -45,32 +45,26 @@ export const useAnalysisApi = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<ExtendedAnalysisResponse | null>(null);
-  
-  // Add request deduplication
-  const activeRequests = new Map<string, Promise<ExtendedAnalysisResponse | null>>();
 
   const analyzeWebsite = async (url: string): Promise<ExtendedAnalysisResponse | null> => {
-    // Check if we already have a request in progress for this URL
-    if (activeRequests.has(url)) {
-      return activeRequests.get(url)!;
-    }
-    
     setLoading(true);
     setError(null);
     
-    // Create the request promise
-    const requestPromise = (async () => {
-      try {
-        // Call the server API route
-        const response = await fetch(
-          `/api/analyze?url=${encodeURIComponent(url)}`,
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-          }
-        );
+    try {
+      console.log('Analyzing URL:', url);
+      
+      // Call the server API route
+      const response = await fetch(
+        `/api/analyze?url=${encodeURIComponent(url)}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+        }
+      );
+
+      console.log('Response status:', response.status);
 
       if (!response.ok) {
         const errorData = await response.text();
@@ -79,9 +73,14 @@ export const useAnalysisApi = () => {
       }
 
       const analysisResult: ExtendedAnalysisResponse = await response.json();
+      console.log('Analysis result:', analysisResult);
       
-      // Clear any previous errors since we got a successful result
-      setError(null);
+      // Validate that the response contains the expected new data structure
+      if (analysisResult.mobileResponsiveness || analysisResult.securityScore || 
+          analysisResult.accessibility || analysisResult.headerChecks) {
+        console.log('New analysis data structure detected and parsed successfully');
+      }
+      
       setData(analysisResult);
       return analysisResult;
       
@@ -89,18 +88,10 @@ export const useAnalysisApi = () => {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
       console.error('Analysis API Error:', err);
       setError(errorMessage);
-      setData(null);
       return null;
-      } finally {
-        setLoading(false);
-        activeRequests.delete(url);
-      }
-    })();
-    
-    // Store the request promise
-    activeRequests.set(url, requestPromise);
-    
-    return requestPromise;
+    } finally {
+      setLoading(false);
+    }
   };
 
   return {

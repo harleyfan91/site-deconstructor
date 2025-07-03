@@ -132,7 +132,7 @@ function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["
             Core Web Vitals
           </Typography>
         </Box>
-        <ChartContainer config={chartConfig} className="h-80 w-full" style={{ minHeight: '320px', minWidth: '300px' }}>
+        <ChartContainer config={chartConfig} className="h-80 w-full">
           <RechartsBarChart
             data={performance.coreWebVitals}
             margin={{ top: 20, right: 30, left: 10, bottom: 5 }}
@@ -309,7 +309,7 @@ function MobileResponsivenessSection() {
             Mobile Responsiveness Details
           </Typography>
         </Box>
-
+        
         <Box mb={3}>
           <Box display="flex" alignItems="center" mb={1}>
             <Typography variant="body2" sx={{ mr: 2 }}>Mobile Performance Score</Typography>
@@ -327,7 +327,7 @@ function MobileResponsivenessSection() {
         <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
           Detected Issues
         </Typography>
-
+        
         {issues.length > 0 ? (
           issues.map((issue, idx) => (
             <Card key={idx} sx={{ mb: 1, backgroundColor: 'warning.light' }}>
@@ -398,7 +398,7 @@ function SecurityScoreSection() {
             Security Score Details
           </Typography>
         </Box>
-
+        
         <Box sx={{ textAlign: 'center', mb: 3 }}>
           <Chip 
             label={`Grade: ${grade}`} 
@@ -419,7 +419,7 @@ function SecurityScoreSection() {
         <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
           Security Findings
         </Typography>
-
+        
         {findings.length > 0 ? (
           findings.map((finding, i) => (
             <Card key={i} sx={{ mb: 1, backgroundColor: 'error.light' }}>
@@ -506,13 +506,11 @@ interface PerformanceTabProps {
 const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error }) => {
   const { data: contextData } = useAnalysisContext();
 
-  if (loading && !data) {
+  if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
         <CircularProgress size={60} />
-        <Typography variant="h6" sx={{ ml: 2 }}>
-          Analyzing performance & security...
-        </Typography>
+        <Typography variant="h6" sx={{ ml: 2 }}>Analyzing performance & security...</Typography>
       </Box>
     );
   }

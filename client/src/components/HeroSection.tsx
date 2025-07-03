@@ -85,11 +85,6 @@ const handleRecentSearch = async ({
   }
 };
 
-const handleAnalysisStart = () => {
-    // Navigate immediately when analysis starts
-    navigate('/dashboard');
-  };
-
 /**
  * Handles successful analysis completion from the URL input form.
  * 
@@ -277,7 +272,7 @@ const HeroSection = () => {
           {/* Input & popular sites shortcuts */}
           <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center', zIndex: 3, position: 'relative' }}>
             <URLInputForm
-              onAnalysisStart={handleAnalysisStart}
+              onAnalysisComplete={result => handleAnalysisComplete(result, navigate, error)}
             />
             <motion.div {...motionProps.formSection}>
               <Typography

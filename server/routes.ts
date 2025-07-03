@@ -354,28 +354,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Persist to Supabase when service-role key exists
       if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
-        try {
-          const admin = createClient(
-            process.env.SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!
-          );
+        const admin = createClient(
+          process.env.SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_ROLE_KEY!
+        );
 
-          const { error: dbError } = await admin.from('reports').upsert({
-            url,
-            scores: { performance: overallScore, mobile: mobileScore, security: securityScore },
-            techStack
-          });
-
-          if (dbError) {
-            console.error('Supabase upsert error:', dbError);
-          } else {
-            console.log('Successfully saved to Supabase for URL:', url);
-          }
-        } catch (dbErr) {
-          console.error('Database operation failed:', dbErr);
-        }
-      } else {
-        console.log('Supabase service role key not configured, skipping database save');
+        await admin.from('reports').upsert({
+          url,
+          scores: { performance: overallScore, mobile: mobileScore, security: securityScore },
+          techStack
+        });
       }
 
       res.json(analysisResult);
