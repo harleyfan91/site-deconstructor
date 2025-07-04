@@ -84,37 +84,47 @@ export const useAnalysisApi = () => {
     // Create the request promise and cache it
     const requestPromise = (async (): Promise<ExtendedAnalysisResponse | null> => {
       try {
-        console.log('Analyzing URL:', url);
+        console.log('🚀 Starting optimized analysis for:', url);
         
-        // Call the server API route
-        const response = await fetch(
-          `/api/analyze?url=${encodeURIComponent(url)}`,
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-          }
-        );
-
-        console.log('Response status:', response.status);
-
-        if (!response.ok) {
-          const errorData = await response.text();
-          console.error('API Error Response:', errorData);
-          throw new Error(`HTTP error! status: ${response.status}, message: ${errorData}`);
-        }
-
-        const analysisResult: ExtendedAnalysisResponse = await response.json();
-        console.log('Analysis result:', analysisResult);
+        // Step 1: Quick analysis for immediate feedback
+        console.log('⚡ Fetching quick analysis...');
+        const quickResponse = await fetch(`/api/analyze/quick?url=${encodeURIComponent(url)}`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        });
         
-        // Validate that the response contains the expected new data structure
-        if (analysisResult.mobileResponsiveness || analysisResult.securityScore || 
-            analysisResult.accessibility || analysisResult.headerChecks) {
-          console.log('New analysis data structure detected and parsed successfully');
+        if (!quickResponse.ok) {
+          throw new Error(`Quick analysis failed: ${quickResponse.status}`);
         }
         
-        return analysisResult;
+        const quickResult: ExtendedAnalysisResponse = await quickResponse.json();
+        console.log('✅ Quick analysis completed');
+        
+        // Update UI immediately with partial data
+        setData(quickResult);
+        
+        // Step 2: Full analysis for complete data (runs in background)
+        console.log('🔍 Fetching full analysis...');
+        const fullResponse = await fetch(`/api/analyze/full?url=${encodeURIComponent(url)}`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (!fullResponse.ok) {
+          console.warn('Full analysis failed, using quick analysis data');
+          return quickResult;
+        }
+        
+        const fullResult: ExtendedAnalysisResponse = await fullResponse.json();
+        console.log('🎯 Full analysis completed');
+        
+        // Validate that the response contains the expected data structure
+        if (fullResult.mobileResponsiveness || fullResult.securityScore || 
+            fullResult.accessibility || fullResult.headerChecks) {
+          console.log('Complete analysis data structure validated');
+        }
+        
+        return fullResult;
         
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';

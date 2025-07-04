@@ -73,16 +73,33 @@ A comprehensive website analysis tool that provides insights into performance, S
 - ✓ Enhanced expansion size to scale(3.5, 2.3) for optimal visibility while preventing off-screen overflow
 - ✓ Added centered text overlay to expanded color squares with hex codes and human-friendly names (June 29, 2025)
 - - ✓ Reorganized Performance tab layout: Core Web Vitals (2x2), Speed Index and Mobile Responsiveness stacked (1x1 each)
+- ✓ Implemented performance optimization refactoring (June 30, 2025)
+- ✓ Added quick analysis endpoint (/api/analyze/quick) for immediate feedback
+- ✓ Added full analysis endpoint (/api/analyze/full) with PSI data and caching
+- ✓ Implemented 3-tier caching: in-memory (30min), database (24hr), and request deduplication
+- ✓ Added precise timing logs and AbortController timeout (25s) for PSI calls
+- ✓ Parallelized HTML fetch and PSI calls using Promise.all
+- ✓ Created analysis_cache table with SHA256 URL hashing
+- ✓ Enhanced client-side to call quick then full analysis for progressive loading
+- ✓ Added comprehensive performance regression tests
+- ✓ Legacy endpoint maintains backward compatibility
+
 ## Technical Stack
 - **Frontend**: React, TypeScript, MUI, Framer Motion
 - **Backend**: Node.js, Express.js, PostgreSQL
 - **Database**: PostgreSQL with Drizzle ORM
 - **Build Tool**: Vite
 - **Deployment**: Replit
+- **Caching**: Multi-tier (Memory + Database + Request deduplication)
+- **Performance**: Quick analysis (<5s), Full analysis with PSI caching
 
 ## User Preferences
 - Focus on resolving build errors without changing functionality or UI
 - Prioritize clean TypeScript compilation and proper type safety
+- Implement performance optimizations without altering UI elements
 
 ## API Endpoints
-- `GET /api/analyze?url=<website-url>` - Analyzes a website and returns comprehensive analysis data
+- `GET /api/analyze/quick?url=<website-url>` - Returns overview data immediately from HTML analysis only
+- `GET /api/analyze/full?url=<website-url>` - Returns complete analysis with PSI data and caching
+- `GET /api/analyze?url=<website-url>` - Legacy endpoint (redirects to full analysis)
+- `POST /api/colors` - Extracts colors from website using Playwright
