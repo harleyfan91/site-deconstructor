@@ -52,20 +52,17 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
 
   // Extract content-specific data from API response
   const imageData = data.data?.ui?.imageAnalysis;
-  const totalImages = imageData?.totalImages || 0;
-  const estimatedPhotos = imageData?.estimatedPhotos || 0;
-  const estimatedIcons = imageData?.estimatedIcons || 0;
-
-  // Estimate text content (this could be enhanced with actual text analysis data)
-  const estimatedTextContent = data.data?.seo?.metaTags ? 
-    (Object.keys(data.data.seo.metaTags).length * 10) + 50 : 50; // Base estimate
+  const photoCount = imageData?.photos?.length ?? 0;
+  const iconCount  = imageData?.icons?.length ?? 0;
+  const totalImages = photoCount + iconCount;
+  const textCount = data.data?.content?.textCount ?? 0;
 
   // Create content distribution data with consistent colors including text
   const contentTypes = [
-    { name: 'Photos', value: estimatedPhotos, color: '#FF6B35' }, // Primary orange
-    { name: 'Icons', value: estimatedIcons, color: '#937B91' }, // Specified purple color
-    { name: 'Text Content', value: estimatedTextContent, color: '#0984E3' }, // Secondary blue
-    { name: 'Other Images', value: Math.max(0, totalImages - estimatedPhotos - estimatedIcons), color: theme.palette.grey[400] },
+    { name: 'Photos', value: photoCount, color: '#FF6B35' },
+    { name: 'Icons', value: iconCount, color: '#937B91' },
+    { name: 'Text Content', value: textCount, color: '#0984E3' },
+    { name: 'Other Images', value: Math.max(0, totalImages - photoCount - iconCount), color: theme.palette.grey[400] },
   ].filter(item => item.value > 0);
 
   // Content readability and text analysis data
@@ -78,7 +75,7 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
     { metric: 'Readability Score', score: readabilityScore, benchmark: 60 },
     { metric: 'Meta Description', score: metaTags.description ? 100 : 0, benchmark: 100 },
     { metric: 'Title Tag', score: metaTags.title ? 100 : 0, benchmark: 100 },
-    { metric: 'Alt Text Coverage', score: totalImages > 0 ? Math.min(100, (estimatedPhotos / totalImages) * 100) : 0, benchmark: 80 },
+    { metric: 'Alt Text Coverage', score: totalImages > 0 ? Math.min(100, (photoCount / totalImages) * 100) : 0, benchmark: 80 },
   ];
 
   // Text accessibility metrics
@@ -278,24 +275,24 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
             <Box sx={{ mb: 3 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography variant="body2">Alt Text Coverage</Typography>
-                <Tooltip 
-                  title={`Alt text coverage: ${totalImages > 0 ? Math.round((estimatedPhotos / totalImages) * 100) : 0}%`}
+                <Tooltip
+                  title={`Alt text coverage: ${totalImages > 0 ? Math.round((photoCount / totalImages) * 100) : 0}%`}
                   enterDelay={300}
                   enterTouchDelay={300}
                 >
                   <Typography variant="body2" sx={{ cursor: 'help' }}>
-                    {totalImages > 0 ? Math.round((estimatedPhotos / totalImages) * 100) : 0}%
+                    {totalImages > 0 ? Math.round((photoCount / totalImages) * 100) : 0}%
                   </Typography>
                 </Tooltip>
               </Box>
               <Tooltip 
-                title={`Alt text coverage: ${totalImages > 0 ? Math.round((estimatedPhotos / totalImages) * 100) : 0}%`}
+                title={`Alt text coverage: ${totalImages > 0 ? Math.round((photoCount / totalImages) * 100) : 0}%`}
                 enterDelay={300}
                 enterTouchDelay={300}
               >
                 <LinearProgress 
                   variant="determinate" 
-                  value={totalImages > 0 ? (estimatedPhotos / totalImages) * 100 : 0} 
+                  value={totalImages > 0 ? (photoCount / totalImages) * 100 : 0}
                   sx={{ 
                     height: 8, 
                     borderRadius: 4, 
@@ -304,7 +301,7 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
                 />
               </Tooltip>
               <Typography variant="body2" color="text.secondary">
-                Your alt text coverage scores better than {totalImages > 0 ? Math.round((estimatedPhotos / totalImages) * 100) : 0}% of websites
+                Your alt text coverage scores better than {totalImages > 0 ? Math.round((photoCount / totalImages) * 100) : 0}% of websites
               </Typography>
             </Box>
             </CardContent>
