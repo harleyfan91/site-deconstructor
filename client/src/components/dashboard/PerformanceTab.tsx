@@ -16,6 +16,7 @@ import { useTheme } from '@mui/material/styles';
 import { Shield, Smartphone, Zap, Activity, ShieldCheck, Gauge, BarChart } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 import { useAnalysisContext } from '../../contexts/AnalysisContext';
+import { MetricCard } from './shared/MetricCard';
 
 // Helper to determine score color given a numeric score
 const getScoreColor = (score: number) => {
@@ -31,48 +32,7 @@ const getScoreTooltip = (score: number) => {
   return 'Needs improvement (<70)';
 };
 
-// Renders a single metric card for performance, mobile, or security metrics
-function MetricCard({
-  icon: IconComponent,
-  title,
-  value,
-  color,
-  description,
-}: {
-  icon: React.ElementType;
-  title: string;
-  value: string;
-  color: string;
-  description: string;
-}) {
-  return (
-    <Card sx={{ height: '100%', borderRadius: 2 }}>
-      <CardContent sx={{ p: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <IconComponent size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-          <Typography variant="h6" sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
-            {title}
-          </Typography>
-        </Box>
-        <Tooltip 
-          title={title === 'Performance Score' ? getScoreTooltip(parseInt(value)) : description}
-          enterDelay={300}
-          enterTouchDelay={300}
-        >
-          <Typography
-            variant={title === 'Performance Score' ? 'h2' : 'h3'}
-            sx={{ fontWeight: 'bold', color, textAlign: 'center', mb: 1, cursor: 'help' }}
-          >
-            {value}
-          </Typography>
-        </Tooltip>
-        <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
-          {description}
-        </Typography>
-      </CardContent>
-    </Card>
-  );
-}
+
 
 // Renders the section with multiple metric cards at the top of the panel
 function MetricsSection({ performanceScore, mobileScore, securityScore }: { 
@@ -111,7 +71,7 @@ function MetricsSection({ performanceScore, mobileScore, securityScore }: {
   return (
     <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 2 }}>
       {metrics.map((metric, idx) => (
-        <MetricCard key={idx} {...metric} />
+        <MetricCard key={idx} {...metric} variant="performance" />
       ))}
     </Box>
   );

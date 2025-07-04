@@ -1,0 +1,403 @@
+Git Diff Patch: Extract MetricCard to Shared Component
+===========================================================
+
+## Step 1: Create shared MetricCard component
+## File: client/src/components/dashboard/shared/MetricCard.tsx (NEW FILE)
+
+```diff
++++ b/client/src/components/dashboard/shared/MetricCard.tsx
+@@ -0,0 +1,149 @@
++import React from 'react';
++import {
++  Box,
++  Typography,
++  Card,
++  CardContent,
++  IconButton,
++  Tooltip,
++} from '@mui/material';
++import InfoOutlined from '@mui/icons-material/InfoOutlined';
++import { LucideIcon } from 'lucide-react';
++
++// Extended interface that supports both PerformanceTab and OverviewTab use cases
++export interface MetricCardProps {
++  // Core props (used by both)
++  icon: LucideIcon;
++  value: string;
++  color: string;
++  description: string;
++  
++  // PerformanceTab style (simple single title)
++  title?: string;
++  
++  // OverviewTab style (multi-line title support)
++  titleLines?: string[];
++  
++  // OverviewTab specific props
++  info?: string;
++  tooltip?: string;
++  onInfo?: (event: React.MouseEvent<HTMLElement>, info: string) => void;
++  
++  // Layout variants
++  variant?: 'performance' | 'overview';
++}
++
++// Helper to determine score color given a numeric score (for PerformanceTab compatibility)
++const getScoreColor = (score: number) => {
++  if (score >= 90) return '#4CAF50';
++  if (score >= 70) return '#FF9800';
++  return '#F44336';
++};
++
++// Helper to get score tooltip text (for PerformanceTab compatibility)
++const getScoreTooltip = (score: number) => {
++  if (score >= 90) return 'Excellent performance (90+)';
++  if (score >= 70) return 'Good performance (70-89)';
++  return 'Needs improvement (<70)';
++};
++
++export const MetricCard: React.FC<MetricCardProps> = ({
++  icon: IconComponent,
++  title,
++  titleLines,
++  value,
++  color,
++  description,
++  info,
++  tooltip,
++  onInfo,
++  variant = 'performance', // Default to PerformanceTab style for backward compatibility
++}) => {
++  // Determine final title display
++  const finalTitleLines = titleLines || (title ? [title] : ['']);
++  const isMultiLine = finalTitleLines.length > 1 || (finalTitleLines[0] && finalTitleLines[0].includes(' '));
++  
++  // Determine tooltip text
++  const finalTooltip = tooltip || (
++    title === 'Performance Score' ? getScoreTooltip(parseInt(value)) : description
++  );
++
++  if (variant === 'overview') {
++    // OverviewTab layout style
++    return (
++      <Card sx={{ height: '100%', borderRadius: 2 }}>
++        <CardContent sx={{ p: 3 }}>
++          {/* Card Title FIRST, supports multi-line */}
++          <Box
++            sx={{
++              display: 'flex',
++              alignItems: 'center',
++              justifyContent: 'space-between',
++              mb: 1,
++              minHeight: 52, // Ensure same height for all cards
++            }}
++          >
++            <Typography
++              variant="h6"
++              sx={{
++                fontWeight: 'bold',
++                color: '#fff',
++                mb: 0,
++                lineHeight: 1.15,
++                wordBreak: 'break-word',
++              }}
++              data-testid="card-title"
++            >
++              {finalTitleLines[0]}
++              {finalTitleLines[1] && (
++                <>
++                  <span className="hidden sm:inline"> </span>
++                  <br className="sm:hidden" />
++                  {finalTitleLines[1]}
++                </>
++              )}
++            </Typography>
++            {/* Always render a placeholder IconButton for alignment (real or invisible) */}
++            {info && onInfo ? (
++              <IconButton size="small" aria-label="info" onClick={e => onInfo(e, info)}>
++                <InfoOutlined fontSize="small" />
++              </IconButton>
++            ) : (
++              // Invisible IconButton to reserve space
++              <IconButton size="small" sx={{ visibility: 'hidden' }}>
++                <InfoOutlined fontSize="small" />
++              </IconButton>
++            )}
++          </Box>
++          {/* Icon and Value */}
++          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
++            <Box
++              sx={{
++                p: 1,
++                borderRadius: 1,
++                backgroundColor: `${color}20`,
++                color: color,
++                mr: 2,
++              }}
++            >
++              <IconComponent size={24} />
++            </Box>
++            <Tooltip 
++              title={finalTooltip}
++              enterDelay={300}
++              enterTouchDelay={300}
++            >
++              <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', cursor: 'help' }}>
++                {value}
++              </Typography>
++            </Tooltip>
++          </Box>
++          {/* Description */}
++          <Typography variant="body2" color="text.secondary">
++            {description}
++          </Typography>
++        </CardContent>
++      </Card>
++    );
++  }
++
++  // PerformanceTab layout style (default)
++  return (
++    <Card sx={{ height: '100%', borderRadius: 2 }}>
++      <CardContent sx={{ p: 2 }}>
++        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
++          <IconComponent size={24} color="#FF6B35" style={{ marginRight: 8 }} />
++          <Typography variant="h6" sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
++            {finalTitleLines.join(' ')}
++          </Typography>
++        </Box>
++        <Tooltip 
++          title={finalTooltip}
++          enterDelay={300}
++          enterTouchDelay={300}
++        >
++          <Typography
++            variant={title === 'Performance Score' ? 'h2' : 'h3'}
++            sx={{ fontWeight: 'bold', color, textAlign: 'center', mb: 1, cursor: 'help' }}
++          >
++            {value}
++          </Typography>
++        </Tooltip>
++        <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
++          {description}
++        </Typography>
++      </CardContent>
++    </Card>
++  );
++};
++
++export default MetricCard;
+
+## Step 2: Update PerformanceTab.tsx to use shared component
+## File: client/src/components/dashboard/PerformanceTab.tsx
+
+```diff
+--- a/client/src/components/dashboard/PerformanceTab.tsx
++++ b/client/src/components/dashboard/PerformanceTab.tsx
+@@ -16,6 +16,7 @@ import { Shield, Smartphone, Zap, Activity, ShieldCheck, Gauge, BarChart } from
+ import type { AnalysisResponse } from '@/types/analysis';
+ import { useAnalysisContext } from '../../contexts/AnalysisContext';
++import { MetricCard } from './shared/MetricCard';
+ 
+ // Helper to determine score color given a numeric score
+ const getScoreColor = (score: number) => {
+@@ -32,40 +33,6 @@ const getScoreTooltip = (score: number) => {
+   return 'Needs improvement (<70)';
+ };
+ 
+-// Renders a single metric card for performance, mobile, or security metrics
+-function MetricCard({
+-  icon: IconComponent,
+-  title,
+-  value,
+-  color,
+-  description,
+-}: {
+-  icon: React.ElementType;
+-  title: string;
+-  value: string;
+-  color: string;
+-  description: string;
+-}) {
+-  return (
+-    <Card sx={{ height: '100%', borderRadius: 2 }}>
+-      <CardContent sx={{ p: 2 }}>
+-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+-          <IconComponent size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+-          <Typography variant="h6" sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
+-            {title}
+-          </Typography>
+-        </Box>
+-        <Tooltip 
+-          title={title === 'Performance Score' ? getScoreTooltip(parseInt(value)) : description}
+-          enterDelay={300}
+-          enterTouchDelay={300}
+-        >
+-          <Typography
+-            variant={title === 'Performance Score' ? 'h2' : 'h3'}
+-            sx={{ fontWeight: 'bold', color, textAlign: 'center', mb: 1, cursor: 'help' }}
+-          >
+-            {value}
+-          </Typography>
+-        </Tooltip>
+-        <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
+-          {description}
+-        </Typography>
+-      </CardContent>
+-    </Card>
+-  );
+-}
+-
+ // Renders the section with multiple metric cards at the top of the panel
+ function MetricsSection({ performanceScore, mobileScore, securityScore }: { 
+   performanceScore: number; 
+@@ -111,7 +76,7 @@ function MetricsSection({ performanceScore, mobileScore, securityScore }: {
+   return (
+     <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 2 }}>
+       {metrics.map((metric, idx) => (
+-        <MetricCard key={idx} {...metric} />
++        <MetricCard key={idx} {...metric} variant="performance" />
+       ))}
+     </Box>
+   );
+
+## Step 3: Update MetricCards.tsx to use shared component  
+## File: client/src/components/dashboard/overview/MetricCards.tsx
+
+```diff
+--- a/client/src/components/dashboard/overview/MetricCards.tsx
++++ b/client/src/components/dashboard/overview/MetricCards.tsx
+@@ -1,7 +1,7 @@
+ 
+ import React from 'react';
+ import { Box } from '@mui/material';
+-import MetricCard from './MetricCard';
++import { MetricCard } from '../shared/MetricCard';
+ import { MetricDefinition } from './types';
+ 
+ interface MetricCardsProps {
+@@ -22,6 +22,7 @@ const MetricCards: React.FC<MetricCardsProps> = ({ metrics, onInfo }) => {
+           info={metric.info}
+           tooltip={metric.tooltip}
+           onInfo={onInfo}
++          variant="overview"
+         />
+       ))}
+     </Box>
+
+## Step 4: Remove old MetricCard component
+## File: client/src/components/dashboard/overview/MetricCard.tsx (DELETED)
+
+```diff
+--- a/client/src/components/dashboard/overview/MetricCard.tsx
++++ /dev/null
+@@ -1,109 +0,0 @@
+-
+-import React from 'react';
+-import {
+-  Box,
+-  Typography,
+-  Card,
+-  CardContent,
+-  IconButton,
+-  Tooltip,
+-} from '@mui/material';
+-import InfoOutlined from '@mui/icons-material/InfoOutlined';
+-import { LucideIcon } from 'lucide-react';
+-
+-interface MetricCardProps {
+-  titleLines: string[];
+-  value: string;
+-  icon: LucideIcon;
+-  color: string;
+-  description: string;
+-  info?: string;
+-  tooltip: string;
+-  onInfo?: (event: React.MouseEvent<HTMLElement>, info: string) => void;
+-}
+-
+-const MetricCard: React.FC<MetricCardProps> = ({
+-  titleLines,
+-  value,
+-  icon: IconComponent,
+-  color,
+-  description,
+-  info,
+-  tooltip,
+-  onInfo,
+-}) => {
+-  return (
+-    <Card sx={{ height: '100%', borderRadius: 2 }}>
+-      <CardContent sx={{ p: 3 }}>
+-        {/* Card Title FIRST, now forced to 2 rows */}
+-        <Box
+-          sx={{
+-            display: 'flex',
+-            alignItems: 'center',
+-            justifyContent: 'space-between',
+-            mb: 1,
+-            minHeight: 52, // Ensure same height for all cards
+-          }}
+-        >
+-          <Typography
+-            variant="h6"
+-            sx={{
+-              fontWeight: 'bold',
+-              color: '#fff',
+-              mb: 0,
+-              lineHeight: 1.15,
+-              wordBreak: 'break-word',
+-            }}
+-            data-testid="card-title"
+-          >
+-            {titleLines[0]}
+-            <span className="hidden sm:inline"> </span>
+-            <br className="sm:hidden" />
+-            {titleLines[1]}
+-          </Typography>
+-          {/* Always render a placeholder IconButton for alignment (real or invisible) */}
+-          {info && onInfo ? (
+-            <IconButton size="small" aria-label="info" onClick={e => onInfo(e, info)}>
+-              <InfoOutlined fontSize="small" />
+-            </IconButton>
+-          ) : (
+-            // Invisible IconButton to reserve space
+-            <IconButton size="small" sx={{ visibility: 'hidden' }}>
+-              <InfoOutlined fontSize="small" />
+-            </IconButton>
+-          )}
+-        </Box>
+-        {/* Icon and Value */}
+-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+-          <Box
+-            sx={{
+-              p: 1,
+-              borderRadius: 1,
+-              backgroundColor: `${color}20`,
+-              color: color,
+-              mr: 2,
+-            }}
+-          >
+-            <IconComponent size={24} />
+-          </Box>
+-          <Tooltip 
+-            title={tooltip}
+-            enterDelay={300}
+-            enterTouchDelay={300}
+-          >
+-            <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', cursor: 'help' }}>
+-              {value}
+-            </Typography>
+-          </Tooltip>
+-        </Box>
+-        {/* Description */}
+-        <Typography variant="body2" color="text.secondary">
+-          {description}
+-        </Typography>
+-      </CardContent>
+-    </Card>
+-  );
+-};
+-
+-export default MetricCard;
+```

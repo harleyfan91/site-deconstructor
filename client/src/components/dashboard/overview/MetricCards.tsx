@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Box } from '@mui/material';
-import MetricCard from './MetricCard';
+import { MetricCard } from '../shared/MetricCard';
 import { MetricDefinition } from './types';
 
 interface MetricCardsProps {
@@ -23,6 +23,7 @@ const MetricCards: React.FC<MetricCardsProps> = ({ metrics, onInfo }) => {
           info={metric.info}
           tooltip={metric.tooltip}
           onInfo={onInfo}
+          variant="overview"
         />
       ))}
     </Box>
