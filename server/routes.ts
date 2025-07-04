@@ -4,6 +4,9 @@ import { storage } from "./storage";
 import Wappalyzer from 'wappalyzer';
 import { extractColors, type ColorResult } from './lib/color-extraction';
 import { SupabaseCacheService } from './lib/supabase';
+import { chromium } from 'playwright';
+import { JSDOM } from 'jsdom';
+import { Readability } from '@mozilla/readability';
 import crypto from 'crypto';
 
 // Helper function to map score to letter grade
@@ -53,6 +56,19 @@ function logTiming(operation: string, startTime: number) {
   const duration = Date.now() - startTime;
   console.log(`⏱️  ${operation}: ${duration}ms`);
   return duration;
+}
+
+async function getTextCount(url: string): Promise<number> {
+  const browser = await chromium.launch({ headless: true, args: ['--no-sandbox'] });
+  const page = await browser.newPage();
+  await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 });
+  const content = await page.content();
+  await browser.close();
+  const dom = new JSDOM(content, { url });
+  const reader = new Readability(dom.window.document);
+  const parsed = reader.parse();
+  if (!parsed || !parsed.textContent) return 0;
+  return parsed.textContent.trim().split(/\s+/).length;
 }
 
 // Optimized PSI function with caching and timeout
@@ -402,13 +418,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const htmlStartTime = Date.now();
       const psiStartTime = Date.now();
       
-      const [response, psiOverview] = await Promise.all([
+      const [response, psiOverview, textCount] = await Promise.all([
         fetch(url, {
           headers: {
             'User-Agent': 'Mozilla/5.0 (compatible; WebsiteAnalyzer/1.0)',
           },
         }),
-        fetchPageSpeedOverview(url)
+        fetchPageSpeedOverview(url),
+        getTextCount(url)
       ]);
 
       if (!response.ok) {
@@ -473,14 +490,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               { type: 'PNG', count: 4, format: 'PNG', totalSize: '1.3MB' }
             ],
             imageAnalysis: {
-              totalImages: localData.extractedImageUrls.length,
-              estimatedPhotos: Math.floor(localData.extractedImageUrls.length * 0.7),
-              estimatedIcons: Math.floor(localData.extractedImageUrls.length * 0.3),
-              imageUrls: localData.extractedImageUrls,
-              photoUrls: localData.extractedImageUrls.filter((_, index) => index % 3 !== 2),
-              iconUrls: localData.extractedImageUrls.filter((_, index) => index % 3 === 2)
+              photos: localData.extractedImageUrls.filter((_, index) => index % 3 !== 2),
+              icons: localData.extractedImageUrls.filter((_, index) => index % 3 === 2)
             },
             contrastIssues: []
+          },
+          content: {
+            textCount
           },
           performance: {
             coreWebVitals: [
@@ -559,13 +575,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`🔄 Forwarding to full analysis for: ${url}`);
       const totalStartTime = Date.now();
       
-      const [response, psiOverview] = await Promise.all([
+      const [response, psiOverview, textCount] = await Promise.all([
         fetch(url, {
           headers: {
             'User-Agent': 'Mozilla/5.0 (compatible; WebsiteAnalyzer/1.0)',
           },
         }),
-        fetchPageSpeedOverview(url)
+        fetchPageSpeedOverview(url),
+        getTextCount(url)
       ]);
 
       if (!response.ok) {
@@ -626,14 +643,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               { type: 'PNG', count: 4, format: 'PNG', totalSize: '1.3MB' }
             ],
             imageAnalysis: {
-              totalImages: localData.extractedImageUrls.length,
-              estimatedPhotos: Math.floor(localData.extractedImageUrls.length * 0.7),
-              estimatedIcons: Math.floor(localData.extractedImageUrls.length * 0.3),
-              imageUrls: localData.extractedImageUrls,
-              photoUrls: localData.extractedImageUrls.filter((_, index) => index % 3 !== 2),
-              iconUrls: localData.extractedImageUrls.filter((_, index) => index % 3 === 2)
+              photos: localData.extractedImageUrls.filter((_, index) => index % 3 !== 2),
+              icons: localData.extractedImageUrls.filter((_, index) => index % 3 === 2)
             },
             contrastIssues: []
+          },
+          content: {
+            textCount
           },
           performance: {
             coreWebVitals: [
