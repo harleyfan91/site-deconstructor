@@ -18,6 +18,9 @@ const DashboardContent = () => {
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [visitedTabs, setVisitedTabs] = useSessionState('dashboard-visited-tabs', new Set(['overview']));
+  
+  // Ensure visitedTabs is always a Set
+  const visitedTabsSet = visitedTabs instanceof Set ? visitedTabs : new Set(['overview']);
   const [backgroundLoadingStarted, setBackgroundLoadingStarted] = useState(false);
 
   const handleExportClick = () => {
@@ -27,7 +30,10 @@ const DashboardContent = () => {
   // Track visited tabs
   const handleTabChange = useCallback((value: string) => {
     setActiveTab(value);
-    setVisitedTabs(prev => new Set([...prev, value]));
+    setVisitedTabs(prev => {
+      const currentSet = prev instanceof Set ? prev : new Set(['overview']);
+      return new Set([...currentSet, value]);
+    });
   }, [setVisitedTabs]);
 
   // Background loading: Start prefetching other data after overview is loaded and visible
@@ -133,31 +139,31 @@ const DashboardContent = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.5 }}
             >
-              <TabsContent value="overview" data-tab-panel-id="overview" forceMount={visitedTabs.has('overview')}>
+              <TabsContent value="overview" data-tab-panel-id="overview" forceMount={visitedTabsSet.has('overview')}>
                 <OverviewTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
 
-              <TabsContent value="ui" data-tab-panel-id="ui" forceMount={visitedTabs.has('ui')}>
+              <TabsContent value="ui" data-tab-panel-id="ui" forceMount={visitedTabsSet.has('ui')}>
                 <UIAnalysisTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
 
-              <TabsContent value="content" data-tab-panel-id="content" forceMount={visitedTabs.has('content')}>
+              <TabsContent value="content" data-tab-panel-id="content" forceMount={visitedTabsSet.has('content')}>
                 <ContentAnalysisTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
 
-              <TabsContent value="performance" data-tab-panel-id="performance" forceMount={visitedTabs.has('performance')}>
+              <TabsContent value="performance" data-tab-panel-id="performance" forceMount={visitedTabsSet.has('performance')}>
                 <PerformanceTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
 
-              <TabsContent value="seo" data-tab-panel-id="seo" forceMount={visitedTabs.has('seo')}>
+              <TabsContent value="seo" data-tab-panel-id="seo" forceMount={visitedTabsSet.has('seo')}>
                 <SEOAnalysisTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
 
-              <TabsContent value="tech" data-tab-panel-id="tech" forceMount={visitedTabs.has('tech')}>
+              <TabsContent value="tech" data-tab-panel-id="tech" forceMount={visitedTabsSet.has('tech')}>
                 <TechTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
 
-              <TabsContent value="compliance" data-tab-panel-id="compliance" forceMount={visitedTabs.has('compliance')}>
+              <TabsContent value="compliance" data-tab-panel-id="compliance" forceMount={visitedTabsSet.has('compliance')}>
                 <ComplianceTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
             </motion.div>
