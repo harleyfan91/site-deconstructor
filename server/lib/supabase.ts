@@ -33,14 +33,11 @@ export class SupabaseCacheService {
 
   static async get(urlHash: string): Promise<AnalysisCacheRow | null> {
     try {
-      const cutoffTime = new Date();
-      cutoffTime.setHours(cutoffTime.getHours() - this.CACHE_TTL_HOURS);
-
+      // Simple cache lookup without time-based filtering since the table structure is minimal
       const { data, error } = await supabase
         .from(this.TABLE_NAME)
         .select('*')
         .eq('url_hash', urlHash)
-        .gte('updated_at', cutoffTime.toISOString())
         .single();
 
       if (error) {
@@ -61,16 +58,12 @@ export class SupabaseCacheService {
 
   static async set(urlHash: string, url: string, analysisData: any): Promise<boolean> {
     try {
-      const now = new Date().toISOString();
-      
+      // Use minimal column structure that matches existing table
       const { error } = await supabase
         .from(this.TABLE_NAME)
         .upsert({
           url_hash: urlHash,
-          url: url,
-          analysis_data: analysisData,
-          updated_at: now,
-          created_at: now
+          analysis_data: analysisData
         }, {
           onConflict: 'url_hash'
         });
@@ -80,6 +73,7 @@ export class SupabaseCacheService {
         return false;
       }
 
+      console.log(`✅ Cached analysis for ${url} in Supabase`);
       return true;
     } catch (error) {
       console.error('Cache set error:', error);
