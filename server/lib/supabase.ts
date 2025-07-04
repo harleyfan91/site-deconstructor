@@ -16,14 +16,14 @@ export const supabase = createClient(supabaseUrl, serviceRoleKey, {
   }
 });
 
-// Database table interface for analysis cache
+// Database table interface for analysis cache (matching actual table structure)
 export interface AnalysisCacheRow {
   id: string;
   url_hash: string;
-  url: string;
+  original_url: string;
   analysis_data: any;
   created_at: string;
-  updated_at: string;
+  expires_at: string;
 }
 
 // Cache operations
@@ -58,11 +58,12 @@ export class SupabaseCacheService {
 
   static async set(urlHash: string, url: string, analysisData: any): Promise<boolean> {
     try {
-      // Use minimal column structure that matches existing table
+      // Match the exact table structure from the screenshot: url_hash, original_url, analysis_data
       const { error } = await supabase
         .from(this.TABLE_NAME)
         .upsert({
           url_hash: urlHash,
+          original_url: url,
           analysis_data: analysisData
         }, {
           onConflict: 'url_hash'
