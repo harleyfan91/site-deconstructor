@@ -5,6 +5,10 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.SUPABASE_SERVICE_ROLE_KEY!; // This contains the URL
 const serviceRoleKey = process.env.VITE_SUPABASE_URL!; // This contains the service role key
 
+console.log('🔧 Supabase configuration check:');
+console.log('📍 URL source (SUPABASE_SERVICE_ROLE_KEY):', supabaseUrl ? `${supabaseUrl.substring(0, 20)}...` : 'MISSING');
+console.log('📍 Key source (VITE_SUPABASE_URL):', serviceRoleKey ? `${serviceRoleKey.substring(0, 20)}...` : 'MISSING');
+
 if (!supabaseUrl || !serviceRoleKey) {
   throw new Error('Missing Supabase environment variables: VITE_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required');
 }
@@ -58,8 +62,12 @@ export class SupabaseCacheService {
 
   static async set(urlHash: string, url: string, analysisData: any): Promise<boolean> {
     try {
+      console.log(`🔄 Attempting to cache data for URL: ${url}`);
+      console.log(`🔄 URL hash: ${urlHash}`);
+      console.log(`🔄 Data size: ${JSON.stringify(analysisData).length} characters`);
+      
       // Match the exact table structure from the screenshot: url_hash, original_url, analysis_data
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from(this.TABLE_NAME)
         .upsert({
           url_hash: urlHash,
@@ -67,23 +75,35 @@ export class SupabaseCacheService {
           analysis_data: analysisData
         }, {
           onConflict: 'url_hash'
-        });
+        })
+        .select();
 
       if (error) {
-        console.error('Supabase cache set error:', error);
+        console.error('❌ Supabase cache set error:', error.code, error.message);
+        console.error('❌ Error details:', error.details);
+        console.error('❌ Error hint:', error.hint);
         return false;
       }
 
-      console.log(`✅ Cached analysis for ${url} in Supabase`);
+      console.log(`✅ Successfully cached analysis for ${url} in Supabase`);
+      console.log(`✅ Inserted/updated row:`, data);
       return true;
     } catch (error) {
-      console.error('Cache set error:', error);
+      console.error('❌ Cache set error (caught exception):', error);
       return false;
     }
   }
 
   static async createTableIfNotExists(): Promise<void> {
     try {
+      // First, validate environment variables
+      console.log('🔍 Checking Supabase environment variables...');
+      console.log(`📍 SUPABASE_SERVICE_ROLE_KEY (URL): ${process.env.SUPABASE_SERVICE_ROLE_KEY ? 'Set' : 'Missing'}`);
+      console.log(`📍 VITE_SUPABASE_URL (Key): ${process.env.VITE_SUPABASE_URL ? 'Set' : 'Missing'}`);
+      
+      // Test basic connection
+      console.log('🔍 Testing Supabase connection...');
+      
       // Test if table exists by trying to select from it with proper error handling
       const { error: testError } = await supabase
         .from(this.TABLE_NAME)

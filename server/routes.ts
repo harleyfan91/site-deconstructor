@@ -138,11 +138,29 @@ async function fetchPageSpeedOverview(url: string): Promise<any> {
     clearTimeout(timeoutId);
     if (error instanceof Error && error.name === 'AbortError') {
       console.warn('PSI request timed out for:', url);
-      // Return fallback data on timeout
-      return {
+      // Return fallback data on timeout and cache it
+      const fallbackData = {
         pageLoadTime: 3.0,
         coreWebVitals: { lcpMs: 2500, inpMs: 100, cls: 0.1 }
       };
+
+      // Cache the fallback data in Supabase and memory
+      const cacheStartTime = Date.now();
+      try {
+        const success = await SupabaseCacheService.set(urlHash, url, fallbackData);
+        if (success) {
+          logTiming('🗄️  Supabase cache write (fallback)', cacheStartTime);
+          console.log(`✅ Cached fallback PSI data for ${url} in Supabase`);
+        } else {
+          console.warn('Failed to write fallback PSI data to Supabase cache');
+        }
+      } catch (cacheError) {
+        console.error('Failed to cache fallback PSI data in Supabase:', cacheError);
+      }
+
+      inMemoryCache.set(`psi_${urlHash}`, { data: fallbackData, timestamp: Date.now() });
+      logTiming('PSI (fallback data)', startTime);
+      return fallbackData;
     }
     throw error;
   }
