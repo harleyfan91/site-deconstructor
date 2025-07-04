@@ -32,7 +32,7 @@ const DashboardContent = () => {
     setActiveTab(value);
     setVisitedTabs(prev => {
       const currentSet = prev instanceof Set ? prev : new Set(['overview']);
-      return new Set([...currentSet, value]);
+      return new Set([...Array.from(currentSet), value]);
     });
   }, [setVisitedTabs]);
 
@@ -139,31 +139,31 @@ const DashboardContent = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.5 }}
             >
-              <TabsContent value="overview" data-tab-panel-id="overview" forceMount={visitedTabsSet.has('overview')}>
+              <TabsContent value="overview" data-tab-panel-id="overview" forceMount={visitedTabsSet.has('overview') || undefined}>
                 <OverviewTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
 
-              <TabsContent value="ui" data-tab-panel-id="ui" forceMount={visitedTabsSet.has('ui')}>
+              <TabsContent value="ui" data-tab-panel-id="ui" forceMount={visitedTabsSet.has('ui') || undefined}>
                 <UIAnalysisTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
 
-              <TabsContent value="content" data-tab-panel-id="content" forceMount={visitedTabsSet.has('content')}>
+              <TabsContent value="content" data-tab-panel-id="content" forceMount={visitedTabsSet.has('content') || undefined}>
                 <ContentAnalysisTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
 
-              <TabsContent value="performance" data-tab-panel-id="performance" forceMount={visitedTabsSet.has('performance')}>
+              <TabsContent value="performance" data-tab-panel-id="performance" forceMount={visitedTabsSet.has('performance') || undefined}>
                 <PerformanceTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
 
-              <TabsContent value="seo" data-tab-panel-id="seo" forceMount={visitedTabsSet.has('seo')}>
+              <TabsContent value="seo" data-tab-panel-id="seo" forceMount={visitedTabsSet.has('seo') || undefined}>
                 <SEOAnalysisTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
 
-              <TabsContent value="tech" data-tab-panel-id="tech" forceMount={visitedTabsSet.has('tech')}>
+              <TabsContent value="tech" data-tab-panel-id="tech" forceMount={visitedTabsSet.has('tech') || undefined}>
                 <TechTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
 
-              <TabsContent value="compliance" data-tab-panel-id="compliance" forceMount={visitedTabsSet.has('compliance')}>
+              <TabsContent value="compliance" data-tab-panel-id="compliance" forceMount={visitedTabsSet.has('compliance') || undefined}>
                 <ComplianceTab data={analysisData} loading={loading} error={error} />
               </TabsContent>
             </motion.div>
