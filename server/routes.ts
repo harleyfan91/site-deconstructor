@@ -2,11 +2,8 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import Wappalyzer from 'wappalyzer';
-import { createClient } from '@supabase/supabase-js';
 import { extractColors, type ColorResult } from './lib/color-extraction';
-import { db } from './db';
-import { analysisCache } from '../shared/schema';
-import { eq, gt } from 'drizzle-orm';
+import { SupabaseCacheService } from './lib/supabase';
 import crypto from 'crypto';
 
 // Helper function to map score to letter grade
@@ -70,26 +67,22 @@ async function fetchPageSpeedOverview(url: string): Promise<any> {
     return memCached.data;
   }
 
-  // Check database cache
+  // Check Supabase database cache
   const dbStartTime = Date.now();
   try {
-    const cached = await db
-      .select()
-      .from(analysisCache)
-      .where(eq(analysisCache.urlHash, urlHash))
-      .limit(1);
+    const cached = await SupabaseCacheService.get(urlHash);
     
-    logTiming('Database cache lookup', dbStartTime);
+    logTiming('🗄️  Supabase cache lookup', dbStartTime);
     
-    if (cached.length > 0 && new Date(cached[0].expiresAt) > new Date()) {
-      const data = cached[0].analysisData;
+    if (cached) {
+      const data = cached.analysis_data;
       // Store in memory cache
       inMemoryCache.set(`psi_${urlHash}`, { data, timestamp: Date.now() });
-      logTiming('PSI (database cache hit)', startTime);
+      logTiming('PSI (Supabase cache hit)', startTime);
       return data;
     }
   } catch (error) {
-    console.error('Database cache lookup failed:', error);
+    console.error('Supabase cache lookup failed:', error);
   }
 
   // Fetch from PSI API with timeout
@@ -124,28 +117,17 @@ async function fetchPageSpeedOverview(url: string): Promise<any> {
       },
     };
 
-    // Cache in database and memory
+    // Cache in Supabase and memory
     const cacheStartTime = Date.now();
     try {
-      const expiresAt = new Date(Date.now() + PSI_CACHE_TTL);
-      await db.insert(analysisCache)
-        .values({
-          urlHash,
-          originalUrl: url,
-          analysisData: overview,
-          expiresAt
-        })
-        .onConflictDoUpdate({
-          target: analysisCache.urlHash,
-          set: {
-            analysisData: overview,
-            expiresAt,
-            createdAt: new Date()
-          }
-        });
-      logTiming('Database cache write', cacheStartTime);
+      const success = await SupabaseCacheService.set(urlHash, url, overview);
+      if (success) {
+        logTiming('🗄️  Supabase cache write', cacheStartTime);
+      } else {
+        console.warn('Failed to write to Supabase cache');
+      }
     } catch (error) {
-      console.error('Failed to cache PSI data:', error);
+      console.error('Failed to cache PSI data in Supabase:', error);
     }
 
     inMemoryCache.set(`psi_${urlHash}`, { data: overview, timestamp: Date.now() });
@@ -167,6 +149,10 @@ async function fetchPageSpeedOverview(url: string): Promise<any> {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Initialize Supabase cache service and create table if needed
+  console.log('🚀 Initializing Supabase cache service...');
+  await SupabaseCacheService.createTableIfNotExists();
+  
   // Color extraction API route
   app.post('/api/colors', async (req, res) => {
     try {

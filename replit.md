@@ -83,14 +83,18 @@ A comprehensive website analysis tool that provides insights into performance, S
 - ✓ Enhanced client-side to call quick then full analysis for progressive loading
 - ✓ Added comprehensive performance regression tests
 - ✓ Legacy endpoint maintains backward compatibility
+- ✓ Migrated caching system from PostgreSQL to Supabase (January 4, 2025)
+- ✓ Created SupabaseCacheService with 24-hour cache TTL
+- ✓ Configured server-side Supabase client with service role permissions
+- ✓ Maintained backwards compatibility with existing analysis endpoints
 
 ## Technical Stack
 - **Frontend**: React, TypeScript, MUI, Framer Motion
-- **Backend**: Node.js, Express.js, PostgreSQL
-- **Database**: PostgreSQL with Drizzle ORM
+- **Backend**: Node.js, Express.js
+- **Database**: Supabase (PostgreSQL)
 - **Build Tool**: Vite
 - **Deployment**: Replit
-- **Caching**: Multi-tier (Memory + Database + Request deduplication)
+- **Caching**: Multi-tier (Memory + Supabase + Request deduplication)
 - **Performance**: Quick analysis (<5s), Full analysis with PSI caching
 
 ## User Preferences
@@ -100,6 +104,27 @@ A comprehensive website analysis tool that provides insights into performance, S
 
 ## API Endpoints
 - `GET /api/analyze/quick?url=<website-url>` - Returns overview data immediately from HTML analysis only
-- `GET /api/analyze/full?url=<website-url>` - Returns complete analysis with PSI data and caching
+- `GET /api/analyze/full?url=<website-url>` - Returns complete analysis with PSI data and Supabase caching
 - `GET /api/analyze?url=<website-url>` - Legacy endpoint (redirects to full analysis)
 - `POST /api/colors` - Extracts colors from website using Playwright
+
+## Setup Instructions
+### Supabase Database Setup
+1. Go to your Supabase project's SQL Editor
+2. Run the following SQL to create the analysis cache table:
+```sql
+CREATE TABLE IF NOT EXISTS analysis_cache (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  url_hash VARCHAR(64) UNIQUE NOT NULL,
+  url TEXT NOT NULL,
+  analysis_data JSONB NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_analysis_cache_url_hash ON analysis_cache(url_hash);
+CREATE INDEX IF NOT EXISTS idx_analysis_cache_updated_at ON analysis_cache(updated_at);
+
+ALTER TABLE analysis_cache ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow service role access" ON analysis_cache FOR ALL USING (true);
+```
