@@ -84,53 +84,50 @@ export class SupabaseCacheService {
 
   static async createTableIfNotExists(): Promise<void> {
     try {
-      // Test if table exists by trying to select from it
+      // Test if table exists by trying to select from it with proper error handling
       const { error: testError } = await supabase
         .from(this.TABLE_NAME)
-        .select('id')
+        .select('url_hash')
         .limit(1);
 
       if (!testError) {
-        console.log(`✅ Table ${this.TABLE_NAME} already exists and is accessible`);
+        console.log(`✅ Table ${this.TABLE_NAME} exists and is accessible`);
         return;
       }
 
-      // If table doesn't exist, provide SQL for manual creation
+      // Log the actual error for debugging
+      console.log(`❌ Table access error:`, testError.code, testError.message);
+      
+      // Common RLS permission error
+      if (testError.code === 'PGRST301' || testError.message.includes('permission denied')) {
+        console.log(`🔒 RLS permission issue detected. Table exists but service role needs policy access.`);
+        console.log(`📝 Run this SQL to fix permissions:`);
+        console.log(`-- Disable RLS temporarily or create proper policy
+ALTER TABLE analysis_cache DISABLE ROW LEVEL SECURITY;
+-- OR create a service role policy:
+-- CREATE POLICY "service_role_access" ON analysis_cache FOR ALL TO service_role USING (true);`);
+        return;
+      }
+
+      // Table doesn't exist
       if (testError.code === 'PGRST106' || testError.message.includes('does not exist')) {
         console.log(`🔧 Table ${this.TABLE_NAME} needs to be created`);
-        
-        const createTableSQL = `
--- Run this SQL in your Supabase SQL Editor to create the analysis cache table:
-
+        console.log(`📝 Please run this SQL in your Supabase SQL editor:`);
+        console.log(`-- Create table matching your existing structure
 CREATE TABLE IF NOT EXISTS analysis_cache (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   url_hash VARCHAR(64) UNIQUE NOT NULL,
-  url TEXT NOT NULL,
+  original_url TEXT,
   analysis_data JSONB NOT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+  expires_at TIMESTAMPTZ DEFAULT NOW()
 );
-
 CREATE INDEX IF NOT EXISTS idx_analysis_cache_url_hash ON analysis_cache(url_hash);
-CREATE INDEX IF NOT EXISTS idx_analysis_cache_updated_at ON analysis_cache(updated_at);
-
--- Enable Row Level Security (optional but recommended)
-ALTER TABLE analysis_cache ENABLE ROW LEVEL SECURITY;
-
--- Create a policy to allow service role access (adjust as needed)
-CREATE POLICY "Allow service role access" ON analysis_cache
-  FOR ALL USING (true);
-`;
-        
-        console.log('📝 Please run this SQL in your Supabase SQL editor:');
-        console.log(createTableSQL);
-        console.log('🔗 Go to: https://supabase.com/dashboard/project/[your-project]/sql');
-      } else {
-        console.error('Unexpected error checking table:', testError);
+ALTER TABLE analysis_cache DISABLE ROW LEVEL SECURITY;`);
       }
       
     } catch (error) {
-      console.error('Error checking/creating table:', error);
+      console.error('Error checking table:', error);
     }
   }
 }
