@@ -327,6 +327,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       console.log(`🚀 Starting quick analysis for: ${url}`);
+      console.log(`📱 Request source: ${req.get('User-Agent')?.includes('Mozilla') ? 'Web Browser' : 'API Call'}`);
       const totalStartTime = Date.now();
       
       // Parallel execution: HTML fetch and cache lookup
@@ -394,6 +395,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       console.log(`🔍 Starting full analysis for: ${url}`);
+      console.log(`📱 Request source: ${req.get('User-Agent')?.includes('Mozilla') ? 'Web Browser' : 'API Call'}`);
       const totalStartTime = Date.now();
       
       // Parallel execution: HTML fetch and PSI data
