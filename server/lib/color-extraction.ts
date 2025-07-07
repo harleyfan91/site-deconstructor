@@ -82,6 +82,33 @@ function getColorName(hex: string): string {
 }
 
 /**
+ * Calculate color temperature score for sorting
+ * Lower scores = unsaturated colors (grays, whites, blacks)
+ * Medium scores = warm colors (reds, oranges, yellows)
+ * Higher scores = cool colors (blues, greens, purples)
+ */
+function getColorTemperatureScore(hsl: { h: number; s: number; l: number }): number {
+  const { h, s, l } = hsl;
+  
+  // Very low saturation = unsaturated (grays, whites, blacks) - sort first
+  if (s < 10) {
+    return 0 + l; // Sort by lightness within unsaturated colors
+  }
+  
+  // Warm colors (reds, oranges, yellows) - sort second
+  if ((h >= 0 && h <= 60) || (h >= 300 && h <= 360)) {
+    return 100 + h; // Reds to yellows, then purples to reds
+  }
+  
+  // Cool colors (greens, cyans, blues, purples) - sort last
+  if (h > 60 && h < 300) {
+    return 200 + h; // Yellows to greens to blues to purples
+  }
+  
+  return 300; // Fallback
+}
+
+/**
  * Maps CSS property and element context to semantic color buckets
  */
 function getBucketForProperty(property: string, elementTag?: string, value?: string): string {
@@ -315,12 +342,17 @@ async function extractColorsFromPage(url: string): Promise<ColorResult[]> {
       colorsByBucket[color.property].push(colorResult);
     });
     
-    // Sort each bucket by HSL hue (0°→360°)
+    // Sort each bucket by color temperature (unsaturated → warm → cool)
     Object.keys(colorsByBucket).forEach(bucket => {
       colorsByBucket[bucket].sort((a, b) => {
-        const hueA = colord(a.hex).toHsl().h;
-        const hueB = colord(b.hex).toHsl().h;
-        return hueA - hueB;
+        const hslA = colord(a.hex).toHsl();
+        const hslB = colord(b.hex).toHsl();
+        
+        // Get temperature score for each color
+        const tempA = getColorTemperatureScore(hslA);
+        const tempB = getColorTemperatureScore(hslB);
+        
+        return tempA - tempB;
       });
     });
     
