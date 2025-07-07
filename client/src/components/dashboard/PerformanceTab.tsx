@@ -134,23 +134,37 @@ function CoreWebVitalsSection({ performance, loading = false }: { performance: A
 
 function SpeedIndexSection({ performanceScore }: { performanceScore: number }) {
   return (
-    <Card sx={{ borderRadius: 2, width: '100%', maxWidth: '100%' }}>
-      <CardContent sx={{ p: 2 }}>
+    <Card sx={{ 
+      borderRadius: 2, 
+      width: '100%', 
+      maxWidth: '100%',
+      minWidth: 0,
+      overflow: 'hidden'
+    }}>
+      <CardContent sx={{ p: 2, minWidth: 0 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <Gauge size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-          <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
+          <Typography variant="h6" gutterBottom sx={{ 
+            fontWeight: 'bold', 
+            lineHeight: 1.2,
+            minWidth: 0,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
+          }}>
             Speed Index
           </Typography>
         </Box>
-        <Box sx={{ mb: 2 }}>
+        <Box sx={{ mb: 2, minWidth: 0 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-            <Typography variant="body2">Loading Speed</Typography>
+            <Typography variant="body2" sx={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              Loading Speed
+            </Typography>
             <Tooltip 
               title={getScoreTooltip(performanceScore)}
               enterDelay={300}
               enterTouchDelay={300}
             >
-              <Typography variant="body2" sx={{ cursor: 'help' }}>{performanceScore}%</Typography>
+              <Typography variant="body2" sx={{ cursor: 'help', flexShrink: 0 }}>{performanceScore}%</Typography>
             </Tooltip>
           </Box>
           <Tooltip 
@@ -161,7 +175,12 @@ function SpeedIndexSection({ performanceScore }: { performanceScore: number }) {
             <LinearProgress variant="determinate" value={performanceScore} sx={{ height: 8, borderRadius: 4, cursor: 'help' }} />
           </Tooltip>
         </Box>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" color="text.secondary" sx={{
+          minWidth: 0,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          wordBreak: 'break-word'
+        }}>
           Your page loads faster than {performanceScore}% of websites
         </Typography>
       </CardContent>
