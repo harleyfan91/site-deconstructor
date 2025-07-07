@@ -137,6 +137,9 @@ A comprehensive website analysis tool that provides insights into performance, S
 - ✓ Successfully extracting authentic fonts: Apple.com returns 9 fonts including SF Pro Text
 - ✓ Added scrollable font display: mobile shows 2 fonts, desktop shows 3 fonts at a time
 - ✓ Implemented custom scrollbar styling for better UX
+- ✓ Added mobile scroll indicator with "↓ Scroll for more fonts" text overlay
+- ✓ Gradient fade effect on scroll indicator for subtle visual cue
+- ✓ Smart conditional display: only shows when >2 fonts and on mobile devices
 
 ## Technical Stack
 - **Frontend**: React, TypeScript, MUI, Framer Motion
