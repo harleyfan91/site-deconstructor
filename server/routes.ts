@@ -235,11 +235,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Invalid URL format' });
       }
 
+      // Generate cache key for colors
+      const urlHash = crypto.createHash('sha256').update(`colors:${url}`).digest('hex');
+      
+      // Try to get from cache first
+      const cached = await SupabaseCacheService.get(urlHash);
+      if (cached) {
+        console.log(`🗄️  Returning cached colors for: ${url}`);
+        return res.json(cached.analysis_data);
+      }
+
       console.log(`Extracting colors for: ${url}`);
       
       const colors = await extractColors(url);
       
       console.log(`Extracted ${colors.length} unique colors`);
+      
+      // Cache the results
+      await SupabaseCacheService.set(urlHash, url, colors);
+      
       res.json(colors);
       
     } catch (error) {
