@@ -163,16 +163,15 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, u
               ))}
             </Box>
             {/* Universal scroll indicator - shows when scrolling and content is scrollable */}
-            {canScroll && (
+            {canScroll && showScrollIndicator && (
               <Box
                 sx={{
                   position: 'absolute',
                   bottom: 6,
                   right: 6,
                   zIndex: 10,
-                  transition: 'opacity 2.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                  transition: 'opacity 2s cubic-bezier(0.4, 0, 0.2, 1)',
                   opacity: showScrollIndicator ? 1 : 0,
-                  pointerEvents: 'none',
                 }}
               >
                 <Box
