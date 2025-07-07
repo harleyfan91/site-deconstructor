@@ -71,7 +71,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
           <Card sx={{ borderRadius: 2, width: '100%' }}>
             <CardContent sx={{ p: 2 }}>
-              <FontAnalysisCard url={data?.url} />
+              <FontAnalysisCard fonts={fonts ?? []} />
             </CardContent>
           </Card>
 
@@ -79,7 +79,8 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
             <CardContent sx={{ p: 2 }}>
               <ContrastWarningsCard 
                 issues={ui?.contrastIssues ?? []} 
-                url={data?.url}
+                data={data}
+                loading={loading}
               />
             </CardContent>
           </Card>
