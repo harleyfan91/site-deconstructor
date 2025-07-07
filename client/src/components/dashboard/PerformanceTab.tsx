@@ -134,7 +134,7 @@ function CoreWebVitalsSection({ performance, loading = false }: { performance: A
 
 function SpeedIndexSection({ performanceScore }: { performanceScore: number }) {
   return (
-    <Card sx={{ borderRadius: 2 }}>
+    <Card sx={{ borderRadius: 2, width: '100%', maxWidth: '100%' }}>
       <CardContent sx={{ p: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <Gauge size={24} color="#FF6B35" style={{ marginRight: 8 }} />
