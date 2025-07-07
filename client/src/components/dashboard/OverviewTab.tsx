@@ -28,18 +28,6 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
   const [infoAnchor, setInfoAnchor] = React.useState<HTMLElement | null>(null);
   const [infoText, setInfoText] = React.useState<string | null>(null);
 
-  // Show loading indicator while data is being fetched
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
-        <CircularProgress size={60} />
-        <Typography variant="h6" sx={{ ml: 2 }}>
-          Analyzing website...
-        </Typography>
-      </Box>
-    );
-  }
-
   // Show error state
   if (error) {
     return (
@@ -55,6 +43,18 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
       <Alert severity="info" sx={{ mt: 2 }}>
         Enter a URL to analyze a website
       </Alert>
+    );
+  }
+
+  // Show loading indicator while initial data is being fetched
+  if (loading && !data.data?.overview) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
+        <CircularProgress size={60} />
+        <Typography variant="h6" sx={{ ml: 2 }}>
+          Analyzing website...
+        </Typography>
+      </Box>
     );
   }
 
@@ -134,7 +134,16 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
       />
 
       {/* Metric card grid */}
-      <MetricCards metrics={metrics} onInfo={handleMetricInfo} />
+      {overview ? (
+        <MetricCards metrics={metrics} onInfo={handleMetricInfo} />
+      ) : (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 4 }}>
+          <CircularProgress size={40} />
+          <Typography variant="body1" sx={{ ml: 2 }}>
+            Loading metrics...
+          </Typography>
+        </Box>
+      )}
 
       {/* Popover for metric info (shows only when infoAnchor is set) */}
       <MetricInfoPopover anchorEl={infoAnchor} infoText={infoText} onClose={handleClosePopover} />
@@ -146,12 +155,21 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
         </Typography>
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 3 }}>
-            <Typography variant="body1" paragraph>
-              Analysis completed at {data.timestamp ? new Date(data.timestamp).toLocaleString() : 'Unknown time'}.
-              {(overview?.overallScore ?? 0) >= 80
-                ? ' The page shows excellent performance across most metrics.'
-                : ' The page has room for improvement in several areas.'}
-            </Typography>
+            {overview ? (
+              <Typography variant="body1" paragraph>
+                Analysis completed at {data.timestamp ? new Date(data.timestamp).toLocaleString() : 'Unknown time'}.
+                {(overview?.overallScore ?? 0) >= 80
+                  ? ' The page shows excellent performance across most metrics.'
+                  : ' The page has room for improvement in several areas.'}
+              </Typography>
+            ) : (
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 2 }}>
+                <CircularProgress size={30} />
+                <Typography variant="body1" sx={{ ml: 2 }}>
+                  Generating analysis summary...
+                </Typography>
+              </Box>
+            )}
           </CardContent>
         </Card>
       </Box>
@@ -163,7 +181,16 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
         </Typography>
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 3 }}>
-            <KeyFindingsGrid overview={overview} theme={theme} />
+            {overview ? (
+              <KeyFindingsGrid overview={overview} theme={theme} />
+            ) : (
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 2 }}>
+                <CircularProgress size={30} />
+                <Typography variant="body1" sx={{ ml: 2 }}>
+                  Analyzing key findings...
+                </Typography>
+              </Box>
+            )}
           </CardContent>
         </Card>
       </Box>

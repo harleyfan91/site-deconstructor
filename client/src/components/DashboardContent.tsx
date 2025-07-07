@@ -144,27 +144,27 @@ const DashboardContent = () => {
               </TabsContent>
 
               <TabsContent value="ui" data-tab-panel-id="ui" forceMount={visitedTabsSet.has('ui') || undefined}>
-                <UIAnalysisTab data={analysisData} loading={loading} error={error} />
+                <UIAnalysisTab data={analysisData} loading={false} error={error} />
               </TabsContent>
 
               <TabsContent value="content" data-tab-panel-id="content" forceMount={visitedTabsSet.has('content') || undefined}>
-                <ContentAnalysisTab data={analysisData} loading={loading} error={error} />
+                <ContentAnalysisTab data={analysisData} loading={false} error={error} />
               </TabsContent>
 
               <TabsContent value="performance" data-tab-panel-id="performance" forceMount={visitedTabsSet.has('performance') || undefined}>
-                <PerformanceTab data={analysisData} loading={loading} error={error} />
+                <PerformanceTab data={analysisData} loading={false} error={error} />
               </TabsContent>
 
               <TabsContent value="seo" data-tab-panel-id="seo" forceMount={visitedTabsSet.has('seo') || undefined}>
-                <SEOAnalysisTab data={analysisData} loading={loading} error={error} />
+                <SEOAnalysisTab data={analysisData} loading={false} error={error} />
               </TabsContent>
 
               <TabsContent value="tech" data-tab-panel-id="tech" forceMount={visitedTabsSet.has('tech') || undefined}>
-                <TechTab data={analysisData} loading={loading} error={error} />
+                <TechTab data={analysisData} loading={false} error={error} />
               </TabsContent>
 
               <TabsContent value="compliance" data-tab-panel-id="compliance" forceMount={visitedTabsSet.has('compliance') || undefined}>
-                <ComplianceTab data={analysisData} loading={loading} error={error} />
+                <ComplianceTab data={analysisData} loading={false} error={error} />
               </TabsContent>
             </motion.div>
           </Tabs>

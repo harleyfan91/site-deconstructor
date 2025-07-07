@@ -1,163 +1,227 @@
-
-import { useState, useRef, useCallback } from 'react';
-import type { AnalysisResponse } from '@/types/analysis';
-
-// Extended types for the new analysis data
-export interface MobileResponsivenessData {
-  score: number;
-  issues: Array<{
-    id: string;
-    title: string;
-    description: string;
-  }>;
-}
-
-export interface SecurityScoreData {
-  grade: string;
-  findings: Array<{
-    id: string;
-    title: string;
-    description: string;
-  }>;
-}
-
-export interface AccessibilityData {
-  violations: any[];
-}
-
-export interface HeaderChecksData {
-  hsts: string;
-  csp: string;
-  frameOptions: string;
-}
-
-// Extended analysis response type
-export interface ExtendedAnalysisResponse extends AnalysisResponse {
-  mobileResponsiveness?: MobileResponsivenessData;
-  securityScore?: SecurityScoreData;
-  accessibility?: AccessibilityData;
-  headerChecks?: HeaderChecksData;
-}
-
-export type { AnalysisResponse } from '@/types/analysis';
-
-// Request deduplication cache
-const requestCache = new Map<string, Promise<ExtendedAnalysisResponse | null>>();
-
-export const useAnalysisApi = () => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<ExtendedAnalysisResponse | null>(null);
-  const currentRequestRef = useRef<string | null>(null);
-
-  const analyzeWebsite = useCallback(async (url: string): Promise<ExtendedAnalysisResponse | null> => {
-    // Prevent duplicate requests for the same URL
-    if (currentRequestRef.current === url) {
-      console.log('Request already in progress for:', url);
-      return data;
-    }
-
-    // Check if there's already a request for this URL
-    if (requestCache.has(url)) {
-      console.log('Using cached request for:', url);
-      setLoading(true);
-      try {
-        const result = await requestCache.get(url)!;
-        if (result) {
-          setData(result);
-          setError(null);
-        }
-        return result;
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-        setError(errorMessage);
-        return null;
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    currentRequestRef.current = url;
-    setLoading(true);
-    setError(null);
-    
-    // Create the request promise and cache it
-    const requestPromise = (async (): Promise<ExtendedAnalysisResponse | null> => {
-      try {
-        console.log('🚀 Starting optimized analysis for:', url);
-        
-        // Step 1: Quick analysis for immediate feedback
-        console.log('⚡ Fetching quick analysis...');
-        const quickResponse = await fetch(`/api/analyze/quick?url=${encodeURIComponent(url)}`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
-        });
-        
-        if (!quickResponse.ok) {
-          throw new Error(`Quick analysis failed: ${quickResponse.status}`);
-        }
-        
-        const quickResult: ExtendedAnalysisResponse = await quickResponse.json();
-        console.log('✅ Quick analysis completed');
-        
-        // Update UI immediately with partial data
-        setData(quickResult);
-        
-        // Step 2: Full analysis for complete data (runs in background)
-        console.log('🔍 Fetching full analysis...');
-        const fullResponse = await fetch(`/api/analyze/full?url=${encodeURIComponent(url)}`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
-        });
-        
-        if (!fullResponse.ok) {
-          console.warn('Full analysis failed, using quick analysis data');
-          return quickResult;
-        }
-        
-        const fullResult: ExtendedAnalysisResponse = await fullResponse.json();
-        console.log('🎯 Full analysis completed');
-        
-        // Validate that the response contains the expected data structure
-        if (fullResult.mobileResponsiveness || fullResult.securityScore || 
-            fullResult.accessibility || fullResult.headerChecks) {
-          console.log('Complete analysis data structure validated');
-        }
-        
-        return fullResult;
-        
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-        console.error('Analysis API Error:', err);
-        throw new Error(errorMessage);
-      }
-    })();
-
-    // Cache the request
-    requestCache.set(url, requestPromise);
-    
-    try {
-      const result = await requestPromise;
-      setData(result);
-      return result;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-      setError(errorMessage);
-      return null;
-    } finally {
-      setLoading(false);
-      currentRequestRef.current = null;
-      // Clean up cache after 5 minutes to prevent memory leaks
-      setTimeout(() => {
-        requestCache.delete(url);
-      }, 5 * 60 * 1000);
-    }
-  }, [data]);
-
-  return {
-    analyzeWebsite,
-    loading,
-    error,
-    data,
-  };
-};
+")
+print("import { useState, useRef, useCallback } from 'react';")
+print("import type { AnalysisResponse } from '@/types/analysis';")
+print("")
+print("// Extended types for the new analysis data")
+print("export interface MobileResponsivenessData {")
+print("  score: number;")
+print("  issues: Array<{")
+print("    id: string;")
+print("    title: string;")
+print("    description: string;")
+print("  }>;")
+print("}")
+print("")
+print("export interface SecurityScoreData {")
+print("  grade: string;")
+print("  findings: Array<{")
+print("    id: string;")
+print("    title: string;")
+print("    description: string;")
+print("  }>;")
+print("}")
+print("")
+print("export interface AccessibilityData {")
+print("  violations: any[];")
+print("}")
+print("")
+print("export interface HeaderChecksData {")
+print("  hsts: string;")
+print("  csp: string;")
+print("  frameOptions: string;")
+print("}")
+print("")
+print("// Extended analysis response type")
+print("export interface ExtendedAnalysisResponse extends AnalysisResponse {")
+print("  mobileResponsiveness?: MobileResponsivenessData;")
+print("  securityScore?: SecurityScoreData;")
+print("  accessibility?: AccessibilityData;")
+print("  headerChecks?: HeaderChecksData;")
+print("}")
+print("")
+print("export type { AnalysisResponse } from '@/types/analysis';")
+print("")
+print("// Request deduplication cache")
+print("const requestCache = new Map<string, Promise<ExtendedAnalysisResponse | null>>();")
+print("")
+print("export const useAnalysisApi = () => {")
+print("  const [loading, setLoading] = useState(false);")
+print("  const [error, setError] = useState<string | null>(null);")
+print("  const [data, setData] = useState<ExtendedAnalysisResponse | null>(null);")
+print("  const currentRequestRef = useRef<string | null>(null);")
+print("")
+print("  const analyzeWebsite = useCallback(async (url: string): Promise<ExtendedAnalysisResponse | null> => {")
+print("    // Prevent duplicate requests for the same URL")
+print("    if (currentRequestRef.current === url) {")
+print("      console.log('Request already in progress for:', url);")
+print("      return data;")
+print("    }")
+print("")
+print("    // Check if there's already a request for this URL")
+print("    if (requestCache.has(url)) {")
+print("      console.log('Using cached request for:', url);")
+print("      setLoading(true);")
+print("      try {")
+print("        const result = await requestCache.get(url)!;")
+print("        if (result) {")
+print("          setData(result);")
+print("          setError(null);")
+print("        }")
+print("        return result;")
+print("      } catch (err) {")
+print("        const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';")
+print("        setError(errorMessage);")
+print("        return null;")
+print("      } finally {")
+print("        setLoading(false);")
+print("      }")
+print("    }")
+print("")
+print("    currentRequestRef.current = url;")
+print("    setLoading(true);")
+print("    setError(null);")
+print("")
+print("    // Create the request promise and cache it")
+print("    const requestPromise = (async (): Promise<ExtendedAnalysisResponse | null> => {")
+print("      try {")
+print("        console.log('🚀 Starting optimized analysis for:', url);")
+print("")
+print("        // Step 1: Quick analysis for immediate feedback")
+print("        console.log('⚡ Fetching quick analysis...');")
+print("        const quickResponse = await fetch(`/api/analyze/quick?url=${encodeURIComponent(url)}`, {")
+print("          method: 'GET',")
+print("          headers: { 'Content-Type': 'application/json' }")
+print("        });")
+print("")
+print("        if (!quickResponse.ok) {")
+print("          throw new Error(`Quick analysis failed: ${quickResponse.status}`);")
+print("        }")
+print("")
+print("        const quickResult: ExtendedAnalysisResponse = await quickResponse.json();")
+print("        console.log('✅ Quick analysis completed');")
+print("")
+print("        // Update UI immediately with partial data")
+print("        setData(quickResult);")
+print("")
+print("        // Step 2: Full analysis for complete data (runs in background)")
+print("        console.log('🔍 Fetching full analysis...');")
+print("        const fullResponse = await fetch(`/api/analyze/full?url=${encodeURIComponent(url)}`, {")
+print("          method: 'GET',")
+print("          headers: { 'Content-Type': 'application/json' }")
+print("        });")
+print("")
+print("        if (!fullResponse.ok) {")
+print("          console.warn('Full analysis failed, using quick analysis data');")
+print("          return quickResult;")
+print("        }")
+print("")
+print("        const fullResult: ExtendedAnalysisResponse = await fullResponse.json();")
+print("        console.log('🎯 Full analysis completed');")
+print("")
+print("        // Validate that the response contains the expected data structure")
+print("        if (fullResult.mobileResponsiveness || fullResult.securityScore || ")
+print("            fullResult.accessibility || fullResult.headerChecks) {")
+print("          console.log('Complete analysis data structure validated');")
+print("        }")
+print("")
+print("        return fullResult;")
+print("")
+print("      } catch (err) {")
+print("        const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';")
+print("        console.error('Analysis API Error:', err);")
+print("        throw new Error(errorMessage);")
+print("      }")
+print("    })();")
+print("")
+print("    // Cache the request")
+print("    requestCache.set(url, requestPromise);")
+print("")
+print("    try {")
+print("      const result = await requestPromise;")
+print("      setData(result);")
+print("      return result;")
+print("    } catch (err) {")
+print("      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';")
+print("      setError(errorMessage);")
+print("      return null;")
+print("    } finally {")
+print("      setLoading(false);")
+print("      currentRequestRef.current = null;")
+print("      // Clean up cache after 5 minutes to prevent memory leaks")
+print("      setTimeout(() => {")
+print("        requestCache.delete(url);")
+print("      }, 5 * 60 * 1000);")
+print("    }")
+print("  }, [data]);")
+print("")
+print("  return {")
+print("    analyzeWebsite,")
+print("    loading,")
+print("    error,")
+print("    data,")
+print("  };")
+print("};")
+print("")
+print("const analyzeUrl = useCallback(async (url: string) => {")
+print("    if (!url) return;")
+print("")
+print("    setLoading(true);")
+print("    setError(null);")
+print("")
+print("    try {")
+print("      console.log('🚀 Starting optimized analysis for:', url);")
+print("")
+print("      // Step 1: Quick analysis (should complete in ~1 second)")
+print("      console.log('⚡ Fetching quick analysis...');")
+print("      const quickResponse = await fetch(`/api/analyze/quick`, {")
+print("        method: 'POST',")
+print("        headers: { 'Content-Type': 'application/json' },")
+print("        body: JSON.stringify({ url })")
+print("      });")
+print("")
+print("      if (!quickResponse.ok) {")
+print("        throw new Error('Quick analysis failed');")
+print("      }")
+print("")
+print("      const quickData = await quickResponse.json();")
+print("      console.log('✅ Quick analysis completed');")
+print("")
+print("      // Set quick data immediately and stop loading for UI")
+print("      setData(quickData);")
+print("      setLoading(false); // Stop loading here to show Overview tab quickly")
+print("")
+print("      // Step 2: Full analysis (runs in background without blocking UI)")
+print("      console.log('🔍 Fetching full analysis...');")
+print("      const fullResponse = await fetch(`/api/analyze/full`, {")
+print("        method: 'POST',")
+print("        headers: { 'Content-Type': 'application/json' },")
+print("        body: JSON.stringify({ url })")
+print("      });")
+print("")
+print("      if (!fullResponse.ok) {")
+print("        console.error('Full analysis failed, but continuing with quick data');")
+print("        return; // Don't throw error, keep the quick data visible")
+print("      }")
+print("")
+print("      const fullData = await fullResponse.json();")
+print("      console.log('🎯 Full analysis completed');")
+print("")
+print("      // Merge full data with quick data")
+print("      const completeData = {")
+print("        ...quickData,")
+print("        data: {")
+print("          ...quickData.data,")
+print("          ...fullData.data,")
+print("        }")
+print("      };")
+print("")
+print("      console.log('Complete analysis data structure validated');")
+print("      setData(completeData);")
+print("")
+print("    } catch (err) {")
+print("      console.error('Analysis failed:', err);")
+print("      setError(err instanceof Error ? err.message : 'Analysis failed');")
+print("      setLoading(false);")
+print("    }")
+print("  }, []);")
+print("
