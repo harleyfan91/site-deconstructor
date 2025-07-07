@@ -224,24 +224,7 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
     };
   }, [url]);
 
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', py: 4 }}>
-        <CircularProgress size={32} sx={{ color: '#FF6B35', mr: 2 }} />
-        <Typography variant="body2" color="text.secondary">
-          Extracting colors from website...
-        </Typography>
-      </Box>
-    );
-  }
-
-  if (error || usageGroups.length === 0) {
-    return (
-      <Alert severity="error" sx={{ mt: 2 }}>
-        {error || 'No colors could be extracted from this website'}
-      </Alert>
-    );
-  }
+  // Removed early returns - header will always be rendered
 
   return (
     <Box onClick={() => {
@@ -276,48 +259,65 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
       </Box>
       
       <Box>
-        {usageGroups.filter(usageGroup => categoryFilters[usageGroup.name]).map((usageGroup, usageIndex) => (
-          <Box key={usageIndex} sx={{ mb: 2 }}>
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                cursor: 'pointer',
-                p: 1,
-                borderRadius: 1,
-                bgcolor: 'rgba(255, 107, 53, 0.05)',
-                animation: glowingSections[usageGroup.name] ? 'pulse 1s ease-in-out infinite' : 'none',
-                '@keyframes pulse': {
-                  '0%, 100%': { boxShadow: '0 0 5px rgba(255, 107, 53, 0.3)' },
-                  '50%': { boxShadow: '0 0 15px rgba(255, 107, 53, 0.6)' }
-                },
-                '&:hover': { bgcolor: 'rgba(255, 107, 53, 0.1)' }
-              }}
-              onClick={() => toggleSection(usageGroup.name)}
-            >
-              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: '#FF6B35' }}>
-                {usageGroup.name} ({usageGroup.groups.reduce((t, g) => t + g.colors.length, 0)})
-              </Typography>
-              <IconButton size="small">
-                {expandedSections[usageGroup.name] ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-              </IconButton>
-            </Box>
-            
-            <Collapse in={expandedSections[usageGroup.name]}>
-              <Box sx={{ pt: 2 }}>
-                {usageGroup.groups.map((harmonyGroup, harmonyIndex) => (
-                  <Box key={harmonyIndex} sx={{ mb: 2 }}>
-                    <Typography variant="subtitle2" sx={{ mb: 1, color: 'text.secondary' }}>
-                      {harmonyGroup.name}
-                    </Typography>
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }} data-color-container>
-                      {harmonyGroup.colors.map((color, colorIndex) => (
-                        <Box
-                          key={colorIndex}
-                          sx={{
-                            ...getSquareStyles(color.hex === expandedHex, expandedElement),
-                            backgroundColor: color.hex,
+        {loading ? (
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', py: 4 }}>
+            <CircularProgress size={32} sx={{ color: '#FF6B35', mr: 2 }} />
+            <Typography variant="body2" color="text.secondary">
+              Extracting colors from website...
+            </Typography>
+          </Box>
+        ) : error ? (
+          <Alert severity="error" sx={{ mt: 2 }}>
+            {error}
+          </Alert>
+        ) : usageGroups.length === 0 ? (
+          <Alert severity="error" sx={{ mt: 2 }}>
+            No colors could be extracted from this website
+          </Alert>
+        ) : (
+          <>
+            {usageGroups.filter(usageGroup => categoryFilters[usageGroup.name]).map((usageGroup, usageIndex) => (
+              <Box key={usageIndex} sx={{ mb: 2 }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    cursor: 'pointer',
+                    p: 1,
+                    borderRadius: 1,
+                    bgcolor: 'rgba(255, 107, 53, 0.05)',
+                    animation: glowingSections[usageGroup.name] ? 'pulse 1s ease-in-out infinite' : 'none',
+                    '@keyframes pulse': {
+                      '0%, 100%': { boxShadow: '0 0 5px rgba(255, 107, 53, 0.3)' },
+                      '50%': { boxShadow: '0 0 15px rgba(255, 107, 53, 0.6)' }
+                    },
+                    '&:hover': { bgcolor: 'rgba(255, 107, 53, 0.1)' }
+                  }}
+                  onClick={() => toggleSection(usageGroup.name)}
+                >
+                  <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: '#FF6B35' }}>
+                    {usageGroup.name} ({usageGroup.groups.reduce((t, g) => t + g.colors.length, 0)})
+                  </Typography>
+                  <IconButton size="small">
+                    {expandedSections[usageGroup.name] ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                  </IconButton>
+                </Box>
+                
+                <Collapse in={expandedSections[usageGroup.name]}>
+                  <Box sx={{ pt: 2 }}>
+                    {usageGroup.groups.map((harmonyGroup, harmonyIndex) => (
+                      <Box key={harmonyIndex} sx={{ mb: 2 }}>
+                        <Typography variant="subtitle2" sx={{ mb: 1, color: 'text.secondary' }}>
+                          {harmonyGroup.name}
+                        </Typography>
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }} data-color-container>
+                          {harmonyGroup.colors.map((color, colorIndex) => (
+                            <Box
+                              key={colorIndex}
+                              sx={{
+                                ...getSquareStyles(color.hex === expandedHex, expandedElement),
+                                backgroundColor: color.hex,
                             '&:hover': {
                               boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
                             }
@@ -372,6 +372,8 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
             </Collapse>
           </Box>
         ))}
+          </>
+        )}
       </Box>
 
       {/* Filter Dropdown Popover */}

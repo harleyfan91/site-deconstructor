@@ -26,6 +26,8 @@ describe('ColorExtractionCard', () => {
     
     render(<ColorExtractionCard url="https://example.com" />);
     
+    // Header should always be visible during loading
+    expect(screen.getByText('Color Extraction')).toBeInTheDocument();
     expect(screen.getByText('Extracting colors from website...')).toBeInTheDocument();
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
