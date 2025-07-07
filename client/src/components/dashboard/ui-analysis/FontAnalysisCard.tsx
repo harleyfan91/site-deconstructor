@@ -14,6 +14,7 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, u
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
+  const [hasUserScrolled, setHasUserScrolled] = useState(false);
   const [canScroll, setCanScroll] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -29,6 +30,11 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, u
 
   // Handle scroll events
   const handleScroll = () => {
+    // Mark that user has scrolled at least once
+    if (!hasUserScrolled) {
+      setHasUserScrolled(true);
+    }
+    
     setShowScrollIndicator(true);
     
     // Clear existing timeout
@@ -79,6 +85,12 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, u
       setTimeout(checkScrollable, 100);
     }
   }, [fonts]);
+
+  // Reset scroll state when URL changes
+  useEffect(() => {
+    setHasUserScrolled(false);
+    setShowScrollIndicator(false);
+  }, [url]);
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -171,7 +183,7 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, u
                   right: 6,
                   zIndex: 10,
                   transition: 'opacity 2.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                  opacity: showScrollIndicator ? 1 : 0,
+                  opacity: (!hasUserScrolled || showScrollIndicator) ? 1 : 0,
                   pointerEvents: 'none',
                 }}
               >

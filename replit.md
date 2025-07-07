@@ -139,10 +139,13 @@ A comprehensive website analysis tool that provides insights into performance, S
 - ✓ Implemented custom scrollbar styling for better UX
 - ✓ Implemented universal dynamic scroll indicator system (January 7, 2025)
 - ✓ Removed all scrollbar tracks across all devices for cleaner interface
-- ✓ Added floating scroll indicator that appears during scroll and fades after 1.5 seconds
+- ✓ Added persistent initial display: shows immediately when content is scrollable
+- ✓ Transitions to dynamic behavior after first user scroll: appears during scroll, fades after 1.5s
+- ✓ Fixed opacity transition with 2.5s smooth cubic-bezier fade-out animation
 - ✓ Smart detection: only shows when content is actually scrollable
 - ✓ Works on all devices (mobile and desktop) with consistent dark overlay design
 - ✓ Positioned as floating overlay in bottom-right corner to avoid layout conflicts
+- ✓ Resets behavior for each new URL analysis to ensure first-time visibility
 
 ## Technical Stack
 - **Frontend**: React, TypeScript, MUI, Framer Motion
