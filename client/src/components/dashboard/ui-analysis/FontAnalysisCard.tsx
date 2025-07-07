@@ -1,38 +1,17 @@
 
-import React, { useEffect, useState } from 'react';
-import { Box, Typography, Chip, CircularProgress } from '@mui/material';
+import React from 'react';
+import { Box, Typography, Chip } from '@mui/material';
 import { Type } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
-import { analyzeFontsOnPage, FontAnalysisResult } from '@/utils/fontAnalysis';
 
 interface FontAnalysisCardProps {
   fonts: Array<{name: string, category: string, usage: string, weight?: string, isLoaded?: boolean, isPublic?: boolean}>;
 }
 
 const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts }) => {
-  const [analyzedFonts, setAnalyzedFonts] = useState<FontAnalysisResult[]>([]);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  useEffect(() => {
-    const performFontAnalysis = async () => {
-      setIsAnalyzing(true);
-      try {
-        const results = await analyzeFontsOnPage();
-        setAnalyzedFonts(results);
-      } catch (error) {
-        console.error('Font analysis failed:', error);
-        // Fallback to prop fonts if analysis fails
-        setAnalyzedFonts([]);
-      } finally {
-        setIsAnalyzing(false);
-      }
-    };
-
-    performFontAnalysis();
-  }, []);
-
-  // Only use real analyzed fonts - no fallback to potentially incorrect prop fonts
-  const fontsToDisplay = analyzedFonts;
+  // Use server-provided font data from Playwright analysis
+  const fontsToDisplay = propFonts || [];
 
   return (
     <Box>
@@ -41,9 +20,7 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts })
         <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
           Font Analysis
         </Typography>
-        {isAnalyzing && (
-          <CircularProgress size={16} sx={{ ml: 2 }} />
-        )}
+
       </Box>
       
       <Box>
