@@ -342,13 +342,24 @@ async function extractColorsFromPage(url: string): Promise<ColorResult[]> {
       colorsByBucket[color.property].push(colorResult);
     });
     
-    // Sort each bucket by color temperature (unsaturated → warm → cool)
+    // Sort each bucket by opacity first (opaque → transparent), then by color temperature within each group
     Object.keys(colorsByBucket).forEach(bucket => {
       colorsByBucket[bucket].sort((a, b) => {
-        const hslA = colord(a.hex).toHsl();
-        const hslB = colord(b.hex).toHsl();
+        const colorA = colord(a.hex);
+        const colorB = colord(b.hex);
         
-        // Get temperature score for each color
+        // Check if colors have full opacity (alpha = 1)
+        const isOpaqueA = colorA.alpha() === 1;
+        const isOpaqueB = colorB.alpha() === 1;
+        
+        // If one is opaque and one is transparent, sort opaque first
+        if (isOpaqueA && !isOpaqueB) return -1;
+        if (!isOpaqueA && isOpaqueB) return 1;
+        
+        // If both have same opacity level, sort by color temperature
+        const hslA = colorA.toHsl();
+        const hslB = colorB.toHsl();
+        
         const tempA = getColorTemperatureScore(hslA);
         const tempB = getColorTemperatureScore(hslB);
         
