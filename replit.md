@@ -110,7 +110,7 @@ A comprehensive website analysis tool that provides insights into performance, S
 - ✓ Simplified from 588 lines to 170 lines - removed complex nested grids and manual positioning
 - ✓ Aligned layout structure with SEO, Content, and Compliance tabs for consistency
 - ✓ Eliminated outer wrappers, metric-cards grid, manual spanning, width helpers and overflow issues
-- ✓ Clean 2-column pattern: Core Web Vitals + Performance Metrics, then Mobile + Recommendations
+- ✓ Clean 2-column pattern: Performance Metrics + Core Web Vitals (2/3 width), then Mobile + Recommendations
 
 ## Technical Stack
 - **Frontend**: React, TypeScript, MUI, Framer Motion

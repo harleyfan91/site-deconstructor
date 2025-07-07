@@ -65,41 +65,8 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
         </Typography>
       </Box>
 
-      {/* Main content - exactly like SEO tab pattern */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 2, mb: 2 }}>
-        {/* Core Web Vitals Chart */}
-        <Card sx={{ borderRadius: 2, height: '400px' }}>
-          <CardContent sx={{ p: 2, height: '100%' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <BarChart size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
-                Core Web Vitals
-              </Typography>
-            </Box>
-            {showLoadingForPerformance ? (
-              <Box display="flex" justifyContent="center" alignItems="center" height="300px">
-                <CircularProgress size={40} />
-                <Typography variant="body2" sx={{ ml: 2 }}>
-                  Loading Core Web Vitals...
-                </Typography>
-              </Box>
-            ) : (
-              <ChartContainer config={chartConfig} className="h-80 w-full">
-                <RechartsBarChart
-                  data={performance.coreWebVitals}
-                  margin={{ top: 20, right: 30, left: 10, bottom: 5 }}
-                >
-                  <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-                  <YAxis domain={[0, 100]} />
-                  <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-                  <Bar dataKey="value" fill="#FF6B35" />
-                  <Bar dataKey="benchmark" fill={theme.palette.grey[300]} />
-                </RechartsBarChart>
-              </ChartContainer>
-            )}
-          </CardContent>
-        </Card>
-        
+      {/* Main content - Performance Metrics first, Core Web Vitals second */}
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 2fr' }, gap: 2, mb: 2 }}>
         {/* Performance Metrics Card */}
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 2 }}>
@@ -146,6 +113,39 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
                 Based on Lighthouse security audits
               </Typography>
             </Box>
+          </CardContent>
+        </Card>
+        
+        {/* Core Web Vitals Chart */}
+        <Card sx={{ borderRadius: 2, height: '400px' }}>
+          <CardContent sx={{ p: 2, height: '100%' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <BarChart size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
+                Core Web Vitals
+              </Typography>
+            </Box>
+            {showLoadingForPerformance ? (
+              <Box display="flex" justifyContent="center" alignItems="center" height="300px">
+                <CircularProgress size={40} />
+                <Typography variant="body2" sx={{ ml: 2 }}>
+                  Loading Core Web Vitals...
+                </Typography>
+              </Box>
+            ) : (
+              <ChartContainer config={chartConfig} className="h-80 w-full">
+                <RechartsBarChart
+                  data={performance.coreWebVitals}
+                  margin={{ top: 20, right: 30, left: 10, bottom: 5 }}
+                >
+                  <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+                  <YAxis domain={[0, 100]} />
+                  <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                  <Bar dataKey="value" fill="#FF6B35" />
+                  <Bar dataKey="benchmark" fill={theme.palette.grey[300]} />
+                </RechartsBarChart>
+              </ChartContainer>
+            )}
           </CardContent>
         </Card>
       </Box>
