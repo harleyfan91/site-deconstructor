@@ -170,7 +170,7 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, u
                   bottom: 8,
                   right: 8,
                   zIndex: 10,
-                  transition: 'opacity 0.3s ease',
+                  transition: 'opacity 1s ease',
                   opacity: showScrollIndicator ? 1 : 0,
                 }}
               >
