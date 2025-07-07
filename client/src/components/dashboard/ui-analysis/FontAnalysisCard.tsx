@@ -192,7 +192,7 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, u
                   bottom: 6,
                   right: 6,
                   zIndex: 10,
-                  transition: 'opacity 2.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                  transition: 'opacity 1.25s cubic-bezier(0.4, 0, 0.2, 1)',
                   opacity: (!hasUserScrolled || showScrollIndicator) ? 1 : 0,
                   pointerEvents: 'none',
                 }}
