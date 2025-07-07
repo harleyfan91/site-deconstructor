@@ -171,6 +171,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   console.log('🚀 Initializing Supabase cache service...');
   await SupabaseCacheService.createTableIfNotExists();
   
+  // Clean up expired entries on startup and then every 6 hours
+  await SupabaseCacheService.cleanupExpired();
+  setInterval(async () => {
+    await SupabaseCacheService.cleanupExpired();
+  }, 6 * 60 * 60 * 1000); // 6 hours
+  
   // Color extraction API route
   app.post('/api/colors', async (req, res) => {
     try {
