@@ -1,17 +1,52 @@
 
-import React from 'react';
-import { Box, Typography, Chip } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Chip, CircularProgress } from '@mui/material';
 import { Type } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 
 interface FontAnalysisCardProps {
-  fonts: Array<{name: string, category: string, usage: string, weight?: string, isLoaded?: boolean, isPublic?: boolean}>;
+  fonts?: Array<{name: string, category: string, usage: string, weight?: string, isLoaded?: boolean, isPublic?: boolean}>;
+  url?: string;
 }
 
-const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts }) => {
+const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, url }) => {
+  const [fonts, setFonts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Use server-provided font data from Playwright analysis
-  const fontsToDisplay = propFonts || [];
+  useEffect(() => {
+    if (!url) return;
+    
+    const fetchFonts = async () => {
+      setLoading(true);
+      setError(null);
+      
+      try {
+        const response = await fetch('/api/fonts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url })
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch fonts: ${response.status}`);
+        }
+        
+        const fontData = await response.json();
+        setFonts(fontData);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to extract fonts');
+        console.error('Font extraction error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFonts();
+  }, [url]);
+
+  // Use fetched font data or fallback to props
+  const fontsToDisplay = fonts.length > 0 ? fonts : (propFonts || []);
 
   return (
     <Box>
@@ -24,9 +59,20 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts })
       </Box>
       
       <Box>
-        {fontsToDisplay.length === 0 ? (
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
+            <CircularProgress size={24} sx={{ mr: 2 }} />
+            <Typography variant="body2" color="text.secondary">
+              Extracting fonts...
+            </Typography>
+          </Box>
+        ) : error ? (
+          <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
+            {error}
+          </Typography>
+        ) : fontsToDisplay.length === 0 ? (
           <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
-            Font extraction is currently unavailable. Browser analysis requires Chromium to be installed.
+            No fonts detected for this website.
           </Typography>
         ) : (
           fontsToDisplay.map((font: any, index: number) => (

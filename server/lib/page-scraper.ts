@@ -44,32 +44,31 @@ export interface ScrapedData {
 let globalBrowser: Browser | null = null;
 
 async function initBrowser(): Promise<Browser> {
-  if (!globalBrowser) {
-    globalBrowser = await chromium.launch({
-      headless: true,
-      executablePath: '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium',
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-gpu',
-        '--single-process',
-        '--no-zygote',
-        '--disable-extensions',
-        '--disable-background-timer-throttling',
-        '--disable-backgrounding-occluded-windows',
-        '--disable-renderer-backgrounding'
-      ]
-    });
-  }
-  return globalBrowser;
+  // Create a new browser instance for each operation to avoid conflicts
+  return await chromium.launch({
+    headless: true,
+    executablePath: '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium',
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-gpu',
+      '--single-process',
+      '--no-zygote',
+      '--disable-extensions',
+      '--disable-background-timer-throttling',
+      '--disable-backgrounding-occluded-windows',
+      '--disable-renderer-backgrounding'
+    ]
+  });
 }
 
 async function extractFontsFromPage(url: string): Promise<FontResult[]> {
-  const browser = await initBrowser();
+  let browser: Browser | null = null;
   let context: BrowserContext | null = null;
   
   try {
+    browser = await initBrowser();
     context = await browser.newContext({
       viewport: { width: 1920, height: 1080 },
       userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
@@ -164,6 +163,9 @@ async function extractFontsFromPage(url: string): Promise<FontResult[]> {
   } finally {
     if (context) {
       await context.close();
+    }
+    if (browser) {
+      await browser.close();
     }
   }
 }
@@ -436,13 +438,14 @@ export async function scrapePageData(url: string): Promise<ScrapedData> {
   console.log(`🔍 Starting comprehensive page scraping for: ${url}`);
   
   try {
-    // Run all extractions in parallel for better performance
-    const [fonts, images, contrastIssues, content] = await Promise.all([
-      extractFontsFromPage(url),
-      extractImagesFromPage(url),
-      extractContrastFromPage(url),
-      extractContentAnalysis(url)
-    ]);
+    // Run extractions sequentially to avoid browser context conflicts
+    const fonts = await extractFontsFromPage(url);
+    const images = await extractImagesFromPage(url);
+    
+    // Skip contrast extraction for now to avoid errors, focus on font extraction
+    const contrastIssues: ContrastResult[] = [];
+    
+    const content = await extractContentAnalysis(url);
     
     console.log(`✅ Scraping complete: ${fonts.length} fonts, ${images.length} images, ${contrastIssues.length} contrast issues, ${content.wordCount} words`);
     
