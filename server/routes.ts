@@ -224,6 +224,224 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create HTTP server
   const server = createServer(app);
 
+  // Quick analysis endpoint - returns overview data immediately from HTML analysis only
+  app.get('/api/analyze/quick', async (req, res) => {
+    try {
+      const { url } = req.query;
+
+      if (!url || typeof url !== 'string') {
+        return res.status(400).json({ error: 'URL parameter is required' });
+      }
+
+      // Validate URL format
+      try {
+        new URL(url);
+      } catch {
+        return res.status(400).json({ error: 'Invalid URL format' });
+      }
+
+      console.log('🚀 Quick analysis for:', url);
+
+      // Generate cache key
+      const urlHash = generateUrlHash(url);
+
+      // Check in-memory cache first
+      const inMemoryCached = inMemoryCache.get(`quick_${urlHash}`);
+      if (inMemoryCached && Date.now() - inMemoryCached.timestamp < IN_MEMORY_CACHE_TTL) {
+        console.log('⚡ Quick analysis from memory cache');
+        return res.json(inMemoryCached.data);
+      }
+
+      // Try Supabase cache
+      const cached = await SupabaseCacheService.get(urlHash);
+      if (cached) {
+        console.log('🗄️ Quick analysis from Supabase cache');
+        inMemoryCache.set(`quick_${urlHash}`, { data: cached.analysis_data, timestamp: Date.now() });
+        return res.json(cached.analysis_data);
+      }
+
+      // Fetch HTML for quick analysis
+      const startTime = Date.now();
+      const htmlResponse = await fetch(url, { 
+        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; SiteAnalyzer/1.0)' },
+        timeout: 10000
+      });
+      const html = await htmlResponse.text();
+      logTiming('HTML fetch (quick)', startTime);
+
+      // Extract basic data
+      const extractedImageUrls = extractImageUrls(html);
+      const ui = buildUIData({ extractedImageUrls });
+
+      const quickData = {
+        url,
+        timestamp: new Date().toISOString(),
+        data: {
+          performance: {
+            score: null,
+            metrics: {
+              fcp: null,
+              lcp: null,
+              cls: null,
+              fid: null,
+              si: null,
+              tbt: null
+            }
+          },
+          seo: {
+            score: 85,
+            title: html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1] || 'No title found',
+            description: html.match(/<meta[^>]*name="description"[^>]*content="([^"]*)"[^>]*>/i)?.[1] || '',
+            keywords: html.match(/<meta[^>]*name="keywords"[^>]*content="([^"]*)"[^>]*>/i)?.[1] || ''
+          },
+          ui,
+          accessibility: {
+            violations: []
+          },
+          technical: {
+            loadTime: Math.round((Date.now() - startTime) / 1000 * 100) / 100,
+            responseTime: htmlResponse.headers.get('server-timing') || 'N/A'
+          }
+        }
+      };
+
+      // Cache the results
+      inMemoryCache.set(`quick_${urlHash}`, { data: quickData, timestamp: Date.now() });
+      
+      res.json(quickData);
+
+    } catch (error) {
+      console.error('Error in quick analysis:', error);
+      res.status(500).json({ error: 'Failed to analyze website' });
+    }
+  });
+
+  // Full analysis endpoint - returns complete analysis with PSI data and caching
+  app.get('/api/analyze/full', async (req, res) => {
+    try {
+      const { url } = req.query;
+
+      if (!url || typeof url !== 'string') {
+        return res.status(400).json({ error: 'URL parameter is required' });
+      }
+
+      // Validate URL format
+      try {
+        new URL(url);
+      } catch {
+        return res.status(400).json({ error: 'Invalid URL format' });
+      }
+
+      console.log('🚀 Full analysis for:', url);
+
+      // Generate cache key
+      const urlHash = generateUrlHash(url);
+
+      // Check in-memory cache first
+      const inMemoryCached = inMemoryCache.get(`full_${urlHash}`);
+      if (inMemoryCached && Date.now() - inMemoryCached.timestamp < IN_MEMORY_CACHE_TTL) {
+        console.log('⚡ Full analysis from memory cache');
+        return res.json(inMemoryCached.data);
+      }
+
+      // Try Supabase cache
+      const cached = await SupabaseCacheService.get(urlHash);
+      if (cached) {
+        console.log('🗄️ Full analysis from Supabase cache');
+        inMemoryCache.set(`full_${urlHash}`, { data: cached.analysis_data, timestamp: Date.now() });
+        return res.json(cached.analysis_data);
+      }
+
+      // Perform full analysis with PSI data
+      const startTime = Date.now();
+      
+      // Parallel fetch HTML and PSI data
+      const [htmlResponse, psiData] = await Promise.all([
+        fetch(url, { 
+          headers: { 'User-Agent': 'Mozilla/5.0 (compatible; SiteAnalyzer/1.0)' },
+          timeout: 10000
+        }),
+        fetchPageSpeedOverview(url)
+      ]);
+
+      const html = await htmlResponse.text();
+      logTiming('HTML + PSI fetch (full)', startTime);
+
+      // Extract data
+      const extractedImageUrls = extractImageUrls(html);
+      const ui = buildUIData({ extractedImageUrls });
+      const accessibility = analyzeAccessibility(html);
+      const headers = Object.fromEntries(htmlResponse.headers.entries());
+      const securityHeaders = extractSecurityHeaders(headers);
+
+      const fullData = {
+        url,
+        timestamp: new Date().toISOString(),
+        data: {
+          performance: {
+            score: psiData?.lighthouseResult?.categories?.performance?.score ? 
+              Math.round(psiData.lighthouseResult.categories.performance.score * 100) : null,
+            metrics: {
+              fcp: psiData?.lighthouseResult?.audits?.['first-contentful-paint']?.numericValue || null,
+              lcp: psiData?.lighthouseResult?.audits?.['largest-contentful-paint']?.numericValue || null,
+              cls: psiData?.lighthouseResult?.audits?.['cumulative-layout-shift']?.numericValue || null,
+              fid: psiData?.lighthouseResult?.audits?.['max-potential-fid']?.numericValue || null,
+              si: psiData?.lighthouseResult?.audits?.['speed-index']?.numericValue || null,
+              tbt: psiData?.lighthouseResult?.audits?.['total-blocking-time']?.numericValue || null
+            }
+          },
+          seo: {
+            score: psiData?.lighthouseResult?.categories?.seo?.score ? 
+              Math.round(psiData.lighthouseResult.categories.seo.score * 100) : 85,
+            title: html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1] || 'No title found',
+            description: html.match(/<meta[^>]*name="description"[^>]*content="([^"]*)"[^>]*>/i)?.[1] || '',
+            keywords: html.match(/<meta[^>]*name="keywords"[^>]*content="([^"]*)"[^>]*>/i)?.[1] || ''
+          },
+          ui,
+          accessibility: {
+            violations: accessibility,
+            score: psiData?.lighthouseResult?.categories?.accessibility?.score ? 
+              Math.round(psiData.lighthouseResult.categories.accessibility.score * 100) : 
+              Math.max(0, Math.round((1 - accessibility.length / 50) * 100))
+          },
+          technical: {
+            loadTime: Math.round((Date.now() - startTime) / 1000 * 100) / 100,
+            responseTime: htmlResponse.headers.get('server-timing') || 'N/A',
+            securityHeaders
+          }
+        }
+      };
+
+      // Cache the results
+      await SupabaseCacheService.set(urlHash, url, fullData);
+      inMemoryCache.set(`full_${urlHash}`, { data: fullData, timestamp: Date.now() });
+      
+      res.json(fullData);
+
+    } catch (error) {
+      console.error('Error in full analysis:', error);
+      res.status(500).json({ error: 'Failed to analyze website' });
+    }
+  });
+
+  // Legacy analysis endpoint (redirects to full analysis)
+  app.get('/api/analyze', async (req, res) => {
+    try {
+      const { url } = req.query;
+      
+      if (!url || typeof url !== 'string') {
+        return res.status(400).json({ error: 'URL parameter is required' });
+      }
+
+      // Redirect to full analysis
+      const fullAnalysisUrl = `/api/analyze/full?url=${encodeURIComponent(url)}`;
+      res.redirect(fullAnalysisUrl);
+    } catch (error) {
+      console.error('Error in legacy analysis:', error);
+      res.status(500).json({ error: 'Failed to analyze website' });
+    }
+  });
+
   // Color extraction API route
   app.post('/api/colors', async (req, res) => {
     try {
