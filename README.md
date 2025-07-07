@@ -2,7 +2,36 @@
 
 ## Project info
 
-A comprehensive website analysis tool that provides insights into performance, SEO, accessibility, and design elements.
+A comprehensive website analysis tool that provides insights into performance, SEO, accessibility, and design elements. The tool uses advanced browser automation (Playwright) to extract authentic content data and provide real-time analysis of websites.
+
+## Architecture Overview
+
+### Frontend Components Using Playwright Data
+
+The following React components integrate with Playwright-powered content analysis:
+
+**Content Analysis Tab** (`client/src/components/dashboard/ContentAnalysisTab.tsx`)
+- Real word count extraction from main article content using @mozilla/readability
+- Flesch-Kincaid readability scoring based on authentic text analysis
+- Text content visualization using actual scraped word counts instead of estimates
+
+**Image Analysis Card** (`client/src/components/dashboard/ui-analysis/ImageAnalysisCard.tsx`)
+- Enhanced image classification using 32×32 pixel area threshold (area > 1024px² = photo, else icon)
+- Real photo/icon URLs from browser DOM inspection
+- Authentic image metadata extraction replacing estimation algorithms
+
+**Export Functionality** (`client/src/lib/exportUtils.ts`)
+- PDF reports with authentic content metrics
+- Real readability scores and word counts in exported analysis
+- Accurate photo/icon classification data in reports
+
+### Progressive Data Loading
+
+The application uses a two-tier loading system:
+1. **Quick Analysis** (`/api/analyze/quick`) - Returns immediate overview data with fallback markers ("!")
+2. **Enhanced Analysis** (`/api/analyze/content`) - Playwright-powered deep content analysis
+
+Frontend components display loading indicators for sections still being processed, while showing available data immediately.
 
 ## How can I edit this code?
 
@@ -46,12 +75,29 @@ npm run dev
 
 This project is built with:
 
-* **React**
-* **Vite**
-* **Tailwind CSS**
-* **Material-UI**
-* **Radix UI**
-* **Emotion**
+### Frontend
+* **React 18** with TypeScript for component architecture
+* **Material-UI (MUI)** for responsive component library
+* **Framer Motion** for smooth animations and transitions
+* **Vite** for fast development and build tooling
+
+### Backend
+* **Express.js** server with TypeScript
+* **Playwright** for headless browser automation and content extraction
+* **@mozilla/readability** for authentic article content parsing
+* **jsdom** for server-side DOM manipulation and analysis
+
+### Content Analysis Pipeline
+* **Real-time scraping**: Playwright extracts fonts, images, and text content
+* **Content classification**: 32×32 pixel threshold for photo vs icon detection  
+* **Readability analysis**: Flesch-Kincaid scoring on extracted article text
+* **Progressive loading**: Quick analysis followed by enhanced Playwright data
+
+### Data Storage
+* **Supabase** (PostgreSQL) for analysis caching with 24-hour TTL
+* **Multi-tier caching**: In-memory (30min) + Database (24hr) + Request deduplication
+
+See [docs/PLAYWRIGHT_INTEGRATION.md](docs/PLAYWRIGHT_INTEGRATION.md) for detailed integration documentation.
 * **Express.js**
 * **Drizzle ORM**
 * **Drizzle Zod**
