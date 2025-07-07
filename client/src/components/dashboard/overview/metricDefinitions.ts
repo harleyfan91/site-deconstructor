@@ -26,11 +26,12 @@ export const getMetricDefinitions = (overview: AnalysisResponse['data']['overvie
   },
   {
     titleLines: ['Page Load', 'Time'],
-    value: overview.pageLoadTime ?? 'Unknown',
+    value: overview.pageLoadTime ? `${overview.pageLoadTime}s` : 'Loading...',
     icon: Clock,
     color: theme.palette.warning.main,
     description: 'Page loading performance',
     tooltip: 'Time taken for the page to fully load',
+    loading: !overview.pageLoadTime,
   },
   {
     titleLines: ['SEO', 'Score'],

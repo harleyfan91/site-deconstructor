@@ -6,6 +6,7 @@ import {
   CardContent,
   IconButton,
   Tooltip,
+  CircularProgress,
 } from '@mui/material';
 import InfoOutlined from '@mui/icons-material/InfoOutlined';
 import { LucideIcon } from 'lucide-react';
@@ -31,6 +32,9 @@ export interface MetricCardProps {
   
   // Layout variants
   variant?: 'performance' | 'overview';
+  
+  // Loading state
+  loading?: boolean;
 }
 
 // Helper to determine score color given a numeric score (for PerformanceTab compatibility)
@@ -58,6 +62,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   tooltip,
   onInfo,
   variant = 'performance', // Default to PerformanceTab style for backward compatibility
+  loading = false,
 }) => {
   // Determine final title display
   const finalTitleLines = titleLines || (title ? [title] : ['']);
@@ -128,15 +133,24 @@ export const MetricCard: React.FC<MetricCardProps> = ({
             >
               <IconComponent size={24} />
             </Box>
-            <Tooltip 
-              title={finalTooltip}
-              enterDelay={300}
-              enterTouchDelay={300}
-            >
-              <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', cursor: 'help' }}>
-                {value}
-              </Typography>
-            </Tooltip>
+            {loading ? (
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <CircularProgress size={16} sx={{ mr: 1 }} />
+                <Typography variant="body2" color="text.secondary">
+                  Loading...
+                </Typography>
+              </Box>
+            ) : (
+              <Tooltip 
+                title={finalTooltip}
+                enterDelay={300}
+                enterTouchDelay={300}
+              >
+                <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', cursor: 'help' }}>
+                  {value}
+                </Typography>
+              </Tooltip>
+            )}
           </Box>
           {/* Description */}
           <Typography variant="body2" color="text.secondary">
@@ -157,18 +171,27 @@ export const MetricCard: React.FC<MetricCardProps> = ({
             {finalTitleLines.join(' ')}
           </Typography>
         </Box>
-        <Tooltip 
-          title={finalTooltip}
-          enterDelay={300}
-          enterTouchDelay={300}
-        >
-          <Typography
-            variant={title === 'Performance Score' ? 'h2' : 'h3'}
-            sx={{ fontWeight: 'bold', color, textAlign: 'center', mb: 1, cursor: 'help' }}
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 1 }}>
+            <CircularProgress size={24} sx={{ mr: 1 }} />
+            <Typography variant="body2" color="text.secondary">
+              Loading...
+            </Typography>
+          </Box>
+        ) : (
+          <Tooltip 
+            title={finalTooltip}
+            enterDelay={300}
+            enterTouchDelay={300}
           >
-            {value}
-          </Typography>
-        </Tooltip>
+            <Typography
+              variant={title === 'Performance Score' ? 'h2' : 'h3'}
+              sx={{ fontWeight: 'bold', color, textAlign: 'center', mb: 1, cursor: 'help' }}
+            >
+              {value}
+            </Typography>
+          </Tooltip>
+        )}
         <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
           {description}
         </Typography>

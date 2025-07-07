@@ -24,6 +24,7 @@ const MetricCards: React.FC<MetricCardsProps> = ({ metrics, onInfo }) => {
           tooltip={metric.tooltip}
           onInfo={onInfo}
           variant="overview"
+          loading={metric.loading}
         />
       ))}
     </Box>

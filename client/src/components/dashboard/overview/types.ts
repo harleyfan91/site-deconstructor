@@ -9,4 +9,5 @@ export interface MetricDefinition {
   description: string;
   info?: string;
   tooltip: string;
+  loading?: boolean;
 }

@@ -356,23 +356,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Perform local analysis
       const localData = await performLocalAnalysis(url, html, response);
       
-      // Create overview response with placeholder PSI data
+      // Create overview response without PSI data (will be loaded separately)
       const analysisResult = {
         id: crypto.randomUUID(),
         url,
         timestamp: new Date().toISOString(),
         status: 'partial',
         isQuickResponse: true,
-        coreWebVitals: {
-          lcp: 2500, // Default values that will be updated by full analysis
-          fid: 100,
-          cls: 0.1
-        },
         data: {
           overview: {
             overallScore: localData.overallScore,
-            pageLoadTime: 3.0, // Will be updated by PSI
-            coreWebVitals: { lcpMs: 2500, inpMs: 100, cls: 0.1 },
+            // pageLoadTime will be added by full analysis only
             seoScore: localData.seoScore,
             userExperienceScore: localData.userExperienceScore
           }
