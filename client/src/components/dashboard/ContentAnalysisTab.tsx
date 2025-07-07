@@ -5,7 +5,7 @@ import { FileText, PieChart, BarChart3, Tags } from 'lucide-react';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart';
 import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis } from 'recharts';
 import { useTheme } from '@mui/material/styles';
-import type { AnalysisResponse } from '../../hooks/useAnalysisApi';
+import type { AnalysisResponse } from '../../types/analysis';
 
 interface ContentAnalysisTabProps {
   data: AnalysisResponse | null;
@@ -58,8 +58,10 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
 
   // Content readability and text analysis data - should pull from Playwright
   const contentData = data.data?.content;
-  const readabilityScore = contentData?.readabilityScore === "!" ? 0 : (contentData?.readabilityScore || 0);
-  const wordCount = contentData?.wordCount === "!" ? 0 : (contentData?.wordCount || 0);
+  const readabilityScore: number = typeof contentData?.readabilityScore === 'number' ? contentData.readabilityScore : 
+    (contentData?.readabilityScore === "!" ? 0 : Number(contentData?.readabilityScore) || 0);
+  const wordCount: number = typeof contentData?.wordCount === 'number' ? contentData.wordCount : 
+    (contentData?.wordCount === "!" ? 0 : Number(contentData?.wordCount) || 0);
 
   // Use real word count from Playwright content analysis
   const estimatedTextContent = wordCount > 0 ? Math.min(wordCount / 10, 100) : 
