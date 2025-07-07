@@ -99,6 +99,13 @@ A comprehensive website analysis tool that provides insights into performance, S
 - ✓ Removed placeholder fonts (Roboto, Arial) and images with authentic scraped data
 - ✓ Fixed progressive loading system: authentic data loads within 1-2 seconds
 - ✓ All analysis endpoints now use real extracted fonts, images, and metadata
+- ✓ Enhanced backend with Playwright content analysis (January 7, 2025)
+- ✓ Added @mozilla/readability + jsdom for word counting and Flesch-Kincaid readability scoring
+- ✓ Implemented enhanced image classification: area > 32×32 → photo, else icon
+- ✓ Created /api/analyze/content endpoint for comprehensive scraping with real data
+- ✓ Added content data to analysis responses with fallback markers ("!") for pending data
+- ✓ Updated ContentAnalysisTab to pull real wordCount and readabilityScore from Playwright
+- ✓ Enhanced ImageAnalysisCard to display authentic photo/icon classification from browser scraping
 
 ## Technical Stack
 - **Frontend**: React, TypeScript, MUI, Framer Motion

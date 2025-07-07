@@ -47,6 +47,7 @@ async function initBrowser(): Promise<Browser> {
   if (!globalBrowser) {
     globalBrowser = await chromium.launch({
       headless: true,
+      executablePath: '/usr/bin/chromium',
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',

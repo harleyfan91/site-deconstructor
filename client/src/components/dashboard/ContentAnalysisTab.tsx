@@ -56,9 +56,9 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
   const estimatedPhotos = imageData?.estimatedPhotos || 0;
   const estimatedIcons = imageData?.estimatedIcons || 0;
 
-  // Estimate text content (this could be enhanced with actual text analysis data)
-  const estimatedTextContent = data.data?.seo?.metaTags ? 
-    (Object.keys(data.data.seo.metaTags).length * 10) + 50 : 50; // Base estimate
+  // Use real word count from Playwright content analysis
+  const estimatedTextContent = wordCount > 0 ? Math.min(wordCount / 10, 100) : 
+    (data.data?.seo?.metaTags ? (Object.keys(data.data.seo.metaTags).length * 10) + 50 : 50);
 
   // Create content distribution data with consistent colors including text
   const contentTypes = [
@@ -68,8 +68,10 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
     { name: 'Other Images', value: Math.max(0, totalImages - estimatedPhotos - estimatedIcons), color: theme.palette.grey[400] },
   ].filter(item => item.value > 0);
 
-  // Content readability and text analysis data
-  const readabilityScore = data.readabilityScore || 0;
+  // Content readability and text analysis data - should pull from Playwright
+  const contentData = data.data?.content;
+  const readabilityScore = contentData?.readabilityScore === "!" ? 0 : (contentData?.readabilityScore || 0);
+  const wordCount = contentData?.wordCount === "!" ? 0 : (contentData?.wordCount || 0);
   const seoChecks = data.data?.seo?.checks || [];
   const metaTags = data.data?.seo?.metaTags || {};
 
