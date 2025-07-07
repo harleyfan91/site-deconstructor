@@ -77,8 +77,30 @@ function MetricsSection({ performanceScore, mobileScore, securityScore }: {
   );
 }
 
-function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["data"]["performance"] }) {
+function CoreWebVitalsSection({ performance, loading = false }: { performance: AnalysisResponse["data"]["performance"]; loading?: boolean }) {
   const theme = useTheme();
+  
+  if (loading) {
+    return (
+      <Card sx={{ borderRadius: 2, height: '400px', width: '100%', maxWidth: '100%', minWidth: 0 }}>
+        <CardContent sx={{ p: 2, height: '100%' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+            <BarChart size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
+              Core Web Vitals
+            </Typography>
+          </Box>
+          <Box display="flex" justifyContent="center" alignItems="center" height="300px">
+            <CircularProgress size={40} />
+            <Typography variant="body2" sx={{ ml: 2 }}>
+              Loading Core Web Vitals...
+            </Typography>
+          </Box>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const chartConfig = {
     value: { label: 'Your Site', color: '#FF6B35' },
     benchmark: { label: 'Benchmark', color: theme.palette.grey[300] }
@@ -466,15 +488,6 @@ interface PerformanceTabProps {
 const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error }) => {
   const { data: contextData } = useAnalysisContext();
 
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
-        <CircularProgress size={60} />
-        <Typography variant="h6" sx={{ ml: 2 }}>Analyzing performance & security...</Typography>
-      </Box>
-    );
-  }
-
   if (error) {
     return (
       <Alert severity="error" sx={{ mt: 2 }}>
@@ -490,6 +503,9 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
       </Alert>
     );
   }
+
+  // Show content immediately, with individual loading indicators for missing sections
+  const showLoadingForPerformance = loading || !data.data?.performance?.coreWebVitals || data.data.performance.coreWebVitals.length === 0;
 
   const { performance } = data.data;
   const mobileScore = contextData?.mobileResponsiveness?.score || 0;
@@ -598,7 +614,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
             maxWidth: '100%', 
             minWidth: 0 
           }}>
-            <CoreWebVitalsSection performance={performance} />
+            <CoreWebVitalsSection performance={performance} loading={showLoadingForPerformance} />
           </Box>
           <Box sx={{ 
             gridColumn: { xs: '1', md: '2' }, 

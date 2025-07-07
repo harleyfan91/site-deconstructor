@@ -99,31 +99,39 @@ export const useAnalysisApi = () => {
         const quickResult: ExtendedAnalysisResponse = await quickResponse.json();
         console.log('✅ Quick analysis completed');
 
-        // Update UI immediately with partial data
+        // Update UI immediately with partial data and CLEAR LOADING
         setData(quickResult);
+        setLoading(false);  // Clear loading state here to show dashboard immediately
 
-        // Step 2: Full analysis for complete data (runs in background)
+        // Step 2: Full analysis runs in background without blocking UI
         console.log('🔍 Fetching full analysis...');
-        const fullResponse = await fetch(`/api/analyze/full?url=${encodeURIComponent(url)}`, {
+        
+        // Run full analysis in background
+        fetch(`/api/analyze/full?url=${encodeURIComponent(url)}`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' }
+        }).then(async (fullResponse) => {
+          if (fullResponse.ok) {
+            const fullResult: ExtendedAnalysisResponse = await fullResponse.json();
+            console.log('🎯 Full analysis completed');
+            
+            // Update data with complete results
+            setData(fullResult);
+            
+            if (fullResult.mobileResponsiveness || fullResult.securityScore || 
+                fullResult.accessibility || fullResult.headerChecks) {
+              console.log('Complete analysis data structure validated');
+            }
+          } else {
+            console.warn('Full analysis failed, keeping quick analysis data');
+          }
+        }).catch((err) => {
+          console.warn('Full analysis error:', err);
+          // Keep the quick analysis data, don't throw error
         });
 
-        if (!fullResponse.ok) {
-          console.warn('Full analysis failed, using quick analysis data');
-          return quickResult;
-        }
-
-        const fullResult: ExtendedAnalysisResponse = await fullResponse.json();
-        console.log('🎯 Full analysis completed');
-
-        // Validate that the response contains the expected data structure
-        if (fullResult.mobileResponsiveness || fullResult.securityScore || 
-            fullResult.accessibility || fullResult.headerChecks) {
-          console.log('Complete analysis data structure validated');
-        }
-
-        return fullResult;
+        // Return quick result immediately to show dashboard
+        return quickResult;
 
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
@@ -137,14 +145,14 @@ export const useAnalysisApi = () => {
 
     try {
       const result = await requestPromise;
-      setData(result);
+      // Don't call setData here since it's already handled in the promise
       return result;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
       setError(errorMessage);
+      setLoading(false);  // Only set loading false on error
       return null;
     } finally {
-      setLoading(false);
       currentRequestRef.current = null;
       // Clean up cache after 5 minutes to prevent memory leaks
       setTimeout(() => {
