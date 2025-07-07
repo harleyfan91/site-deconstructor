@@ -219,7 +219,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     await SupabaseCacheService.cleanupExpired();
   }, 6 * 60 * 60 * 1000); // 6 hours
   
-  // Color extraction API route
+  // Color extraction API route with caching
   app.post('/api/colors', async (req, res) => {
     try {
       const { url } = req.body;
@@ -235,11 +235,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Invalid URL format' });
       }
 
-      console.log(`Extracting colors for: ${url}`);
+      // Generate cache key for colors
+      const colorsCacheKey = `colors_${generateUrlHash(url)}`;
+      
+      // Check cache first
+      const cachedColors = await SupabaseCacheService.get(colorsCacheKey);
+      if (cachedColors) {
+        console.log(`🎨 Color cache hit for: ${url}`);
+        return res.json(cachedColors.analysis_data);
+      }
+
+      console.log(`🎨 Extracting colors for: ${url}`);
+      const extractStartTime = Date.now();
       
       const colors = await extractColors(url);
       
+      logTiming('Color extraction', extractStartTime);
       console.log(`Extracted ${colors.length} unique colors`);
+      
+      // Cache the results
+      await SupabaseCacheService.set(colorsCacheKey, url, colors);
+      console.log(`✅ Cached color data for ${url}`);
+      
       res.json(colors);
       
     } catch (error) {
@@ -255,6 +272,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.status(500).json({ error: 'Color extraction failed' });
+    }
+  });
+
+  // Font analysis API route with caching
+  app.post('/api/fonts', async (req, res) => {
+    try {
+      const { url } = req.body;
+      
+      if (!url || typeof url !== 'string') {
+        return res.status(400).json({ error: 'URL is required in request body' });
+      }
+
+      // Validate URL format
+      try {
+        new URL(url);
+      } catch {
+        return res.status(400).json({ error: 'Invalid URL format' });
+      }
+
+      // Generate cache key for fonts
+      const fontsCacheKey = `fonts_${generateUrlHash(url)}`;
+      
+      // Check cache first
+      const cachedFonts = await SupabaseCacheService.get(fontsCacheKey);
+      if (cachedFonts) {
+        console.log(`🔤 Font cache hit for: ${url}`);
+        return res.json(cachedFonts.analysis_data);
+      }
+
+      console.log(`🔤 Extracting fonts for: ${url}`);
+      const extractStartTime = Date.now();
+      
+      // Extract fonts using the scrapePageData function
+      const scrapedData = await scrapePageData(url);
+      const fonts = scrapedData.fonts;
+      
+      logTiming('Font extraction', extractStartTime);
+      console.log(`Extracted ${fonts.length} fonts`);
+      
+      // Cache the results
+      await SupabaseCacheService.set(fontsCacheKey, url, fonts);
+      console.log(`✅ Cached font data for ${url}`);
+      
+      res.json(fonts);
+      
+    } catch (error) {
+      console.error('Font extraction failed:', error);
+      
+      if (error instanceof Error) {
+        if (error.message.includes('timeout') || error.message.includes('TimeoutError')) {
+          return res.status(504).json({ error: 'Request timeout while extracting fonts' });
+        }
+        if (error.message.includes('net::ERR_') || error.message.includes('Navigation failed')) {
+          return res.status(400).json({ error: 'Unable to access the provided URL' });
+        }
+      }
+      
+      res.status(500).json({ error: 'Font extraction failed' });
     }
   });
 
