@@ -6,8 +6,7 @@ import type { AnalysisResponse } from '@/types/analysis';
 
 interface ContrastWarningsCardProps {
   issues: Array<{textColor: string, backgroundColor: string, ratio: number}>;
-  data: AnalysisResponse | null;
-  loading: boolean;
+  url?: string;
 }
 
 interface ViolationCardProps {
@@ -46,14 +45,42 @@ const ViolationCard: React.FC<ViolationCardProps> = ({ id, impact, description }
   </Box>
 );
 
-const ContrastWarningsCard: React.FC<ContrastWarningsCardProps> = ({ issues, data, loading }) => {
+const ContrastWarningsCard: React.FC<ContrastWarningsCardProps> = ({ issues, url }) => {
+  const [accessibilityData, setAccessibilityData] = React.useState<any>(null);
+  const [loading, setLoading] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!url) return;
+
+    const fetchAccessibility = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch('/api/accessibility', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url })
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setAccessibilityData(data);
+        }
+      } catch (error) {
+        console.error('Accessibility analysis failed:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAccessibility();
+  }, [url]);
+
   // Defensive: always work with an array
   const issuesSafe = Array.isArray(issues) ? issues : [];
 
   // Extract accessibility data
-  const violations = data?.accessibility?.violations || [];
-  const totalChecks = 50;
-  const score = Math.max(0, Math.round((1 - violations.length / totalChecks) * 100));
+  const violations = accessibilityData?.violations || [];
+  const score = accessibilityData?.score || 0;
 
   if (loading) {
     return (

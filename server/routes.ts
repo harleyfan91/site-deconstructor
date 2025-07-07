@@ -2,10 +2,12 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import Wappalyzer from 'wappalyzer';
-import { extractColors, type ColorResult } from './lib/color-extraction';
-import { SupabaseCacheService } from './lib/supabase';
+import { extractColors, type ColorResult } from './lib/color-extraction.js';
+import { SupabaseCacheService } from './lib/supabase.js';
+import { analyzeAccessibility, extractSecurityHeaders } from '../client/src/lib/accessibility.js';
 import crypto from 'crypto';
 import { scrapePageData } from './lib/page-scraper';
+import playwright from 'playwright';
 
 // Helper function to map score to letter grade
 function mapScoreToGrade(score: number): string {
@@ -62,7 +64,7 @@ function extractImageUrls(html: string): string[] {
   const imageUrls: string[] = [];
   const imgRegex = /<img[^>]+src="([^"]+)"/gi;
   let match;
-  
+
   while ((match = imgRegex.exec(html)) !== null) {
     const src = match[1];
     // Convert relative URLs to absolute URLs if needed
@@ -75,7 +77,7 @@ function extractImageUrls(html: string): string[] {
       imageUrls.push(src);
     }
   }
-  
+
   return imageUrls;
 }
 
@@ -101,7 +103,7 @@ function logTiming(operation: string, startTime: number) {
 async function fetchPageSpeedOverview(url: string): Promise<any> {
   const startTime = Date.now();
   const urlHash = generateUrlHash(url);
-  
+
   // Check in-memory cache first
   const memCached = inMemoryCache.get(`psi_${urlHash}`);
   if (memCached && Date.now() - memCached.timestamp < IN_MEMORY_CACHE_TTL) {
@@ -113,9 +115,9 @@ async function fetchPageSpeedOverview(url: string): Promise<any> {
   const dbStartTime = Date.now();
   try {
     const cached = await SupabaseCacheService.get(urlHash);
-    
+
     logTiming('🗄️  Supabase cache lookup', dbStartTime);
-    
+
     if (cached) {
       const data = cached.analysis_data;
       // Store in memory cache
@@ -137,17 +139,17 @@ async function fetchPageSpeedOverview(url: string): Promise<any> {
     const apiUrl =
       `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&category=performance` +
       (apiKey ? `&key=${apiKey}` : "");
-    
+
     const res = await fetch(apiUrl, { signal: controller.signal });
     clearTimeout(timeoutId);
-    
+
     if (!res.ok) {
       throw new Error(`PSI request failed: ${res.status}`);
     }
-    
+
     const json = await res.json();
     logTiming('PSI API call', psiStartTime);
-    
+
     const audits = json.lighthouseResult?.audits || {};
     const metrics = audits['metrics']?.details?.items?.[0] || {};
     const overview = {
@@ -212,18 +214,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize Supabase cache service and create table if needed
   console.log('🚀 Initializing Supabase cache service...');
   await SupabaseCacheService.createTableIfNotExists();
-  
+
   // Clean up expired entries on startup and then every 6 hours
   await SupabaseCacheService.cleanupExpired();
   setInterval(async () => {
     await SupabaseCacheService.cleanupExpired();
   }, 6 * 60 * 60 * 1000); // 6 hours
-  
+
   // Color extraction API route
   app.post('/api/colors', async (req, res) => {
     try {
       const { url } = req.body;
-      
+
       if (!url || typeof url !== 'string') {
         return res.status(400).json({ error: 'URL is required in request body' });
       }
@@ -237,7 +239,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Generate cache key for colors
       const urlHash = crypto.createHash('sha256').update(`colors:${url}`).digest('hex');
-      
+
       // Try to get from cache first
       const cached = await SupabaseCacheService.get(urlHash);
       if (cached) {
@@ -246,39 +248,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       console.log(`Extracting colors for: ${url}`);
-      
+
       const colors = await extractColors(url);
-      
+
       console.log(`Extracted ${colors.length} unique colors`);
-      
+
       // Cache the results
       await SupabaseCacheService.set(urlHash, url, colors);
-      
+
       res.json(colors);
-      
+
     } catch (error) {
-      console.error('Color extraction failed:', error);
-      
-      if (error instanceof Error) {
-        if (error.message.includes('timeout') || error.message.includes('TimeoutError')) {
-          return res.status(504).json({ error: 'Request timeout while extracting colors' });
-        }
-        if (error.message.includes('net::ERR_') || error.message.includes('Navigation failed')) {
-          return res.status(400).json({ error: 'Unable to access the provided URL' });
-        }
-      }
-      
-      res.status(500).json({ error: 'Color extraction failed' });
+      console.error('Error in colors endpoint:', error);
+      res.status(500).json({ error: 'Failed to extract colors' });
     }
   });
 
-  // Full UI data extraction API route
-  app.post('/api/ui-data', async (req, res) => {
+  // Accessibility analysis endpoint with caching
+  app.post('/api/accessibility', async (req, res) => {
     try {
       const { url } = req.body;
-      
-      if (!url || typeof url !== 'string') {
-        return res.status(400).json({ error: 'URL is required in request body' });
+
+      if (!url) {
+        return res.status(400).json({ error: 'URL is required' });
       }
 
       // Validate URL format
@@ -288,645 +280,151 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Invalid URL format' });
       }
 
-      console.log(`🔍 Extracting UI data for: ${url}`);
-      
-      // For now, return empty data until scraping is fixed
-      const scrapedData: {
-        fonts: any[];
-        images: Array<{
-          type: string;
-          url: string;
-          alt: string;
-          isPhoto: boolean;
-          isIcon: boolean;
-        }>;
-        contrastIssues: any[];
-      } = { fonts: [], images: [], contrastIssues: [] };
-      
-      // Format the data to match the expected structure
-      const uiData = {
-        fonts: scrapedData.fonts,
-        images: scrapedData.images.map(img => ({
-          type: img.type,
-          count: 1,
-          format: img.type,
-          url: img.url,
-          alt: img.alt
-        })),
-        imageAnalysis: {
-          totalImages: scrapedData.images.length,
-          estimatedPhotos: scrapedData.images.filter(img => img.isPhoto).length,
-          estimatedIcons: scrapedData.images.filter(img => img.isIcon).length,
-          imageUrls: scrapedData.images.map(img => img.url),
-          photoUrls: scrapedData.images.filter(img => img.isPhoto).map(img => img.url),
-          iconUrls: scrapedData.images.filter(img => img.isIcon).map(img => img.url)
-        },
-        contrastIssues: scrapedData.contrastIssues
-      };
-      
-      console.log(`✅ UI data extracted: ${uiData.fonts.length} fonts, ${uiData.images.length} images, ${uiData.contrastIssues.length} contrast issues`);
-      res.json(uiData);
-      
-    } catch (error) {
-      console.error('UI data extraction failed:', error);
-      
-      if (error instanceof Error) {
-        if (error.message.includes('timeout') || error.message.includes('TimeoutError')) {
-          return res.status(504).json({ error: 'Request timeout while extracting UI data' });
-        }
-        if (error.message.includes('net::ERR_') || error.message.includes('Navigation failed')) {
-          return res.status(400).json({ error: 'Unable to access the provided URL' });
-        }
+      // Generate cache key for accessibility
+      const urlHash = crypto.createHash('sha256').update(`accessibility:${url}`).digest('hex');
+
+      // Try to get from cache first
+      const cached = await SupabaseCacheService.get(urlHash);
+      if (cached) {
+        console.log(`🗄️  Returning cached accessibility for: ${url}`);
+        return res.json(cached.analysis_data);
       }
-      
-      res.status(500).json({ error: 'UI data extraction failed' });
+
+      console.log(`Analyzing accessibility for: ${url}`);
+
+      // Fetch HTML and run accessibility analysis
+      const htmlResponse = await fetch(url, { 
+        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; SiteAnalyzer/1.0)' }
+      });
+      const html = await htmlResponse.text();
+
+      const violations = analyzeAccessibility(html);
+      const headers = Object.fromEntries(htmlResponse.headers.entries());
+      const securityHeaders = extractSecurityHeaders(headers);
+
+      const accessibilityData = {
+        violations,
+        securityHeaders,
+        score: Math.max(0, Math.round((1 - violations.length / 50) * 100))
+      };
+
+      console.log(`Found ${violations.length} accessibility violations`);
+
+      // Cache the results
+      await SupabaseCacheService.set(urlHash, url, accessibilityData);
+
+      res.json(accessibilityData);
+
+    } catch (error) {
+      console.error('Error in accessibility endpoint:', error);
+      res.status(500).json({ error: 'Failed to analyze accessibility' });
     }
   });
 
-  // Helper function to perform local HTML analysis
-  async function performLocalAnalysis(url: string, html: string, response: Response) {
-    const startTime = Date.now();
-    
-    // Extract image URLs from HTML
-    const extractedImageUrls = extractImageUrls(html);
-    
-    // Basic mobile responsiveness check
-    const hasViewportMeta = html.includes('viewport');
-    const hasResponsiveCSS = html.includes('max-width') || html.includes('min-width');
-    const mobileScore = (hasViewportMeta ? 50 : 0) + (hasResponsiveCSS ? 50 : 0);
-    
-    const mobileIssues: { id: string; title: string; description: string }[] = [];
-    if (!hasViewportMeta) {
-      mobileIssues.push({
-        id: 'viewport-meta',
-        title: 'Missing Viewport Meta Tag',
-        description: 'Page does not have a viewport meta tag for mobile optimization'
-      });
-    }
-    if (!hasResponsiveCSS) {
-      mobileIssues.push({
-        id: 'responsive-css',
-        title: 'No Responsive CSS Detected',
-        description: 'Page may not have responsive CSS rules'
-      });
-    }
-
-    // Basic security checks
-    const hasHTTPS = url.startsWith('https://');
-    const securityScore = hasHTTPS ? 80 : 40;
-    
-    const securityFindings: { id: string; title: string; description: string }[] = [];
-    if (!hasHTTPS) {
-      securityFindings.push({
-        id: 'no-https',
-        title: 'No HTTPS',
-        description: 'Website is not using HTTPS encryption'
-      });
-    }
-
-    // Basic accessibility checks
-    const hasAltTags = html.includes('alt=');
-    const accessibilityViolations: { id: string; impact: string; description: string }[] = [];
-    if (!hasAltTags) {
-      accessibilityViolations.push({
-        id: 'images-alt',
-        impact: 'serious',
-        description: 'Images may be missing alt attributes'
-      });
-    }
-
-    // Header checks
-    const headerChecks = {
-      hsts: response.headers.get('strict-transport-security') || 'missing',
-      csp: response.headers.get('content-security-policy') || 'missing',
-      frameOptions: response.headers.get('x-frame-options') || 'missing'
-    };
-
-    // Calculate scores
-    const overallScore = Math.round((mobileScore + securityScore + (hasAltTags ? 80 : 60)) / 3);
-    const seoScore = hasViewportMeta && hasAltTags ? 85 : 65;
-    const userExperienceScore = mobileScore;
-
-    // Tech stack detection
-    const techStack: { category: string; technology: string }[] = [];
-    try {
-      if (html.includes('react')) techStack.push({ category: 'JavaScript Frameworks', technology: 'React' });
-      if (html.includes('vue')) techStack.push({ category: 'JavaScript Frameworks', technology: 'Vue.js' });
-      if (html.includes('angular')) techStack.push({ category: 'JavaScript Frameworks', technology: 'Angular' });
-      if (html.includes('bootstrap')) techStack.push({ category: 'CSS Frameworks', technology: 'Bootstrap' });
-      if (html.includes('tailwind')) techStack.push({ category: 'CSS Frameworks', technology: 'Tailwind CSS' });
-      if (html.includes('jquery')) techStack.push({ category: 'JavaScript Libraries', technology: 'jQuery' });
-      if (hasHTTPS) techStack.push({ category: 'Security', technology: 'HTTPS' });
-      
-      techStack.push({ category: 'Markup Languages', technology: 'HTML5' });
-      
-      const server = response.headers.get('server');
-      if (server) {
-        if (server.toLowerCase().includes('nginx')) techStack.push({ category: 'Web Servers', technology: 'Nginx' });
-        if (server.toLowerCase().includes('apache')) techStack.push({ category: 'Web Servers', technology: 'Apache' });
-        if (server.toLowerCase().includes('cloudflare')) techStack.push({ category: 'CDN', technology: 'Cloudflare' });
-      }
-    } catch (e) {
-      console.warn('Tech stack detection error:', e);
-      techStack.push({ category: 'Markup Languages', technology: 'HTML5' });
-    }
-
-    // Extract fonts from CSS
-    const fontFamilies = new Set<string>();
-    const fontMatches = html.match(/font-family\s*:\s*[^;}]+/gi) || [];
-    fontMatches.forEach(match => {
-      const fonts = match.replace(/font-family\s*:\s*/i, '').split(',');
-      fonts.forEach(font => {
-        const cleanFont = font.trim().replace(/['"]/g, '');
-        if (cleanFont && cleanFont !== 'inherit') {
-          fontFamilies.add(cleanFont);
-        }
-      });
-    });
-
-    // Convert to structured font data
-    const extractedFonts = Array.from(fontFamilies).map(font => {
-      let category = 'sans-serif';
-      if (font.toLowerCase().includes('serif') && !font.toLowerCase().includes('sans')) {
-        category = 'serif';
-      } else if (['Courier', 'Monaco', 'Consolas', 'monospace'].some(mono => font.toLowerCase().includes(mono.toLowerCase()))) {
-        category = 'monospace';
-      }
-      
-      return {
-        name: font,
-        category,
-        usage: 'Various text elements',
-        weight: '400',
-        isLoaded: true,
-        isPublic: !['Arial', 'Helvetica', 'Times', 'Courier', 'Verdana', 'Georgia'].some(
-          systemFont => font.toLowerCase().includes(systemFont.toLowerCase())
-        )
-      };
-    });
-
-    // Enhanced image analysis
-    const imageElements = extractedImageUrls.map(url => {
-      const isIcon = url.toLowerCase().includes('icon') || 
-                     url.toLowerCase().includes('logo') || 
-                     url.toLowerCase().includes('.svg') ||
-                     url.includes('32x32') || url.includes('16x16');
-      
-      let type = 'unknown';
-      if (url.includes('.jpg') || url.includes('.jpeg')) type = 'JPEG';
-      else if (url.includes('.png')) type = 'PNG';
-      else if (url.includes('.gif')) type = 'GIF';
-      else if (url.includes('.webp')) type = 'WEBP';
-      else if (url.includes('.svg')) type = 'SVG';
-      
-      return {
-        url,
-        type,
-        isIcon,
-        isPhoto: !isIcon
-      };
-    });
-
-    logTiming('Local HTML analysis', startTime);
-    
-    return {
-      extractedImageUrls,
-      extractedFonts,
-      imageElements,
-      mobileScore,
-      mobileIssues,
-      securityScore,
-      securityFindings,
-      accessibilityViolations,
-      headerChecks,
-      overallScore,
-      seoScore,
-      userExperienceScore,
-      techStack,
-      html,
-      hasAltTags
-    };
-  }
-
-  // Quick analysis endpoint - returns overview data immediately
-  app.get('/api/analyze/quick', async (req, res) => {
-    try {
-      const { url } = req.query;
-      
-      if (!url || typeof url !== 'string') {
-        return res.status(400).json({ error: 'URL parameter is required' });
-      }
-
-      console.log(`🚀 Starting quick analysis for: ${url}`);
-      console.log(`📱 Request source: ${req.get('User-Agent')?.includes('Mozilla') ? 'Web Browser' : 'API Call'}`);
-      const totalStartTime = Date.now();
-      
-      // Parallel execution: HTML fetch and cache lookup
-      const htmlStartTime = Date.now();
-      const [response] = await Promise.all([
-        fetch(url, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (compatible; WebsiteAnalyzer/1.0)',
-          },
-        })
-      ]);
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch ${url}: ${response.status}`);
-      }
-
-      const html = await response.text();
-      logTiming('HTML fetch', htmlStartTime);
-      
-      // Perform local analysis
-      const localData = await performLocalAnalysis(url, html, response);
-      
-      // Create overview response without PSI data (will be loaded separately)
-      const analysisResult = {
-        id: crypto.randomUUID(),
-        url,
-        timestamp: new Date().toISOString(),
-        status: 'partial',
-        isQuickResponse: true,
-        data: {
-          overview: {
-            overallScore: localData.overallScore,
-            // pageLoadTime will be added by full analysis only
-            seoScore: localData.seoScore,
-            userExperienceScore: localData.userExperienceScore
-          },
-          ui: buildUIData(localData),
-          technical: {
-            techStack: localData.techStack,
-            healthGrade: mapScoreToGrade(localData.overallScore),
-            issues: localData.securityFindings.concat(localData.mobileIssues).map(issue => ({
-              type: 'security',
-              description: issue.description,
-              severity: 'medium' as const,
-              status: 'open'
-            })),
-            securityScore: localData.securityScore,
-            accessibility: {
-              violations: localData.accessibilityViolations
-            }
-          },
-          seo: {
-            score: localData.seoScore,
-            metaTags: {
-              title: localData.html.match(/<title>(.*?)<\/title>/i)?.[1] || 'No title found',
-              description: localData.html.match(/<meta[^>]*name="description"[^>]*content="([^"]*)"[^>]*>/i)?.[1] || 'No description found'
-            },
-            checks: [
-              {
-                name: 'Title Tag',
-                status: localData.html.includes('<title>') ? 'good' : 'error',
-                description: localData.html.includes('<title>') ? 'Title tag found' : 'Missing title tag'
-              },
-              {
-                name: 'Meta Description',
-                status: localData.html.includes('name="description"') ? 'good' : 'warning',
-                description: localData.html.includes('name="description"') ? 'Meta description found' : 'Missing meta description'
-              }
-            ],
-            recommendations: []
-          },
-          content: buildContentData() // Use fallback markers for quick analysis
-        }
-      };
-
-      logTiming('🚀 Total quick analysis', totalStartTime);
-      res.json(analysisResult);
-
-    } catch (error) {
-      console.error('Quick analysis error:', error);
-      res.status(500).json({ 
-        error: 'Quick analysis failed', 
-        message: error instanceof Error ? error.message : 'Unknown error' 
-      });
-    }
-  });
-
-  // Full analysis endpoint - returns complete data with PSI
-  app.get('/api/analyze/full', async (req, res) => {
-    try {
-      const { url } = req.query;
-      
-      if (!url || typeof url !== 'string') {
-        return res.status(400).json({ error: 'URL parameter is required' });
-      }
-
-      console.log(`🔍 Starting full analysis for: ${url}`);
-      console.log(`📱 Request source: ${req.get('User-Agent')?.includes('Mozilla') ? 'Web Browser' : 'API Call'}`);
-      const totalStartTime = Date.now();
-      
-      // Parallel execution: HTML fetch and PSI data
-      const htmlStartTime = Date.now();
-      const psiStartTime = Date.now();
-      
-      const [response, psiOverview] = await Promise.all([
-        fetch(url, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (compatible; WebsiteAnalyzer/1.0)',
-          },
-        }),
-        fetchPageSpeedOverview(url)
-      ]);
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch ${url}: ${response.status}`);
-      }
-
-      const html = await response.text();
-      logTiming('HTML fetch (full)', htmlStartTime);
-      
-      // Perform local analysis
-      const localData = await performLocalAnalysis(url, html, response);
-
-      // Create full analysis response
-      const analysisResult = {
-        id: crypto.randomUUID(),
-        url,
-        timestamp: new Date().toISOString(),
-        status: 'complete',
-        coreWebVitals: {
-          lcp: psiOverview.coreWebVitals.lcpMs,
-          fid: psiOverview.coreWebVitals.inpMs,
-          cls: psiOverview.coreWebVitals.cls
-        },
-        securityHeaders: {
-          csp: response.headers.get('content-security-policy') || '',
-          hsts: response.headers.get('strict-transport-security') || '',
-          xfo: response.headers.get('x-frame-options') || '',
-          xcto: response.headers.get('x-content-type-options') || '',
-          referrer: response.headers.get('referrer-policy') || ''
-        },
-        performanceScore: localData.overallScore,
-        seoScore: localData.seoScore,
-        readabilityScore: 75,
-        complianceStatus: localData.overallScore >= 80 ? 'pass' : localData.overallScore >= 60 ? 'warn' : 'fail',
-        mobileResponsiveness: {
-          score: localData.mobileScore,
-          issues: localData.mobileIssues
-        },
-        securityScore: {
-          grade: mapScoreToGrade(localData.securityScore),
-          findings: localData.securityFindings
-        },
-        accessibility: {
-          violations: localData.accessibilityViolations
-        },
-        headerChecks: localData.headerChecks,
-        data: {
-          overview: {
-            overallScore: localData.overallScore,
-            pageLoadTime: psiOverview.pageLoadTime,
-            coreWebVitals: psiOverview.coreWebVitals,
-            seoScore: localData.seoScore,
-            userExperienceScore: localData.userExperienceScore
-          },
-          ui: buildUIData(localData),
-          performance: {
-            coreWebVitals: [
-              { name: 'LCP', value: Number((psiOverview.coreWebVitals.lcpMs / 1000).toFixed(1)), benchmark: 2.5 },
-              { name: 'FID', value: psiOverview.coreWebVitals.inpMs, benchmark: 100 },
-              { name: 'CLS', value: psiOverview.coreWebVitals.cls, benchmark: 0.1 }
-            ],
-            performanceScore: localData.overallScore,
-            mobileResponsive: localData.mobileScore >= 50,
-            recommendations: localData.mobileIssues.map(issue => ({
-              type: 'warning' as const,
-              title: issue.title,
-              description: issue.description
-            }))
-          },
-          seo: {
-            score: localData.seoScore,
-            metaTags: {
-              title: localData.html.match(/<title>(.*?)<\/title>/i)?.[1] || 'No title found',
-              description: localData.html.match(/<meta[^>]*name="description"[^>]*content="([^"]*)"[^>]*>/i)?.[1] || 'No description found'
-            },
-            checks: [
-              {
-                name: 'Title Tag',
-                status: localData.html.includes('<title>') ? 'good' : 'error',
-                description: localData.html.includes('<title>') ? 'Title tag found' : 'Missing title tag'
-              },
-              {
-                name: 'Meta Description',
-                status: localData.html.includes('name="description"') ? 'good' : 'warning',
-                description: localData.html.includes('name="description"') ? 'Meta description found' : 'Missing meta description'
-              }
-            ],
-            recommendations: []
-          },
-          content: buildContentData(), // Use fallback markers initially
-          technical: {
-            techStack: localData.techStack,
-            healthGrade: mapScoreToGrade(localData.overallScore),
-            issues: localData.securityFindings.concat(localData.mobileIssues).map(issue => ({
-              type: 'security',
-              description: issue.description,
-              severity: 'medium' as const,
-              status: 'open'
-            })),
-            securityScore: localData.securityScore,
-            accessibility: {
-              violations: localData.accessibilityViolations
-            }
-          }
-        }
-      };
-
-      logTiming('🔍 Total full analysis', totalStartTime);
-      res.json(analysisResult);
-
-    } catch (error) {
-      console.error('Full analysis error:', error);
-      res.status(500).json({ 
-        error: 'Full analysis failed', 
-        message: error instanceof Error ? error.message : 'Unknown error' 
-      });
-    }
-  });
-
-  // Legacy analysis endpoint - redirects to full analysis for backward compatibility
-  app.get('/api/analyze', async (req, res) => {
-    console.log('📍 Legacy /api/analyze called, using full analysis endpoint');
-    
-    try {
-      // Direct forwarding to full analysis logic
-      const { url } = req.query;
-      if (!url || typeof url !== 'string') {
-        return res.status(400).json({ error: 'URL parameter is required' });
-      }
-
-      console.log(`🔄 Forwarding to full analysis for: ${url}`);
-      const totalStartTime = Date.now();
-      
-      const [response, psiOverview] = await Promise.all([
-        fetch(url, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (compatible; WebsiteAnalyzer/1.0)',
-          },
-        }),
-        fetchPageSpeedOverview(url)
-      ]);
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch ${url}: ${response.status}`);
-      }
-
-      const html = await response.text();
-      const localData = await performLocalAnalysis(url, html, response);
-
-      const analysisResult = {
-        id: crypto.randomUUID(),
-        url,
-        timestamp: new Date().toISOString(),
-        status: 'complete',
-        coreWebVitals: {
-          lcp: psiOverview.coreWebVitals.lcpMs,
-          fid: psiOverview.coreWebVitals.inpMs,
-          cls: psiOverview.coreWebVitals.cls
-        },
-        securityHeaders: {
-          csp: response.headers.get('content-security-policy') || '',
-          hsts: response.headers.get('strict-transport-security') || '',
-          xfo: response.headers.get('x-frame-options') || '',
-          xcto: response.headers.get('x-content-type-options') || '',
-          referrer: response.headers.get('referrer-policy') || ''
-        },
-        performanceScore: localData.overallScore,
-        seoScore: localData.seoScore,
-        readabilityScore: 75,
-        complianceStatus: localData.overallScore >= 80 ? 'pass' : localData.overallScore >= 60 ? 'warn' : 'fail',
-        mobileResponsiveness: {
-          score: localData.mobileScore,
-          issues: localData.mobileIssues
-        },
-        securityScore: {
-          grade: mapScoreToGrade(localData.securityScore),
-          findings: localData.securityFindings
-        },
-        accessibility: {
-          violations: localData.accessibilityViolations
-        },
-        headerChecks: localData.headerChecks,
-        data: {
-          overview: {
-            overallScore: localData.overallScore,
-            pageLoadTime: psiOverview.pageLoadTime,
-            coreWebVitals: psiOverview.coreWebVitals,
-            seoScore: localData.seoScore,
-            userExperienceScore: localData.userExperienceScore
-          },
-          ui: buildUIData(localData),
-          performance: {
-            coreWebVitals: [
-              { name: 'LCP', value: Number((psiOverview.coreWebVitals.lcpMs / 1000).toFixed(1)), benchmark: 2.5 },
-              { name: 'FID', value: psiOverview.coreWebVitals.inpMs, benchmark: 100 },
-              { name: 'CLS', value: psiOverview.coreWebVitals.cls, benchmark: 0.1 }
-            ],
-            performanceScore: localData.overallScore,
-            mobileResponsive: localData.mobileScore >= 50,
-            recommendations: localData.mobileIssues.map(issue => ({
-              type: 'warning' as const,
-              title: issue.title,
-              description: issue.description
-            }))
-          },
-          seo: {
-            score: localData.seoScore,
-            metaTags: {
-              title: localData.html.match(/<title>(.*?)<\/title>/i)?.[1] || 'No title found',
-              description: localData.html.match(/<meta[^>]*name="description"[^>]*content="([^"]*)"[^>]*>/i)?.[1] || 'No description found'
-            },
-            checks: [
-              {
-                name: 'Title Tag',
-                status: localData.html.includes('<title>') ? 'good' : 'error',
-                description: localData.html.includes('<title>') ? 'Title tag found' : 'Missing title tag'
-              },
-              {
-                name: 'Meta Description',
-                status: localData.html.includes('name="description"') ? 'good' : 'warning',
-                description: localData.html.includes('name="description"') ? 'Meta description found' : 'Missing meta description'
-              }
-            ],
-            recommendations: []
-          },
-          technical: {
-            techStack: localData.techStack,
-            healthGrade: mapScoreToGrade(localData.overallScore),
-            issues: localData.securityFindings.concat(localData.mobileIssues).map(issue => ({
-              type: 'security',
-              description: issue.description,
-              severity: 'medium' as const,
-              status: 'open'
-            })),
-            securityScore: localData.securityScore,
-            accessibility: {
-              violations: localData.accessibilityViolations
-            }
-          }
-        }
-      };
-
-      logTiming('📍 Legacy analysis (full)', totalStartTime);
-      res.json(analysisResult);
-
-    } catch (error) {
-      console.error('Legacy analysis error:', error);
-      res.status(500).json({ 
-        error: 'Analysis failed', 
-        message: error instanceof Error ? error.message : 'Unknown error' 
-      });
-    }
-  });
-
-  // Enhanced content analysis endpoint with real scraping
-  app.post('/api/analyze/content', async (req, res) => {
+  // Font analysis endpoint with caching  
+  app.post('/api/fonts', async (req, res) => {
     try {
       const { url } = req.body;
-      
-      if (!url || typeof url !== 'string') {
-        return res.status(400).json({ error: 'URL is required in request body' });
+
+      if (!url) {
+        return res.status(400).json({ error: 'URL is required' });
       }
 
-      console.log(`📄 Starting enhanced content analysis for: ${url}`);
-      const startTime = Date.now();
-      
-      // Perform comprehensive page scraping with content analysis
-      const scrapedData = await scrapePageData(url);
-      
-      logTiming('Enhanced content analysis', startTime);
-      
-      // Return enhanced UI data with real content analysis
-      const response = {
-        ui: {
-          imageAnalysis: {
-            photoUrls: scrapedData.images.filter(img => img.isPhoto).map(img => img.url),
-            iconUrls: scrapedData.images.filter(img => img.isIcon).map(img => img.url)
+      // Validate URL format
+      try {
+        new URL(url);
+      } catch {
+        return res.status(400).json({ error: 'Invalid URL format' });
+      }
+
+      // Generate cache key for fonts
+      const urlHash = crypto.createHash('sha256').update(`fonts:${url}`).digest('hex');
+
+      // Try to get from cache first
+      const cached = await SupabaseCacheService.get(urlHash);
+      if (cached) {
+        console.log(`🗄️  Returning cached fonts for: ${url}`);
+        return res.json(cached.analysis_data);
+      }
+
+      console.log(`Analyzing fonts for: ${url}`);
+
+      // Launch Playwright for font analysis
+      const browser = await playwright.chromium.launch();
+      const page = await browser.newPage();
+
+      try {
+        await page.goto(url, { waitUntil: 'networkidle' });
+
+        // Extract fonts from the page
+        const fonts = await page.evaluate(() => {
+          const elements = Array.from(document.querySelectorAll('body *'));
+          const seenFamilies = new Set();
+          const results = [];
+
+          for (const el of elements) {
+            const styles = getComputedStyle(el);
+            const { fontFamily, fontWeight } = styles;
+
+            // Clean up font family name
+            const cleanFontFamily = fontFamily.split(',')[0].replace(/['"]/g, '').trim();
+
+            if (seenFamilies.has(cleanFontFamily) || !cleanFontFamily) continue;
+            seenFamilies.add(cleanFontFamily);
+
+            // Determine font category
+            const lowerFamily = cleanFontFamily.toLowerCase();
+            let category = 'display';
+            if (['times', 'georgia', 'serif'].some(font => lowerFamily.includes(font))) {
+              category = 'serif';
+            } else if (['arial', 'helvetica', 'sans-serif'].some(font => lowerFamily.includes(font))) {
+              category = 'sans-serif';
+            } else if (['courier', 'monaco', 'monospace'].some(font => lowerFamily.includes(font))) {
+              category = 'monospace';
+            }
+
+            // Determine usage context
+            const tagName = el.tagName.toLowerCase();
+            const fontSize = parseFloat(styles.fontSize);
+            let usage = 'body';
+
+            if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(tagName)) {
+              usage = 'heading';
+            } else if (fontSize > 24) {
+              usage = 'display';
+            } else if (fontSize < 14) {
+              usage = 'caption';
+            }
+
+            results.push({
+              name: cleanFontFamily,
+              category,
+              usage,
+              weight: fontWeight,
+              isLoaded: true, // If we can analyze it, it's loaded
+              isPublic: ['Arial', 'Helvetica', 'Times', 'Georgia', 'Courier'].some(sys => 
+                cleanFontFamily.toLowerCase().includes(sys.toLowerCase())
+              )
+            });
           }
-        },
-        content: {
-          wordCount: scrapedData.content.wordCount,
-          readabilityScore: scrapedData.content.readabilityScore
-        }
-      };
-      
-      console.log(`✅ Enhanced analysis complete: ${scrapedData.content.wordCount} words, ${scrapedData.content.readabilityScore} readability score`);
-      res.json(response);
-      
+
+          return results;
+        });
+
+        console.log(`Extracted ${fonts.length} unique fonts`);
+
+        // Cache the results
+        await SupabaseCacheService.set(urlHash, url, fonts);
+
+        res.json(fonts);
+
+      } finally {
+        await browser.close();
+      }
+
     } catch (error) {
-      console.error('Enhanced content analysis error:', error);
-      res.status(500).json({ 
-        error: 'Enhanced content analysis failed', 
-        message: error instanceof Error ? error.message : 'Unknown error' 
-      });
+      console.error('Error in fonts endpoint:', error);
+      res.status(500).json({ error: 'Failed to analyze fonts' });
     }
   });
-
-  const httpServer = createServer(app);
-  return httpServer;
-}
+};

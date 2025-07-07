@@ -2,37 +2,40 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Typography, Chip, CircularProgress } from '@mui/material';
 import { Type } from 'lucide-react';
-import type { AnalysisResponse } from '@/types/analysis';
-import { analyzeFontsOnPage, FontAnalysisResult } from '@/utils/fontAnalysis';
 
 interface FontAnalysisCardProps {
-  fonts: Array<{name: string, category: string, usage: string, weight?: string, isLoaded?: boolean, isPublic?: boolean}>;
+  url?: string;
 }
 
-const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts }) => {
-  const [analyzedFonts, setAnalyzedFonts] = useState<FontAnalysisResult[]>([]);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
+const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ url }) => {
+  const [fonts, setFonts] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const performFontAnalysis = async () => {
-      setIsAnalyzing(true);
+    if (!url) return;
+
+    const fetchFonts = async () => {
+      setIsLoading(true);
       try {
-        const results = await analyzeFontsOnPage();
-        setAnalyzedFonts(results);
+        const response = await fetch('/api/fonts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url })
+        });
+        
+        if (response.ok) {
+          const fontData = await response.json();
+          setFonts(fontData);
+        }
       } catch (error) {
         console.error('Font analysis failed:', error);
-        // Fallback to prop fonts if analysis fails
-        setAnalyzedFonts([]);
       } finally {
-        setIsAnalyzing(false);
+        setIsLoading(false);
       }
     };
 
-    performFontAnalysis();
-  }, []);
-
-  // Use analyzed fonts if available, otherwise fall back to prop fonts
-  const fontsToDisplay = analyzedFonts.length > 0 ? analyzedFonts : propFonts;
+    fetchFonts();
+  }, [url]);
 
   return (
     <Box>
@@ -41,29 +44,25 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts })
         <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
           Font Analysis
         </Typography>
-        {isAnalyzing && (
-          <CircularProgress size={16} sx={{ ml: 2 }} />
-        )}
+        {isLoading && <CircularProgress size={16} sx={{ ml: 2 }} />}
       </Box>
       
       <Box>
-        {fontsToDisplay.map((font: any, index: number) => (
-          <Box key={index} sx={{ mb: 3, pb: 2, borderBottom: index < fontsToDisplay.length - 1 ? '1px solid #E0E0E0' : 'none' }}>
+        {fonts.map((font: any, index: number) => (
+          <Box key={index} sx={{ mb: 3, pb: 2, borderBottom: index < fonts.length - 1 ? '1px solid #E0E0E0' : 'none' }}>
             <Typography variant="h6" sx={{ fontFamily: font.name, mb: 1 }}>
               {font.name}
             </Typography>
             <Box sx={{ display: 'flex', gap: 1, mb: 1, flexWrap: 'wrap' }}>
               <Chip label={font.category} size="small" variant="outlined" />
               <Chip label={font.usage} size="small" />
-              {'isLoaded' in font && (
-                <Chip 
-                  label={font.isLoaded ? 'loaded' : 'not loaded'} 
-                  size="small" 
-                  color={font.isLoaded ? 'success' : 'error'}
-                  variant="outlined"
-                />
-              )}
-              {'isPublic' in font && font.isPublic && (
+              <Chip 
+                label={font.isLoaded ? 'loaded' : 'not loaded'} 
+                size="small" 
+                color={font.isLoaded ? 'success' : 'error'}
+                variant="outlined"
+              />
+              {font.isPublic && (
                 <Chip label="Public Font" size="small" color="info" variant="outlined" />
               )}
             </Box>
