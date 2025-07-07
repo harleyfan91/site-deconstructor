@@ -258,7 +258,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`🔍 Extracting UI data for: ${url}`);
       
       // For now, return empty data until scraping is fixed
-      const scrapedData = { fonts: [], images: [], contrastIssues: [] };
+      const scrapedData: {
+        fonts: any[];
+        images: Array<{
+          type: string;
+          url: string;
+          alt: string;
+          isPhoto: boolean;
+          isIcon: boolean;
+        }>;
+        contrastIssues: any[];
+      } = { fonts: [], images: [], contrastIssues: [] };
       
       // Format the data to match the expected structure
       const uiData = {
