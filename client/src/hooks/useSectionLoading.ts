@@ -39,9 +39,9 @@ export const useSectionLoading = (data: AnalysisResponse | null, globalLoading: 
       performance: !data.data?.performance?.coreWebVitals || data.data.performance.coreWebVitals.length === 0,
       seo: !data.data?.seo?.score && data.data?.seo?.score !== 0,
       technical: !data.data?.technical?.accessibility,
-      ui: !data.data?.ui?.colors || data.data.ui.colors.length === 0,
+      ui: !data.data?.ui, // UI tab loads when ui section exists, regardless of colors
       content: !data.data?.overview,
-      compliance: !data.lhr?.categories?.security,
+      compliance: !data.data?.technical?.accessibility, // Use accessibility data for compliance until PSI loads
     });
   }, [data, globalLoading]);
 

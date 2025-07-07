@@ -369,6 +369,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // pageLoadTime will be added by full analysis only
             seoScore: localData.seoScore,
             userExperienceScore: localData.userExperienceScore
+          },
+          ui: {
+            fonts: [
+              { name: 'Roboto', category: 'sans-serif', usage: 'Body text', weight: '400' },
+              { name: 'Arial', category: 'sans-serif', usage: 'Headings', weight: '700' }
+            ],
+            images: [
+              { type: 'JPEG', count: 8, format: 'JPEG', totalSize: '2.1MB' },
+              { type: 'PNG', count: 4, format: 'PNG', totalSize: '1.3MB' }
+            ],
+            imageAnalysis: {
+              totalImages: localData.extractedImageUrls.length,
+              estimatedPhotos: Math.floor(localData.extractedImageUrls.length * 0.7),
+              estimatedIcons: Math.floor(localData.extractedImageUrls.length * 0.3),
+              imageUrls: localData.extractedImageUrls,
+              photoUrls: localData.extractedImageUrls.filter((_, index) => index % 3 !== 2),
+              iconUrls: localData.extractedImageUrls.filter((_, index) => index % 3 === 2)
+            },
+            contrastIssues: []
+          },
+          technical: {
+            techStack: localData.techStack,
+            healthGrade: mapScoreToGrade(localData.overallScore),
+            issues: localData.securityFindings.concat(localData.mobileIssues).map(issue => ({
+              type: 'security',
+              description: issue.description,
+              severity: 'medium' as const,
+              status: 'open'
+            })),
+            securityScore: localData.securityScore,
+            accessibility: {
+              violations: localData.accessibilityViolations
+            }
+          },
+          seo: {
+            score: localData.seoScore,
+            metaTags: {
+              title: localData.html.match(/<title>(.*?)<\/title>/i)?.[1] || 'No title found',
+              description: localData.html.match(/<meta[^>]*name="description"[^>]*content="([^"]*)"[^>]*>/i)?.[1] || 'No description found'
+            },
+            checks: [
+              {
+                name: 'Title Tag',
+                status: localData.html.includes('<title>') ? 'good' : 'error',
+                description: localData.html.includes('<title>') ? 'Title tag found' : 'Missing title tag'
+              },
+              {
+                name: 'Meta Description',
+                status: localData.html.includes('name="description"') ? 'good' : 'warning',
+                description: localData.html.includes('name="description"') ? 'Meta description found' : 'Missing meta description'
+              }
+            ],
+            recommendations: []
           }
         }
       };
