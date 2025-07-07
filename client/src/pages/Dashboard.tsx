@@ -23,7 +23,7 @@ const Dashboard = ({ darkMode, toggleDarkMode }: DashboardProps) => {
         top: urlInputHeight,
         behavior: 'smooth'
       });
-    }, 4000); // Increased from 800ms to 4000ms for better timing
+    }, 1500); // Increased from 800ms to 1500ms for better timing
 
     return () => clearTimeout(timer);
   }, [isMobile]);
