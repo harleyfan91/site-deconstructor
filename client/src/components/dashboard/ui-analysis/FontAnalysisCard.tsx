@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Box, Typography, Chip, CircularProgress } from '@mui/material';
 import { Type } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
@@ -13,6 +13,34 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, u
   const [fonts, setFonts] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showScrollIndicator, setShowScrollIndicator] = useState(false);
+  const [canScroll, setCanScroll] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Check if content is scrollable
+  const checkScrollable = () => {
+    const element = scrollRef.current;
+    if (element) {
+      const isScrollable = element.scrollHeight > element.clientHeight;
+      setCanScroll(isScrollable);
+    }
+  };
+
+  // Handle scroll events
+  const handleScroll = () => {
+    setShowScrollIndicator(true);
+    
+    // Clear existing timeout
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
+    }
+    
+    // Hide indicator after scroll stops
+    scrollTimeoutRef.current = setTimeout(() => {
+      setShowScrollIndicator(false);
+    }, 1500);
+  };
 
   useEffect(() => {
     if (!url) return;
@@ -44,6 +72,22 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, u
 
     fetchFonts();
   }, [url]);
+
+  // Check scrollable after fonts load
+  useEffect(() => {
+    if (fonts.length > 0) {
+      setTimeout(checkScrollable, 100);
+    }
+  }, [fonts]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Use fetched font data or fallback to props
   const fontsToDisplay = fonts.length > 0 ? fonts : (propFonts || []);
@@ -77,25 +121,19 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, u
         ) : (
           <Box sx={{ position: 'relative' }}>
             <Box 
+              ref={scrollRef}
+              onScroll={handleScroll}
               sx={{ 
                 maxHeight: { xs: '200px', md: '300px' }, // 2 fonts mobile, 3 fonts desktop (~100px per font)
                 overflowY: 'auto',
                 overflowX: 'hidden',
-                pr: 2, // Add padding for scrollbar
+                pr: 1,
+                // Hide scrollbar completely
                 '&::-webkit-scrollbar': {
-                  width: '4px',
+                  display: 'none',
                 },
-                '&::-webkit-scrollbar-track': {
-                  background: '#f1f1f1',
-                  borderRadius: '3px',
-                },
-                '&::-webkit-scrollbar-thumb': {
-                  background: '#b3b3b3',
-                  borderRadius: '3px',
-                  '&:hover': {
-                    background: '#8c8c8c',
-                  },
-                },
+                scrollbarWidth: 'none', // Firefox
+                msOverflowStyle: 'none', // IE/Edge
               }}
             >
               {fontsToDisplay.map((font: any, index: number) => (
@@ -124,16 +162,16 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, u
                 </Box>
               ))}
             </Box>
-            {/* Scroll indicator for mobile - only show if there are more than 2 fonts */}
-            {fontsToDisplay.length > 2 && (
+            {/* Universal scroll indicator - shows when scrolling and content is scrollable */}
+            {canScroll && showScrollIndicator && (
               <Box
                 sx={{
-                  display: { xs: 'flex', md: 'none' }, // Only show on mobile
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  mt: 1,
-                  py: 0.5,
-                  borderTop: '1px solid #E0E0E0',
+                  position: 'absolute',
+                  bottom: 8,
+                  right: 8,
+                  zIndex: 10,
+                  transition: 'opacity 0.3s ease',
+                  opacity: showScrollIndicator ? 1 : 0,
                 }}
               >
                 <Box
@@ -144,14 +182,15 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, u
                     px: 1,
                     py: 0.5,
                     borderRadius: '12px',
-                    backgroundColor: 'rgba(0,0,0,0.05)',
-                    border: '1px solid rgba(0,0,0,0.1)',
+                    backgroundColor: 'rgba(0,0,0,0.75)',
+                    color: 'white',
+                    backdropFilter: 'blur(4px)',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
                   }}
                 >
                   <Typography 
                     variant="caption" 
                     sx={{ 
-                      color: 'text.secondary',
                       fontSize: '10px',
                       fontWeight: 500,
                     }}
@@ -160,15 +199,15 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, u
                   </Typography>
                   <Box
                     sx={{
-                      width: '12px',
-                      height: '12px',
+                      width: '10px',
+                      height: '10px',
                       borderRadius: '50%',
-                      backgroundColor: 'primary.main',
+                      backgroundColor: 'white',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      color: 'white',
-                      fontSize: '8px',
+                      color: 'black',
+                      fontSize: '6px',
                     }}
                   >
                     ↓
