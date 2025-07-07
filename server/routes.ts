@@ -549,14 +549,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'URL parameter is required' });
       }
 
-      console.log(`🚀 Starting quick analysis for: ${url}`);
+      // Normalize URL - add https:// if missing protocol
+      let normalizedUrl = url.trim();
+      if (!normalizedUrl.startsWith('http://') && !normalizedUrl.startsWith('https://')) {
+        normalizedUrl = `https://${normalizedUrl}`;
+      }
+
+      // Validate URL format
+      try {
+        new URL(normalizedUrl);
+      } catch {
+        return res.status(400).json({ error: 'Invalid URL format' });
+      }
+
+      console.log(`🚀 Starting quick analysis for: ${normalizedUrl}`);
       console.log(`📱 Request source: ${req.get('User-Agent')?.includes('Mozilla') ? 'Web Browser' : 'API Call'}`);
       const totalStartTime = Date.now();
       
       // Parallel execution: HTML fetch and cache lookup
       const htmlStartTime = Date.now();
       const [response] = await Promise.all([
-        fetch(url, {
+        fetch(normalizedUrl, {
           headers: {
             'User-Agent': 'Mozilla/5.0 (compatible; WebsiteAnalyzer/1.0)',
           },
@@ -564,19 +577,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       ]);
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch ${url}: ${response.status}`);
+        throw new Error(`Failed to fetch ${normalizedUrl}: ${response.status}`);
       }
 
       const html = await response.text();
       logTiming('HTML fetch', htmlStartTime);
       
       // Perform local analysis
-      const localData = await performLocalAnalysis(url, html, response);
+      const localData = await performLocalAnalysis(normalizedUrl, html, response);
       
       // Create overview response without PSI data (will be loaded separately)
       const analysisResult = {
         id: crypto.randomUUID(),
-        url,
+        url: normalizedUrl,
         timestamp: new Date().toISOString(),
         status: 'partial',
         isQuickResponse: true,
