@@ -221,6 +221,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     await SupabaseCacheService.cleanupExpired();
   }, 6 * 60 * 60 * 1000); // 6 hours
 
+  // Create HTTP server
+  const server = createServer(app);
+
   // Color extraction API route
   app.post('/api/colors', async (req, res) => {
     try {
@@ -427,4 +430,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: 'Failed to analyze fonts' });
     }
   });
+
+  return server;
 };
