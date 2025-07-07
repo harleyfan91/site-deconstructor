@@ -167,10 +167,10 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, u
               <Box
                 sx={{
                   position: 'absolute',
-                  bottom: 8,
-                  right: 8,
+                  bottom: 6,
+                  right: 6,
                   zIndex: 10,
-                  transition: 'opacity 1s ease',
+                  transition: 'opacity 1.5s ease',
                   opacity: showScrollIndicator ? 1 : 0,
                 }}
               >
