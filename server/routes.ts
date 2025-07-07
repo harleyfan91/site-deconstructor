@@ -59,6 +59,79 @@ function buildContentData(scrapedData?: any) {
   };
 }
 
+// Helper function to analyze SEO and create checks
+function analyzeSEO(html: string, url: string) {
+  const title = html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1] || '';
+  const description = html.match(/<meta[^>]*name="description"[^>]*content="([^"]*)"[^>]*>/i)?.[1] || '';
+  const keywords = html.match(/<meta[^>]*name="keywords"[^>]*content="([^"]*)"[^>]*>/i)?.[1] || '';
+  const h1Tags = (html.match(/<h1[^>]*>(.*?)<\/h1>/gi) || []).length;
+  const imageTagsWithAlt = (html.match(/<img[^>]*alt="[^"]*"[^>]*>/gi) || []).length;
+  const imageTags = (html.match(/<img[^>]*>/gi) || []).length;
+  const viewport = html.match(/<meta[^>]*name="viewport"[^>]*>/i);
+  const canonical = html.match(/<link[^>]*rel="canonical"[^>]*>/i);
+
+  const checks = [
+    {
+      check: 'Title Tag',
+      status: title && title.length >= 30 && title.length <= 60 ? 'good' : title ? 'warning' : 'error',
+      description: title ? `Title: "${title}" (${title.length} characters)` : 'No title tag found',
+      recommendation: title ? 
+        (title.length < 30 ? 'Title is too short (< 30 chars)' : 
+         title.length > 60 ? 'Title is too long (> 60 chars)' : 
+         'Title length is optimal') : 'Add a descriptive title tag'
+    },
+    {
+      check: 'Meta Description',
+      status: description && description.length >= 120 && description.length <= 160 ? 'good' : description ? 'warning' : 'error',
+      description: description ? `Description: "${description}" (${description.length} characters)` : 'No meta description found',
+      recommendation: description ? 
+        (description.length < 120 ? 'Description is too short (< 120 chars)' : 
+         description.length > 160 ? 'Description is too long (> 160 chars)' : 
+         'Description length is optimal') : 'Add a meta description'
+    },
+    {
+      check: 'Heading Structure',
+      status: h1Tags === 1 ? 'good' : h1Tags > 1 ? 'warning' : 'error',
+      description: `Found ${h1Tags} H1 tag(s)`,
+      recommendation: h1Tags === 1 ? 'H1 structure is correct' : 
+        h1Tags > 1 ? 'Multiple H1 tags found - use only one per page' : 
+        'Add an H1 tag to the page'
+    },
+    {
+      check: 'Image Alt Text',
+      status: imageTags === 0 ? 'good' : imageTagsWithAlt === imageTags ? 'good' : 
+        imageTagsWithAlt > imageTags * 0.8 ? 'warning' : 'error',
+      description: `${imageTagsWithAlt}/${imageTags} images have alt text`,
+      recommendation: imageTags === 0 ? 'No images to check' :
+        imageTagsWithAlt === imageTags ? 'All images have alt text' :
+        `Add alt text to ${imageTags - imageTagsWithAlt} missing images`
+    },
+    {
+      check: 'Mobile Viewport',
+      status: viewport ? 'good' : 'error',
+      description: viewport ? 'Viewport meta tag present' : 'No viewport meta tag found',
+      recommendation: viewport ? 'Mobile viewport is configured' : 'Add viewport meta tag for mobile responsiveness'
+    },
+    {
+      check: 'Canonical URL',
+      status: canonical ? 'good' : 'warning',
+      description: canonical ? 'Canonical link tag present' : 'No canonical URL found',
+      recommendation: canonical ? 'Canonical URL is set' : 'Consider adding canonical link tag'
+    }
+  ];
+
+  const goodChecks = checks.filter(c => c.status === 'good').length;
+  const score = Math.round((goodChecks / checks.length) * 100);
+
+  return {
+    score,
+    title,
+    description,
+    keywords,
+    checks
+  };
+}
+
 // Helper function to extract image URLs from HTML
 function extractImageUrls(html: string): string[] {
   const imageUrls: string[] = [];
@@ -272,11 +345,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Extract basic data
       const extractedImageUrls = extractImageUrls(html);
       const ui = buildUIData({ extractedImageUrls });
+      const seo = analyzeSEO(html, url);
 
       const quickData = {
         url,
         timestamp: new Date().toISOString(),
         data: {
+          overview: {
+            overallScore: Math.round((seo.score + 85) / 2), // Average of SEO score and estimated performance
+            pageLoadTime: Math.round((Date.now() - startTime) / 1000 * 100) / 100,
+            seoScore: seo.score,
+            userExperienceScore: 85, // Estimated score for quick analysis
+            coreWebVitals: {
+              lcp: null,
+              fid: null,
+              cls: null,
+              fcp: null,
+              lcp_benchmark: 2.5,
+              fid_benchmark: 100,
+              cls_benchmark: 0.1,
+              fcp_benchmark: 1.8
+            }
+          },
           performance: {
             score: null,
             metrics: {
@@ -288,12 +378,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               tbt: null
             }
           },
-          seo: {
-            score: 85,
-            title: html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1] || 'No title found',
-            description: html.match(/<meta[^>]*name="description"[^>]*content="([^"]*)"[^>]*>/i)?.[1] || '',
-            keywords: html.match(/<meta[^>]*name="keywords"[^>]*content="([^"]*)"[^>]*>/i)?.[1] || ''
-          },
+          seo,
           ui,
           accessibility: {
             violations: []
@@ -373,14 +458,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const accessibility = analyzeAccessibility(html);
       const headers = Object.fromEntries(htmlResponse.headers.entries());
       const securityHeaders = extractSecurityHeaders(headers);
+      const seo = analyzeSEO(html, url);
+
+      // Override SEO score with PSI data if available
+      if (psiData?.lighthouseResult?.categories?.seo?.score) {
+        seo.score = Math.round(psiData.lighthouseResult.categories.seo.score * 100);
+      }
+
+      const performanceScore = psiData?.lighthouseResult?.categories?.performance?.score ? 
+        Math.round(psiData.lighthouseResult.categories.performance.score * 100) : null;
+      const accessibilityScore = psiData?.lighthouseResult?.categories?.accessibility?.score ? 
+        Math.round(psiData.lighthouseResult.categories.accessibility.score * 100) : 
+        Math.max(0, Math.round((1 - accessibility.length / 50) * 100));
+      
+      // Calculate overall score
+      const scores = [performanceScore, seo.score, accessibilityScore].filter(s => s !== null);
+      const overallScore = scores.length > 0 ? Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length) : 75;
 
       const fullData = {
         url,
         timestamp: new Date().toISOString(),
         data: {
+          overview: {
+            overallScore,
+            pageLoadTime: Math.round((Date.now() - startTime) / 1000 * 100) / 100,
+            seoScore: seo.score,
+            userExperienceScore: accessibilityScore,
+            coreWebVitals: {
+              lcp: psiData?.lighthouseResult?.audits?.['largest-contentful-paint']?.numericValue || null,
+              fid: psiData?.lighthouseResult?.audits?.['max-potential-fid']?.numericValue || null,
+              cls: psiData?.lighthouseResult?.audits?.['cumulative-layout-shift']?.numericValue || null,
+              fcp: psiData?.lighthouseResult?.audits?.['first-contentful-paint']?.numericValue || null,
+              lcp_benchmark: 2.5,
+              fid_benchmark: 100,
+              cls_benchmark: 0.1,
+              fcp_benchmark: 1.8
+            }
+          },
           performance: {
-            score: psiData?.lighthouseResult?.categories?.performance?.score ? 
-              Math.round(psiData.lighthouseResult.categories.performance.score * 100) : null,
+            score: performanceScore,
             metrics: {
               fcp: psiData?.lighthouseResult?.audits?.['first-contentful-paint']?.numericValue || null,
               lcp: psiData?.lighthouseResult?.audits?.['largest-contentful-paint']?.numericValue || null,
@@ -390,19 +506,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
               tbt: psiData?.lighthouseResult?.audits?.['total-blocking-time']?.numericValue || null
             }
           },
-          seo: {
-            score: psiData?.lighthouseResult?.categories?.seo?.score ? 
-              Math.round(psiData.lighthouseResult.categories.seo.score * 100) : 85,
-            title: html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1] || 'No title found',
-            description: html.match(/<meta[^>]*name="description"[^>]*content="([^"]*)"[^>]*>/i)?.[1] || '',
-            keywords: html.match(/<meta[^>]*name="keywords"[^>]*content="([^"]*)"[^>]*>/i)?.[1] || ''
-          },
+          seo,
           ui,
           accessibility: {
             violations: accessibility,
-            score: psiData?.lighthouseResult?.categories?.accessibility?.score ? 
-              Math.round(psiData.lighthouseResult.categories.accessibility.score * 100) : 
-              Math.max(0, Math.round((1 - accessibility.length / 50) * 100))
+            score: accessibilityScore
           },
           technical: {
             loadTime: Math.round((Date.now() - startTime) / 1000 * 100) / 100,
