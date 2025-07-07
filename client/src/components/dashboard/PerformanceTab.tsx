@@ -51,7 +51,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
   const performanceScore = performance?.performanceScore || 0;
   const mobileScore = contextData?.mobileResponsiveness?.score || 0;
   const securityScore = contextData?.lhr ? Math.round(contextData.lhr.categories.security.score * 100) : 0;
-  const showLoadingForPerformance = loading || !performance?.coreWebVitals || performance.coreWebVitals.length === 0;
+  const showLoadingForPerformance = loading || !performance?.coreWebVitals || (performance.coreWebVitals && performance.coreWebVitals.length === 0);
 
   const chartConfig = {
     value: { label: 'Your Site', color: '#FF6B35' },
@@ -136,7 +136,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
             ) : (
               <ChartContainer config={chartConfig} className="h-80 w-full">
                 <RechartsBarChart
-                  data={performance.coreWebVitals}
+                  data={performance?.coreWebVitals || []}
                   margin={{ top: 20, right: 30, left: 10, bottom: 5 }}
                 >
                   <XAxis dataKey="name" tick={{ fontSize: 10 }} />
@@ -176,7 +176,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
               </Typography>
             </Box>
             <Typography variant="body2" color="text.secondary">
-              {performance.recommendations?.length || 0} performance improvements suggested
+              {performance?.recommendations?.length || 0} performance improvements suggested
             </Typography>
           </CardContent>
         </Card>
