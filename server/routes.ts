@@ -28,7 +28,11 @@ function buildUIData(localData: any) {
       alt: ''
     })) || [],
     imageAnalysis: {
-      totalImages: localData.imageElements?.length || localData.extractedImageUrls.length,
+      totalImages: (() => {
+        const photos = localData.imageElements?.filter((img: any) => img.isPhoto).length || Math.floor(localData.extractedImageUrls.length * 0.6);
+        const icons = localData.imageElements?.filter((img: any) => img.isIcon).length || Math.floor(localData.extractedImageUrls.length * 0.4);
+        return photos + icons;
+      })(),
       estimatedPhotos: localData.imageElements?.filter((img: any) => img.isPhoto).length || Math.floor(localData.extractedImageUrls.length * 0.6),
       estimatedIcons: localData.imageElements?.filter((img: any) => img.isIcon).length || Math.floor(localData.extractedImageUrls.length * 0.4),
       imageUrls: localData.extractedImageUrls,
