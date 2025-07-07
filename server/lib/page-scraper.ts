@@ -1,4 +1,6 @@
 import { Browser, BrowserContext, Page, chromium } from 'playwright';
+import { Readability } from '@mozilla/readability';
+import { JSDOM } from 'jsdom';
 
 export interface FontResult {
   name: string;
@@ -27,10 +29,16 @@ export interface ContrastResult {
   isAccessible: boolean;
 }
 
+export interface ContentAnalysis {
+  wordCount: number;
+  readabilityScore: number;
+}
+
 export interface ScrapedData {
   fonts: FontResult[];
   images: ImageResult[];
   contrastIssues: ContrastResult[];
+  content: ContentAnalysis;
 }
 
 let globalBrowser: Browser | null = null;
@@ -189,16 +197,16 @@ async function extractImagesFromPage(url: string): Promise<ImageResult[]> {
         const height = img.naturalHeight || img.height;
         
         if (src && !src.startsWith('data:')) {
-          // Determine if it's likely an icon or photo
-          const isSmall = width <= 64 && height <= 64;
+          // Enhanced classification: area > 32×32 → photo, else icon
+          const area = width * height;
           const hasIconKeywords = src.toLowerCase().includes('icon') || 
                                   src.toLowerCase().includes('logo') || 
                                   alt.toLowerCase().includes('icon') || 
                                   alt.toLowerCase().includes('logo');
           const isSvg = src.toLowerCase().includes('.svg');
           
-          const isIcon = isSmall || hasIconKeywords || isSvg;
-          const isPhoto = !isIcon && (width > 100 || height > 100);
+          const isIcon = area <= (32 * 32) || width <= 32 || height <= 32 || hasIconKeywords || isSvg;
+          const isPhoto = !isIcon;
           
           // Determine type from URL
           let type = 'unknown';
@@ -341,30 +349,115 @@ async function extractContrastFromPage(url: string): Promise<ContrastResult[]> {
   }
 }
 
+// Content analysis using Readability
+async function extractContentAnalysis(url: string): Promise<ContentAnalysis> {
+  const browser = await initBrowser();
+  let context: BrowserContext | null = null;
+  
+  try {
+    context = await browser.newContext();
+    const page = await context.newPage();
+    
+    await page.goto(url, { 
+      waitUntil: 'domcontentloaded',
+      timeout: 30000 
+    });
+    
+    // Get the full HTML content
+    const htmlContent = await page.content();
+    
+    // Use JSDOM to parse the HTML
+    const dom = new JSDOM(htmlContent, { url });
+    const document = dom.window.document;
+    
+    // Use Readability to extract the main content
+    const reader = new Readability(document);
+    const article = reader.parse();
+    
+    if (!article) {
+      return { wordCount: 0, readabilityScore: 0 };
+    }
+    
+    // Count words in the extracted content
+    const textContent = article.textContent || '';
+    const wordCount = textContent.trim().split(/\s+/).filter(word => word.length > 0).length;
+    
+    // Calculate Flesch-Kincaid readability score
+    const readabilityScore = calculateFleschKincaidScore(textContent);
+    
+    return { wordCount, readabilityScore };
+  } catch (error) {
+    console.error('Content analysis failed:', error);
+    return { wordCount: 0, readabilityScore: 0 };
+  } finally {
+    if (context) {
+      await context.close();
+    }
+  }
+}
+
+// Helper function to calculate Flesch-Kincaid readability score
+function calculateFleschKincaidScore(text: string): number {
+  if (!text || text.length === 0) return 0;
+  
+  // Count sentences (rough estimation)
+  const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0).length;
+  if (sentences === 0) return 0;
+  
+  // Count words
+  const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+  const wordCount = words.length;
+  if (wordCount === 0) return 0;
+  
+  // Count syllables (rough estimation)
+  let syllableCount = 0;
+  words.forEach(word => {
+    const cleanWord = word.toLowerCase().replace(/[^a-z]/g, '');
+    if (cleanWord.length === 0) return;
+    
+    // Simple syllable counting
+    let syllables = cleanWord.replace(/[^aeiouy]/g, '').length;
+    if (cleanWord.endsWith('e')) syllables--;
+    if (syllables === 0) syllables = 1;
+    syllableCount += syllables;
+  });
+  
+  // Flesch Reading Ease formula
+  const avgSentenceLength = wordCount / sentences;
+  const avgSyllablesPerWord = syllableCount / wordCount;
+  const fleschScore = 206.835 - (1.015 * avgSentenceLength) - (84.6 * avgSyllablesPerWord);
+  
+  // Convert to 0-100 scale and ensure it's within bounds
+  return Math.max(0, Math.min(100, Math.round(fleschScore)));
+}
+
 export async function scrapePageData(url: string): Promise<ScrapedData> {
   console.log(`🔍 Starting comprehensive page scraping for: ${url}`);
   
   try {
     // Run all extractions in parallel for better performance
-    const [fonts, images, contrastIssues] = await Promise.all([
+    const [fonts, images, contrastIssues, content] = await Promise.all([
       extractFontsFromPage(url),
       extractImagesFromPage(url),
-      extractContrastFromPage(url)
+      extractContrastFromPage(url),
+      extractContentAnalysis(url)
     ]);
     
-    console.log(`✅ Scraping complete: ${fonts.length} fonts, ${images.length} images, ${contrastIssues.length} contrast issues`);
+    console.log(`✅ Scraping complete: ${fonts.length} fonts, ${images.length} images, ${contrastIssues.length} contrast issues, ${content.wordCount} words`);
     
     return {
       fonts,
       images,
-      contrastIssues
+      contrastIssues,
+      content
     };
   } catch (error) {
     console.error('Page scraping failed:', error);
     return {
       fonts: [],
       images: [],
-      contrastIssues: []
+      contrastIssues: [],
+      content: { wordCount: 0, readabilityScore: 0 }
     };
   }
 }

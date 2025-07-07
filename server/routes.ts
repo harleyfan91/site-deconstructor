@@ -5,6 +5,7 @@ import Wappalyzer from 'wappalyzer';
 import { extractColors, type ColorResult } from './lib/color-extraction';
 import { SupabaseCacheService } from './lib/supabase';
 import crypto from 'crypto';
+import { scrapePageData } from './lib/page-scraper';
 
 // Helper function to map score to letter grade
 function mapScoreToGrade(score: number): string {
@@ -35,6 +36,20 @@ function buildUIData(localData: any) {
       iconUrls: localData.imageElements?.filter((img: any) => img.isIcon).map((img: any) => img.url) || localData.extractedImageUrls.filter((_, index) => index % 2 === 1)
     },
     contrastIssues: [] // Will be enhanced later with real contrast analysis
+  };
+}
+
+function buildContentData(scrapedData?: any) {
+  if (scrapedData?.content) {
+    return {
+      wordCount: scrapedData.content.wordCount,
+      readabilityScore: scrapedData.content.readabilityScore
+    };
+  }
+  // Return fallback markers as specified
+  return {
+    wordCount: "!",
+    readabilityScore: "!"
   };
 }
 
@@ -556,7 +571,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }
             ],
             recommendations: []
-          }
+          },
+          content: buildContentData() // Use fallback markers for quick analysis
         }
       };
 
@@ -685,6 +701,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             ],
             recommendations: []
           },
+          content: buildContentData(), // Use fallback markers initially
           technical: {
             techStack: localData.techStack,
             healthGrade: mapScoreToGrade(localData.overallScore),
@@ -844,6 +861,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('Legacy analysis error:', error);
       res.status(500).json({ 
         error: 'Analysis failed', 
+        message: error instanceof Error ? error.message : 'Unknown error' 
+      });
+    }
+  });
+
+  // Enhanced content analysis endpoint with real scraping
+  app.post('/api/analyze/content', async (req, res) => {
+    try {
+      const { url } = req.body;
+      
+      if (!url || typeof url !== 'string') {
+        return res.status(400).json({ error: 'URL is required in request body' });
+      }
+
+      console.log(`📄 Starting enhanced content analysis for: ${url}`);
+      const startTime = Date.now();
+      
+      // Perform comprehensive page scraping with content analysis
+      const scrapedData = await scrapePageData(url);
+      
+      logTiming('Enhanced content analysis', startTime);
+      
+      // Return enhanced UI data with real content analysis
+      const response = {
+        ui: {
+          imageAnalysis: {
+            photoUrls: scrapedData.images.filter(img => img.isPhoto).map(img => img.url),
+            iconUrls: scrapedData.images.filter(img => img.isIcon).map(img => img.url)
+          }
+        },
+        content: {
+          wordCount: scrapedData.content.wordCount,
+          readabilityScore: scrapedData.content.readabilityScore
+        }
+      };
+      
+      console.log(`✅ Enhanced analysis complete: ${scrapedData.content.wordCount} words, ${scrapedData.content.readabilityScore} readability score`);
+      res.json(response);
+      
+    } catch (error) {
+      console.error('Enhanced content analysis error:', error);
+      res.status(500).json({ 
+        error: 'Enhanced content analysis failed', 
         message: error instanceof Error ? error.message : 'Unknown error' 
       });
     }
