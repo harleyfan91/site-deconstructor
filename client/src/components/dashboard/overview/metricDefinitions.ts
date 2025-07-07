@@ -11,22 +11,22 @@ export const getMetricDefinitions = (overview: AnalysisResponse['data']['overvie
   return [
   {
     titleLines: ['Overall', 'Score'],
-    value: `${overview.overallScore ?? 0}/100`,
+    value: `${overview.overallScore ?? "!"}/100`,
     icon: Star,
-    color: useScoreColor(theme)(overview.overallScore ?? 0),
+    color: useScoreColor(theme)(overview.overallScore ?? "!"),
     description: getScoreDescription(
-      overview.overallScore ?? 0,
+      overview.overallScore ?? "!",
       'Excellent performance overall',
       'Good, could be improved',
       'Needs improvement',
     ),
     info:
       'Overall score weights performance (40%), SEO (40%) and user experience (20%) based on the collected metrics.',
-    tooltip: getScoreTooltip(overview.overallScore ?? 0, 'overall performance'),
+      tooltip: getScoreTooltip(overview.overallScore ?? "!", 'overall performance'),
   },
   {
     titleLines: ['Page Load', 'Time'],
-    value: overview.pageLoadTime ? `${overview.pageLoadTime}s` : 'Loading...',
+    value: overview.pageLoadTime ? `${overview.pageLoadTime}s` : "!",
     icon: Clock,
     color: theme.palette.warning.main,
     description: 'Page loading performance',
@@ -35,19 +35,19 @@ export const getMetricDefinitions = (overview: AnalysisResponse['data']['overvie
   },
   {
     titleLines: ['SEO', 'Score'],
-    value: `${overview.seoScore ?? 0}/100`,
+    value: `${overview.seoScore ?? "!"}/100`,
     icon: TrendingUp,
-    color: useScoreColor(theme)(overview.seoScore ?? 0),
-    description: (overview.seoScore ?? 0) >= 80 ? 'Excellent SEO optimization' : 'SEO could be improved',
-    tooltip: getScoreTooltip(overview.seoScore ?? 0, 'SEO optimization'),
+    color: useScoreColor(theme)(overview.seoScore ?? "!"),
+    description: (overview.seoScore ?? "!") >= 80 ? 'Excellent SEO optimization' : 'SEO could be improved',
+    tooltip: getScoreTooltip(overview.seoScore ?? "!", 'SEO optimization'),
   },
   {
     titleLines: ['User', 'Experience'],
-    value: `${overview.userExperienceScore ?? 0}/100`,
+    value: `${overview.userExperienceScore ?? "!"}/100`,
     icon: Users,
-    color: (overview.userExperienceScore ?? 0) >= 80 ? theme.palette.success.main : theme.palette.primary.main,
-    description: (overview.userExperienceScore ?? 0) >= 80 ? 'Excellent user experience' : 'Good user experience',
-    tooltip: getScoreTooltip(overview.userExperienceScore ?? 0, 'user experience'),
+    color: (overview.userExperienceScore ?? "!") >= 80 ? theme.palette.success.main : theme.palette.primary.main,
+    description: (overview.userExperienceScore ?? "!") >= 80 ? 'Excellent user experience' : 'Good user experience',
+    tooltip: getScoreTooltip(overview.userExperienceScore ?? "!", 'user experience'),
   },
 ];
 };

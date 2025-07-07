@@ -18,7 +18,7 @@ const MetricInfoPopover: React.FC<MetricInfoPopoverProps> = ({ anchorEl, infoTex
   >
     <Box sx={{ p: 2, maxWidth: 250 }}>
       <Typography variant="body2">
-        {infoText || '— No data available —'}
+        {infoText || "!"}
       </Typography>
     </Box>
   </Popover>
