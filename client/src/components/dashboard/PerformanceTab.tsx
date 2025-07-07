@@ -78,42 +78,53 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
               </Typography>
             </Box>
             
-            <Box sx={{ mb: 3 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="body2">Performance Score</Typography>
-                <Typography variant="h4" sx={{ color: getScoreColor(performanceScore) }}>
-                  {performanceScore}
+            {showLoadingForPerformance ? (
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', py: 4 }}>
+                <CircularProgress size={32} sx={{ color: '#FF6B35', mr: 2 }} />
+                <Typography variant="body2" color="text.secondary">
+                  Loading performance metrics...
                 </Typography>
               </Box>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                {performanceScore >= 90 ? 'Excellent Performance' : 
-                 performanceScore >= 70 ? 'Good Performance' : 'Needs Improvement'}
-              </Typography>
-            </Box>
+            ) : (
+              <>
+                <Box sx={{ mb: 3 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                    <Typography variant="body2">Performance Score</Typography>
+                    <Typography variant="h4" sx={{ color: getScoreColor(performanceScore) }}>
+                      {performanceScore}
+                    </Typography>
+                  </Box>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    {performanceScore >= 90 ? 'Excellent Performance' : 
+                     performanceScore >= 70 ? 'Good Performance' : 'Needs Improvement'}
+                  </Typography>
+                </Box>
 
-            <Box sx={{ mb: 3 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="body2">Mobile Score</Typography>
-                <Typography variant="h4" sx={{ color: getScoreColor(mobileScore) }}>
-                  {mobileScore}%
-                </Typography>
-              </Box>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Mobile Responsiveness
-              </Typography>
-            </Box>
+                <Box sx={{ mb: 3 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                    <Typography variant="body2">Mobile Score</Typography>
+                    <Typography variant="h4" sx={{ color: getScoreColor(mobileScore) }}>
+                      {mobileScore}%
+                    </Typography>
+                  </Box>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    Mobile Responsiveness
+                  </Typography>
+                </Box>
 
-            <Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="body2">Security Score</Typography>
-                <Typography variant="h4" sx={{ color: getScoreColor(securityScore) }}>
-                  {securityScore}%
-                </Typography>
-              </Box>
-              <Typography variant="body2" color="text.secondary">
-                Based on Lighthouse security audits
-              </Typography>
-            </Box>
+                <Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                    <Typography variant="body2">Security Score</Typography>
+                    <Typography variant="h4" sx={{ color: getScoreColor(securityScore) }}>
+                      {securityScore}%
+                    </Typography>
+                  </Box>
+                  <Typography variant="body2" color="text.secondary">
+                    Based on Lighthouse security audits
+                  </Typography>
+                </Box>
+              </>
+            )}
           </CardContent>
         </Card>
         

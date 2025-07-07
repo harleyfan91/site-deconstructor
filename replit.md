@@ -152,6 +152,9 @@ A comprehensive website analysis tool that provides insights into performance, S
 - ✓ Fixed Color Extraction header consistency - now persists header and icon during loading like Font Analysis (January 7, 2025)
 - ✓ Removed early returns to maintain header visibility during extraction process  
 - ✓ Aligned loading states between Font Analysis and Color Extraction for consistent UX
+- ✓ Added loading indicator to Performance Metrics section matching UI analysis components (January 7, 2025)
+- ✓ Performance Metrics now shows header persistently with spinner during data loading
+- ✓ Consistent loading behavior across all analysis sections: UI, Content, and Performance tabs
 
 ## Technical Stack
 - **Frontend**: React, TypeScript, MUI, Framer Motion
