@@ -82,17 +82,17 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, u
               overflowX: 'hidden',
               pr: 1, // Add padding for scrollbar
               '&::-webkit-scrollbar': {
-                width: '6px',
+                width: '4px',
               },
               '&::-webkit-scrollbar-track': {
                 background: '#f1f1f1',
                 borderRadius: '3px',
               },
               '&::-webkit-scrollbar-thumb': {
-                background: '#c1c1c1',
+                background: '#b3b3b3',
                 borderRadius: '3px',
                 '&:hover': {
-                  background: '#a8a8a8',
+                  background: '#8c8c8c',
                 },
               },
             }}
