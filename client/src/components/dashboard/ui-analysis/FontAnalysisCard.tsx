@@ -13,6 +13,7 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, u
   const [fonts, setFonts] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasStartedLoading, setHasStartedLoading] = useState(false);
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
   const [hasUserScrolled, setHasUserScrolled] = useState(false);
   const [canScroll, setCanScroll] = useState(false);
@@ -49,11 +50,15 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, u
   };
 
   useEffect(() => {
-    if (!url) return;
+    if (!url) {
+      setHasStartedLoading(false);
+      return;
+    }
     
     const fetchFonts = async () => {
       setLoading(true);
       setError(null);
+      setHasStartedLoading(true);
       
       try {
         const response = await fetch('/api/fonts', {
@@ -90,6 +95,7 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, u
   useEffect(() => {
     setHasUserScrolled(false);
     setShowScrollIndicator(false);
+    setFonts([]); // Clear previous fonts when URL changes
   }, [url]);
 
   // Cleanup timeout on unmount
@@ -126,9 +132,13 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, u
           <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
             {error}
           </Typography>
-        ) : fontsToDisplay.length === 0 ? (
+        ) : fontsToDisplay.length === 0 && hasStartedLoading ? (
           <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
             No fonts detected for this website.
+          </Typography>
+        ) : fontsToDisplay.length === 0 ? (
+          <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
+            Enter a URL to analyze fonts.
           </Typography>
         ) : (
           <Box sx={{ position: 'relative' }}>
