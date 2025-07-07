@@ -80,7 +80,7 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, u
               maxHeight: { xs: '200px', md: '300px' }, // 2 fonts mobile, 3 fonts desktop (~100px per font)
               overflowY: 'auto',
               overflowX: 'hidden',
-              pr: 1, // Add padding for scrollbar
+              // pr: 1, // Add padding for scrollbar
               '&::-webkit-scrollbar': {
                 width: '4px',
               },
