@@ -82,7 +82,7 @@ function CoreWebVitalsSection({ performance, loading = false }: { performance: A
   
   if (loading) {
     return (
-      <Card sx={{ borderRadius: 2, height: '400px', width: '100%', maxWidth: '100%', minWidth: 0 }}>
+      <Card sx={{ borderRadius: 2, height: '400px' }}>
         <CardContent sx={{ p: 2, height: '100%' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
             <BarChart size={24} color="#FF6B35" style={{ marginRight: 8 }} />
@@ -106,7 +106,7 @@ function CoreWebVitalsSection({ performance, loading = false }: { performance: A
     benchmark: { label: 'Benchmark', color: theme.palette.grey[300] }
   };
   return (
-    <Card sx={{ borderRadius: 2, height: '400px', width: '100%', maxWidth: '100%', minWidth: 0 }}>
+    <Card sx={{ borderRadius: 2, height: '400px' }}>
       <CardContent sx={{ p: 2, height: '100%' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <BarChart size={24} color="#FF6B35" style={{ marginRight: 8 }} />
@@ -134,7 +134,7 @@ function CoreWebVitalsSection({ performance, loading = false }: { performance: A
 
 function SpeedIndexSection({ performanceScore }: { performanceScore: number }) {
   return (
-    <Card sx={{ borderRadius: 2, width: '100%', maxWidth: '100%', minWidth: 0 }}>
+    <Card sx={{ borderRadius: 2 }}>
       <CardContent sx={{ p: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <Gauge size={24} color="#FF6B35" style={{ marginRight: 8 }} />
@@ -512,158 +512,63 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
   const securityScore = contextData?.lhr ? Math.round(contextData.lhr.categories.security.score * 100) : 0;
 
   return (
-    <Box sx={{ width: '100%', maxWidth: '100%', overflow: 'hidden' }}>
+    <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
         <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', flexGrow: 1 }}>
           Performance & Security Analysis
         </Typography>
       </Box>
-      <Box sx={{ display: 'grid', gap: 2, alignItems: 'stretch', width: '100%', maxWidth: '100%' }}>
-        {/* Performance Score Section */}
-        <Box sx={{ 
-          display: 'grid', 
-          gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, 
-          gap: 2,
-          width: '100%',
-          maxWidth: '100%'
-        }}>
-          <Card sx={{ borderRadius: 2, width: '100%', maxWidth: '100%', minWidth: 0 }}>
-            <CardContent sx={{ p: 2, textAlign: 'center' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Zap size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-                <Typography variant="h6" sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
-                  Performance Score
-                </Typography>
-              </Box>
-              <Tooltip 
-                title={getScoreTooltip(performance.performanceScore)}
-                enterDelay={300}
-                enterTouchDelay={300}
-              >
-                <Typography
-                  variant="h3"
-                  sx={{ fontWeight: 'bold', color: getScoreColor(performance.performanceScore), textAlign: 'center', mb: 1, cursor: 'help' }}
-                >
-                  {performance.performanceScore}
-                </Typography>
-              </Tooltip>
-              <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
-                {performance.performanceScore >= 90
-                  ? 'Excellent Performance'
-                  : performance.performanceScore >= 70
-                  ? 'Good Performance'
-                  : 'Needs Improvement'}
-              </Typography>
-            </CardContent>
-          </Card>
 
-          <Card sx={{ borderRadius: 2 }}>
-            <CardContent sx={{ p: 2, textAlign: 'center' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Smartphone size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-                <Typography variant="h6" sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
-                  Mobile Score
-                </Typography>
-              </Box>
-              <Typography
-                variant="h3"
-                sx={{ fontWeight: 'bold', color: getScoreColor(mobileScore), textAlign: 'center', mb: 1 }}
-              >
-                {mobileScore}%
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
-                Mobile Responsiveness
-              </Typography>
-            </CardContent>
-          </Card>
+      {/* Top 3 metric cards - matches other tabs' pattern */}
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 2, mb: 2 }}>
+        <MetricCard 
+          title="Performance Score"
+          value={performance.performanceScore.toString()}
+          icon={Zap}
+          color={getScoreColor(performance.performanceScore)}
+          description={
+            performance.performanceScore >= 90
+              ? 'Excellent Performance'
+              : performance.performanceScore >= 70
+              ? 'Good Performance'
+              : 'Needs Improvement'
+          }
+          variant="performance"
+        />
+        <MetricCard 
+          title="Mobile Score"
+          value={`${mobileScore}%`}
+          icon={Smartphone}
+          color={getScoreColor(mobileScore)}
+          description="Mobile Responsiveness"
+          variant="performance"
+        />
+        <MetricCard 
+          title="Security Score"
+          value={`${securityScore}%`}
+          icon={Shield}
+          color={getScoreColor(securityScore)}
+          description="Based on Lighthouse security audits"
+          variant="performance"
+        />
+      </Box>
 
-          <Card sx={{ borderRadius: 2 }}>
-            <CardContent sx={{ p: 2, textAlign: 'center' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Shield size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-                <Typography variant="h6" sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
-                  Security Score
-                </Typography>
-              </Box>
-              <Typography
-                variant="h3"
-                sx={{ fontWeight: 'bold', color: getScoreColor(securityScore), textAlign: 'center', mb: 1 }}
-              >
-                {securityScore}%
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
-                Based on Lighthouse security audits
-              </Typography>
-            </CardContent>
-          </Card>
-        </Box>
+      {/* Core Web Vitals and Speed Index - clean 2-column layout */}
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 2, mb: 2 }}>
+        <CoreWebVitalsSection performance={performance} loading={showLoadingForPerformance} />
+        <SpeedIndexSection performanceScore={performance.performanceScore} />
+      </Box>
 
-        {/* Core Web Vitals, Speed Index, and Mobile Responsiveness */}
-        <Box sx={{ 
-          display: 'grid', 
-          gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, 
-          gridTemplateRows: { xs: 'auto', md: 'auto auto' },
-          gap: 2,
-          width: '100%',
-          maxWidth: '100%'
-        }}>
-          <Box sx={{ 
-            gridColumn: { xs: '1', md: '1' }, 
-            gridRow: { xs: 'auto', md: '1 / 3' },
-            width: '100%', 
-            maxWidth: '100%', 
-            minWidth: 0 
-          }}>
-            <CoreWebVitalsSection performance={performance} loading={showLoadingForPerformance} />
-          </Box>
-          <Box sx={{ 
-            gridColumn: { xs: '1', md: '2' }, 
-            gridRow: { xs: 'auto', md: '1' },
-            width: '100%', 
-            maxWidth: '100%', 
-            minWidth: 0 
-          }}>
-            <SpeedIndexSection performanceScore={performance.performanceScore} />
-          </Box>
-          <Box sx={{ 
-            gridColumn: { xs: '1', md: '2' }, 
-            gridRow: { xs: 'auto', md: '2' },
-            width: '100%', 
-            maxWidth: '100%', 
-            minWidth: 0 
-          }}>
-            <MobileResponsivenessSection />
-          </Box>
-        </Box>
+      {/* Mobile and Security Details - standard 2-column layout */}
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2, mb: 2 }}>
+        <MobileResponsivenessSection />
+        <SecurityScoreSection />
+      </Box>
 
-        {/* Security Details */}
-        <Box sx={{ 
-          display: 'grid', 
-          gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, 
-          gap: 2,
-          width: '100%',
-          maxWidth: '100%'
-        }}>
-          <Box sx={{ width: '100%', maxWidth: '100%', minWidth: 0 }}>
-            <SecurityScoreSection />
-          </Box>
-        </Box>
-
-        {/* Security Audits and Performance Recommendations */}
-        <Box sx={{ 
-          display: 'grid', 
-          gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, 
-          gap: 2,
-          width: '100%',
-          maxWidth: '100%'
-        }}>
-          <Box sx={{ width: '100%', maxWidth: '100%', minWidth: 0 }}>
-            <SecurityAuditsSection />
-          </Box>
-          <Box sx={{ width: '100%', maxWidth: '100%', minWidth: 0 }}>
-            <RecommendationsSection recommendations={performance.recommendations} />
-          </Box>
-        </Box>
+      {/* Security Audits and Recommendations - matches other tabs */}
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
+        <SecurityAuditsSection />
+        <RecommendationsSection recommendations={performance.recommendations} />
       </Box>
     </Box>
   );
