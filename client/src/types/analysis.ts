@@ -173,6 +173,10 @@ export interface AnalysisResponse {
     adTags?: {
       [key: string]: boolean;
     };
+    content?: {
+      wordCount: number | string;
+      readabilityScore: number | string;
+    };
   };
   lhr: {
     categories: {
