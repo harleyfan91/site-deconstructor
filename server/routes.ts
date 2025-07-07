@@ -654,10 +654,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Full analysis endpoint - returns complete data with PSI
   app.get('/api/analyze/full', async (req, res) => {
     try {
-      const { url } = req.query;
+      let { url } = req.query;
       
       if (!url || typeof url !== 'string') {
         return res.status(400).json({ error: 'URL parameter is required' });
+      }
+
+      // Normalize URL by adding https:// if no protocol is specified
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = `https://${url}`;
       }
 
       console.log(`🔍 Starting full analysis for: ${url}`);

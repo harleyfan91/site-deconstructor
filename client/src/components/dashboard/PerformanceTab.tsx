@@ -48,6 +48,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
   }
 
   const { performance } = data.data;
+  const performanceScore = performance?.performanceScore || 0;
   const mobileScore = contextData?.mobileResponsiveness?.score || 0;
   const securityScore = contextData?.lhr ? Math.round(contextData.lhr.categories.security.score * 100) : 0;
   const showLoadingForPerformance = loading || !performance?.coreWebVitals || performance.coreWebVitals.length === 0;
@@ -80,13 +81,13 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
             <Box sx={{ mb: 3 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography variant="body2">Performance Score</Typography>
-                <Typography variant="h4" sx={{ color: getScoreColor(performance.performanceScore) }}>
-                  {performance.performanceScore}
+                <Typography variant="h4" sx={{ color: getScoreColor(performanceScore) }}>
+                  {performanceScore}
                 </Typography>
               </Box>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                {performance.performanceScore >= 90 ? 'Excellent Performance' : 
-                 performance.performanceScore >= 70 ? 'Good Performance' : 'Needs Improvement'}
+                {performanceScore >= 90 ? 'Excellent Performance' : 
+                 performanceScore >= 70 ? 'Good Performance' : 'Needs Improvement'}
               </Typography>
             </Box>
 
