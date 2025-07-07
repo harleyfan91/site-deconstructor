@@ -131,28 +131,49 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, u
                   display: { xs: 'flex', md: 'none' }, // Only show on mobile
                   justifyContent: 'center',
                   alignItems: 'center',
-                  position: 'absolute',
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  height: '24px',
-                  background: 'linear-gradient(to top, rgba(255,255,255,0.9), transparent)',
-                  pointerEvents: 'none',
-                  borderRadius: '0 0 8px 8px',
+                  mt: 1,
+                  py: 0.5,
+                  borderTop: '1px solid #E0E0E0',
                 }}
               >
-                <Typography 
-                  variant="caption" 
-                  sx={{ 
-                    color: 'text.secondary',
-                    fontSize: '11px',
-                    fontWeight: 500,
-                    textAlign: 'center',
-                    textShadow: '0 1px 2px rgba(255,255,255,0.8)'
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0.5,
+                    px: 1,
+                    py: 0.5,
+                    borderRadius: '12px',
+                    backgroundColor: 'rgba(0,0,0,0.05)',
+                    border: '1px solid rgba(0,0,0,0.1)',
                   }}
                 >
-                  ↓ Scroll for more fonts
-                </Typography>
+                  <Typography 
+                    variant="caption" 
+                    sx={{ 
+                      color: 'text.secondary',
+                      fontSize: '10px',
+                      fontWeight: 500,
+                    }}
+                  >
+                    Scroll for more
+                  </Typography>
+                  <Box
+                    sx={{
+                      width: '12px',
+                      height: '12px',
+                      borderRadius: '50%',
+                      backgroundColor: 'primary.main',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'white',
+                      fontSize: '8px',
+                    }}
+                  >
+                    ↓
+                  </Box>
+                </Box>
               </Box>
             )}
           </Box>
