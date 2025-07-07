@@ -75,31 +75,54 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, u
             No fonts detected for this website.
           </Typography>
         ) : (
-          fontsToDisplay.map((font: any, index: number) => (
-            <Box key={index} sx={{ mb: 3, pb: 2, borderBottom: index < fontsToDisplay.length - 1 ? '1px solid #E0E0E0' : 'none' }}>
-              <Typography variant="h6" sx={{ fontFamily: font.name, mb: 1 }}>
-                {font.name}
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 1, mb: 1, flexWrap: 'wrap' }}>
-                <Chip label={font.category} size="small" variant="outlined" />
-                <Chip label={font.usage} size="small" />
-                {'isLoaded' in font && (
-                  <Chip 
-                    label={font.isLoaded ? 'loaded' : 'not loaded'} 
-                    size="small" 
-                    color={font.isLoaded ? 'success' : 'error'}
-                    variant="outlined"
-                  />
-                )}
-                {'isPublic' in font && font.isPublic && (
-                  <Chip label="Public Font" size="small" color="info" variant="outlined" />
-                )}
+          <Box 
+            sx={{ 
+              maxHeight: { xs: '200px', md: '300px' }, // 2 fonts mobile, 3 fonts desktop (~100px per font)
+              overflowY: 'auto',
+              overflowX: 'hidden',
+              pr: 1, // Add padding for scrollbar
+              '&::-webkit-scrollbar': {
+                width: '6px',
+              },
+              '&::-webkit-scrollbar-track': {
+                background: '#f1f1f1',
+                borderRadius: '3px',
+              },
+              '&::-webkit-scrollbar-thumb': {
+                background: '#c1c1c1',
+                borderRadius: '3px',
+                '&:hover': {
+                  background: '#a8a8a8',
+                },
+              },
+            }}
+          >
+            {fontsToDisplay.map((font: any, index: number) => (
+              <Box key={index} sx={{ mb: 3, pb: 2, borderBottom: index < fontsToDisplay.length - 1 ? '1px solid #E0E0E0' : 'none' }}>
+                <Typography variant="h6" sx={{ fontFamily: font.name, mb: 1 }}>
+                  {font.name}
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 1, mb: 1, flexWrap: 'wrap' }}>
+                  <Chip label={font.category} size="small" variant="outlined" />
+                  <Chip label={font.usage} size="small" />
+                  {'isLoaded' in font && (
+                    <Chip 
+                      label={font.isLoaded ? 'loaded' : 'not loaded'} 
+                      size="small" 
+                      color={font.isLoaded ? 'success' : 'error'}
+                      variant="outlined"
+                    />
+                  )}
+                  {'isPublic' in font && font.isPublic && (
+                    <Chip label="Public Font" size="small" color="info" variant="outlined" />
+                  )}
+                </Box>
+                <Typography variant="body2" color="text.secondary">
+                  Weight: {font.weight}
+                </Typography>
               </Box>
-              <Typography variant="body2" color="text.secondary">
-                Weight: {font.weight}
-              </Typography>
-            </Box>
-          ))
+            ))}
+          </Box>
         )}
       </Box>
     </Box>
