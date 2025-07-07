@@ -138,7 +138,19 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
                   data={performance.coreWebVitals}
                   margin={{ top: 20, right: 30, left: 10, bottom: 5 }}
                 >
-                  <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+                  <XAxis 
+                    dataKey="name" 
+                    tick={{ fontSize: 10 }} 
+                    tickFormatter={(value) => {
+                      const fullNames = {
+                        'LCP': 'Largest Contentful Paint',
+                        'FID': 'First Input Delay', 
+                        'CLS': 'Cumulative Layout Shift'
+                      };
+                      // Show full names on screens wider than 768px
+                      return window.innerWidth > 768 ? fullNames[value] || value : value;
+                    }}
+                  />
                   <YAxis domain={[0, 100]} />
                   <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
                   <Bar dataKey="value" fill="#FF6B35" />
