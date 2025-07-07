@@ -114,19 +114,21 @@ function CoreWebVitalsSection({ performance, loading = false }: { performance: A
             Core Web Vitals
           </Typography>
         </Box>
-        <ChartContainer config={chartConfig} className="h-80 w-full">
-          <RechartsBarChart
-            data={performance.coreWebVitals}
-            margin={{ top: 20, right: 30, left: 10, bottom: 5 }}
-          >
-            <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-            <YAxis domain={[0, 100]} />
+        <Box sx={{ width: '100%', height: '320px' }}>
+          <ChartContainer config={chartConfig} style={{ width: '100%', height: '100%' }}>
+            <RechartsBarChart
+              data={performance.coreWebVitals}
+              margin={{ top: 20, right: 30, left: 10, bottom: 5 }}
+            >
+              <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+              <YAxis domain={[0, 100]} />
 
-            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-            <Bar dataKey="value" fill="#FF6B35" />
-            <Bar dataKey="benchmark" fill={theme.palette.grey[300]} />
-          </RechartsBarChart>
-        </ChartContainer>
+              <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+              <Bar dataKey="value" fill="#FF6B35" />
+              <Bar dataKey="benchmark" fill={theme.palette.grey[300]} />
+            </RechartsBarChart>
+          </ChartContainer>
+        </Box>
       </CardContent>
     </Card>
   );
