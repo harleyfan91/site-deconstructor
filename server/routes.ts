@@ -492,39 +492,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       techStack.push({ category: 'Markup Languages', technology: 'HTML5' });
     }
 
-    // Extract fonts from CSS
-    const fontFamilies = new Set<string>();
-    const fontMatches = html.match(/font-family\s*:\s*[^;}]+/gi) || [];
-    fontMatches.forEach(match => {
-      const fonts = match.replace(/font-family\s*:\s*/i, '').split(',');
-      fonts.forEach(font => {
-        const cleanFont = font.trim().replace(/['"]/g, '');
-        if (cleanFont && cleanFont !== 'inherit') {
-          fontFamilies.add(cleanFont);
-        }
-      });
-    });
-
-    // Convert to structured font data
-    const extractedFonts = Array.from(fontFamilies).map(font => {
-      let category = 'sans-serif';
-      if (font.toLowerCase().includes('serif') && !font.toLowerCase().includes('sans')) {
-        category = 'serif';
-      } else if (['Courier', 'Monaco', 'Consolas', 'monospace'].some(mono => font.toLowerCase().includes(mono.toLowerCase()))) {
-        category = 'monospace';
-      }
-      
-      return {
-        name: font,
-        category,
-        usage: 'Various text elements',
-        weight: '400',
-        isLoaded: true,
-        isPublic: !['Arial', 'Helvetica', 'Times', 'Courier', 'Verdana', 'Georgia'].some(
-          systemFont => font.toLowerCase().includes(systemFont.toLowerCase())
-        )
-      };
-    });
+    // Font extraction is handled by the dedicated /api/fonts endpoint
+    // which uses Playwright for real font detection. We don't generate
+    // fallback font data here to avoid showing incorrect information.
+    const extractedFonts: any[] = [];
 
     // Enhanced image analysis
     const imageElements = extractedImageUrls.map(url => {
