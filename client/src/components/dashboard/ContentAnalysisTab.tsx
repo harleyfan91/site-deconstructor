@@ -13,6 +13,52 @@ interface ContentAnalysisTabProps {
   error: string | null;
 }
 
+// Helper to get abbreviated name for Content Structure Analysis metrics
+const getAbbreviatedMetricName = (fullName: string) => {
+  const abbreviations: { [key: string]: string } = {
+    'Readability Score': 'Read.',
+    'Meta Description': 'Meta Desc.',
+    'Title Tag': 'Title',
+    'Alt Text Coverage': 'Alt Text'
+  };
+  return abbreviations[fullName] || fullName;
+};
+
+// Helper to get full name for abbreviated metrics
+const getFullMetricName = (abbreviation: string) => {
+  const metricNames: { [key: string]: string } = {
+    'Read.': 'Readability Score',
+    'Meta Desc.': 'Meta Description',
+    'Title': 'Title Tag',
+    'Alt Text': 'Alt Text Coverage'
+  };
+  return metricNames[abbreviation] || abbreviation;
+};
+
+// Custom tick component with tooltip for Content Structure Analysis
+const ContentCustomTick = (props: any) => {
+  const { x, y, payload } = props;
+  const fullName = getFullMetricName(payload.value);
+  
+  return (
+    <Tooltip title={fullName} arrow placement="top">
+      <g transform={`translate(${x},${y})`}>
+        <text
+          x={0}
+          y={0}
+          dy={16}
+          textAnchor="middle"
+          fill="#666"
+          fontSize="10"
+          style={{ cursor: 'help' }}
+        >
+          {payload.value}
+        </text>
+      </g>
+    </Tooltip>
+  );
+};
+
 const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) => {
   const theme = useTheme();
 
@@ -77,12 +123,12 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
   const seoChecks = data.data?.seo?.checks || [];
   const metaTags = data.data?.seo?.metaTags || {};
 
-  // Content structure analysis with consistent colors
+  // Content structure analysis with consistent colors and abbreviated names
   const contentStructureData = [
-    { metric: 'Readability Score', score: readabilityScore, benchmark: 60 },
-    { metric: 'Meta Description', score: metaTags.description ? 100 : 0, benchmark: 100 },
-    { metric: 'Title Tag', score: metaTags.title ? 100 : 0, benchmark: 100 },
-    { metric: 'Alt Text Coverage', score: totalImages > 0 ? Math.min(100, (estimatedPhotos / totalImages) * 100) : 0, benchmark: 80 },
+    { metric: getAbbreviatedMetricName('Readability Score'), score: readabilityScore, benchmark: 60 },
+    { metric: getAbbreviatedMetricName('Meta Description'), score: metaTags.description ? 100 : 0, benchmark: 100 },
+    { metric: getAbbreviatedMetricName('Title Tag'), score: metaTags.title ? 100 : 0, benchmark: 100 },
+    { metric: getAbbreviatedMetricName('Alt Text Coverage'), score: totalImages > 0 ? Math.min(100, (estimatedPhotos / totalImages) * 100) : 0, benchmark: 80 },
   ];
 
   // Text accessibility metrics
@@ -179,7 +225,7 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
               </Box>
             <ChartContainer config={chartConfig} className="h-80 w-full">
               <BarChart data={contentStructureData} margin={{ top: 20, right: 20, left: 0, bottom: 5 }}>
-                <XAxis dataKey="metric" tick={{ fontSize: 10 }} />
+                <XAxis dataKey="metric" tick={<ContentCustomTick />} />
                 <YAxis domain={[0, 100]} />
                 <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
                 <Bar dataKey="score" fill="#FF6B35" />
