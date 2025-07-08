@@ -278,7 +278,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('🔧 Analyzing tech stack for:', url);
       
-      const technicalAnalysis = await getTechnicalAnalysis(url);
+      // Use lightweight tech analysis to avoid browser context conflicts
+      const { getTechnicalAnalysis: getLightweightAnalysis } = await import('./lib/tech-lightweight');
+      const technicalAnalysis = await getLightweightAnalysis(url);
       
       res.json(technicalAnalysis);
     } catch (error) {

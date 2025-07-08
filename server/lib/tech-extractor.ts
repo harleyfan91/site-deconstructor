@@ -6,6 +6,7 @@ import { chromium, type Browser, type Page } from 'playwright';
 // Using pattern-based detection instead of deprecated Wappalyzer
 import { SupabaseCacheService } from './supabase';
 import crypto from 'crypto';
+import PQueue from 'p-queue';
 
 export interface TechStackItem {
   category: string;
@@ -92,15 +93,24 @@ export interface TechnicalAnalysis {
   gzip: boolean;
 }
 
-let browserInstance: Browser | null = null;
+// Global browser instance and queue shared across tech analysis
+let globalBrowser: Browser | null = null;
+const techQueue = new PQueue({ concurrency: 2 });
 
 async function initBrowser(): Promise<Browser> {
-  // Always create fresh browser instance for tech analysis to avoid context conflicts
-  const browser = await chromium.launch({
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
-  });
-  return browser;
+  if (!globalBrowser) {
+    globalBrowser = await chromium.launch({
+      headless: true,
+      executablePath: '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium',
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-extensions'
+      ]
+    });
+  }
+  return globalBrowser;
 }
 
 async function analyzeTechStack(page: Page, html: string, url: string): Promise<TechStackItem[]> {
@@ -491,14 +501,18 @@ function analyzeTLSAndCompression(response: Response): { tlsVersion: string; cdn
 }
 
 export async function extractTechnicalData(url: string): Promise<TechnicalAnalysis> {
-  const browser = await initBrowser();
-  const context = await browser.newContext({
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-  });
-  
-  const page = await context.newPage();
+  return techQueue.add(async () => {
+    let context: any = null;
+    let page: Page | null = null;
+    
+    try {
+      const browser = await initBrowser();
+      context = await browser.newContext({
+        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      });
+      
+      page = await context.newPage();
 
-  try {
     const response = await page.goto(url, { 
       waitUntil: 'domcontentloaded',
       timeout: 30000 
@@ -593,10 +607,69 @@ export async function extractTechnicalData(url: string): Promise<TechnicalAnalys
       gzip
     };
 
-  } finally {
-    await context.close();
-    await browser.close();
-  }
+  } catch (error) {
+    console.error('Technical analysis error:', error);
+    
+    // Return fallback data structure with error indicators
+    return {
+      techStack: [{ category: 'Unknown', technology: '!' }],
+      thirdPartyScripts: [],
+      securityHeaders: {
+        csp: '!',
+        hsts: '!',
+        xfo: '!',
+        xss: '!',
+        xcto: '!',
+        referrer: '!'
+      },
+      minification: {
+        cssMinified: false,
+        jsMinified: false,
+        htmlMinified: false
+      },
+      social: {
+        hasOpenGraph: false,
+        hasTwitterCard: false,
+        hasShareButtons: false,
+        facebookPixel: false,
+        googleAnalytics: false,
+        linkedInInsight: false
+      },
+      cookies: {
+        hasCookieScript: false,
+        cookieConsentType: 'none'
+      },
+      adTags: {
+        hasGAM: false,
+        hasAdSense: false,
+        hasPrebid: false,
+        hasAPS: false,
+        hasIX: false,
+        hasANX: false,
+        hasOpenX: false,
+        hasRubicon: false,
+        hasPubMatic: false,
+        hasVPAID: false,
+        hasCriteo: false,
+        hasTaboola: false,
+        hasOutbrain: false,
+        hasSharethrough: false,
+        hasTeads: false,
+        hasMoat: false,
+        hasDV: false,
+        hasIAS: false
+      },
+      issues: [],
+      tlsVersion: '!',
+      cdn: false,
+      gzip: false
+    };
+    } finally {
+      if (page) await page.close().catch(() => {});
+      if (context) await context.close().catch(() => {});
+      // Don't close the global browser, keep it for reuse
+    }
+  });
 }
 
 export async function getTechnicalAnalysis(url: string): Promise<TechnicalAnalysis> {
