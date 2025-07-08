@@ -787,7 +787,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }))
           },
           // SEO data excluded when null - use dedicated /api/seo endpoint
-          ...(seoData ? { seo: buildSEOData(seoData, lhrData) } : {}),
+          ...(seoData ? { seo: buildSEOData(seoData, undefined) } : {}),
           content: buildContentData(), // Use fallback markers initially
           technical: {
             techStack: localData.techStack,
