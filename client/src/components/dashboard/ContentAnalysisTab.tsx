@@ -40,16 +40,20 @@ const ContentCustomTick = (props: any) => {
   const { x, y, payload } = props;
   const fullName = getFullMetricName(payload.value);
   
+  // Check if we're on a mobile screen
+  const isMobile = window.innerWidth < 768;
+  
   return (
     <Tooltip title={fullName} arrow placement="top">
       <g transform={`translate(${x},${y})`}>
         <text
           x={0}
           y={0}
-          dy={16}
-          textAnchor="middle"
+          dy={isMobile ? 20 : 16}
+          textAnchor={isMobile ? "end" : "middle"}
           fill="#666"
-          fontSize="10"
+          fontSize={isMobile ? "9" : "10"}
+          transform={isMobile ? "rotate(-45)" : "rotate(0)"}
           style={{ cursor: 'help' }}
         >
           {payload.value}
@@ -224,7 +228,7 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
                 </Typography>
               </Box>
             <ChartContainer config={chartConfig} className="h-80 w-full">
-              <BarChart data={contentStructureData} margin={{ top: 20, right: 20, left: 0, bottom: 5 }}>
+              <BarChart data={contentStructureData} margin={{ top: 20, right: 20, left: 0, bottom: 40 }}>
                 <XAxis dataKey="metric" tick={<ContentCustomTick />} />
                 <YAxis domain={[0, 100]} />
                 <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
