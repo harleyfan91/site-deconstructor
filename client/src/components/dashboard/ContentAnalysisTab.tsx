@@ -452,4 +452,3 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
 };
 
 export default ContentAnalysisTab;
-```// This line reduces the right padding of the Content Structure Analysis chart.
