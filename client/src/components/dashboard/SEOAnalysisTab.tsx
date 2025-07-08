@@ -384,7 +384,7 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
                       {rec.title}
                     </Typography>
                     <Chip 
-                      label={rec.priority.toUpperCase()} 
+                      label={rec.priority} 
                       size="small" 
                       variant="outlined"
                       sx={{ 
