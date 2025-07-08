@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Box, Typography, Card, CardContent, LinearProgress, CircularProgress, Alert, Chip, Tooltip } from '@mui/material';
 import { FileText, PieChart, BarChart3, Tags } from 'lucide-react';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart';
@@ -39,16 +39,6 @@ const getFullMetricName = (abbreviation: string) => {
 const ContentCustomTick = (props: any) => {
   const { x, y, payload } = props;
   const fullName = getFullMetricName(payload.value);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
   
   return (
     <Tooltip title={fullName} arrow placement="top">
@@ -56,11 +46,10 @@ const ContentCustomTick = (props: any) => {
         <text
           x={0}
           y={0}
-          dy={isMobile ? 22 : 16}
-          textAnchor={isMobile ? "end" : "middle"}
+          dy={16}
+          textAnchor="middle"
           fill="#666"
-          fontSize={isMobile ? "8" : "10"}
-          transform={isMobile ? "rotate(-45)" : "rotate(0)"}
+          fontSize="10"
           style={{ cursor: 'help' }}
         >
           {payload.value}
@@ -235,7 +224,7 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
                 </Typography>
               </Box>
             <ChartContainer config={chartConfig} className="h-80 w-full">
-              <BarChart data={contentStructureData} margin={{ top: 20, right: 20, left: 0, bottom: 50 }}>
+              <BarChart data={contentStructureData} margin={{ top: 20, right: 20, left: 0, bottom: 5 }}>
                 <XAxis dataKey="metric" tick={<ContentCustomTick />} />
                 <YAxis domain={[0, 100]} />
                 <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
