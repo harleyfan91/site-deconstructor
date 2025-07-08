@@ -106,7 +106,26 @@ async function initBrowser(): Promise<Browser> {
 }
 
 export async function extractSEOData(url: string): Promise<SEOData> {
-  const browserInstance = await initBrowser();
+  // Create a new browser instance for each request to avoid conflicts
+  let browserInstance: Browser;
+  
+  try {
+    // Use minimal args for better compatibility
+    browserInstance = await chromium.launch({
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--disable-web-security',
+        '--disable-features=VizDisplayCompositor'
+      ]
+    });
+  } catch (error) {
+    throw new Error(`Failed to launch browser: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+
   const page = await browserInstance.newPage();
   
   try {
@@ -154,6 +173,7 @@ export async function extractSEOData(url: string): Promise<SEOData> {
     
   } finally {
     await page.close();
+    await browserInstance.close();
   }
 }
 
