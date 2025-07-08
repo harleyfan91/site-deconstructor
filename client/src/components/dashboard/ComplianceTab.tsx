@@ -199,7 +199,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <Lock size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+              <Lock size={24} style={{ marginRight: 8, color: theme.palette.primary.main }} />
               <Typography 
                 variant="h6" 
                 sx={{ 
@@ -223,23 +223,23 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
                       cursor: 'pointer',
                       p: 1,
                       borderRadius: 1,
-                      bgcolor: 'rgba(255, 107, 53, 0.05)',
+                      bgcolor: `${theme.palette.primary.main}0D`,
                       animation: glowingSections[category.name] ? 'pulse 1s ease-in-out infinite' : 'none',
                       '@keyframes pulse': {
                         '0%, 100%': {
-                          boxShadow: '0 0 5px rgba(255, 107, 53, 0.3)',
+                          boxShadow: `0 0 5px ${theme.palette.primary.main}4D`,
                         },
                         '50%': {
-                          boxShadow: '0 0 15px rgba(255, 107, 53, 0.6)',
+                          boxShadow: `0 0 15px ${theme.palette.primary.main}99`,
                         },
                       },
                       '&:hover': {
-                        bgcolor: 'rgba(255, 107, 53, 0.1)',
+                        bgcolor: `${theme.palette.primary.main}1A`,
                       },
                     }}
                     onClick={() => toggleHeaderSection(category.name)}
                   >
-                    <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: '#FF6B35' }}>
+                    <Typography variant="subtitle2" sx={{ color: theme.palette.primary.main }}>
                       {category.name} ({category.headers.filter(h => h.value).length}/{category.headers.length})
                     </Typography>
                     <IconButton size="small">

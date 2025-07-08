@@ -287,17 +287,17 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
                     cursor: 'pointer',
                     p: 1,
                     borderRadius: 1,
-                    bgcolor: 'primary.light',
+                    bgcolor: `${theme.palette.primary.main}0D`, // rgba(255, 107, 53, 0.05) equivalent
                     animation: glowingSections[usageGroup.name] ? 'pulse 1s ease-in-out infinite' : 'none',
                     '@keyframes pulse': {
-                      '0%, 100%': { boxShadow: `0 0 5px ${theme.palette.primary.main}33` },
+                      '0%, 100%': { boxShadow: `0 0 5px ${theme.palette.primary.main}4D` },
                       '50%': { boxShadow: `0 0 15px ${theme.palette.primary.main}99` }
                     },
-                    '&:hover': { bgcolor: 'primary.main' }
+                    '&:hover': { bgcolor: `${theme.palette.primary.main}1A` } // rgba(255, 107, 53, 0.1) equivalent
                   }}
                   onClick={() => toggleSection(usageGroup.name)}
                 >
-                  <Typography variant="subtitle1" sx={{ color: 'primary.main' }}>
+                  <Typography variant="subtitle1" sx={{ color: theme.palette.primary.main }}>
                     {usageGroup.name} ({usageGroup.groups.reduce((t, g) => t + g.colors.length, 0)})
                   </Typography>
                   <IconButton size="small">
