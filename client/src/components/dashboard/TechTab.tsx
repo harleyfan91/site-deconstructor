@@ -610,7 +610,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                   </tr>
                 </thead>
                 <tbody className="[&_tr:last-child]:border-0">
-                  {(technical.issues ?? []).map((issue, index) => (
+                  {(techAnalysis?.issues ?? data?.data?.technical?.issues ?? []).map((issue, index) => (
                     <tr key={index} className="border-b transition-colors [&:has([role=checkbox])]:pr-0">
                       <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">{issue.type}</td>
                       <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">{issue.description}</td>
@@ -643,7 +643,10 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
             </div>
           </CardContent>
           </Card>
-          <TechnicalHealthSummary healthGrade={technical.healthGrade ?? 'C'} issues={technical.issues ?? []} />
+          <TechnicalHealthSummary 
+            healthGrade={data?.data?.technical?.healthGrade ?? 'C'} 
+            issues={techAnalysis?.issues ?? data?.data?.technical?.issues ?? []} 
+          />
         </Box>
       </Box>
     </Box>

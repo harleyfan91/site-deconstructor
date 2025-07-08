@@ -95,13 +95,12 @@ export interface TechnicalAnalysis {
 let browserInstance: Browser | null = null;
 
 async function initBrowser(): Promise<Browser> {
-  if (!browserInstance) {
-    browserInstance = await chromium.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
-    });
-  }
-  return browserInstance;
+  // Always create fresh browser instance for tech analysis to avoid context conflicts
+  const browser = await chromium.launch({
+    headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+  });
+  return browser;
 }
 
 async function analyzeTechStack(page: Page, html: string, url: string): Promise<TechStackItem[]> {
@@ -596,6 +595,7 @@ export async function extractTechnicalData(url: string): Promise<TechnicalAnalys
 
   } finally {
     await context.close();
+    await browser.close();
   }
 }
 
