@@ -1,12 +1,13 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import Wappalyzer from 'wappalyzer';
+// Removed deprecated Wappalyzer - using pattern-based detection instead
 import { extractColors, type ColorResult } from './lib/color-extraction';
 import { SupabaseCacheService } from './lib/supabase';
 import crypto from 'crypto';
 import { scrapePageData } from './lib/page-scraper';
 import { extractSEOData, type SEOData } from './lib/seo-extractor';
+import { getTechnicalAnalysis, type TechnicalAnalysis } from './lib/tech-extractor';
 
 // Helper function to map score to letter grade
 function mapScoreToGrade(score: number): string {
@@ -266,6 +267,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     await SupabaseCacheService.cleanupExpired();
   }, 6 * 60 * 60 * 1000); // 6 hours
   
+  // Tech analysis endpoint
+  app.post('/api/tech', async (req, res) => {
+    try {
+      const { url } = req.body;
+      
+      if (!url || typeof url !== 'string') {
+        return res.status(400).json({ error: 'URL is required in request body' });
+      }
+      
+      console.log('🔧 Analyzing tech stack for:', url);
+      
+      const technicalAnalysis = await getTechnicalAnalysis(url);
+      
+      res.json(technicalAnalysis);
+    } catch (error) {
+      console.error('Technical analysis error:', error);
+      res.status(500).json({ error: 'Failed to analyze website technology' });
+    }
+  });
+
   // Color extraction API route with caching
   app.post('/api/colors', async (req, res) => {
     try {
@@ -515,7 +536,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const seoScore = hasViewportMeta && hasAltTags ? 85 : 65;
     const userExperienceScore = mobileScore;
 
-    // Tech stack detection
+    // Basic tech stack detection for quick analysis (comprehensive analysis available via /api/tech)
     const techStack: { category: string; technology: string }[] = [];
     try {
       if (html.includes('react')) techStack.push({ category: 'JavaScript Frameworks', technology: 'React' });
@@ -660,7 +681,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
             securityScore: localData.securityScore,
             accessibility: {
               violations: localData.accessibilityViolations
-            }
+            },
+            // Placeholder markers for real tech data - use /api/tech endpoint for comprehensive analysis
+            minification: {
+              cssMinified: "!",
+              jsMinified: "!",
+              htmlMinified: "!"
+            },
+            social: {
+              hasOpenGraph: "!",
+              hasTwitterCard: "!",
+              hasShareButtons: "!"
+            },
+            cookies: {
+              hasCookieScript: "!",
+              cookieConsentType: "!"
+            },
+            securityHeaders: {
+              csp: localData.headerChecks.csp,
+              hsts: localData.headerChecks.hsts,
+              xfo: localData.headerChecks.frameOptions
+            },
+            tlsVersion: "!",
+            cdn: "!",
+            gzip: "!"
+          },
+          adTags: {
+            hasGAM: "!",
+            hasAdSense: "!",
+            hasPrebid: "!",
+            hasAPS: "!",
+            hasIX: "!",
+            hasANX: "!",
+            hasOpenX: "!",
+            hasRubicon: "!",
+            hasPubMatic: "!",
+            hasVPAID: "!",
+            hasCriteo: "!",
+            hasTaboola: "!",
+            hasOutbrain: "!",
+            hasSharethrough: "!",
+            hasTeads: "!",
+            hasMoat: "!",
+            hasDV: "!",
+            hasIAS: "!"
           },
           // SEO data excluded from quick analysis - use dedicated /api/seo endpoint
           content: buildContentData() // Use fallback markers for quick analysis

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, Card, CardContent, Chip, CircularProgress, Alert, Tooltip } from '@mui/material';
 import { Shield, Globe, Server, Database, Code, Layers, Zap, Activity, BarChart, Users, Cookie, Settings } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
@@ -173,28 +173,136 @@ interface TechTabProps {
   error: string | null;
 }
 
+/** Interface for comprehensive technical analysis data */
+interface TechnicalAnalysis {
+  techStack: Array<{
+    category: string;
+    technology: string;
+    version?: string;
+    confidence?: number;
+  }>;
+  minification: {
+    cssMinified: boolean;
+    jsMinified: boolean;
+    htmlMinified: boolean;
+  };
+  social: {
+    hasOpenGraph: boolean;
+    hasTwitterCard: boolean;
+    hasShareButtons: boolean;
+    facebookPixel: boolean;
+    googleAnalytics: boolean;
+    linkedInInsight: boolean;
+  };
+  cookies: {
+    hasCookieScript: boolean;
+    cookieConsentType: 'none' | 'banner' | 'popup' | 'overlay';
+    cookieLibrary?: string;
+  };
+  adTags: {
+    hasGAM: boolean;
+    hasAdSense: boolean;
+    hasPrebid: boolean;
+    hasAPS: boolean;
+    hasIX: boolean;
+    hasANX: boolean;
+    hasOpenX: boolean;
+    hasRubicon: boolean;
+    hasPubMatic: boolean;
+    hasVPAID: boolean;
+    hasCriteo: boolean;
+    hasTaboola: boolean;
+    hasOutbrain: boolean;
+    hasSharethrough: boolean;
+    hasTeads: boolean;
+    hasMoat: boolean;
+    hasDV: boolean;
+    hasIAS: boolean;
+  };
+  securityHeaders: {
+    csp: string;
+    hsts: string;
+    xfo: string;
+    xss: string;
+    xcto: string;
+    referrer: string;
+  };
+  issues: Array<{
+    type: 'performance' | 'security' | 'accessibility' | 'seo';
+    description: string;
+    severity: 'high' | 'medium' | 'low';
+    recommendation?: string;
+  }>;
+  tlsVersion: string;
+  cdn: boolean;
+  gzip: boolean;
+}
+
 /**
- * Main TechTab component – renders technical analysis panels.
- * UI & logic are unchanged.
+ * Main TechTab component – renders technical analysis panels with real data.
  */
 const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
   const theme = useTheme();
+  
+  // State for comprehensive technical analysis
+  const [techAnalysis, setTechAnalysis] = useState<TechnicalAnalysis | null>(null);
+  const [techLoading, setTechLoading] = useState(false);
+  const [techError, setTechError] = useState<string | null>(null);
+
+  // Fetch comprehensive technical data when URL is available
+  useEffect(() => {
+    if (data?.url && !loading && !error) {
+      fetchTechnicalAnalysis(data.url);
+    }
+  }, [data?.url, loading, error]);
+
+  const fetchTechnicalAnalysis = async (url: string) => {
+    setTechLoading(true);
+    setTechError(null);
+    
+    try {
+      console.log('🔧 Fetching comprehensive tech analysis for:', url);
+      
+      const response = await fetch('/api/tech', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Technical analysis failed: ${response.status}`);
+      }
+
+      const analysisData = await response.json();
+      console.log('✅ Technical analysis data received:', analysisData);
+      setTechAnalysis(analysisData);
+    } catch (err) {
+      console.error('Technical analysis error:', err);
+      setTechError(err instanceof Error ? err.message : 'Failed to analyze technology stack');
+    } finally {
+      setTechLoading(false);
+    }
+  };
 
   // Loading: show spinner and message
-  if (loading) {
+  if (loading || techLoading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
         <CircularProgress size={60} />
-        <Typography variant="h6" sx={{ ml: 2 }}>Analyzing tech stack...</Typography>
+        <Typography variant="h6" sx={{ ml: 2 }}>
+          {loading ? 'Analyzing tech stack...' : 'Extracting comprehensive technology data...'}
+        </Typography>
       </Box>
     );
   }
 
   // Error state: show error alert
-  if (error) {
+  if (error || techError) {
     return (
       <Alert severity="error" sx={{ mt: 2 }}>
-        {error}
+        {error || techError}
       </Alert>
     );
   }
@@ -208,11 +316,15 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
     );
   }
 
-  // Main render
-  const { technical } = data.data;
-  const adTags = data.data.adTags; // Extract adTags separately for better debugging
+  // Use comprehensive technical analysis data if available, fallback to basic data
+  const displayTechStack = techAnalysis?.techStack || data.data.technical?.techStack || [];
+  const displayMinification = techAnalysis?.minification || data.data.technical?.minification;
+  const displaySocial = techAnalysis?.social || data.data.technical?.social;
+  const displayCookies = techAnalysis?.cookies || data.data.technical?.cookies;
+  const displayAdTags = techAnalysis?.adTags || data.data.adTags;
 
-  console.log('TechTab - adTags data:', adTags); // Debug log
+  console.log('TechTab - using real tech analysis:', !!techAnalysis);
+  console.log('TechTab - display data:', { displayAdTags, displaySocial, displayMinification });
 
   return (
     <Box>
@@ -239,7 +351,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                 </Typography>
 
               </Box>
-              <TechStackGrid techStack={technical.techStack ?? []} />
+              <TechStackGrid techStack={displayTechStack} />
             </CardContent>
           </Card>
 
@@ -259,32 +371,32 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
               </Box>
               <Box sx={{ display: 'grid', gridTemplateColumns: '1fr', gap: 2 }}>
                 <Tooltip
-                  title={technical.minification?.cssMinified ? 'CSS files are minified for better performance' : 'CSS files are not minified - consider minifying for better performance'}
+                  title={displayMinification?.cssMinified ? 'CSS files are minified for better performance' : 'CSS files are not minified - consider minifying for better performance'}
                   enterDelay={300}
                   enterTouchDelay={300}
                 >
                   <Chip
-                    label={`CSS: ${technical.minification?.cssMinified ? 'Minified' : 'Not Minified'}`}
-                    {...chipStateStyle(Boolean(technical.minification?.cssMinified), theme)}
+                    label={`CSS: ${displayMinification?.cssMinified ? 'Minified' : 'Not Minified'}`}
+                    {...chipStateStyle(Boolean(displayMinification?.cssMinified), theme)}
                     size="small"
                     sx={{ 
-                      ...chipStateStyle(Boolean(technical.minification?.cssMinified), theme).sx, 
+                      ...chipStateStyle(Boolean(displayMinification?.cssMinified), theme).sx, 
                       width: '100%',
                       cursor: 'help'
                     }}
                   />
                 </Tooltip>
                 <Tooltip
-                  title={technical.minification?.jsMinified ? 'JavaScript files are minified for better performance' : 'JavaScript files are not minified - consider minifying for better performance'}
+                  title={displayMinification?.jsMinified ? 'JavaScript files are minified for better performance' : 'JavaScript files are not minified - consider minifying for better performance'}
                   enterDelay={300}
                   enterTouchDelay={300}
                 >
                   <Chip
-                    label={`JavaScript: ${technical.minification?.jsMinified ? 'Minified' : 'Not Minified'}`}
-                    {...chipStateStyle(Boolean(technical.minification?.jsMinified), theme)}
+                    label={`JavaScript: ${displayMinification?.jsMinified ? 'Minified' : 'Not Minified'}`}
+                    {...chipStateStyle(Boolean(displayMinification?.jsMinified), theme)}
                     size="small"
                     sx={{ 
-                      ...chipStateStyle(Boolean(technical.minification?.jsMinified), theme).sx, 
+                      ...chipStateStyle(Boolean(displayMinification?.jsMinified), theme).sx, 
                       width: '100%',
                       cursor: 'help'
                     }}
@@ -316,7 +428,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
             gap: 2
           }}>
             {adTagDescriptors.map(({ label, key }) => {
-              const isDetected = Boolean(adTags?.[key]);
+              const isDetected = Boolean(displayAdTags?.[key]);
               return (
                 <Tooltip
                   key={key}
@@ -363,48 +475,48 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
           </Box>
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 2 }}>
             <Tooltip
-              title={technical.social?.hasOpenGraph ? 'Open Graph meta tags detected' : 'Open Graph meta tags not found'}
+              title={displaySocial?.hasOpenGraph ? 'Open Graph meta tags detected' : 'Open Graph meta tags not found'}
               enterDelay={300}
               enterTouchDelay={300}
             >
               <Chip
                 label="Open Graph Meta Tags"
-                {...chipStateStyle(Boolean(technical.social?.hasOpenGraph), theme)}
+                {...chipStateStyle(Boolean(displaySocial?.hasOpenGraph), theme)}
                 size="small"
                 sx={{ 
-                  ...chipStateStyle(Boolean(technical.social?.hasOpenGraph), theme).sx, 
+                  ...chipStateStyle(Boolean(displaySocial?.hasOpenGraph), theme).sx, 
                   width: '100%',
                   cursor: 'help'
                 }}
               />
             </Tooltip>
             <Tooltip
-              title={technical.social?.hasTwitterCard ? 'Twitter card meta tags detected' : 'Twitter card meta tags not found'}
+              title={displaySocial?.hasTwitterCard ? 'Twitter card meta tags detected' : 'Twitter card meta tags not found'}
               enterDelay={300}
               enterTouchDelay={300}
             >
               <Chip
                 label="Twitter Card Meta Tags"
-                {...chipStateStyle(Boolean(technical.social?.hasTwitterCard), theme)}
+                {...chipStateStyle(Boolean(displaySocial?.hasTwitterCard), theme)}
                 size="small"
                 sx={{ 
-                  ...chipStateStyle(Boolean(technical.social?.hasTwitterCard), theme).sx, 
+                  ...chipStateStyle(Boolean(displaySocial?.hasTwitterCard), theme).sx, 
                   width: '100%',
                   cursor: 'help'
                 }}
               />
             </Tooltip>
             <Tooltip
-              title={technical.social?.hasShareButtons ? 'Share buttons detected on the website' : 'Share buttons not found on the website'}
+              title={displaySocial?.hasShareButtons ? 'Share buttons detected on the website' : 'Share buttons not found on the website'}
               enterDelay={300}
               enterTouchDelay={300}
             >
               <Chip
                 label="Share Buttons"
-                {...chipStateStyle(Boolean(technical.social?.hasShareButtons), theme)}
+                {...chipStateStyle(Boolean(displaySocial?.hasShareButtons), theme)}
                 size="small"
                 sx={{ 
-                  ...chipStateStyle(Boolean(technical.social?.hasShareButtons), theme).sx, 
+                  ...chipStateStyle(Boolean(displaySocial?.hasShareButtons), theme).sx, 
                   width: '100%',
                   cursor: 'help'
                 }}
@@ -430,7 +542,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
             </Typography>
           </Box>
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 2 }}>
-            {technical.cookies?.hasCookieScript ? (
+            {displayCookies?.hasCookieScript ? (
               <Tooltip
                 title="Cookie consent script detected on this website"
                 enterDelay={300}
