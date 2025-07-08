@@ -147,43 +147,37 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
   React.useEffect(() => {
     if (!data || headerCategories.length === 0) return;
     
-    const hasStoredState = Object.keys(headerSectionsExpanded).some(key => 
-      headerCategories.some(cat => cat.name === key)
-    );
-    
-    if (!hasStoredState) {
-      // Initialize all sections as expanded
-      const initialState: Record<string, boolean> = {};
+    // Always initialize sections as expanded for fresh data
+    const initialState: Record<string, boolean> = {};
+    headerCategories.forEach(category => {
+      initialState[category.name] = true;
+    });
+    setHeaderSectionsExpanded(initialState);
+
+    // Start glow animation 1 second before collapse
+    const glowTimer = setTimeout(() => {
+      const glowState: Record<string, boolean> = {};
       headerCategories.forEach(category => {
-        initialState[category.name] = true;
+        glowState[category.name] = true;
       });
-      setHeaderSectionsExpanded(initialState);
+      setGlowingSections(glowState);
+    }, 1500); // Start glowing at 1.5s (collapse happens at 2.5s)
 
-      // Start glow animation 1 second before collapse
-      const glowTimer = setTimeout(() => {
-        const glowState: Record<string, boolean> = {};
-        headerCategories.forEach(category => {
-          glowState[category.name] = true;
-        });
-        setGlowingSections(glowState);
-      }, 1500); // Start glowing at 1.5s (collapse happens at 2.5s)
+    // Auto-collapse all sections after delay
+    const collapseTimer = setTimeout(() => {
+      const collapsedState: Record<string, boolean> = {};
+      headerCategories.forEach(category => {
+        collapsedState[category.name] = false;
+      });
+      setHeaderSectionsExpanded(collapsedState);
+      // Stop glowing after collapse
+      setGlowingSections({});
+    }, 2500);
 
-      // Auto-collapse all sections after delay
-      const collapseTimer = setTimeout(() => {
-        const collapsedState: Record<string, boolean> = {};
-        headerCategories.forEach(category => {
-          collapsedState[category.name] = false;
-        });
-        setHeaderSectionsExpanded(collapsedState);
-        // Stop glowing after collapse
-        setGlowingSections({});
-      }, 2500);
-
-      return () => {
-        clearTimeout(glowTimer);
-        clearTimeout(collapseTimer);
-      };
-    }
+    return () => {
+      clearTimeout(glowTimer);
+      clearTimeout(collapseTimer);
+    };
   }, [data, headerCategories.length, setHeaderSectionsExpanded]);
 
   return (
