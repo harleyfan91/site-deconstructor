@@ -68,11 +68,39 @@ export interface SEOData {
 
 async function initBrowser(): Promise<Browser> {
   if (!browser) {
-    browser = await chromium.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      executablePath: process.env.CHROMIUM_EXECUTABLE_PATH || undefined
-    });
+    try {
+      console.log('🚀 Launching browser for SEO extraction...');
+      browser = await chromium.launch({
+        headless: true,
+        executablePath: '/usr/bin/chromium-browser',
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--no-first-run',
+          '--no-zygote',
+          '--disable-gpu',
+          '--disable-web-security',
+          '--disable-features=VizDisplayCompositor'
+        ]
+      });
+      console.log('✅ Browser launched successfully');
+    } catch (error) {
+      console.log('⚠️ Failed to launch system Chromium, trying default...');
+      browser = await chromium.launch({
+        headless: true,
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--no-first-run',
+          '--no-zygote',
+          '--disable-gpu'
+        ]
+      });
+    }
   }
   return browser;
 }

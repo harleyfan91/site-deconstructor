@@ -350,149 +350,150 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
         </CardContent>
       </Card>
 
-      {/* Additional SEO Data Sections */}
-      <Grid container spacing={2} sx={{ mt: 1 }}>
+      {/* Additional SEO Data Sections - 2x2 Layout matching other tabs */}
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 2, mt: 2 }}>
         {/* Keywords Section */}
-        {seo.keywords && seo.keywords.length > 0 && (
-          <Grid item xs={12} md={6}>
-            <Card sx={{ borderRadius: 2 }}>
-              <CardContent sx={{ p: 3 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                  <Hash size={24} color={theme.palette.primary.main} style={{ marginRight: 8 }} />
-                  <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                    Top Keywords
-                  </Typography>
-                </Box>
-                <TableContainer component={Paper} sx={{ boxShadow: 'none', border: '1px solid', borderColor: 'divider' }}>
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Keyword</TableCell>
-                        <TableCell align="right">Count</TableCell>
-                        <TableCell align="right">Density</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {seo.keywords.slice(0, 8).map((keyword, index) => (
-                        <TableRow key={index}>
-                          <TableCell component="th" scope="row">
-                            {keyword.keyword}
-                          </TableCell>
-                          <TableCell align="right">{keyword.count}</TableCell>
-                          <TableCell align="right">{keyword.density}%</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </CardContent>
-            </Card>
-          </Grid>
-        )}
-
-        {/* Heading Hierarchy Section */}
-        {seo.headings && (
-          <Grid item xs={12} md={6}>
-            <Card sx={{ borderRadius: 2 }}>
-              <CardContent sx={{ p: 3 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                  <FileText size={24} color={theme.palette.primary.main} style={{ marginRight: 8 }} />
-                  <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                    Heading Structure
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  {Object.entries(seo.headings).map(([level, count]) => (
-                    <Box key={level} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                        {level.toUpperCase()}
-                      </Typography>
-                      <Chip 
-                        label={count} 
-                        size="small" 
-                        color={count > 0 ? 'success' : 'default'}
-                        variant={count > 0 ? 'filled' : 'outlined'}
-                      />
-                    </Box>
-                  ))}
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-        )}
-
-        {/* Technical SEO Status */}
-        <Grid item xs={12} md={6}>
+        {seo.keywords && seo.keywords.length > 0 && seo.keywords[0]?.keyword !== '!analysis pending' && (
           <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                <Globe size={24} color={theme.palette.primary.main} style={{ marginRight: 8 }} />
+                <Hash size={24} color={theme.palette.primary.main} style={{ marginRight: 8 }} />
                 <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                  Technical SEO
+                  Top Keywords
                 </Typography>
               </Box>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography variant="body2">Robots.txt</Typography>
-                  <Chip
-                    icon={seo.hasRobotsTxt ? <Check size={16} /> : <X size={16} />}
-                    label={seo.hasRobotsTxt ? 'Present' : 'Missing'}
-                    color={seo.hasRobotsTxt ? 'success' : 'warning'}
-                    size="small"
+              <TableContainer component={Paper} sx={{ boxShadow: 'none', border: '1px solid', borderColor: 'divider' }}>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Keyword</TableCell>
+                      <TableCell align="right">Count</TableCell>
+                      <TableCell align="right">Density</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {seo.keywords.slice(0, 6).map((keyword, index) => (
+                      <TableRow key={index}>
+                        <TableCell component="th" scope="row">
+                          {keyword.keyword}
+                        </TableCell>
+                        <TableCell align="right">{keyword.count}</TableCell>
+                        <TableCell align="right">{keyword.density}%</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Heading Hierarchy Section - Always show */}
+        <Card sx={{ borderRadius: 2 }}>
+          <CardContent sx={{ p: 3 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+              <FileText size={24} color={theme.palette.primary.main} style={{ marginRight: 8 }} />
+              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                Heading Structure
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+              {seo.headings && Object.entries(seo.headings).map(([level, count]) => (
+                <Box key={level} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
+                    {level.toUpperCase()}
+                  </Typography>
+                  <Chip 
+                    label={count} 
+                    size="small" 
+                    color={count > 0 ? 'success' : 'default'}
+                    variant="outlined"
                   />
                 </Box>
+              ))}
+            </Box>
+          </CardContent>
+        </Card>
+
+        {/* Technical SEO Status - Always show */}
+        <Card sx={{ borderRadius: 2 }}>
+          <CardContent sx={{ p: 3 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+              <Globe size={24} color={theme.palette.primary.main} style={{ marginRight: 8 }} />
+              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                Technical SEO
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="body2">Robots.txt</Typography>
+                <Chip
+                  label={seo.hasRobotsTxt ? 'Present' : 'Missing'}
+                  color={seo.hasRobotsTxt ? 'success' : 'error'}
+                  size="small"
+                  variant="outlined"
+                />
+              </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="body2">XML Sitemap</Typography>
+                <Chip
+                  label={seo.hasSitemap ? 'Present' : 'Missing'}
+                  color={seo.hasSitemap ? 'success' : 'error'}
+                  size="small"
+                  variant="outlined"
+                />
+              </Box>
+              {seo.structuredData && seo.structuredData.length > 0 ? (
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography variant="body2">XML Sitemap</Typography>
+                  <Typography variant="body2">Structured Data</Typography>
                   <Chip
-                    icon={seo.hasSitemap ? <Check size={16} /> : <X size={16} />}
-                    label={seo.hasSitemap ? 'Present' : 'Missing'}
-                    color={seo.hasSitemap ? 'success' : 'warning'}
+                    label={`${seo.structuredData.length} items`}
+                    color="success"
                     size="small"
+                    variant="outlined"
                   />
                 </Box>
-                {seo.structuredData && seo.structuredData.length > 0 && (
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="body2">Structured Data</Typography>
-                    <Chip
-                      label={`${seo.structuredData.length} items`}
-                      color="success"
-                      size="small"
-                    />
+              ) : (
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography variant="body2">Structured Data</Typography>
+                  <Chip
+                    label="None detected"
+                    color="default"
+                    size="small"
+                    variant="outlined"
+                  />
+                </Box>
+              )}
+            </Box>
+          </CardContent>
+        </Card>
+
+        {/* Meta Tags Section */}
+        {seo.metaTags && Object.keys(seo.metaTags).length > 0 && seo.metaTags.title !== '!Analysis pending' && (
+          <Card sx={{ borderRadius: 2 }}>
+            <CardContent sx={{ p: 3 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                <Shield size={24} color={theme.palette.primary.main} style={{ marginRight: 8 }} />
+                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                  Meta Tags
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, maxHeight: 200, overflowY: 'auto' }}>
+                {Object.entries(seo.metaTags).slice(0, 8).map(([key, value]) => (
+                  <Box key={key} sx={{ pb: 1, borderBottom: '1px solid', borderColor: 'divider' }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold' }}>
+                      {key}
+                    </Typography>
+                    <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
+                      {String(value).length > 60 ? `${String(value).substring(0, 60)}...` : String(value)}
+                    </Typography>
                   </Box>
-                )}
+                ))}
               </Box>
             </CardContent>
           </Card>
-        </Grid>
-
-        {/* Meta Tags Section */}
-        {seo.metaTags && Object.keys(seo.metaTags).length > 0 && (
-          <Grid item xs={12} md={6}>
-            <Card sx={{ borderRadius: 2 }}>
-              <CardContent sx={{ p: 3 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                  <Shield size={24} color={theme.palette.primary.main} style={{ marginRight: 8 }} />
-                  <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                    Meta Tags
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, maxHeight: 200, overflowY: 'auto' }}>
-                  {Object.entries(seo.metaTags).slice(0, 10).map(([key, value]) => (
-                    <Box key={key} sx={{ pb: 1, borderBottom: '1px solid', borderColor: 'divider' }}>
-                      <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold' }}>
-                        {key}
-                      </Typography>
-                      <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
-                        {String(value).length > 80 ? `${String(value).substring(0, 80)}...` : String(value)}
-                      </Typography>
-                    </Box>
-                  ))}
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
         )}
-      </Grid>
+      </Box>
     </Box>
   );
 };

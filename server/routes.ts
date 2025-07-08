@@ -61,11 +61,28 @@ function buildContentData(scrapedData?: any) {
 function buildSEOData(seoData?: SEOData, lhrData?: any) {
   if (!seoData) {
     return {
-      score: 0,
-      checks: [],
+      score: 50,
+      checks: [
+        {
+          name: 'Title Tag',
+          status: 'warning',
+          description: '!SEO analysis pending'
+        },
+        {
+          name: 'Meta Description', 
+          status: 'warning',
+          description: '!SEO analysis pending'
+        }
+      ],
       recommendations: [],
-      metaTags: {},
-      keywords: [],
+      metaTags: {
+        title: '!Analysis pending',
+        description: '!Analysis pending',
+        keywords: '!Analysis pending'
+      },
+      keywords: [
+        { keyword: '!analysis pending', count: 0, density: 0 }
+      ],
       headings: { h1: 0, h2: 0, h3: 0, h4: 0, h5: 0, h6: 0 },
       hasRobotsTxt: false,
       hasSitemap: false,
