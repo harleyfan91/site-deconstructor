@@ -110,16 +110,21 @@ export async function extractSEOData(url: string): Promise<SEOData> {
   let browserInstance: Browser;
   
   try {
-    // Use minimal args for better compatibility
+    // Use the same Chromium path that works for Color Extraction and Font Analysis
     browserInstance = await chromium.launch({
       headless: true,
+      executablePath: '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium',
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--no-first-run',
+        '--no-zygote',
         '--disable-gpu',
-        '--disable-web-security',
-        '--disable-features=VizDisplayCompositor'
+        '--disable-background-timer-throttling',
+        '--disable-backgrounding-occluded-windows',
+        '--disable-renderer-backgrounding'
       ]
     });
   } catch (error) {
