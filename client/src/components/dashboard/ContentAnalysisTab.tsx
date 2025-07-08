@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Box, Typography, Card, CardContent, LinearProgress, CircularProgress, Alert, Chip, Tooltip } from '@mui/material';
 import { FileText, PieChart, BarChart3, Tags } from 'lucide-react';
@@ -38,7 +39,7 @@ const getFullMetricName = (abbreviation: string) => {
 const ContentCustomTick = (props: any) => {
   const { x, y, payload } = props;
   const fullName = getFullMetricName(payload.value);
-
+  
   return (
     <Tooltip title={fullName} arrow placement="top">
       <g transform={`translate(${x},${y})`}>
@@ -223,7 +224,7 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
                 </Typography>
               </Box>
             <ChartContainer config={chartConfig} className="h-80 w-full">
-              <BarChart data={contentStructureData} margin={{ top: 20, right: 5, left: 0, bottom: 50 }}>
+              <BarChart data={contentStructureData} margin={{ top: 20, right: 20, left: 0, bottom: 5 }}>
                 <XAxis dataKey="metric" tick={<ContentCustomTick />} />
                 <YAxis domain={[0, 100]} />
                 <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
@@ -250,8 +251,8 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
                   Text Content Quality
                 </Typography>
               </Box>
-
-
+            
+            
             <Box sx={{ mb: 3 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography variant="body2">Readability Score (Flesch Reading Ease)</Typography>
@@ -373,8 +374,8 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
                 Content Metadata
               </Typography>
             </Box>
-
-
+            
+            
             <Box sx={{ mb: 2 }}>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>Title Tag</Typography>
               <Tooltip 

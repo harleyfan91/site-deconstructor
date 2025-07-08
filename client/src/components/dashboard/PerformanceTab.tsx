@@ -45,7 +45,7 @@ const getFullMetricName = (abbreviation: string) => {
 const CustomTick = (props: any) => {
   const { x, y, payload } = props;
   const fullName = getFullMetricName(payload.value);
-
+  
   return (
     <Tooltip title={fullName} arrow placement="top">
       <g transform={`translate(${x},${y})`}>
@@ -115,7 +115,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
                 Performance Metrics
               </Typography>
             </Box>
-
+            
             {showLoadingForPerformance ? (
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', py: 4 }}>
                 <CircularProgress size={32} sx={{ color: '#FF6B35', mr: 2 }} />
@@ -165,7 +165,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
             )}
           </CardContent>
         </Card>
-
+        
         {/* Core Web Vitals Chart */}
         <Card sx={{ borderRadius: 2, height: '400px' }}>
           <CardContent sx={{ p: 2, height: '100%' }}>
@@ -186,7 +186,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
               <ChartContainer config={chartConfig} className="h-80 w-full">
                 <RechartsBarChart
                   data={performance?.coreWebVitals || []}
-                  margin={{ top: 20, right: 5, left: 5, bottom: 5 }}
+                  margin={{ top: 20, right: 30, left: 10, bottom: 5 }}
                 >
                   <XAxis dataKey="name" tick={<CustomTick />} />
                   <YAxis domain={[0, 100]} />
@@ -215,7 +215,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
             </Typography>
           </CardContent>
         </Card>
-
+        
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
