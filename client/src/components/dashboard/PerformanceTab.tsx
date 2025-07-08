@@ -22,10 +22,10 @@ interface PerformanceTabProps {
 }
 
 // Helper to determine score color given a numeric score
-const getScoreColor = (score: number) => {
-  if (score >= 90) return '#4CAF50';
-  if (score >= 70) return '#FF9800';
-  return '#F44336';
+const getScoreColor = (score: number, theme: any) => {
+  if (score >= 90) return theme.palette.success.main;
+  if (score >= 70) return theme.palette.warning.main;
+  return theme.palette.error.main;
 };
 
 // Helper to get full name for Core Web Vitals abbreviations
@@ -92,14 +92,14 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
   const showLoadingForPerformance = loading || !performance?.coreWebVitals || (performance.coreWebVitals && performance.coreWebVitals.length === 0);
 
   const chartConfig = {
-    value: { label: 'Your Site', color: '#FF6B35' },
+    value: { label: 'Your Site', color: theme.palette.primary.main },
     benchmark: { label: 'Benchmark', color: theme.palette.grey[300] }
   };
 
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', flexGrow: 1 }}>
+        <Typography variant="h5" gutterBottom sx={{ flexGrow: 1 }}>
           Performance & Security Analysis
         </Typography>
       </Box>
@@ -110,15 +110,15 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <Zap size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+              <Zap size={24} style={{ marginRight: 8, color: theme.palette.primary.main }} />
+              <Typography variant="h6">
                 Performance Metrics
               </Typography>
             </Box>
             
             {showLoadingForPerformance ? (
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', py: 4 }}>
-                <CircularProgress size={32} sx={{ color: '#FF6B35', mr: 2 }} />
+                <CircularProgress size={32} sx={{ color: 'primary.main', mr: 2 }} />
                 <Typography variant="body2" color="text.secondary">
                   Loading performance metrics...
                 </Typography>
@@ -128,7 +128,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
                 <Box sx={{ mb: 3 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                     <Typography variant="body2">Performance Score</Typography>
-                    <Typography variant="h4" sx={{ color: getScoreColor(performanceScore) }}>
+                    <Typography variant="h4" sx={{ color: getScoreColor(performanceScore, theme) }}>
                       {performanceScore}
                     </Typography>
                   </Box>
@@ -141,7 +141,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
                 <Box sx={{ mb: 3 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                     <Typography variant="body2">Mobile Score</Typography>
-                    <Typography variant="h4" sx={{ color: getScoreColor(mobileScore) }}>
+                    <Typography variant="h4" sx={{ color: getScoreColor(mobileScore, theme) }}>
                       {mobileScore}%
                     </Typography>
                   </Box>
@@ -153,7 +153,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
                 <Box>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                     <Typography variant="body2">Security Score</Typography>
-                    <Typography variant="h4" sx={{ color: getScoreColor(securityScore) }}>
+                    <Typography variant="h4" sx={{ color: getScoreColor(securityScore, theme) }}>
                       {securityScore}%
                     </Typography>
                   </Box>
@@ -170,8 +170,8 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
         <Card sx={{ borderRadius: 2, height: '400px' }}>
           <CardContent sx={{ p: 2, height: '100%' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <BarChart size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
+              <BarChart size={24} style={{ marginRight: 8, color: theme.palette.primary.main }} />
+              <Typography variant="h6" gutterBottom sx={{ lineHeight: 1.2 }}>
                 Core Web Vitals
               </Typography>
             </Box>

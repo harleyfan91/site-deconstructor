@@ -77,15 +77,12 @@ const AppHeader = ({ darkMode, toggleDarkMode }: { darkMode: boolean; toggleDark
             to="/"
             sx={{
               flexGrow: 1,
-              fontWeight: 700,
               textDecoration: 'none',
-              // Slightly reduce font size
-              fontSize: { xs: '1.1rem', md: '1.25rem' },
             }}
           >
             <span
               style={{
-                background: 'linear-gradient(45deg, #FF6B35 30%, #0984E3 90%)',
+                background: `linear-gradient(45deg, ${theme.palette.primary.main} 30%, ${theme.palette.secondary.main} 90%)`,
                 WebkitBackgroundClip: 'text',
                 color: 'transparent',
                 display: 'inline-block',

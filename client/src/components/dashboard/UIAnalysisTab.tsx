@@ -55,7 +55,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', flexGrow: 1 }}>
+        <Typography variant="h5" gutterBottom sx={{ flexGrow: 1 }}>
           User Interface Analysis
         </Typography>
       </Box>

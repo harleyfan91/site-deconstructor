@@ -11,6 +11,7 @@ import {
   Chip,
   Typography,
   Box,
+  useTheme,
 } from '@mui/material';
 import { Check, StarBorder, Close } from '@mui/icons-material';
 import { motion } from 'framer-motion';
@@ -22,6 +23,7 @@ interface PricingCardProps {
 }
 
 const PricingCard = ({ plan, index }: PricingCardProps) => {
+  const theme = useTheme();
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -43,13 +45,13 @@ const PricingCard = ({ plan, index }: PricingCardProps) => {
           justifyContent: 'space-between',
           cursor: 'pointer',
           transition: 'all 0.3s ease',
-          border: plan.recommended ? '2px solid #FF6B35' : '1px solid rgba(255, 255, 255, 0.1)',
+          border: plan.recommended ? `2px solid ${theme.palette.primary.main}` : '1px solid rgba(255, 255, 255, 0.1)',
           position: 'relative',
           overflow: 'visible',
           flex: 1,
           '&:hover': {
             transform: 'translateY(-8px)',
-            boxShadow: '0 12px 40px rgba(255, 107, 53, 0.2)',
+            boxShadow: `0 12px 40px ${theme.palette.primary.main}33`,
           },
         }}
       >
@@ -63,22 +65,22 @@ const PricingCard = ({ plan, index }: PricingCardProps) => {
               top: -16,
               left: '50%',
               transform: 'translateX(-50%)',
-              fontWeight: 600,
+
               zIndex: 2,
-              boxShadow: '0 4px 12px rgba(255, 107, 53, 0.3)',
+              boxShadow: `0 4px 12px ${theme.palette.primary.main}4D`,
             }}
           />
         )}
         <CardContent sx={{ p: 3, textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column' }}>
           <Typography
             variant="h5"
-            sx={{ mb: 2, fontWeight: 600 }}
+            sx={{ mb: 2 }}
           >
             {plan.title}
           </Typography>
           <Typography
             variant="h3"
-            sx={{ mb: 1, fontWeight: 700 }}
+            sx={{ mb: 1 }}
           >
             {plan.price}
           </Typography>
@@ -158,10 +160,10 @@ const PricingCard = ({ plan, index }: PricingCardProps) => {
             color="primary"
             fullWidth
             sx={{
-              background: 'linear-gradient(45deg, #FF6B35 30%, #FF8A65 90%)',
-              boxShadow: '0 4px 15px rgba(255, 107, 53, 0.3)',
+              background: `linear-gradient(45deg, ${theme.palette.primary.main} 30%, ${theme.palette.primary.light} 90%)`,
+              boxShadow: `0 4px 15px ${theme.palette.primary.main}4D`,
               '&:hover': {
-                background: 'linear-gradient(45deg, #FF8A65 30%, #FF6B35 90%)',
+                background: `linear-gradient(45deg, ${theme.palette.primary.light} 30%, ${theme.palette.primary.main} 90%)`,
               },
             }}
           >

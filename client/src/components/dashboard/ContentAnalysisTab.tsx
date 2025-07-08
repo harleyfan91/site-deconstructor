@@ -115,9 +115,9 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
 
   // Create content distribution data with consistent colors including text
   const contentTypes = [
-    { name: 'Photos', value: estimatedPhotos, color: '#FF6B35' }, // Primary orange
-    { name: 'Icons', value: estimatedIcons, color: '#937B91' }, // Specified purple color
-    { name: 'Text Content', value: estimatedTextContent, color: '#0984E3' }, // Secondary blue
+    { name: 'Photos', value: estimatedPhotos, color: theme.palette.primary.main },
+    { name: 'Icons', value: estimatedIcons, color: theme.palette.grey[600] },
+    { name: 'Text Content', value: estimatedTextContent, color: theme.palette.secondary.main },
     { name: 'Other Images', value: Math.max(0, totalImages - estimatedPhotos - estimatedIcons), color: theme.palette.grey[400] },
   ].filter(item => item.value > 0);
   const seoChecks = data.data?.seo?.checks || [];
@@ -160,7 +160,7 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', flexGrow: 1 }}>
+        <Typography variant="h5" gutterBottom sx={{ flexGrow: 1 }}>
           Content Analysis
         </Typography>
       </Box>
@@ -169,14 +169,8 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
           <Card sx={{ borderRadius: 2, height: '400px' }}>
             <CardContent sx={{ p: 2, height: '100%' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <PieChart size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-                <Typography 
-                  variant="h6" 
-                  sx={{ 
-                    fontWeight: 'bold',
-                    fontSize: { xs: '1.1rem', sm: '1.25rem' }
-                  }}
-                >
+                <PieChart size={24} style={{ marginRight: 8, color: theme.palette.primary.main }} />
+                <Typography variant="h6">
                   Content Distribution
                 </Typography>
               </Box>
@@ -212,14 +206,8 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
           <Card sx={{ borderRadius: 2, height: '400px' }}>
             <CardContent sx={{ p: 2, height: '100%' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <BarChart3 size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-                <Typography 
-                  variant="h6" 
-                  sx={{ 
-                    fontWeight: 'bold',
-                    fontSize: { xs: '1.1rem', sm: '1.25rem' }
-                  }}
-                >
+                <BarChart3 size={24} style={{ marginRight: 8, color: theme.palette.primary.main }} />
+                <Typography variant="h6">
                   Content Structure Analysis
                 </Typography>
               </Box>
@@ -228,7 +216,7 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
                 <XAxis dataKey="metric" tick={<ContentCustomTick />} />
                 <YAxis domain={[0, 100]} />
                 <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-                <Bar dataKey="score" fill="#FF6B35" />
+                <Bar dataKey="score" fill={theme.palette.primary.main} />
                 <Bar dataKey="benchmark" fill={theme.palette.grey[300]} />
               </BarChart>
             </ChartContainer>
@@ -240,14 +228,8 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
           <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ p: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <FileText size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-                <Typography 
-                  variant="h6" 
-                  sx={{ 
-                    fontWeight: 'bold',
-                    fontSize: { xs: '1.1rem', sm: '1.25rem' }
-                  }}
-                >
+                <FileText size={24} style={{ marginRight: 8, color: theme.palette.primary.main }} />
+                <Typography variant="h6">
                   Text Content Quality
                 </Typography>
               </Box>
@@ -363,14 +345,8 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
           <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ p: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <Tags size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  fontWeight: 'bold',
-                  fontSize: { xs: '1.1rem', sm: '1.25rem' }
-                }}
-              >
+              <Tags size={24} style={{ marginRight: 8, color: theme.palette.primary.main }} />
+              <Typography variant="h6">
                 Content Metadata
               </Typography>
             </Box>

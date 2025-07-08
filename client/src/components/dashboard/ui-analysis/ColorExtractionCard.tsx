@@ -3,7 +3,7 @@
  * Now supports 11 semantic color buckets for comprehensive analysis.
  */
 import React, { useState, useEffect, useRef } from 'react';
-import { Box, Typography, Collapse, IconButton, CircularProgress, Alert, Dialog, DialogContent, SxProps, Theme, Popover, FormControlLabel, Checkbox, FormGroup } from '@mui/material';
+import { Box, Typography, Collapse, IconButton, CircularProgress, Alert, Dialog, DialogContent, SxProps, Theme, Popover, FormControlLabel, Checkbox, FormGroup, useTheme } from '@mui/material';
 import { Palette, ChevronDown, ChevronUp, Settings } from 'lucide-react';
 import { useSessionState } from '@/hooks/useSessionState';
 
@@ -98,6 +98,7 @@ interface ColorDetail {
 }
 
 export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
+  const theme = useTheme();
   const [usageGroups, setUsageGroups] = useState<UsageGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -233,8 +234,8 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
     }}>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Palette size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+          <Palette size={24} style={{ marginRight: 8, color: theme.palette.primary.main }} />
+          <Typography variant="h6">
             Color Extraction
           </Typography>
         </Box>
@@ -242,14 +243,14 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
           size="small"
           onClick={handleFilterClick}
           sx={{
-            color: '#FF6B35',
+            color: 'primary.main',
             animation: cogGlowing ? 'pulse 1s ease-in-out infinite' : 'none',
             '@keyframes pulse': {
-              '0%, 100%': { boxShadow: '0 0 5px rgba(255, 107, 53, 0.3)' },
-              '50%': { boxShadow: '0 0 15px rgba(255, 107, 53, 0.6)' }
+              '0%, 100%': { boxShadow: `0 0 5px ${theme.palette.primary.main}33` },
+              '50%': { boxShadow: `0 0 15px ${theme.palette.primary.main}99` }
             },
             '&:hover': { 
-              backgroundColor: 'rgba(255, 107, 53, 0.1)',
+              backgroundColor: 'primary.light',
               transform: 'scale(1.1)'
             }
           }}
@@ -261,7 +262,7 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
       <Box>
         {loading ? (
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', py: 4 }}>
-            <CircularProgress size={32} sx={{ color: '#FF6B35', mr: 2 }} />
+            <CircularProgress size={32} sx={{ color: 'primary.main', mr: 2 }} />
             <Typography variant="body2" color="text.secondary">
               Extracting colors from website...
             </Typography>
@@ -286,17 +287,17 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
                     cursor: 'pointer',
                     p: 1,
                     borderRadius: 1,
-                    bgcolor: 'rgba(255, 107, 53, 0.05)',
+                    bgcolor: 'primary.light',
                     animation: glowingSections[usageGroup.name] ? 'pulse 1s ease-in-out infinite' : 'none',
                     '@keyframes pulse': {
-                      '0%, 100%': { boxShadow: '0 0 5px rgba(255, 107, 53, 0.3)' },
-                      '50%': { boxShadow: '0 0 15px rgba(255, 107, 53, 0.6)' }
+                      '0%, 100%': { boxShadow: `0 0 5px ${theme.palette.primary.main}33` },
+                      '50%': { boxShadow: `0 0 15px ${theme.palette.primary.main}99` }
                     },
-                    '&:hover': { bgcolor: 'rgba(255, 107, 53, 0.1)' }
+                    '&:hover': { bgcolor: 'primary.main' }
                   }}
                   onClick={() => toggleSection(usageGroup.name)}
                 >
-                  <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: '#FF6B35' }}>
+                  <Typography variant="subtitle1" sx={{ color: 'primary.main' }}>
                     {usageGroup.name} ({usageGroup.groups.reduce((t, g) => t + g.colors.length, 0)})
                   </Typography>
                   <IconButton size="small">
@@ -308,7 +309,7 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
                   <Box sx={{ pt: 2 }}>
                     {usageGroup.groups.map((harmonyGroup, harmonyIndex) => (
                       <Box key={harmonyIndex} sx={{ mb: 2 }}>
-                        <Typography variant="subtitle2" sx={{ mb: 1, color: 'text.secondary' }}>
+                        <Typography variant="subtitle2" sx={{ mb: 1 }} color="text.secondary">
                           {harmonyGroup.name}
                         </Typography>
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }} data-color-container>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography, Container, Chip } from '@mui/material';
+import { Box, Typography, Container, Chip, useTheme } from '@mui/material';
 import { KeyboardArrowDown } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -103,6 +103,7 @@ const handleAnalysisComplete = (
 const HeroSection = () => {
   const { analyzeWebsite, loading, error } = useAnalysisContext();
   const navigate = useNavigate();
+  const theme = useTheme();
 
   return (
     <Box
@@ -125,9 +126,9 @@ const HeroSection = () => {
           zIndex: 0,
           // Same background & mask as before
           background: `
-            radial-gradient(circle at 20% 50%, rgba(255, 107, 53, 0.3) 0%, transparent 50%),
-            radial-gradient(circle at 80% 20%, rgba(9, 132, 227, 0.3) 0%, transparent 50%),
-            radial-gradient(circle at 40% 80%, rgba(255, 138, 101, 0.2) 0%, transparent 50%),
+            radial-gradient(circle at 20% 50%, ${theme.palette.primary.main}30 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, ${theme.palette.secondary.main}30 0%, transparent 50%),
+            radial-gradient(circle at 40% 80%, ${theme.palette.primary.light}20 0%, transparent 50%),
             linear-gradient(135deg, #0F0F0F 0%, #1A1A1A 100%)
           `,
           WebkitMaskImage: MASK_IMAGE,
@@ -171,7 +172,7 @@ const HeroSection = () => {
           left: '10%',
           width: 60,
           height: 60,
-          background: 'linear-gradient(45deg, #FF6B35, #FF8A65)',
+          background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
           borderRadius: '16px',
           opacity: 0.1,
           zIndex: 0,
@@ -194,7 +195,7 @@ const HeroSection = () => {
           right: '15%',
           width: 80,
           height: 80,
-          background: 'linear-gradient(45deg, #0984E3, #42A5F5)',
+          background: `linear-gradient(45deg, ${theme.palette.secondary.main}, ${theme.palette.secondary.light})`,
           borderRadius: '50%',
           opacity: 0.1,
           zIndex: 0,

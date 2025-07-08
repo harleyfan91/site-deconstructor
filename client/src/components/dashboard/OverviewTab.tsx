@@ -97,7 +97,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
             left: 0,
             right: '20px', // Stop before the edge
             bottom: 0,
-            background: 'linear-gradient(to left, #FF6B35 0%, #FF6B35 12%, transparent 60%)',
+            background: `linear-gradient(to left, ${theme.palette.primary.main} 0%, ${theme.palette.primary.main} 12%, transparent 60%)`,
             borderRadius: '8px'
           }}
         />
@@ -113,11 +113,8 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
           }}
         >
           <Typography variant="h5" sx={{ 
-            fontWeight: 'bold', 
             color: 'white', 
-            textShadow: '0 1px 2px rgba(0,0,0,0.3)',
-            // Slightly smaller heading on mobile
-            fontSize: { xs: '1.1rem', sm: '1.25rem' }
+            textShadow: '0 1px 2px rgba(0,0,0,0.3)'
           }}>
             Website Overview
           </Typography>

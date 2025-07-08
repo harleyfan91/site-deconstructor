@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Box, Typography, List, ListItem, Link, Collapse, IconButton } from '@mui/material';
+import { Box, Typography, List, ListItem, Link, Collapse, IconButton, useTheme } from '@mui/material';
 import { Image, ChevronDown, ChevronUp } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 import { useSessionState } from '@/hooks/useSessionState';
@@ -91,6 +91,7 @@ const AdaptiveLink: React.FC<AdaptiveLinkProps> = ({ url, index }) => {
 };
 
 const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnalysis }) => {
+  const theme = useTheme();
   const [expandedSections, setExpandedSections] = useSessionState<Record<string, boolean>>(
     'ui-image-analysis-expanded',
     {
@@ -119,8 +120,8 @@ const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnal
   return (
     <Box>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-          <Image size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+          <Image size={24} style={{ marginRight: 8, color: theme.palette.primary.main }} />
+          <Typography variant="h6">
             Image Analysis
           </Typography>
         </Box>

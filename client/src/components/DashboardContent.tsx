@@ -78,13 +78,7 @@ const DashboardContent = () => {
             component="h1"
             gutterBottom
             sx={{
-              fontWeight: 'bold',
               mb: { xs: 0.5, sm: 0 },
-              fontSize: {
-                xs: '1.6rem',
-                sm: '2.1rem',
-                md: '2.5rem'
-              },
               whiteSpace: { xs: 'nowrap', sm: 'normal' },
               overflow: 'hidden',
               textOverflow: 'ellipsis',

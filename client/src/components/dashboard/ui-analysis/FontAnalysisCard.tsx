@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Box, Typography, Chip, CircularProgress } from '@mui/material';
+import { Box, Typography, Chip, CircularProgress, useTheme } from '@mui/material';
 import { Type } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 
@@ -10,6 +10,7 @@ interface FontAnalysisCardProps {
 }
 
 const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, url }) => {
+  const theme = useTheme();
   const [fonts, setFonts] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -113,8 +114,8 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, u
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-        <Type size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+        <Type size={24} style={{ marginRight: 8, color: theme.palette.primary.main }} />
+        <Typography variant="h6">
           Font Analysis
         </Typography>
 
