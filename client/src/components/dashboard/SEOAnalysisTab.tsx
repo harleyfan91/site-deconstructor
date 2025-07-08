@@ -383,22 +383,17 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
                     }}>
                       {rec.title}
                     </Typography>
-                    <Tooltip 
-                      title={getPriorityTooltip(rec.priority)}
-                      enterDelay={300}
-                      enterTouchDelay={300}
-                    >
-                      <Chip 
-                        label={rec.priority} 
-                        size="small" 
-                        sx={{ 
-                          backgroundColor: getPriorityColor(rec.priority),
-                          color: 'white',
-                          fontSize: '0.7rem',
-                          cursor: 'help'
-                        }}
-                      />
-                    </Tooltip>
+                    <Chip 
+                      label={rec.priority.toUpperCase()} 
+                      size="small" 
+                      variant="outlined"
+                      sx={{ 
+                        borderColor: getPriorityColor(rec.priority),
+                        color: getPriorityColor(rec.priority),
+                        fontWeight: 'medium',
+                        fontSize: '0.75rem'
+                      }}
+                    />
                   </Box>
                   <Typography variant="body2" sx={{ color: 'rgba(0, 0, 0, 0.87)' }}>
                     {rec.description}
@@ -463,12 +458,19 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
                   <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
                     {level.toUpperCase()}
                   </Typography>
-                  <Chip 
-                    label={count} 
-                    size="small" 
-                    color={count > 0 ? 'success' : 'default'}
-                    variant="outlined"
-                  />
+                  <Tooltip
+                    title={count > 0 ? `${count} ${level.toUpperCase()} heading${count === 1 ? '' : 's'} found - good for SEO structure` : `No ${level.toUpperCase()} headings found - consider adding for better content hierarchy`}
+                    enterDelay={300}
+                    enterTouchDelay={300}
+                  >
+                    <Chip 
+                      label={count} 
+                      size="small" 
+                      color={count > 0 ? 'success' : 'default'}
+                      variant="outlined"
+                      sx={{ cursor: 'help' }}
+                    />
+                  </Tooltip>
                 </Box>
               ))}
             </Box>
