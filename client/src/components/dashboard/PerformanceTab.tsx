@@ -6,6 +6,7 @@ import {
   CardContent,
   CircularProgress,
   Alert,
+  Tooltip,
 } from '@mui/material';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart';
 import { BarChart as RechartsBarChart, Bar, XAxis, YAxis } from 'recharts';
@@ -25,6 +26,43 @@ const getScoreColor = (score: number) => {
   if (score >= 90) return '#4CAF50';
   if (score >= 70) return '#FF9800';
   return '#F44336';
+};
+
+// Helper to get full name for Core Web Vitals abbreviations
+const getFullMetricName = (abbreviation: string) => {
+  const metricNames: { [key: string]: string } = {
+    'LCP': 'Largest Contentful Paint',
+    'FID': 'First Input Delay',
+    'CLS': 'Cumulative Layout Shift',
+    'FCP': 'First Contentful Paint',
+    'INP': 'Interaction to Next Paint',
+    'TTFB': 'Time to First Byte'
+  };
+  return metricNames[abbreviation] || abbreviation;
+};
+
+// Custom tick component with tooltip
+const CustomTick = (props: any) => {
+  const { x, y, payload } = props;
+  const fullName = getFullMetricName(payload.value);
+  
+  return (
+    <Tooltip title={fullName} arrow placement="top">
+      <g transform={`translate(${x},${y})`}>
+        <text
+          x={0}
+          y={0}
+          dy={16}
+          textAnchor="middle"
+          fill="#666"
+          fontSize="10"
+          style={{ cursor: 'help' }}
+        >
+          {payload.value}
+        </text>
+      </g>
+    </Tooltip>
+  );
 };
 
 const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error }) => {
@@ -150,7 +188,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
                   data={performance?.coreWebVitals || []}
                   margin={{ top: 20, right: 30, left: 10, bottom: 5 }}
                 >
-                  <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+                  <XAxis dataKey="name" tick={<CustomTick />} />
                   <YAxis domain={[0, 100]} />
                   <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
                   <Bar dataKey="value" fill="#FF6B35" />
