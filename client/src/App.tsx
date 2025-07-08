@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { createAppTheme } from './theme/theme';
 import LandingPage from './pages/LandingPage';
 import Dashboard from './pages/Dashboard';
+import AnalyzePage from './pages/AnalyzePage';
 import { AnalysisProvider } from './contexts/AnalysisContext';
 import { useState } from 'react';
 
@@ -23,6 +24,7 @@ const App = () => {
           <Routes>
             <Route path="/" element={<LandingPage darkMode={darkMode} toggleDarkMode={toggleDarkMode} />} />
             <Route path="/dashboard" element={<Dashboard darkMode={darkMode} toggleDarkMode={toggleDarkMode} />} />
+            <Route path="/analyze" element={<AnalyzePage darkMode={darkMode} toggleDarkMode={toggleDarkMode} />} />
           </Routes>
         </Router>
       </AnalysisProvider>
