@@ -6,6 +6,7 @@ import { extractColors, type ColorResult } from './lib/color-extraction';
 import { SupabaseCacheService } from './lib/supabase';
 import crypto from 'crypto';
 import { scrapePageData } from './lib/page-scraper';
+import { extractSEOData, type SEOData } from './lib/seo-extractor';
 
 // Helper function to map score to letter grade
 function mapScoreToGrade(score: number): string {
@@ -54,6 +55,62 @@ function buildContentData(scrapedData?: any) {
   return {
     wordCount: "!",
     readabilityScore: "!"
+  };
+}
+
+function buildSEOData(seoData?: SEOData, lhrData?: any) {
+  if (!seoData) {
+    return {
+      score: 0,
+      checks: [],
+      recommendations: [],
+      metaTags: {},
+      keywords: [],
+      headings: { h1: 0, h2: 0, h3: 0, h4: 0, h5: 0, h6: 0 },
+      hasRobotsTxt: false,
+      hasSitemap: false,
+      structuredData: []
+    };
+  }
+
+  // Enhance with Lighthouse SEO data if available
+  let enhancedChecks = [...seoData.checks];
+  let enhancedScore = seoData.score;
+  
+  if (lhrData?.categories?.seo) {
+    const lighthouseSEOScore = Math.round(lhrData.categories.seo.score * 100);
+    
+    // Blend our score with Lighthouse score (weighted average)
+    enhancedScore = Math.round((seoData.score * 0.7) + (lighthouseSEOScore * 0.3));
+    
+    // Add Lighthouse-specific checks
+    if (lhrData.audits?.['document-title']?.score === 1) {
+      const existingTitleCheck = enhancedChecks.find(c => c.name === 'Title Tag');
+      if (existingTitleCheck && existingTitleCheck.status !== 'good') {
+        existingTitleCheck.status = 'good';
+        existingTitleCheck.description = 'Title tag is present and well-optimized (Lighthouse verified)';
+      }
+    }
+    
+    if (lhrData.audits?.['meta-description']?.score === 1) {
+      const existingDescCheck = enhancedChecks.find(c => c.name === 'Meta Description');
+      if (existingDescCheck && existingDescCheck.status !== 'good') {
+        existingDescCheck.status = 'good';
+        existingDescCheck.description = 'Meta description is present and well-optimized (Lighthouse verified)';
+      }
+    }
+  }
+
+  return {
+    score: enhancedScore,
+    checks: enhancedChecks,
+    recommendations: seoData.recommendations,
+    metaTags: seoData.metaTags,
+    keywords: seoData.keywords,
+    headings: seoData.headings,
+    hasRobotsTxt: seoData.hasRobotsTxt,
+    hasSitemap: seoData.hasSitemap,
+    structuredData: seoData.structuredData
   };
 }
 
@@ -615,26 +672,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               violations: localData.accessibilityViolations
             }
           },
-          seo: {
-            score: localData.seoScore,
-            metaTags: {
-              title: localData.html.match(/<title>(.*?)<\/title>/i)?.[1] || 'No title found',
-              description: localData.html.match(/<meta[^>]*name="description"[^>]*content="([^"]*)"[^>]*>/i)?.[1] || 'No description found'
-            },
-            checks: [
-              {
-                name: 'Title Tag',
-                status: localData.html.includes('<title>') ? 'good' : 'error',
-                description: localData.html.includes('<title>') ? 'Title tag found' : 'Missing title tag'
-              },
-              {
-                name: 'Meta Description',
-                status: localData.html.includes('name="description"') ? 'good' : 'warning',
-                description: localData.html.includes('name="description"') ? 'Meta description found' : 'Missing meta description'
-              }
-            ],
-            recommendations: []
-          },
+          seo: buildSEOData(), // Use fallback markers for quick analysis
           content: buildContentData() // Use fallback markers for quick analysis
         }
       };
@@ -669,17 +707,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`📱 Request source: ${req.get('User-Agent')?.includes('Mozilla') ? 'Web Browser' : 'API Call'}`);
       const totalStartTime = Date.now();
       
-      // Parallel execution: HTML fetch and PSI data
+      // Parallel execution: HTML fetch, PSI data, and SEO analysis
       const htmlStartTime = Date.now();
       const psiStartTime = Date.now();
+      const seoStartTime = Date.now();
       
-      const [response, psiOverview] = await Promise.all([
+      const [response, psiOverview, seoData] = await Promise.all([
         fetch(url, {
           headers: {
             'User-Agent': 'Mozilla/5.0 (compatible; WebsiteAnalyzer/1.0)',
           },
         }),
-        fetchPageSpeedOverview(url)
+        fetchPageSpeedOverview(url),
+        extractSEOData(url).catch(error => {
+          console.warn('SEO extraction failed:', error);
+          return null; // Return null so analysis can continue without SEO data
+        })
       ]);
 
       if (!response.ok) {
@@ -688,6 +731,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const html = await response.text();
       logTiming('HTML fetch (full)', htmlStartTime);
+      if (seoData) {
+        logTiming('SEO extraction (full)', seoStartTime);
+        console.log(`SEO analysis: Score ${seoData.score}, ${seoData.checks.length} checks`);
+      }
       
       // Perform local analysis
       const localData = await performLocalAnalysis(url, html, response);
@@ -749,26 +796,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               description: issue.description
             }))
           },
-          seo: {
-            score: localData.seoScore,
-            metaTags: {
-              title: localData.html.match(/<title>(.*?)<\/title>/i)?.[1] || 'No title found',
-              description: localData.html.match(/<meta[^>]*name="description"[^>]*content="([^"]*)"[^>]*>/i)?.[1] || 'No description found'
-            },
-            checks: [
-              {
-                name: 'Title Tag',
-                status: localData.html.includes('<title>') ? 'good' : 'error',
-                description: localData.html.includes('<title>') ? 'Title tag found' : 'Missing title tag'
-              },
-              {
-                name: 'Meta Description',
-                status: localData.html.includes('name="description"') ? 'good' : 'warning',
-                description: localData.html.includes('name="description"') ? 'Meta description found' : 'Missing meta description'
-              }
-            ],
-            recommendations: []
-          },
+          seo: buildSEOData(seoData), // Use real SEO data or fallback
           content: buildContentData(), // Use fallback markers initially
           technical: {
             techStack: localData.techStack,
@@ -885,26 +913,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               description: issue.description
             }))
           },
-          seo: {
-            score: localData.seoScore,
-            metaTags: {
-              title: localData.html.match(/<title>(.*?)<\/title>/i)?.[1] || 'No title found',
-              description: localData.html.match(/<meta[^>]*name="description"[^>]*content="([^"]*)"[^>]*>/i)?.[1] || 'No description found'
-            },
-            checks: [
-              {
-                name: 'Title Tag',
-                status: localData.html.includes('<title>') ? 'good' : 'error',
-                description: localData.html.includes('<title>') ? 'Title tag found' : 'Missing title tag'
-              },
-              {
-                name: 'Meta Description',
-                status: localData.html.includes('name="description"') ? 'good' : 'warning',
-                description: localData.html.includes('name="description"') ? 'Meta description found' : 'Missing meta description'
-              }
-            ],
-            recommendations: []
-          },
+          seo: buildSEOData(), // Legacy endpoint uses fallback data
           technical: {
             techStack: localData.techStack,
             healthGrade: mapScoreToGrade(localData.overallScore),
@@ -974,6 +983,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
         error: 'Enhanced content analysis failed', 
         message: error instanceof Error ? error.message : 'Unknown error' 
       });
+    }
+  });
+
+  // SEO data extraction API route with caching
+  app.post('/api/seo', async (req, res) => {
+    try {
+      const { url } = req.body;
+      
+      if (!url || typeof url !== 'string') {
+        return res.status(400).json({ error: 'URL is required in request body' });
+      }
+
+      // Normalize URL
+      let normalizedUrl = url.trim();
+      if (!normalizedUrl.match(/^https?:\/\//)) {
+        normalizedUrl = `https://${normalizedUrl}`;
+      }
+
+      // Validate URL format
+      try {
+        new URL(normalizedUrl);
+      } catch {
+        return res.status(400).json({ error: 'Invalid URL format' });
+      }
+
+      console.log(`🔍 Starting SEO analysis for: ${normalizedUrl}`);
+      const overallStartTime = Date.now();
+      
+      const urlHash = generateUrlHash(normalizedUrl);
+      const seosCacheKey = `seo_${urlHash}`;
+      
+      // Check cache first
+      const cachedSEO = await SupabaseCacheService.get(seosCacheKey);
+      if (cachedSEO) {
+        console.log(`🔍 SEO cache hit for: ${normalizedUrl}`);
+        logTiming('🔍 Total SEO analysis (cached)', overallStartTime);
+        return res.json(cachedSEO.analysis_data);
+      }
+
+      console.log(`🔍 Extracting SEO data for: ${normalizedUrl}`);
+      const extractStartTime = Date.now();
+      
+      // Extract SEO data using Playwright
+      const seoData = await extractSEOData(normalizedUrl);
+      
+      logTiming('SEO extraction', extractStartTime);
+      console.log(`Extracted SEO data: Score ${seoData.score}, ${seoData.checks.length} checks, ${seoData.keywords.length} keywords`);
+      
+      // Cache the results
+      await SupabaseCacheService.set(seosCacheKey, normalizedUrl, seoData);
+      console.log(`✅ Cached SEO data for ${normalizedUrl}`);
+      
+      logTiming('🔍 Total SEO analysis', overallStartTime);
+      res.json(seoData);
+      
+    } catch (error) {
+      console.error('SEO extraction failed:', error);
+      
+      if (error instanceof Error) {
+        if (error.message.includes('timeout') || error.message.includes('TimeoutError')) {
+          return res.status(504).json({ error: 'Request timeout while analyzing SEO' });
+        }
+        if (error.message.includes('net::ERR_') || error.message.includes('Navigation failed')) {
+          return res.status(400).json({ error: 'Unable to access the provided URL' });
+        }
+      }
+      
+      res.status(500).json({ error: 'SEO analysis failed' });
     }
   });
 

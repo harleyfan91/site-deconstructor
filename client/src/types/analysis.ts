@@ -167,8 +167,37 @@ export interface AnalysisResponse {
         canonical?: string;
         'og:title'?: string;
         'og:description'?: string;
+        'og:image'?: string;
+        'og:url'?: string;
+        'og:type'?: string;
+        'twitter:card'?: string;
+        'twitter:title'?: string;
+        'twitter:description'?: string;
+        'twitter:image'?: string;
+        keywords?: string;
+        author?: string;
+        robots?: string;
         [key: string]: any;
       };
+      keywords?: Array<{
+        keyword: string;
+        count: number;
+        density: number;
+      }>;
+      headings?: {
+        h1: number;
+        h2: number;
+        h3: number;
+        h4: number;
+        h5: number;
+        h6: number;
+      };
+      hasRobotsTxt?: boolean;
+      hasSitemap?: boolean;
+      structuredData?: Array<{
+        type: string;
+        data: any;
+      }>;
     };
     adTags?: {
       [key: string]: boolean;
