@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { Box, Typography, Card, CardContent, Chip, CircularProgress, Alert, Tooltip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Grid } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Card, CardContent, Chip, CircularProgress, Alert, Tooltip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import { CheckCircle, AlertCircle, XCircle, Search, Target, TrendingUp, Hash, FileText, Globe, Shield, Check, X } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 import { useTheme } from '@mui/material/styles';
@@ -13,16 +13,48 @@ interface SEOAnalysisTabProps {
 
 const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error }) => {
   const theme = useTheme();
+  const [seoData, setSeoData] = useState<any>(null);
+  const [seoLoading, setSeoLoading] = useState(false);
+  const [seoError, setSeoError] = useState<string | null>(null);
 
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
-        <CircularProgress size={60} />
-        <Typography variant="h6" sx={{ ml: 2 }}>Analyzing SEO...</Typography>
-      </Box>
-    );
-  }
+  // Extract URL from the data
+  const url = (data as any)?.url;
 
+  useEffect(() => {
+    if (url && !seoData && !seoLoading) {
+      fetchSEOData();
+    }
+  }, [url]);
+
+  const fetchSEOData = async () => {
+    if (!url) return;
+    
+    setSeoLoading(true);
+    setSeoError(null);
+    
+    try {
+      const response = await fetch('/api/seo', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url: decodeURIComponent(url) }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('SEO analysis failed');
+      }
+      
+      const result = await response.json();
+      setSeoData(result);
+    } catch (err) {
+      setSeoError(err instanceof Error ? err.message : 'SEO analysis failed');
+    } finally {
+      setSeoLoading(false);
+    }
+  };
+
+  // Show general error
   if (error) {
     return (
       <Alert severity="error" sx={{ mt: 2 }}>
@@ -31,7 +63,8 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
     );
   }
 
-  if (!data) {
+  // Show message when no URL is available
+  if (!data || !url) {
     return (
       <Alert severity="info" sx={{ mt: 2 }}>
         Enter a URL to analyze website SEO
@@ -39,8 +72,35 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
     );
   }
 
-  const { seo } = data.data;
-  if (!seo) return null;
+  // Show SEO loading state
+  if (seoLoading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
+        <CircularProgress size={60} />
+        <Typography variant="h6" sx={{ ml: 2 }}>Analyzing SEO...</Typography>
+      </Box>
+    );
+  }
+
+  // Show SEO error
+  if (seoError) {
+    return (
+      <Alert severity="warning" sx={{ mt: 2 }}>
+        SEO analysis is temporarily unavailable. {seoError}
+      </Alert>
+    );
+  }
+
+  // Show message when no SEO data is available yet
+  if (!seoData) {
+    return (
+      <Alert severity="info" sx={{ mt: 2 }}>
+        SEO analysis will begin shortly...
+      </Alert>
+    );
+  }
+
+  const seo = seoData;
 
   const getStatusIcon = (status: string) => {
     switch (status) {

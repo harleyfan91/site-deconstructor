@@ -60,60 +60,7 @@ function buildContentData(scrapedData?: any) {
 
 function buildSEOData(seoData?: SEOData, lhrData?: any) {
   if (!seoData) {
-    return {
-      score: 50,
-      checks: [
-        {
-          name: 'Title Tag',
-          status: 'warning',
-          description: '!SEO analysis pending'
-        },
-        {
-          name: 'Meta Description', 
-          status: 'warning',
-          description: '!SEO analysis pending'
-        }
-      ],
-      recommendations: [
-        {
-          title: 'Improve Page Speed',
-          description: 'Optimize images, minify CSS/JS, and leverage browser caching to improve loading times.',
-          priority: 'high'
-        },
-        {
-          title: 'Add Meta Description',
-          description: 'Include a compelling meta description (150-160 characters) to improve click-through rates.',
-          priority: 'high'
-        },
-        {
-          title: 'Optimize Title Tags',
-          description: 'Ensure title tags are unique, descriptive, and include target keywords within 60 characters.',
-          priority: 'medium'
-        },
-        {
-          title: 'Create XML Sitemap',
-          description: 'Generate and submit an XML sitemap to help search engines discover and index your content.',
-          priority: 'medium'
-        },
-        {
-          title: 'Implement Structured Data',
-          description: 'Add schema markup to help search engines understand your content and improve rich snippets.',
-          priority: 'low'
-        }
-      ],
-      metaTags: {
-        title: '!Analysis pending',
-        description: '!Analysis pending',
-        keywords: '!Analysis pending'
-      },
-      keywords: [
-        { keyword: '!analysis pending', count: 0, density: 0 }
-      ],
-      headings: { h1: 0, h2: 0, h3: 0, h4: 0, h5: 0, h6: 0 },
-      hasRobotsTxt: false,
-      hasSitemap: false,
-      structuredData: []
-    };
+    return null; // Return null when no real data is available
   }
 
   // Enhance with Lighthouse SEO data if available
@@ -715,7 +662,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               violations: localData.accessibilityViolations
             }
           },
-          seo: buildSEOData(), // Use fallback markers for quick analysis
+          // SEO data excluded from quick analysis - use dedicated /api/seo endpoint
           content: buildContentData() // Use fallback markers for quick analysis
         }
       };
@@ -839,7 +786,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               description: issue.description
             }))
           },
-          seo: buildSEOData(seoData), // Use real SEO data or fallback
+          // SEO data excluded when null - use dedicated /api/seo endpoint
+          ...(seoData ? { seo: buildSEOData(seoData, lhrData) } : {}),
           content: buildContentData(), // Use fallback markers initially
           technical: {
             techStack: localData.techStack,
@@ -956,7 +904,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               description: issue.description
             }))
           },
-          seo: buildSEOData(), // Legacy endpoint uses fallback data
+          // SEO data excluded from legacy endpoint - use dedicated /api/seo endpoint
           technical: {
             techStack: localData.techStack,
             healthGrade: mapScoreToGrade(localData.overallScore),
