@@ -319,15 +319,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json(cachedColors.analysis_data);
       }
 
-      console.log(`🎨 Extracting colors and analyzing accessibility for: ${url}`);
+      console.log(`🎨 Extracting colors for: ${url}`);
       const extractStartTime = Date.now();
       
-      // Use enhanced color extraction with axe-core accessibility analysis
-      const { extractColorsWithAccessibility } = await import('./lib/color-extraction');
-      const colorAnalysis = await extractColorsWithAccessibility(url);
+      // Use original color extraction
+      const { extractColors } = await import('./lib/color-extraction');
+      const colors = await extractColors(url);
       
-      logTiming('Color extraction with accessibility', extractStartTime);
-      console.log(`Extracted ${colorAnalysis.colors.length} unique colors, ${colorAnalysis.contrastIssues.length} contrast issues, accessibility score: ${colorAnalysis.accessibilityScore}`);
+      // Format as expected by frontend
+      const colorAnalysis = { colors };
+      
+      logTiming('Color extraction', extractStartTime);
+      console.log(`Extracted ${colorAnalysis.colors.length} unique colors`);
       
       // Cache the results
       await SupabaseCacheService.set(colorsCacheKey, url, colorAnalysis);
