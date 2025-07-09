@@ -83,55 +83,31 @@ export const useAnalysisApi = () => {
     // Create the request promise and cache it
     const requestPromise = (async (): Promise<ExtendedAnalysisResponse | null> => {
       try {
-        console.log('🚀 Starting progressive analysis for:', url);
+        console.log('🚀 Starting comprehensive analysis for:', url);
 
-        // Step 1: Immediate local analysis for Overview tab
-        console.log('⚡ Fetching immediate analysis...');
-        const immediateResponse = await fetch(`/api/analyze/immediate?url=${encodeURIComponent(url)}`, {
+        // Single comprehensive analysis endpoint
+        console.log('🔍 Fetching complete analysis...');
+        const analysisResponse = await fetch(`/api/analyze/full?url=${encodeURIComponent(url)}`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' }
         });
 
-        if (!immediateResponse.ok) {
-          throw new Error(`Immediate analysis failed: ${immediateResponse.status}`);
+        if (!analysisResponse.ok) {
+          throw new Error(`Analysis failed: ${analysisResponse.status}`);
         }
 
-        const immediateResult: ExtendedAnalysisResponse = await immediateResponse.json();
-        console.log('✅ Immediate analysis completed - showing Overview');
+        const analysisResult: ExtendedAnalysisResponse = await analysisResponse.json();
+        console.log('✅ Analysis completed');
 
-        // Update UI immediately with local data and CLEAR LOADING
-        setData(immediateResult);
-        setLoading(false);  // Clear loading state here to show dashboard immediately
-
-        // Step 2: Complete analysis runs in background without blocking UI
-        console.log('🔍 Fetching complete analysis in background...');
+        // Update UI with complete data
+        setData(analysisResult);
         
-        // Run complete analysis in background
-        fetch(`/api/analyze/full?url=${encodeURIComponent(url)}`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
-        }).then(async (fullResponse) => {
-          if (fullResponse.ok) {
-            const fullResult: ExtendedAnalysisResponse = await fullResponse.json();
-            console.log('🎯 Complete analysis finished - updating data');
-            
-            // Update data with complete results (includes PSI data)
-            setData(fullResult);
-            
-            if (fullResult.mobileResponsiveness || fullResult.securityScore || 
-                fullResult.accessibility || fullResult.headerChecks) {
-              console.log('Complete analysis data structure validated');
-            }
-          } else {
-            console.warn('Complete analysis failed, keeping immediate analysis data');
-          }
-        }).catch((err) => {
-          console.warn('Complete analysis error:', err);
-          // Keep the immediate analysis data, don't throw error
-        });
+        if (analysisResult.mobileResponsiveness || analysisResult.securityScore || 
+            analysisResult.accessibility || analysisResult.headerChecks) {
+          console.log('Complete analysis data structure validated');
+        }
 
-        // Return immediate result to show dashboard
-        return immediateResult;
+        return analysisResult;
 
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
@@ -145,7 +121,7 @@ export const useAnalysisApi = () => {
 
     try {
       const result = await requestPromise;
-      // Loading is already set to false in the promise after immediate response
+      setLoading(false);  // Analysis complete, stop loading
       return result;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';

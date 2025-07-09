@@ -37,10 +37,10 @@ The application uses a unified analysis system with progressive section loading:
    - `/api/fonts` - Authentic font extraction from rendered websites
    - `/api/lighthouse/*` - Direct Lighthouse performance, SEO, and best practices data
 
-3. **Progressive Loading Experience**:
+3. **Optimized Loading Experience**:
    - **Section-level loading indicators** - Each dashboard section shows loading state independently
-   - **Immediate navigation** - Users land on Overview tab while specialized sections load in background
-   - **Intelligent caching** - 30-minute in-memory + 24-hour Supabase cache for performance
+   - **Intelligent caching** - 30-minute in-memory + 24-hour Supabase cache for sub-second cached responses
+   - **Parallel processing** - HTML analysis, PSI data, and SEO extraction run simultaneously
 
 4. **Intelligent Caching Strategy**:
    - **In-memory cache** (30 minutes) for ultra-fast repeated requests
