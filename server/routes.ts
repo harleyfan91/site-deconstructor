@@ -571,6 +571,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       techStack.push({ category: 'Markup Languages', technology: 'HTML5' });
     }
 
+    // Basic minification detection as fallback (comprehensive analysis available via /api/tech)
+    const minification = {
+      cssMinified: /<style[^>]*>[^<]*{[^}]*}[^<]*<\/style>/i.test(html.replace(/\s+/g, '')),
+      jsMinified: /<script[^>]*>[^<]*\w+\([^)]*\)[^<]*<\/script>/i.test(html.replace(/\s+/g, '')),
+      htmlMinified: !/>\s+</.test(html)
+    };
+
     // Font extraction is handled by the dedicated /api/fonts endpoint
     // which uses Playwright for real font detection. We don't generate
     // fallback font data here to avoid showing incorrect information.
@@ -614,6 +621,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       seoScore,
       userExperienceScore,
       techStack,
+      minification,
       html,
       hasAltTags
     };
@@ -693,12 +701,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             accessibility: {
               violations: localData.accessibilityViolations
             },
-            // Placeholder markers for real tech data - use /api/tech endpoint for comprehensive analysis
-            minification: {
-              cssMinified: "!",
-              jsMinified: "!",
-              htmlMinified: "!"
-            },
+            // Basic minification detection as fallback - comprehensive analysis available via /api/tech
+            minification: localData.minification,
             social: {
               hasOpenGraph: "!",
               hasTwitterCard: "!",
