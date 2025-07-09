@@ -2,7 +2,7 @@
 
 ## Project info
 
-A comprehensive website analysis tool that provides insights into performance, SEO, accessibility, and design elements. The tool uses advanced browser automation (Playwright) to extract authentic content data and provide real-time analysis of websites.
+A comprehensive website analysis platform that transforms complex technical insights into actionable, user-friendly information. The application provides authentic website analysis using advanced browser automation, Lighthouse performance audits, and real-time accessibility testing with axe-core integration.
 
 ## Architecture Overview
 
@@ -25,13 +25,24 @@ The following React components integrate with Playwright-powered content analysi
 - Real readability scores and word counts in exported analysis
 - Accurate photo/icon classification data in reports
 
-### Progressive Data Loading
+### Progressive Data Loading & Analysis Architecture
 
-The application uses a two-tier loading system:
-1. **Quick Analysis** (`/api/analyze/quick`) - Returns immediate overview data with fallback markers ("!")
-2. **Enhanced Analysis** (`/api/analyze/content`) - Playwright-powered deep content analysis
+The application uses a comprehensive multi-tier analysis system:
 
-Frontend components display loading indicators for sections still being processed, while showing available data immediately.
+1. **Quick Analysis** (`/api/analyze/quick`) - Immediate HTML analysis with real minification detection
+2. **Specialized Endpoints** for comprehensive analysis:
+   - `/api/seo` - Playwright extraction + Lighthouse SEO audits (blended scoring)
+   - `/api/tech` - Enhanced tech detection (lightweight + Lighthouse best practices)
+   - `/api/colors` - Real color extraction with axe-core accessibility analysis
+   - `/api/fonts` - Authentic font extraction from rendered websites
+   - `/api/lighthouse/*` - Direct Lighthouse performance, SEO, and best practices data
+
+3. **Intelligent Caching Strategy**:
+   - **In-memory cache** (30 minutes) for ultra-fast repeated requests
+   - **Supabase cache** (24 hours) for persistent data storage
+   - **Request deduplication** to prevent duplicate API calls
+
+Frontend components show section-level loading indicators while maintaining immediate data display for available sections.
 
 ## How can I edit this code?
 
@@ -81,11 +92,14 @@ This project is built with:
 * **Framer Motion** for smooth animations and transitions
 * **Vite** for fast development and build tooling
 
-### Backend
-* **Express.js** server with TypeScript
+### Backend & Analysis Engine
+* **Express.js** server with TypeScript for robust API architecture
+* **Lighthouse** for comprehensive performance, SEO, and best practices analysis (replacing PageSpeed Insights)
 * **Playwright** for headless browser automation and content extraction
+* **axe-core** for real-time accessibility testing and contrast analysis
 * **@mozilla/readability** for authentic article content parsing
 * **jsdom** for server-side DOM manipulation and analysis
+* **Enhanced Tech Detection** combining lightweight HTTP analysis with Lighthouse data
 
 ### Content Analysis Pipeline
 * **Real-time scraping**: Playwright extracts fonts, images, and text content
@@ -93,33 +107,52 @@ This project is built with:
 * **Readability analysis**: Flesch-Kincaid scoring on extracted article text
 * **Progressive loading**: Quick analysis followed by enhanced Playwright data
 
-### Data Storage
+### Data Storage & Performance
 * **Supabase** (PostgreSQL) for analysis caching with 24-hour TTL
 * **Multi-tier caching**: In-memory (30min) + Database (24hr) + Request deduplication
-
-See [docs/PLAYWRIGHT_INTEGRATION.md](docs/PLAYWRIGHT_INTEGRATION.md) for detailed integration documentation.
-* **Express.js**
-* **Drizzle ORM**
-* **Drizzle Zod**
-* **Supabase JS Client**
-* **Wappalyzer**
-* **Neon Database**
+* **Drizzle ORM** for type-safe database operations
+* **Express.js** API architecture with specialized analysis endpoints
 
 *For a complete list of all frameworks and libraries (including package names and versions), see [docs/TECH\_STACK.md](docs/TECH_STACK.md).*
 
-## Tech Stack Detection
+### Advanced Analysis Capabilities
 
-This application uses **Wappalyzer** for accurate technology detection on analyzed websites. Wappalyzer now runs server-side to provide real-time technology identification including:
+**SEO Analysis** - Blended scoring system combining:
+- Playwright-based meta tag extraction and keyword analysis (60% weight)
+- Lighthouse SEO audit scores and recommendations (40% weight)
+- Real sitemap.xml and robots.txt validation
 
-* JavaScript frameworks (React, Vue, Angular, etc.)
-* CSS frameworks (Bootstrap, Tailwind, etc.)
-* Content Management Systems
-* Analytics tools
-* E-commerce platforms
-* Web servers and hosting solutions
-* And much more...
+**Accessibility Testing** - Integrated axe-core analysis:
+- Real contrast ratio calculations from rendered websites
+- WCAG compliance checking with actionable recommendations
+- Color accessibility warnings with suggested improvements
 
-The integration provides comprehensive technology fingerprinting without requiring API keys or external dependencies beyond the Wappalyzer npm package.
+**Performance Analysis** - Lighthouse-powered metrics:
+- Core Web Vitals (LCP, FID, CLS) from real user scenarios
+- Performance optimization opportunities
+- Best practices compliance with security assessments
+
+## Enhanced Technical Analysis
+
+The application features a sophisticated **Enhanced Tech Analysis** system that combines multiple data sources for comprehensive technology detection:
+
+### Lightweight Pattern-Based Detection
+* **Real-time HTTP analysis** for immediate technology identification
+* **Pattern matching** for JavaScript frameworks (React, Vue, Angular, Next.js, Nuxt.js, Svelte, D3.js)
+* **Security headers analysis** (CSP, HSTS, X-Frame-Options, etc.)
+* **Minification detection** using content analysis patterns
+* **Social platform integration** (Open Graph, Twitter Cards, analytics tracking)
+
+### Lighthouse Best Practices Integration
+* **HTTP/2 usage detection**
+* **Text compression analysis**
+* **Image optimization assessment**
+* **WebP image format usage**
+* **Responsive image implementation**
+* **Security vulnerability scanning**
+
+### Fallback Architecture
+When comprehensive Lighthouse analysis fails, the system gracefully falls back to lightweight detection, ensuring users always receive authentic technical data rather than placeholder values.
 
 ## Supabase Setup
 
@@ -135,7 +168,7 @@ PSI_API_KEY=<your-google-psi-key>
 * `VITE_SUPABASE_URL`: Your Supabase project URL
 * `VITE_SUPABASE_ANON_KEY`: Public anon key for client-side operations
 * `SUPABASE_SERVICE_ROLE_KEY`: Service role key for server-side operations (optional)
-* `PSI_API_KEY`: Google PageSpeed Insights API key (optional but recommended)
+* `PSI_API_KEY`: Google PageSpeed Insights API key (legacy support, Lighthouse is primary)
 
 To enable color palette extraction with `node-vibrant`, install the optional dependency pinned to version `^4.0.3`:
 

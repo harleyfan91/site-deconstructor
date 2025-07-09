@@ -2,6 +2,10 @@
 
 This document provides a detailed breakdown of all major frameworks and libraries used throughout the project, including package names as referenced in `package.json` and configuration files.
 
+## Analysis Engine Architecture
+
+The application features a sophisticated multi-tier analysis system powered by industry-standard tools:
+
 ## Frontend Frameworks & Libraries
 
 * **React**
@@ -25,31 +29,66 @@ This document provides a detailed breakdown of all major frameworks and librarie
 
 ## Backend Frameworks & Libraries
 
-* **Node.js**
-  * Runtime environment
-* **Express.js**
-  * Package: `express`
-* **Playwright** 🎭
-  * Package: `playwright`
-  * Used for: Headless browser automation, content extraction, image classification
-  * Components using: ContentAnalysisTab, ImageAnalysisCard
-* **Mozilla Readability**
-  * Package: `@mozilla/readability`
-  * Used for: Article content extraction and word counting
+### Core Server Infrastructure
+* **Node.js** - Runtime environment
+* **Express.js** - Package: `express`
+  * RESTful API architecture with specialized analysis endpoints
+  * Middleware for request validation and error handling
+
+### Analysis Engine Components
+
+#### Browser Automation & Content Extraction
+* **Playwright** 🎭 - Package: `playwright`
+  * Headless Chromium automation for real website rendering
+  * Content extraction: fonts, images, colors, text content
+  * Page screenshot and DOM analysis capabilities
+  * Components using: ContentAnalysisTab, ImageAnalysisCard, FontAnalysisCard, ColorExtractionCard
+
+#### Performance & SEO Analysis
+* **Lighthouse** - Package: `lighthouse`
+  * Comprehensive performance auditing (replacing PageSpeed Insights)
+  * SEO audit scoring and recommendations
+  * Best practices compliance assessment
+  * Core Web Vitals measurement from real scenarios
+  * API endpoints: `/api/lighthouse/seo`, `/api/lighthouse/performance`, `/api/lighthouse/best-practices`
+
+#### Accessibility Testing
+* **axe-core** - Package: `@axe-core/playwright`
+  * Real-time accessibility testing integrated with Playwright
+  * WCAG compliance checking with actionable recommendations
+  * Color contrast analysis from rendered websites
+  * Integrated into color extraction API for accessibility scoring
+
+#### Content Analysis
+* **Mozilla Readability** - Package: `@mozilla/readability`
+  * Article content extraction and word counting
+  * Flesch-Kincaid readability scoring on authentic text
   * Components using: ContentAnalysisTab (readability scores)
-* **JSDOM**
-  * Package: `jsdom`
-  * Used for: Server-side DOM manipulation for content analysis
-* **Drizzle ORM**
-  * Packages: `drizzle-orm`, `drizzle-orm/neon-serverless`
-* **Drizzle Zod**
-  * Package: `drizzle-zod`
-* **Supabase JS Client**
-  * Package: `@supabase/supabase-js`
-* **Wappalyzer**
-  * Package: `wappalyzer`
-* **Neon Database**
-  * Package: `@neondatabase/serverless`
+
+* **JSDOM** - Package: `jsdom`
+  * Server-side DOM manipulation for content analysis
+  * HTML parsing and element extraction
+
+#### Enhanced Tech Detection
+* **Lightweight Pattern Analysis** - Custom implementation
+  * HTTP-based technology detection without browser context conflicts
+  * Real-time pattern matching for frameworks (React, Vue, Angular, Next.js, Nuxt.js, Svelte, D3.js)
+  * Security headers analysis (CSP, HSTS, X-Frame-Options)
+  * Minification detection using content analysis patterns
+  * Social platform integration detection (Open Graph, Twitter Cards, analytics)
+
+### Database & Caching
+* **Supabase** - Package: `@supabase/supabase-js`
+  * PostgreSQL database with real-time capabilities
+  * Server-side client with service role permissions
+  * 24-hour TTL caching for analysis results
+
+* **Drizzle ORM** - Packages: `drizzle-orm`, `drizzle-kit`
+  * Type-safe database operations
+  * Schema migration management
+
+* **Drizzle Zod** - Package: `drizzle-zod`
+  * Runtime validation with TypeScript integration
 
 ## Content Analysis Integration
 
@@ -69,10 +108,57 @@ This document provides a detailed breakdown of all major frameworks and librarie
 * Fetches Playwright data after quick analysis
 * Handles loading states and fallback markers ("!")
 
-### API Endpoints
+### API Endpoints & Caching Strategy
 
-* `/api/analyze/quick` - Immediate overview with fallback markers
-* `/api/analyze/content` - Playwright-powered deep content analysis
-* `/api/colors` - Real color extraction from rendered websites
+#### Quick Analysis
+* `/api/analyze/quick` - Immediate HTML analysis with real minification detection
+* `/api/analyze/full` - Complete analysis with PageSpeed Insights data and Supabase caching
+
+#### Specialized Analysis Endpoints
+* `/api/seo` - Playwright extraction + Lighthouse SEO audits (blended scoring: 60% extraction + 40% Lighthouse)
+* `/api/tech` - Enhanced tech detection (lightweight + Lighthouse best practices)
+* `/api/colors` - Real color extraction with axe-core accessibility analysis
+* `/api/fonts` - Authentic font extraction from rendered websites
+* `/api/lighthouse/seo` - Direct Lighthouse SEO audit data
+* `/api/lighthouse/performance` - Lighthouse performance metrics
+* `/api/lighthouse/best-practices` - Lighthouse best practices assessment
+
+#### Intelligent Caching Architecture
+1. **In-memory cache** (30 minutes) for ultra-fast repeated requests
+2. **Supabase cache** (24 hours) with URL hash-based keys:
+   - `seo_{hash}` - SEO analysis results
+   - `tech_lightweight_{hash}` - Enhanced tech analysis
+   - `colors_{hash}` - Color extraction with accessibility data
+   - `fonts_{hash}` - Font analysis results
+   - `lighthouse_seo_{hash}` - Lighthouse SEO audit data
+3. **Request deduplication** to prevent duplicate API calls during concurrent requests
+
+#### Performance Metrics
+- **Cache hits**: 109-242ms response time (vs 7-25 seconds for fresh analysis)
+- **Quick analysis**: <2 seconds for immediate user feedback
+- **Full analysis**: 9-25 seconds with comprehensive data
+- **Fallback handling**: Graceful degradation when comprehensive analysis fails
+
+## Migration from PageSpeed Insights to Lighthouse
+
+The application has undergone a significant backend architecture upgrade:
+
+### Previous Architecture (Deprecated)
+- **PageSpeed Insights API** - External API calls with rate limits and API key requirements
+- **Wappalyzer** - Technology detection (deprecated package)
+- **Basic HTML parsing** - Limited technical analysis capabilities
+
+### Current Architecture (Enhanced)
+- **Lighthouse** - Local Lighthouse audits providing comprehensive analysis without external API dependencies
+- **Enhanced Tech Detection** - Dual-layer system combining lightweight HTTP analysis with Lighthouse best practices
+- **axe-core Integration** - Real accessibility testing with contrast analysis
+- **Intelligent Fallback System** - Graceful degradation when comprehensive analysis fails
+
+### Benefits of Migration
+1. **Reduced External Dependencies** - No API key requirements for core functionality
+2. **Enhanced Analysis Depth** - More comprehensive technical insights
+3. **Better Performance** - Local analysis reduces network latency
+4. **Improved Reliability** - Fallback mechanisms ensure users always receive authentic data
+5. **Real Accessibility Testing** - axe-core provides actual WCAG compliance checking
 
 *For details on exact versions and full dependency list, refer to `package.json` files in the root and server directories.*
