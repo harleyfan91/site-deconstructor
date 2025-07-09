@@ -511,7 +511,7 @@ function generateRecommendations(
   metaTags: SEOMetaTags,
   headings: HeadingHierarchy
 ): Array<{ title: string; description: string; priority: 'high' | 'medium' | 'low' }> {
-  const recommendations = [];
+  const recommendations: Array<{ title: string; description: string; priority: 'high' | 'medium' | 'low' }> = [];
   
   // High priority recommendations
   if (!metaTags.title) {

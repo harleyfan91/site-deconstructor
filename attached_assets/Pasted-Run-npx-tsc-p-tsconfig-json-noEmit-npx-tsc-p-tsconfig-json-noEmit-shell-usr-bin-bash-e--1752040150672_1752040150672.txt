@@ -1,0 +1,61 @@
+Run npx tsc -p tsconfig.json --noEmit
+  npx tsc -p tsconfig.json --noEmit
+  shell: /usr/bin/bash -e {0}
+  
+Error: client/src/components/dashboard/SEOAnalysisTab.tsx(462,28): error TS18046: 'count' is of type 'unknown'.
+Error: client/src/components/dashboard/SEOAnalysisTab.tsx(467,23): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & ChipOwnProps & ChipSlotsAndSlotProps & CommonProps & Omit<...>): Element | null', gave the following error.
+    Type 'unknown' is not assignable to type 'ReactNode'.
+  Overload 2 of 2, '(props: DefaultComponentProps<ChipTypeMap<{}, "div">>): Element | null', gave the following error.
+    Type 'unknown' is not assignable to type 'ReactNode'.
+Error: client/src/components/dashboard/SEOAnalysisTab.tsx(469,30): error TS18046: 'count' is of type 'unknown'.
+Error: client/src/components/dashboard/TechTab.tsx(279,27): error TS2345: Argument of type '{ accessibility: { violations: { id: string; description?: string | undefined; }[]; }; social?: { hasOpenGraph: boolean; hasTwitterCard: boolean; hasShareButtons: boolean; } | undefined; cookies?: { ...; } | undefined; ... 5 more ...; securityScore?: number | undefined; }' is not assignable to parameter of type 'SetStateAction<TechnicalAnalysis | null>'.
+  Type '{ accessibility: { violations: { id: string; description?: string | undefined; }[]; }; social?: { hasOpenGraph: boolean; hasTwitterCard: boolean; hasShareButtons: boolean; } | undefined; cookies?: { ...; } | undefined; ... 5 more ...; securityScore?: number | undefined; }' is missing the following properties from type 'TechnicalAnalysis': adTags, securityHeaders, tlsVersion, cdn, gzip
+Error: client/src/components/dashboard/TechTab.tsx(294,25): error TS2345: Argument of type '{ accessibility: { violations: { id: string; description?: string | undefined; }[]; }; social?: { hasOpenGraph: boolean; hasTwitterCard: boolean; hasShareButtons: boolean; } | undefined; cookies?: { ...; } | undefined; ... 5 more ...; securityScore?: number | undefined; }' is not assignable to parameter of type 'SetStateAction<TechnicalAnalysis | null>'.
+  Type '{ accessibility: { violations: { id: string; description?: string | undefined; }[]; }; social?: { hasOpenGraph: boolean; hasTwitterCard: boolean; hasShareButtons: boolean; } | undefined; cookies?: { ...; } | undefined; ... 5 more ...; securityScore?: number | undefined; }' is missing the following properties from type 'TechnicalAnalysis': adTags, securityHeaders, tlsVersion, cdn, gzip
+Error: server/lib/axe-integration.ts(46,25): error TS2339: Property 'injectIntoPage' does not exist on type 'typeof AxeBuilder'.
+Error: server/lib/axe-integration.ts(49,44): error TS2339: Property 'getViolations' does not exist on type 'typeof AxeBuilder'.
+Error: server/lib/enhanced-tech-analysis.ts(110,86): error TS18046: 'lighthouseError' is of type 'unknown'.
+Error: server/lib/enhanced-tech-analysis.ts(218,17): error TS2345: Argument of type '{ type: string; description: string; severity: string; recommendation: string; source: "lighthouse"; }' is not assignable to parameter of type 'never'.
+Error: server/lib/enhanced-tech-analysis.ts(228,17): error TS2345: Argument of type '{ type: string; description: string; severity: string; recommendation: string; source: "lighthouse"; }' is not assignable to parameter of type 'never'.
+Error: server/lib/enhanced-tech-analysis.ts(238,17): error TS2345: Argument of type '{ type: string; description: string; severity: string; recommendation: string; source: "lighthouse"; }' is not assignable to parameter of type 'never'.
+Error: server/lib/enhanced-tech-analysis.ts(248,17): error TS2345: Argument of type '{ type: string; description: string; severity: string; recommendation: string; source: "lighthouse"; }' is not assignable to parameter of type 'never'.
+Error: server/lib/enhanced-tech-analysis.ts(258,17): error TS2345: Argument of type '{ type: string; description: string; severity: string; recommendation: string; source: "lighthouse"; }' is not assignable to parameter of type 'never'.
+Error: server/lib/lighthouse-service.ts(66,5): error TS2322: Type 'LaunchedChrome' is not assignable to type 'null'.
+Error: server/lib/lighthouse-service.ts(76,13): error TS2339: Property 'lhr' does not exist on type 'RunnerResult | undefined'.
+Error: server/lib/lighthouse-service.ts(77,13): error TS18047: 'chrome' is possibly 'null'.
+Error: server/lib/lighthouse-service.ts(80,7): error TS2353: Object literal may only specify known properties, and 'disableDeviceEmulation' does not exist in type 'Flags'.
+Error: server/lib/lighthouse-service.ts(100,20): error TS2339: Property 'kill' does not exist on type 'never'.
+Error: server/lib/seo-extractor.ts(518,26): error TS2345: Argument of type '{ title: string; description: string; priority: "high"; }' is not assignable to parameter of type 'never'.
+Error: server/lib/seo-extractor.ts(526,26): error TS2345: Argument of type '{ title: string; description: string; priority: "high"; }' is not assignable to parameter of type 'never'.
+Error: server/lib/seo-extractor.ts(534,26): error TS2345: Argument of type '{ title: string; description: string; priority: "high"; }' is not assignable to parameter of type 'never'.
+Error: server/lib/seo-extractor.ts(543,26): error TS2345: Argument of type '{ title: string; description: string; priority: "medium"; }' is not assignable to parameter of type 'never'.
+Error: server/lib/seo-extractor.ts(551,26): error TS2345: Argument of type '{ title: string; description: string; priority: "medium"; }' is not assignable to parameter of type 'never'.
+Error: server/lib/seo-extractor.ts(560,26): error TS2345: Argument of type '{ title: string; description: string; priority: "low"; }' is not assignable to parameter of type 'never'.
+Error: server/lib/tech-extractor.ts(331,28): error TS2531: Object is possibly 'null'.
+Error: server/lib/tech-extractor.ts(504,3): error TS2322: Type 'void | { techStack: TechStackItem[]; thirdPartyScripts: ThirdPartyScript[]; securityHeaders: SecurityHeaders; minification: MinificationStatus; ... 6 more ...; gzip: boolean; }' is not assignable to type 'TechnicalAnalysis'.
+  Type 'void' is not assignable to type 'TechnicalAnalysis'.
+Error: server/lib/tech-extractor.ts(516,28): error TS18047: 'page' is possibly 'null'.
+Error: server/lib/tech-extractor.ts(525,24): error TS18047: 'page' is possibly 'null'.
+Error: server/lib/tech-extractor.ts(537,24): error TS2345: Argument of type 'Page | null' is not assignable to parameter of type 'Page'.
+  Type 'null' is not assignable to type 'Page'.
+Error: server/lib/tech-extractor.ts(538,32): error TS2345: Argument of type 'Page | null' is not assignable to parameter of type 'Page'.
+  Type 'null' is not assignable to type 'Page'.
+Error: server/lib/tech-extractor.ts(539,30): error TS2345: Argument of type 'import("/home/runner/work/site-deconstructor/site-deconstructor/node_modules/playwright-core/types/types").Response' is not assignable to parameter of type 'Response'.
+  Type 'Response' is missing the following properties from type 'Response': redirected, type, clone, bodyUsed, and 3 more.
+Error: server/lib/tech-extractor.ts(540,27): error TS2345: Argument of type 'Page | null' is not assignable to parameter of type 'Page'.
+  Type 'null' is not assignable to type 'Page'.
+Error: server/lib/tech-extractor.ts(541,25): error TS2345: Argument of type 'Page | null' is not assignable to parameter of type 'Page'.
+  Type 'null' is not assignable to type 'Page'.
+Error: server/lib/tech-extractor.ts(542,22): error TS2345: Argument of type 'Page | null' is not assignable to parameter of type 'Page'.
+  Type 'null' is not assignable to type 'Page'.
+Error: server/lib/tech-extractor.ts(543,21): error TS2345: Argument of type 'Page | null' is not assignable to parameter of type 'Page'.
+  Type 'null' is not assignable to type 'Page'.
+Error: server/lib/tech-extractor.ts(546,64): error TS2345: Argument of type 'import("/home/runner/work/site-deconstructor/site-deconstructor/node_modules/playwright-core/types/types").Response' is not assignable to parameter of type 'Response'.
+  Type 'Response' is missing the following properties from type 'Response': redirected, type, clone, bodyUsed, and 3 more.
+Error: server/lib/tech-extractor.ts(754,7): error TS2304: Cannot find name 'browserInstance'.
+Error: server/lib/tech-extractor.ts(755,11): error TS2304: Cannot find name 'browserInstance'.
+Error: server/lib/tech-extractor.ts(756,5): error TS2304: Cannot find name 'browserInstance'.
+Error: server/lib/tech-lightweight.ts(217,19): error TS2345: Argument of type '{ type: string; description: string; severity: string; recommendation: string; }' is not assignable to parameter of type 'never'.
+Error: server/lib/tech-lightweight.ts(226,19): error TS2345: Argument of type '{ type: string; description: string; severity: string; recommendation: string; }' is not assignable to parameter of type 'never'.
+Error: Process completed with exit code 2.

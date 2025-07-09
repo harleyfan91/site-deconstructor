@@ -275,8 +275,15 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
         // Try to get fallback data from the main analysis
         console.warn('Enhanced tech analysis failed, using basic data if available');
         const fallbackData = data?.data?.technical;
-        if (fallbackData) {
-          setTechAnalysis(fallbackData);
+        if (fallbackData && 'techStack' in fallbackData) {
+          setTechAnalysis({
+            ...fallbackData,
+            adTags: fallbackData.adTags || [],
+            securityHeaders: fallbackData.securityHeaders || { csp: 'Not Set', hsts: 'Not Set', xfo: 'Not Set', xss: 'Not Set', xcto: 'Not Set', referrer: 'Not Set' },
+            tlsVersion: fallbackData.tlsVersion || 'Unknown',
+            cdn: fallbackData.cdn || false,
+            gzip: fallbackData.gzip || false
+          });
           return;
         }
         throw new Error('Technical analysis temporarily unavailable');
@@ -289,9 +296,16 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
       console.error('Technical analysis error:', err);
       // Use fallback data from main analysis if available
       const fallbackData = data?.data?.technical;
-      if (fallbackData) {
+      if (fallbackData && 'techStack' in fallbackData) {
         console.log('Using fallback technical data from main analysis');
-        setTechAnalysis(fallbackData);
+        setTechAnalysis({
+          ...fallbackData,
+          adTags: fallbackData.adTags || [],
+          securityHeaders: fallbackData.securityHeaders || { csp: 'Not Set', hsts: 'Not Set', xfo: 'Not Set', xss: 'Not Set', xcto: 'Not Set', referrer: 'Not Set' },
+          tlsVersion: fallbackData.tlsVersion || 'Unknown',
+          cdn: fallbackData.cdn || false,
+          gzip: fallbackData.gzip || false
+        });
       } else {
         setTechError('Technical analysis temporarily unavailable');
       }

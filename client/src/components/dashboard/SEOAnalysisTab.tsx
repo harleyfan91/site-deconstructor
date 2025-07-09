@@ -459,14 +459,14 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
                     {level.toUpperCase()}
                   </Typography>
                   <Tooltip
-                    title={count > 0 ? `${count} ${level.toUpperCase()} heading${count === 1 ? '' : 's'} found - good for SEO structure` : `No ${level.toUpperCase()} headings found - consider adding for better content hierarchy`}
+                    title={(typeof count === 'number' && count > 0) ? `${count} ${level.toUpperCase()} heading${count === 1 ? '' : 's'} found - good for SEO structure` : `No ${level.toUpperCase()} headings found - consider adding for better content hierarchy`}
                     enterDelay={300}
                     enterTouchDelay={300}
                   >
                     <Chip 
-                      label={count} 
+                      label={String(count)} 
                       size="small" 
-                      color={count > 0 ? 'success' : 'default'}
+                      color={(typeof count === 'number' && count > 0) ? 'success' : 'default'}
                       variant="outlined"
                       sx={{ cursor: 'help' }}
                     />

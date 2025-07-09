@@ -2,7 +2,7 @@
  * Lightweight technical analysis using HTTP requests and HTML parsing
  * Designed to avoid browser context conflicts while providing real data
  */
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 import { SupabaseCacheService } from './supabase';
 
 export interface TechStackItem {
@@ -212,7 +212,12 @@ export async function extractTechnicalData(url: string): Promise<TechnicalAnalys
     const tlsVersion = headers.get('alt-svc') ? 'TLS 1.3' : 'TLS 1.2+';
     
     // Generate issues based on analysis
-    const issues = [];
+    const issues: Array<{
+      type: string;
+      description: string;
+      severity: string;
+      recommendation: string;
+    }> = [];
     if (securityHeaders.csp === 'Not Set') {
       issues.push({
         type: 'security',

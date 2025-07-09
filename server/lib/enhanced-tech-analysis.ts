@@ -5,7 +5,7 @@
 import { getLighthouseBestPractices, type LighthouseBestPracticesData } from './lighthouse-service';
 import { getTechnicalAnalysis as getLightweightTech } from './tech-lightweight';
 import { SupabaseCacheService } from './supabase';
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 
 export interface EnhancedTechAnalysis {
   // Core tech stack from lightweight analysis
@@ -107,7 +107,8 @@ export async function getEnhancedTechAnalysis(url: string): Promise<EnhancedTech
     try {
       lighthouseData = await getLighthouseBestPractices(url);
     } catch (lighthouseError) {
-      console.warn('Lighthouse Best Practices failed, using lightweight data only:', lighthouseError.message);
+      const errorMessage = lighthouseError instanceof Error ? lighthouseError.message : 'Unknown error';
+      console.warn('Lighthouse Best Practices failed, using lightweight data only:', errorMessage);
       // Return enhanced analysis with just lightweight data
       return {
         ...lightweightData,
@@ -211,7 +212,13 @@ function generateLighthouseIssues(lighthouseData: LighthouseBestPracticesData): 
   recommendation: string;
   source: 'lighthouse';
 }> {
-  const issues = [];
+  const issues: Array<{
+    type: string;
+    description: string;
+    severity: string;
+    recommendation: string;
+    source: 'lighthouse';
+  }> = [];
   
   // Check for failed audits and create issues
   if (lighthouseData.audits.isOnHttps?.score !== 1) {

@@ -5,7 +5,7 @@
 import lighthouse from 'lighthouse';
 import { launch } from 'chrome-launcher';
 import { SupabaseCacheService } from './supabase';
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 
 export interface LighthouseSEOData {
   score: number;
@@ -59,7 +59,7 @@ export interface LighthouseBestPracticesData {
 }
 
 async function runLighthouse(url: string, categories: string[]): Promise<any> {
-  let chrome = null;
+  let chrome: any = null;
   try {
     console.log(`🔍 Running Lighthouse analysis for ${url} (categories: ${categories.join(', ')})`);
     
@@ -73,12 +73,11 @@ async function runLighthouse(url: string, categories: string[]): Promise<any> {
       ]
     });
 
-    const { lhr } = await lighthouse(url, {
+    const result = await lighthouse(url, {
       port: chrome.port,
       output: 'json',
       onlyCategories: categories,
-      disableDeviceEmulation: true,
-      disableStorageReset: true,
+      // Remove unsupported flags
       throttlingMethod: 'simulate',
       throttling: {
         rttMs: 40,
@@ -88,15 +87,15 @@ async function runLighthouse(url: string, categories: string[]): Promise<any> {
         downloadThroughputKbps: 0,
         uploadThroughputKbps: 0
       }
-    });
+    } as any);
 
     console.log(`✅ Lighthouse analysis completed for ${url}`);
-    return lhr;
+    return result?.lhr;
   } catch (error) {
     console.error('Lighthouse analysis failed:', error);
     throw error;
   } finally {
-    if (chrome) {
+    if (chrome && chrome.kill) {
       await chrome.kill();
     }
   }

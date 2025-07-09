@@ -5,7 +5,7 @@
 import { Page } from 'playwright';
 import AxePlaywright from '@axe-core/playwright';
 import { SupabaseCacheService } from './supabase';
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 
 export interface AxeViolation {
   id: string;
@@ -42,16 +42,13 @@ export async function runAxeAnalysis(page: Page, url: string): Promise<Accessibi
   try {
     console.log(`🔍 Running axe-core accessibility analysis for ${url}`);
     
-    // Inject axe-core into the page
-    await AxePlaywright.injectIntoPage(page);
+    // Create axe builder and inject into page
+    const axeBuilder = new (AxePlaywright as any)(page);
     
     // Run accessibility tests focusing on WCAG 2.0 AA compliance
-    const violations = await AxePlaywright.getViolations(page, {
-      runOnly: {
-        type: 'tag',
-        values: ['wcag2a', 'wcag2aa', 'wcag21aa']
-      }
-    });
+    const violations = await axeBuilder
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
+      .analyze();
 
     // Extract contrast-specific violations
     const contrastViolations = violations.filter(v => v.id === 'color-contrast');

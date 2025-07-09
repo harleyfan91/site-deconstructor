@@ -124,7 +124,7 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, u
       <Box>
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
-            <CircularProgress size={24} sx={{ mr: 2 }} />
+            <CircularProgress size={32} sx={{ mr: 2 }} />
             <Typography variant="body2" color="text.secondary">
               Extracting fonts...
             </Typography>

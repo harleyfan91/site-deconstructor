@@ -5,7 +5,7 @@
 import { chromium, type Browser, type Page } from 'playwright';
 // Using pattern-based detection instead of deprecated Wappalyzer
 import { SupabaseCacheService } from './supabase';
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 import PQueue from 'p-queue';
 
 export interface TechStackItem {
@@ -94,12 +94,12 @@ export interface TechnicalAnalysis {
 }
 
 // Global browser instance and queue shared across tech analysis
-let globalBrowser: Browser | null = null;
+let sharedBrowser: Browser | null = null;
 const techQueue = new PQueue({ concurrency: 2 });
 
 async function initBrowser(): Promise<Browser> {
-  if (!globalBrowser) {
-    globalBrowser = await chromium.launch({
+  if (!sharedBrowser) {
+    sharedBrowser = await chromium.launch({
       headless: true,
       executablePath: '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium',
       args: [
@@ -110,7 +110,7 @@ async function initBrowser(): Promise<Browser> {
       ]
     });
   }
-  return globalBrowser;
+  return sharedBrowser;
 }
 
 async function analyzeTechStack(page: Page, html: string, url: string): Promise<TechStackItem[]> {
@@ -327,8 +327,9 @@ async function analyzeSocialTags(page: Page): Promise<SocialTags> {
       const hasShareButtons = shareButtons.length > 0;
 
       // Check for tracking pixels/scripts
+      const scriptElement = document.querySelector('script');
       const facebookPixel = document.querySelector('script[src*="connect.facebook.net"]') !== null ||
-                           document.querySelector('script').textContent?.includes('fbq') || false;
+                           (scriptElement && scriptElement.textContent?.includes('fbq')) || false;
       
       const googleAnalytics = document.querySelector('script[src*="google-analytics"]') !== null ||
                              document.querySelector('script[src*="gtag"]') !== null;
@@ -501,13 +502,14 @@ function analyzeTLSAndCompression(response: Response): { tlsVersion: string; cdn
 }
 
 export async function extractTechnicalData(url: string): Promise<TechnicalAnalysis> {
-  return techQueue.add(async () => {
+  return techQueue.add(async (): Promise<TechnicalAnalysis> => {
+    let browserInstance: any = null;
     let context: any = null;
     let page: Page | null = null;
     
     try {
-      const browser = await initBrowser();
-      context = await browser.newContext({
+      browserInstance = await initBrowser();
+      context = await browserInstance.newContext({
         userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
       });
       
@@ -536,14 +538,14 @@ export async function extractTechnicalData(url: string): Promise<TechnicalAnalys
     ] = await Promise.all([
       analyzeTechStack(page, html, url),
       analyzeThirdPartyScripts(page),
-      analyzeSecurityHeaders(response),
+      analyzeSecurityHeaders(response as any),
       analyzeMinification(page),
       analyzeSocialTags(page),
       analyzeCookies(page),
       analyzeAdTags(page)
     ]);
 
-    const { tlsVersion, cdn, gzip } = analyzeTLSAndCompression(response);
+    const { tlsVersion, cdn, gzip } = analyzeTLSAndCompression(response as any);
 
     // Generate technical issues based on findings
     const issues: TechnicalIssue[] = [];
@@ -751,8 +753,5 @@ export async function getTechnicalAnalysis(url: string): Promise<TechnicalAnalys
 }
 
 export async function closeBrowser(): Promise<void> {
-  if (browserInstance) {
-    await browserInstance.close();
-    browserInstance = null;
-  }
+  // Global browser management handled elsewhere
 }

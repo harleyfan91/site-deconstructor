@@ -4,7 +4,7 @@ import { storage } from "./storage";
 // Removed deprecated Wappalyzer - using pattern-based detection instead
 import { extractColors, type ColorResult } from './lib/color-extraction';
 import { SupabaseCacheService } from './lib/supabase';
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 import { scrapePageData } from './lib/page-scraper';
 import { extractSEOData, type SEOData } from './lib/seo-extractor';
 import { getTechnicalAnalysis, type TechnicalAnalysis } from './lib/tech-extractor';
