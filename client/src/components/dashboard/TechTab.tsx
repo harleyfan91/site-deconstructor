@@ -272,7 +272,14 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
       });
 
       if (!response.ok) {
-        throw new Error(`Technical analysis failed: ${response.status}`);
+        // Try to get fallback data from the main analysis
+        console.warn('Enhanced tech analysis failed, using basic data if available');
+        const fallbackData = data?.data?.technical;
+        if (fallbackData) {
+          setTechAnalysis(fallbackData);
+          return;
+        }
+        throw new Error('Technical analysis temporarily unavailable');
       }
 
       const analysisData = await response.json();
@@ -280,7 +287,14 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
       setTechAnalysis(analysisData);
     } catch (err) {
       console.error('Technical analysis error:', err);
-      setTechError(err instanceof Error ? err.message : 'Failed to analyze technology stack');
+      // Use fallback data from main analysis if available
+      const fallbackData = data?.data?.technical;
+      if (fallbackData) {
+        console.log('Using fallback technical data from main analysis');
+        setTechAnalysis(fallbackData);
+      } else {
+        setTechError('Technical analysis temporarily unavailable');
+      }
     } finally {
       setTechLoading(false);
     }

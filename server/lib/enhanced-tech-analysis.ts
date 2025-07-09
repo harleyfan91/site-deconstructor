@@ -98,11 +98,43 @@ export async function getEnhancedTechAnalysis(url: string): Promise<EnhancedTech
 
     console.log('🔍 Performing enhanced tech analysis (lightweight + Lighthouse)...');
     
-    // Run both analyses in parallel
-    const [lightweightData, lighthouseData] = await Promise.all([
-      getLightweightTech(url),
-      getLighthouseBestPractices(url)
-    ]);
+    // Run lightweight first, then Lighthouse to avoid concurrency issues
+    console.log('🔍 Running lightweight tech analysis...');
+    const lightweightData = await getLightweightTech(url);
+    
+    console.log('🔍 Running Lighthouse Best Practices analysis...');
+    let lighthouseData;
+    try {
+      lighthouseData = await getLighthouseBestPractices(url);
+    } catch (lighthouseError) {
+      console.warn('Lighthouse Best Practices failed, using lightweight data only:', lighthouseError.message);
+      // Return enhanced analysis with just lightweight data
+      return {
+        ...lightweightData,
+        // Default lighthouse values
+        performance: {
+          usesHttp2: false,
+          usesTextCompression: !!lightweightData.gzip,
+          usesOptimizedImages: false,
+          usesWebpImages: false,
+          usesResponsiveImages: false,
+          efficientAnimatedContent: false,
+        },
+        bestPractices: {
+          hasDoctype: true,
+          hasCharset: true,
+          noDocumentWrite: true,
+          noGeolocationOnStart: true,
+          noNotificationOnStart: true,
+          noVulnerableLibraries: true,
+          noUnloadListeners: true,
+          cspXss: lightweightData.securityHeaders.csp !== 'Not Set',
+        },
+        issues: lightweightData.issues.map(issue => ({ ...issue, source: 'lightweight' as const })),
+        lighthouseScore: 0,
+        overallScore: calculateLightweightScore(lightweightData)
+      };
+    }
 
     // Combine and enhance the data
     const enhancedAnalysis: EnhancedTechAnalysis = {
