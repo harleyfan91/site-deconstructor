@@ -72,7 +72,7 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
     );
   }
 
-  const seo = seoData;
+  const seo = seoData || {};
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -620,7 +620,7 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
         </Card>
 
         {/* Meta Tags Section */}
-        {seo.metaTags && Object.keys(seo.metaTags).length > 0 && seo.metaTags.title !== '!Analysis pending' && (
+        {seo?.metaTags && Object.keys(seo.metaTags).length > 0 && seo.metaTags.title !== '!Analysis pending' && (
           <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
