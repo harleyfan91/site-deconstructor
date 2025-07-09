@@ -645,7 +645,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`📱 Request source: ${req.get('User-Agent')?.includes('Mozilla') ? 'Web Browser' : 'API Call'}`);
       const totalStartTime = Date.now();
       
-      // Optimized: HTML fetch and local analysis first, then PSI
+      // Step 1: HTML fetch and local analysis (immediate response)
       const htmlStartTime = Date.now();
       const response = await fetch(url, {
         headers: {
@@ -658,12 +658,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const html = await response.text();
-      logTiming('HTML fetch (optimized)', htmlStartTime);
+      logTiming('HTML fetch (immediate)', htmlStartTime);
       
       // Perform local analysis immediately
       const localData = await performLocalAnalysis(url, html, response);
 
-      // Try to get PSI data from cache first, fallback to live if needed
+      // Create initial analysis response with local data only
+      const immediateAnalysisResult = {
+        id: crypto.randomUUID(),
+        url,
+        timestamp: new Date().toISOString(),
+        status: 'analyzing', // Indicates PSI data is still loading
+        securityHeaders: {
+          csp: response.headers.get('content-security-policy') || '',
+          hsts: response.headers.get('strict-transport-security') || '',
+          xfo: response.headers.get('x-frame-options') || '',
+          xcto: response.headers.get('x-content-type-options') || '',
+          referrer: response.headers.get('referrer-policy') || ''
+        },
+        performanceScore: localData.overallScore,
+        seoScore: localData.seoScore,
+        readabilityScore: 75,
+        complianceStatus: localData.overallScore >= 80 ? 'pass' : localData.overallScore >= 60 ? 'warn' : 'fail',
+        mobileResponsiveness: {
+          score: localData.mobileScore,
+          issues: localData.mobileIssues
+        },
+        securityScore: {
+          grade: mapScoreToGrade(localData.securityScore),
+          findings: localData.securityFindings
+        },
+        accessibility: {
+          violations: localData.accessibilityViolations
+        },
+        headerChecks: localData.headerChecks,
+        data: {
+          overview: {
+            overallScore: localData.overallScore,
+            seoScore: localData.seoScore,
+            userExperienceScore: localData.userExperienceScore
+            // pageLoadTime and coreWebVitals will be undefined initially
+          },
+          ui: buildUIData(localData),
+          performance: {
+            performanceScore: localData.overallScore,
+            mobileResponsive: localData.mobileScore >= 50,
+            recommendations: localData.mobileIssues.map(issue => ({
+              type: 'warning' as const,
+              title: issue.title,
+              description: issue.description
+            }))
+          },
+          content: buildContentData(),
+          technical: {
+            techStack: localData.techStack,
+            healthGrade: mapScoreToGrade(localData.overallScore),
+            issues: localData.securityFindings.concat(localData.mobileIssues).map(issue => ({
+              type: 'security',
+              description: issue.description,
+              severity: 'medium' as const,
+              status: 'open'
+            })),
+            securityScore: localData.securityScore,
+            accessibility: {
+              violations: localData.accessibilityViolations
+            }
+          }
+        }
+      };
+
+      // Check if client wants immediate response (new query parameter)
+      const wantImmediate = req.query.immediate === 'true';
+      if (wantImmediate) {
+        logTiming('🔍 Immediate local analysis', totalStartTime);
+        return res.json(immediateAnalysisResult);
+      }
+
+      // Continue with PSI for full analysis
       const psiStartTime = Date.now();
       const seoStartTime = Date.now();
       
@@ -676,7 +747,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       ]);
 
       if (seoData) {
-        logTiming('SEO extraction (optimized)', seoStartTime);
+        logTiming('SEO extraction (full)', seoStartTime);
         console.log(`SEO analysis: Score ${seoData.score}, ${seoData.checks.length} checks`);
       }
 

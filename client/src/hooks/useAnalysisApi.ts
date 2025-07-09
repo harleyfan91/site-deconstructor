@@ -83,31 +83,46 @@ export const useAnalysisApi = () => {
     // Create the request promise and cache it
     const requestPromise = (async (): Promise<ExtendedAnalysisResponse | null> => {
       try {
-        console.log('🚀 Starting comprehensive analysis for:', url);
+        console.log('🚀 Starting progressive analysis for:', url);
 
-        // Single comprehensive analysis endpoint
-        console.log('🔍 Fetching complete analysis...');
-        const analysisResponse = await fetch(`/api/analyze/full?url=${encodeURIComponent(url)}`, {
+        // Step 1: Get immediate local analysis for fast Overview display
+        console.log('⚡ Fetching immediate local analysis...');
+        const immediateResponse = await fetch(`/api/analyze/full?url=${encodeURIComponent(url)}&immediate=true`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' }
         });
 
-        if (!analysisResponse.ok) {
-          throw new Error(`Analysis failed: ${analysisResponse.status}`);
+        if (!immediateResponse.ok) {
+          throw new Error(`Immediate analysis failed: ${immediateResponse.status}`);
         }
 
-        const analysisResult: ExtendedAnalysisResponse = await analysisResponse.json();
-        console.log('✅ Analysis completed');
+        const immediateResult: ExtendedAnalysisResponse = await immediateResponse.json();
+        console.log('✅ Immediate analysis completed - Overview can render');
 
-        // Update UI with complete data
-        setData(analysisResult);
-        
-        if (analysisResult.mobileResponsiveness || analysisResult.securityScore || 
-            analysisResult.accessibility || analysisResult.headerChecks) {
-          console.log('Complete analysis data structure validated');
-        }
+        // Update UI immediately with local data and show Overview tab
+        setData(immediateResult);
+        setLoading(false); // Allow Overview tab to render
 
-        return analysisResult;
+        // Step 2: Get complete analysis with PSI data in background
+        console.log('🔍 Fetching PSI data in background...');
+        fetch(`/api/analyze/full?url=${encodeURIComponent(url)}`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        }).then(async (fullResponse) => {
+          if (fullResponse.ok) {
+            const fullResult: ExtendedAnalysisResponse = await fullResponse.json();
+            console.log('🎯 PSI data received - updating Performance metrics');
+            
+            // Update with complete data including PSI
+            setData(fullResult);
+          } else {
+            console.warn('PSI data failed, keeping local analysis');
+          }
+        }).catch((err) => {
+          console.warn('PSI background fetch error:', err);
+        });
+
+        return immediateResult;
 
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
