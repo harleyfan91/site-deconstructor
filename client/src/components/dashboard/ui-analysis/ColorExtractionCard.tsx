@@ -157,7 +157,8 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
         });
         
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const flat: ColorResult[] = await res.json();
+        const response = await res.json();
+        const flat: ColorResult[] = response.colors || response;
 
         // Map flat response to grouped structure expected by the UI
         const groups: Record<string, { name: string; colors: { hex: string; name: string }[] }[]> = {};
