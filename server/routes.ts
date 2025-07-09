@@ -627,7 +627,160 @@ export async function registerRoutes(app: Express): Promise<Server> {
     };
   }
 
-  // Main analysis endpoint - returns complete data with PSI
+  // Immediate analysis endpoint - returns local data without PSI for fast Overview display
+  app.get('/api/analyze/immediate', async (req, res) => {
+    try {
+      let { url } = req.query;
+      
+      if (!url || typeof url !== 'string') {
+        return res.status(400).json({ error: 'URL parameter is required' });
+      }
+
+      // Normalize URL
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = `https://${url}`;
+      }
+
+      console.log(`⚡ Starting immediate analysis for: ${url}`);
+      const totalStartTime = Date.now();
+      
+      // Fast HTML fetch and local analysis only
+      const htmlStartTime = Date.now();
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; WebsiteAnalyzer/1.0)',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch ${url}: ${response.status}`);
+      }
+
+      const html = await response.text();
+      logTiming('HTML fetch (immediate)', htmlStartTime);
+      
+      // Perform local analysis immediately
+      const localData = await performLocalAnalysis(url, html, response);
+
+      // Create immediate analysis response without PSI data
+      const analysisResult = {
+        id: crypto.randomUUID(),
+        url,
+        timestamp: new Date().toISOString(),
+        status: 'immediate',
+        securityHeaders: {
+          csp: response.headers.get('content-security-policy') || '',
+          hsts: response.headers.get('strict-transport-security') || '',
+          xfo: response.headers.get('x-frame-options') || '',
+          xcto: response.headers.get('x-content-type-options') || '',
+          referrer: response.headers.get('referrer-policy') || ''
+        },
+        performanceScore: localData.overallScore,
+        seoScore: localData.seoScore,
+        readabilityScore: 75,
+        complianceStatus: localData.overallScore >= 80 ? 'pass' : localData.overallScore >= 60 ? 'warn' : 'fail',
+        mobileResponsiveness: {
+          score: localData.mobileScore,
+          issues: localData.mobileIssues
+        },
+        securityScore: {
+          grade: mapScoreToGrade(localData.securityScore),
+          findings: localData.securityFindings
+        },
+        accessibility: {
+          violations: localData.accessibilityViolations
+        },
+        headerChecks: localData.headerChecks,
+        data: {
+          overview: {
+            overallScore: localData.overallScore,
+            // pageLoadTime and coreWebVitals will be added by PSI endpoint
+            seoScore: localData.seoScore,
+            userExperienceScore: localData.userExperienceScore
+          },
+          ui: buildUIData(localData),
+          performance: {
+            performanceScore: localData.overallScore,
+            mobileResponsive: localData.mobileScore >= 50,
+            recommendations: localData.mobileIssues.map(issue => ({
+              type: 'warning' as const,
+              title: issue.title,
+              description: issue.description
+            }))
+          },
+          content: buildContentData(),
+          technical: {
+            techStack: localData.techStack,
+            healthGrade: mapScoreToGrade(localData.overallScore),
+            issues: localData.securityFindings.concat(localData.mobileIssues).map(issue => ({
+              type: 'security',
+              description: issue.description,
+              severity: 'medium' as const,
+              status: 'open'
+            })),
+            securityScore: localData.securityScore,
+            accessibility: {
+              violations: localData.accessibilityViolations
+            }
+          }
+        }
+      };
+
+      logTiming('⚡ Total immediate analysis', totalStartTime);
+      res.json(analysisResult);
+
+    } catch (error) {
+      console.error('Immediate analysis error:', error);
+      res.status(500).json({ 
+        error: 'Immediate analysis failed', 
+        message: error instanceof Error ? error.message : 'Unknown error' 
+      });
+    }
+  });
+
+  // PSI data endpoint - returns only PSI performance data
+  app.get('/api/analyze/psi', async (req, res) => {
+    try {
+      let { url } = req.query;
+      
+      if (!url || typeof url !== 'string') {
+        return res.status(400).json({ error: 'URL parameter is required' });
+      }
+
+      // Normalize URL
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = `https://${url}`;
+      }
+
+      console.log(`🔍 Starting PSI analysis for: ${url}`);
+      const psiStartTime = Date.now();
+      
+      // Fetch PSI data only
+      const psiOverview = await fetchPageSpeedOverview(url);
+      
+      const psiResult = {
+        pageLoadTime: psiOverview.pageLoadTime,
+        coreWebVitals: psiOverview.coreWebVitals,
+        coreWebVitalsArray: [
+          { name: 'LCP', value: Number((psiOverview.coreWebVitals.lcpMs / 1000).toFixed(1)), benchmark: 2.5 },
+          { name: 'FID', value: psiOverview.coreWebVitals.inpMs, benchmark: 100 },
+          { name: 'CLS', value: psiOverview.coreWebVitals.cls, benchmark: 0.1 }
+        ]
+      };
+
+      logTiming('🔍 PSI analysis', psiStartTime);
+      res.json(psiResult);
+
+    } catch (error) {
+      console.error('PSI analysis error:', error);
+      res.status(500).json({ 
+        error: 'PSI analysis failed', 
+        message: error instanceof Error ? error.message : 'Unknown error' 
+      });
+    }
+  });
+
+  // Main analysis endpoint - returns complete data with PSI (kept for backward compatibility)
   app.get('/api/analyze/full', async (req, res) => {
     try {
       let { url } = req.query;
@@ -645,17 +798,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`📱 Request source: ${req.get('User-Agent')?.includes('Mozilla') ? 'Web Browser' : 'API Call'}`);
       const totalStartTime = Date.now();
       
-      // Parallel execution: HTML fetch, PSI data, and SEO analysis
+      // Step 1: Fast HTML fetch and local analysis
       const htmlStartTime = Date.now();
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; WebsiteAnalyzer/1.0)',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch ${url}: ${response.status}`);
+      }
+
+      const html = await response.text();
+      logTiming('HTML fetch (fast)', htmlStartTime);
+      
+      // Perform local analysis immediately
+      const localData = await performLocalAnalysis(url, html, response);
+
+      // Step 2: Start PSI and SEO in parallel (don't wait for response)
       const psiStartTime = Date.now();
       const seoStartTime = Date.now();
       
-      const [response, psiOverview, seoData] = await Promise.all([
-        fetch(url, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (compatible; WebsiteAnalyzer/1.0)',
-          },
-        }),
+      const [psiOverview, seoData] = await Promise.all([
         fetchPageSpeedOverview(url),
         extractSEOData(url).catch(error => {
           console.warn('SEO extraction failed:', error);
@@ -663,19 +828,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })
       ]);
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch ${url}: ${response.status}`);
-      }
-
-      const html = await response.text();
-      logTiming('HTML fetch (full)', htmlStartTime);
       if (seoData) {
         logTiming('SEO extraction (full)', seoStartTime);
         console.log(`SEO analysis: Score ${seoData.score}, ${seoData.checks.length} checks`);
       }
-      
-      // Perform local analysis
-      const localData = await performLocalAnalysis(url, html, response);
 
       // Create full analysis response
       const analysisResult = {
