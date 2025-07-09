@@ -299,12 +299,18 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
       if (fallbackData && 'techStack' in fallbackData) {
         console.log('Using fallback technical data from main analysis');
         setTechAnalysis({
-          ...fallbackData,
-          adTags: fallbackData.adTags || [],
-          securityHeaders: fallbackData.securityHeaders || { csp: 'Not Set', hsts: 'Not Set', xfo: 'Not Set', xss: 'Not Set', xcto: 'Not Set', referrer: 'Not Set' },
-          tlsVersion: fallbackData.tlsVersion || 'Unknown',
-          cdn: fallbackData.cdn || false,
-          gzip: fallbackData.gzip || false
+          techStack: fallbackData.techStack || [],
+          thirdPartyScripts: fallbackData.thirdPartyScripts || [],
+          minification: fallbackData.minification || { cssMinified: false, jsMinified: false, htmlMinified: false },
+          social: fallbackData.social || { hasOpenGraph: false, hasTwitterCard: false, hasShareButtons: false },
+          cookies: fallbackData.cookies || { hasSessionCookies: false, hasTrackingCookies: false, hasAnalyticsCookies: false },
+          adTags: (fallbackData as any).adTags || [],
+          securityHeaders: (fallbackData as any).securityHeaders || { csp: 'Not Set', hsts: 'Not Set', xfo: 'Not Set', xss: 'Not Set', xcto: 'Not Set', referrer: 'Not Set' },
+          tlsVersion: (fallbackData as any).tlsVersion || 'Unknown',
+          cdn: (fallbackData as any).cdn || false,
+          gzip: (fallbackData as any).gzip || false,
+          accessibility: fallbackData.accessibility || { violations: [] },
+          issues: []
         });
       } else {
         setTechError('Technical analysis temporarily unavailable');
@@ -317,11 +323,11 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
   // No tab-level loading - use section-level loading instead
 
   // Use comprehensive technical analysis data if available, fallback to basic data
-  const displayTechStack = techAnalysis?.techStack || data.data.technical?.techStack || [];
-  const displayMinification = techAnalysis?.minification || data.data.technical?.minification;
-  const displaySocial = techAnalysis?.social || data.data.technical?.social;
-  const displayCookies = techAnalysis?.cookies || data.data.technical?.cookies;
-  const displayAdTags = techAnalysis?.adTags || data.data.adTags;
+  const displayTechStack = techAnalysis?.techStack || data?.data?.technical?.techStack || [];
+  const displayMinification = techAnalysis?.minification || data?.data?.technical?.minification;
+  const displaySocial = techAnalysis?.social || data?.data?.technical?.social;
+  const displayCookies = techAnalysis?.cookies || data?.data?.technical?.cookies;
+  const displayAdTags = techAnalysis?.adTags || (data as any)?.data?.adTags;
 
   console.log('TechTab - using real tech analysis:', !!techAnalysis);
   console.log('TechTab - display data:', { displayAdTags, displaySocial, displayMinification });

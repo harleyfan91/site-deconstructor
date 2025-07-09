@@ -502,7 +502,7 @@ function analyzeTLSAndCompression(response: Response): { tlsVersion: string; cdn
 }
 
 export async function extractTechnicalData(url: string): Promise<TechnicalAnalysis> {
-  return techQueue.add(async (): Promise<TechnicalAnalysis> => {
+  return techQueue.add(async () => {
     let browserInstance: any = null;
     let context: any = null;
     let page: Page | null = null;
@@ -515,35 +515,39 @@ export async function extractTechnicalData(url: string): Promise<TechnicalAnalys
       
       page = await context.newPage();
 
-    const response = await page.goto(url, { 
-      waitUntil: 'domcontentloaded',
-      timeout: 30000 
-    });
+      if (!page) {
+        throw new Error('Failed to create page');
+      }
 
-    if (!response) {
-      throw new Error('Failed to load page');
-    }
+      const response = await page.goto(url, { 
+        waitUntil: 'domcontentloaded',
+        timeout: 30000 
+      });
 
-    const html = await page.content();
+      if (!response) {
+        throw new Error('Failed to load page');
+      }
 
-    // Run all analyses in parallel for better performance
-    const [
-      techStack,
-      thirdPartyScripts,
-      securityHeaders,
-      minification,
-      social,
-      cookies,
-      adTags
-    ] = await Promise.all([
-      analyzeTechStack(page, html, url),
-      analyzeThirdPartyScripts(page),
-      analyzeSecurityHeaders(response as any),
-      analyzeMinification(page),
-      analyzeSocialTags(page),
-      analyzeCookies(page),
-      analyzeAdTags(page)
-    ]);
+      const html = await page.content();
+
+      // Run all analyses in parallel for better performance
+      const [
+        techStack,
+        thirdPartyScripts,
+        securityHeaders,
+        minification,
+        social,
+        cookies,
+        adTags
+      ] = await Promise.all([
+        analyzeTechStack(page, html, url),
+        analyzeThirdPartyScripts(page),
+        analyzeSecurityHeaders(response as any),
+        analyzeMinification(page),
+        analyzeSocialTags(page),
+        analyzeCookies(page),
+        analyzeAdTags(page)
+      ]);
 
     const { tlsVersion, cdn, gzip } = analyzeTLSAndCompression(response as any);
 
