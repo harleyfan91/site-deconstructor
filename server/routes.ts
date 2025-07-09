@@ -334,7 +334,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Cache the results
       await SupabaseCacheService.set(colorsCacheKey, url, colorAnalysis);
-      console.log(`✅ Cached color and accessibility data for ${url}`);
+      console.log(`✅ Cached color data for ${url}`);
       
       res.json(colorAnalysis);
       
