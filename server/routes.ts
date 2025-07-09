@@ -627,138 +627,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     };
   }
 
-  // Quick analysis endpoint - returns overview data immediately
-  app.get('/api/analyze/quick', async (req, res) => {
-    try {
-      const { url } = req.query;
-      
-      if (!url || typeof url !== 'string') {
-        return res.status(400).json({ error: 'URL parameter is required' });
-      }
-
-      // Normalize URL - add https:// if missing protocol
-      let normalizedUrl = url.trim();
-      if (!normalizedUrl.startsWith('http://') && !normalizedUrl.startsWith('https://')) {
-        normalizedUrl = `https://${normalizedUrl}`;
-      }
-
-      // Validate URL format
-      try {
-        new URL(normalizedUrl);
-      } catch {
-        return res.status(400).json({ error: 'Invalid URL format' });
-      }
-
-      console.log(`🚀 Starting quick analysis for: ${normalizedUrl}`);
-      console.log(`📱 Request source: ${req.get('User-Agent')?.includes('Mozilla') ? 'Web Browser' : 'API Call'}`);
-      const totalStartTime = Date.now();
-      
-      // Parallel execution: HTML fetch and cache lookup
-      const htmlStartTime = Date.now();
-      const [response] = await Promise.all([
-        fetch(normalizedUrl, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (compatible; WebsiteAnalyzer/1.0)',
-          },
-        })
-      ]);
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch ${normalizedUrl}: ${response.status}`);
-      }
-
-      const html = await response.text();
-      logTiming('HTML fetch', htmlStartTime);
-      
-      // Perform local analysis
-      const localData = await performLocalAnalysis(normalizedUrl, html, response);
-      
-      // Create overview response without PSI data (will be loaded separately)
-      const analysisResult = {
-        id: crypto.randomUUID(),
-        url: normalizedUrl,
-        timestamp: new Date().toISOString(),
-        status: 'partial',
-        isQuickResponse: true,
-        data: {
-          overview: {
-            overallScore: localData.overallScore,
-            // pageLoadTime will be added by full analysis only
-            seoScore: localData.seoScore,
-            userExperienceScore: localData.userExperienceScore
-          },
-          ui: buildUIData(localData),
-          technical: {
-            techStack: localData.techStack,
-            healthGrade: mapScoreToGrade(localData.overallScore),
-            issues: localData.securityFindings.concat(localData.mobileIssues).map(issue => ({
-              type: 'security',
-              description: issue.description,
-              severity: 'medium' as const,
-              status: 'open'
-            })),
-            securityScore: localData.securityScore,
-            accessibility: {
-              violations: localData.accessibilityViolations
-            },
-            // Basic minification detection as fallback - comprehensive analysis available via /api/tech
-            minification: localData.minification,
-            social: {
-              hasOpenGraph: "!",
-              hasTwitterCard: "!",
-              hasShareButtons: "!"
-            },
-            cookies: {
-              hasCookieScript: "!",
-              cookieConsentType: "!"
-            },
-            securityHeaders: {
-              csp: localData.headerChecks.csp,
-              hsts: localData.headerChecks.hsts,
-              xfo: localData.headerChecks.frameOptions
-            },
-            tlsVersion: "!",
-            cdn: "!",
-            gzip: "!"
-          },
-          adTags: {
-            hasGAM: "!",
-            hasAdSense: "!",
-            hasPrebid: "!",
-            hasAPS: "!",
-            hasIX: "!",
-            hasANX: "!",
-            hasOpenX: "!",
-            hasRubicon: "!",
-            hasPubMatic: "!",
-            hasVPAID: "!",
-            hasCriteo: "!",
-            hasTaboola: "!",
-            hasOutbrain: "!",
-            hasSharethrough: "!",
-            hasTeads: "!",
-            hasMoat: "!",
-            hasDV: "!",
-            hasIAS: "!"
-          },
-          // SEO data excluded from quick analysis - use dedicated /api/seo endpoint
-          content: buildContentData() // Use fallback markers for quick analysis
-        }
-      };
-
-      logTiming('🚀 Total quick analysis', totalStartTime);
-      res.json(analysisResult);
-
-    } catch (error) {
-      console.error('Quick analysis error:', error);
-      res.status(500).json({ 
-        error: 'Quick analysis failed', 
-        message: error instanceof Error ? error.message : 'Unknown error' 
-      });
-    }
-  });
-
-  // Full analysis endpoint - returns complete data with PSI
+  // Main analysis endpoint - returns complete data with PSI
   app.get('/api/analyze/full', async (req, res) => {
     try {
       let { url } = req.query;
@@ -772,7 +641,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         url = `https://${url}`;
       }
 
-      console.log(`🔍 Starting full analysis for: ${url}`);
+      console.log(`🔍 Starting comprehensive analysis for: ${url}`);
       console.log(`📱 Request source: ${req.get('User-Agent')?.includes('Mozilla') ? 'Web Browser' : 'API Call'}`);
       const totalStartTime = Date.now();
       
@@ -885,21 +754,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       };
 
-      logTiming('🔍 Total full analysis', totalStartTime);
+      logTiming('🔍 Total comprehensive analysis', totalStartTime);
       res.json(analysisResult);
 
     } catch (error) {
-      console.error('Full analysis error:', error);
+      console.error('Analysis error:', error);
       res.status(500).json({ 
-        error: 'Full analysis failed', 
+        error: 'Analysis failed', 
         message: error instanceof Error ? error.message : 'Unknown error' 
       });
     }
   });
 
-  // Legacy analysis endpoint - redirects to full analysis for backward compatibility
+  // Legacy analysis endpoint - redirects to main analysis for backward compatibility
   app.get('/api/analyze', async (req, res) => {
-    console.log('📍 Legacy /api/analyze called, using full analysis endpoint');
+    console.log('📍 Legacy /api/analyze called, using main analysis endpoint');
     
     try {
       // Direct forwarding to full analysis logic
@@ -908,7 +777,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'URL parameter is required' });
       }
 
-      console.log(`🔄 Forwarding to full analysis for: ${url}`);
+      console.log(`🔄 Forwarding to main analysis for: ${url}`);
       const totalStartTime = Date.now();
       
       const [response, psiOverview] = await Promise.all([

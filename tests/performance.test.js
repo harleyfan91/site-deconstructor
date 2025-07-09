@@ -19,34 +19,7 @@ const throttledFetch = async (url, options = {}) => {
 };
 
 describe('Analysis Performance Tests', () => {
-  test('Quick analysis returns within 5 seconds', async () => {
-    const startTime = Date.now();
-    
-    const response = await throttledFetch(
-      `${SERVER_BASE}/api/analyze/quick?url=${encodeURIComponent(TEST_URL)}`,
-      { timeout: QUICK_TIMEOUT }
-    );
-    
-    const duration = Date.now() - startTime;
-    const data = await response.json();
-    
-    // Performance assertions
-    expect(duration).toBeLessThan(QUICK_TIMEOUT);
-    expect(response.status).toBe(200);
-    
-    // Data structure assertions
-    expect(data).toHaveProperty('id');
-    expect(data).toHaveProperty('url', TEST_URL);
-    expect(data).toHaveProperty('status', 'partial');
-    expect(data).toHaveProperty('isQuickResponse', true);
-    expect(data).toHaveProperty('data.overview');
-    expect(data.data.overview).toHaveProperty('overallScore');
-    expect(data.data.overview).toHaveProperty('seoScore');
-    
-    console.log(`✅ Quick analysis completed in ${duration}ms`);
-  }, QUICK_TIMEOUT + 1000);
-
-  test('Full analysis returns complete data', async () => {
+  test('Main analysis returns complete data', async () => {
     const startTime = Date.now();
     
     const response = await throttledFetch(
@@ -77,7 +50,7 @@ describe('Analysis Performance Tests', () => {
     expect(data.data.overview).toHaveProperty('coreWebVitals');
     expect(typeof data.data.overview.pageLoadTime).toBe('number');
     
-    console.log(`🔍 Full analysis completed in ${duration}ms`);
+    console.log(`🔍 Analysis completed in ${duration}ms`);
   }, FULL_TIMEOUT + 1000);
 
   test('Legacy endpoint maintains backward compatibility', async () => {

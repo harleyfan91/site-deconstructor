@@ -110,9 +110,9 @@ The application features a sophisticated multi-tier analysis system powered by i
 
 ### API Endpoints & Caching Strategy
 
-#### Quick Analysis
-* `/api/analyze/quick` - Immediate HTML analysis with real minification detection
+#### Main Analysis
 * `/api/analyze/full` - Complete analysis with PageSpeed Insights data and Supabase caching
+* `/api/analyze` - Legacy endpoint (redirects to main analysis for backward compatibility)
 
 #### Specialized Analysis Endpoints
 * `/api/seo` - Playwright extraction + Lighthouse SEO audits (blended scoring: 60% extraction + 40% Lighthouse)
@@ -135,8 +135,8 @@ The application features a sophisticated multi-tier analysis system powered by i
 
 #### Performance Metrics
 - **Cache hits**: 109-242ms response time (vs 7-25 seconds for fresh analysis)
-- **Quick analysis**: <2 seconds for immediate user feedback
-- **Full analysis**: 9-25 seconds with comprehensive data
+- **Main analysis**: 9-25 seconds for comprehensive data with progressive section loading
+- **Section-level loading**: Each dashboard section shows loading indicators independently
 - **Fallback handling**: Graceful degradation when comprehensive analysis fails
 
 ## Migration from PageSpeed Insights to Lighthouse

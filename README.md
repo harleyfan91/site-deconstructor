@@ -25,24 +25,27 @@ The following React components integrate with Playwright-powered content analysi
 - Real readability scores and word counts in exported analysis
 - Accurate photo/icon classification data in reports
 
-### Progressive Data Loading & Analysis Architecture
+### Streamlined Analysis Architecture
 
-The application uses a comprehensive multi-tier analysis system:
+The application uses a unified analysis system with progressive section loading:
 
-1. **Quick Analysis** (`/api/analyze/quick`) - Immediate HTML analysis with real minification detection
-2. **Specialized Endpoints** for comprehensive analysis:
+1. **Main Analysis** (`/api/analyze/full`) - Comprehensive website analysis with PageSpeed Insights data
+2. **Specialized Endpoints** for enhanced data:
    - `/api/seo` - Playwright extraction + Lighthouse SEO audits (blended scoring)
    - `/api/tech` - Enhanced tech detection (lightweight + Lighthouse best practices)
    - `/api/colors` - Real color extraction with axe-core accessibility analysis
    - `/api/fonts` - Authentic font extraction from rendered websites
    - `/api/lighthouse/*` - Direct Lighthouse performance, SEO, and best practices data
 
-3. **Intelligent Caching Strategy**:
+3. **Progressive Loading Experience**:
+   - **Section-level loading indicators** - Each dashboard section shows loading state independently
+   - **Immediate navigation** - Users land on Overview tab while specialized sections load in background
+   - **Intelligent caching** - 30-minute in-memory + 24-hour Supabase cache for performance
+
+4. **Intelligent Caching Strategy**:
    - **In-memory cache** (30 minutes) for ultra-fast repeated requests
    - **Supabase cache** (24 hours) for persistent data storage
    - **Request deduplication** to prevent duplicate API calls
-
-Frontend components show section-level loading indicators while maintaining immediate data display for available sections.
 
 ## How can I edit this code?
 
