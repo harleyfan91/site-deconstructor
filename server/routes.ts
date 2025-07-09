@@ -8,6 +8,9 @@ import crypto from 'crypto';
 import { scrapePageData } from './lib/page-scraper';
 import { extractSEOData, type SEOData } from './lib/seo-extractor';
 import { getTechnicalAnalysis, type TechnicalAnalysis } from './lib/tech-extractor';
+import { getLighthouseSEO, getLighthousePerformance, getLighthouseBestPractices } from './lib/lighthouse-service';
+import { getAccessibilityAnalysis } from './lib/axe-integration';
+import { getEnhancedTechAnalysis } from './lib/enhanced-tech-analysis';
 
 // Helper function to map score to letter grade
 function mapScoreToGrade(score: number): string {
@@ -145,7 +148,8 @@ function logTiming(operation: string, startTime: number) {
   return duration;
 }
 
-// Optimized PSI function with caching and timeout
+// DEPRECATED: PSI function - replaced with Lighthouse
+// Keeping for backward compatibility during transition
 async function fetchPageSpeedOverview(url: string): Promise<any> {
   const startTime = Date.now();
   const urlHash = generateUrlHash(url);
@@ -267,7 +271,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     await SupabaseCacheService.cleanupExpired();
   }, 6 * 60 * 60 * 1000); // 6 hours
   
-  // Tech analysis endpoint
+  // Tech analysis endpoint - Enhanced with Lighthouse Best Practices
   app.post('/api/tech', async (req, res) => {
     try {
       const { url } = req.body;
@@ -276,15 +280,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'URL is required in request body' });
       }
       
-      console.log('🔧 Analyzing tech stack for:', url);
+      console.log('🔧 Running enhanced tech analysis (lightweight + Lighthouse) for:', url);
       
-      // Use lightweight tech analysis to avoid browser context conflicts
-      const { getTechnicalAnalysis: getLightweightAnalysis } = await import('./lib/tech-lightweight');
-      const technicalAnalysis = await getLightweightAnalysis(url);
+      // Use enhanced tech analysis combining lightweight and Lighthouse
+      const { getEnhancedTechAnalysis } = await import('./lib/enhanced-tech-analysis');
+      const technicalAnalysis = await getEnhancedTechAnalysis(url);
       
       res.json(technicalAnalysis);
     } catch (error) {
-      console.error('Technical analysis error:', error);
+      console.error('Enhanced technical analysis error:', error);
       res.status(500).json({ error: 'Failed to analyze website technology' });
     }
   });
@@ -315,19 +319,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json(cachedColors.analysis_data);
       }
 
-      console.log(`🎨 Extracting colors for: ${url}`);
+      console.log(`🎨 Extracting colors and analyzing accessibility for: ${url}`);
       const extractStartTime = Date.now();
       
-      const colors = await extractColors(url);
+      // Use enhanced color extraction with axe-core accessibility analysis
+      const { extractColorsWithAccessibility } = await import('./lib/color-extraction');
+      const colorAnalysis = await extractColorsWithAccessibility(url);
       
-      logTiming('Color extraction', extractStartTime);
-      console.log(`Extracted ${colors.length} unique colors`);
+      logTiming('Color extraction with accessibility', extractStartTime);
+      console.log(`Extracted ${colorAnalysis.colors.length} unique colors, ${colorAnalysis.contrastIssues.length} contrast issues, accessibility score: ${colorAnalysis.accessibilityScore}`);
       
       // Cache the results
-      await SupabaseCacheService.set(colorsCacheKey, url, colors);
-      console.log(`✅ Cached color data for ${url}`);
+      await SupabaseCacheService.set(colorsCacheKey, url, colorAnalysis);
+      console.log(`✅ Cached color and accessibility data for ${url}`);
       
-      res.json(colors);
+      res.json(colorAnalysis);
       
     } catch (error) {
       console.error('Color extraction failed:', error);
@@ -1082,18 +1088,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`🔍 Extracting SEO data for: ${normalizedUrl}`);
       const extractStartTime = Date.now();
       
-      // Extract SEO data using Playwright
-      const seoData = await extractSEOData(normalizedUrl);
+      // Extract SEO data using Playwright + enhance with Lighthouse
+      const [seoData, lighthouseSEO] = await Promise.all([
+        extractSEOData(normalizedUrl),
+        getLighthouseSEO(normalizedUrl)
+      ]);
+      
+      // Enhance SEO data with Lighthouse scores
+      const enhancedSEOData = {
+        ...seoData,
+        lighthouseScore: lighthouseSEO.score,
+        // Blend scores with Lighthouse having 40% weight
+        score: Math.round((seoData.score * 0.6) + (lighthouseSEO.score * 0.4)),
+        lighthouseAudits: {
+          documentTitle: lighthouseSEO.audits.documentTitle,
+          metaDescription: lighthouseSEO.audits.metaDescription,
+          httpStatusCode: lighthouseSEO.audits.httpStatusCode,
+          isOnHttps: lighthouseSEO.audits.isOnHttps,
+          viewport: lighthouseSEO.audits.viewport,
+          canonicalUrl: lighthouseSEO.audits.canonicalUrl
+        }
+      };
       
       logTiming('SEO extraction', extractStartTime);
-      console.log(`Extracted SEO data: Score ${seoData.score}, ${seoData.checks.length} checks, ${seoData.keywords.length} keywords`);
+      console.log(`Extracted enhanced SEO data: Score ${enhancedSEOData.score} (Lighthouse: ${lighthouseSEO.score}), ${seoData.checks.length} checks, ${seoData.keywords.length} keywords`);
       
-      // Cache the results
-      await SupabaseCacheService.set(seosCacheKey, normalizedUrl, seoData);
-      console.log(`✅ Cached SEO data for ${normalizedUrl}`);
+      // Cache the enhanced results
+      await SupabaseCacheService.set(seosCacheKey, normalizedUrl, enhancedSEOData);
+      console.log(`✅ Cached enhanced SEO data for ${normalizedUrl}`);
       
       logTiming('🔍 Total SEO analysis', overallStartTime);
-      res.json(seoData);
+      res.json(enhancedSEOData);
       
     } catch (error) {
       console.error('SEO extraction failed:', error);
@@ -1108,6 +1133,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.status(500).json({ error: 'SEO analysis failed' });
+    }
+  });
+
+  // Lighthouse SEO Analysis endpoint
+  app.post('/api/lighthouse/seo', async (req, res) => {
+    try {
+      const { url } = req.body;
+      
+      if (!url || typeof url !== 'string') {
+        return res.status(400).json({ error: 'URL is required in request body' });
+      }
+
+      // Normalize URL
+      let normalizedUrl = url.trim();
+      if (!normalizedUrl.match(/^https?:\/\//)) {
+        normalizedUrl = `https://${normalizedUrl}`;
+      }
+
+      console.log(`🔍 Running Lighthouse SEO analysis for: ${normalizedUrl}`);
+      const seoData = await getLighthouseSEO(normalizedUrl);
+      
+      res.json(seoData);
+    } catch (error) {
+      console.error('Lighthouse SEO analysis error:', error);
+      res.status(500).json({ error: 'Failed to analyze SEO with Lighthouse' });
+    }
+  });
+
+  // Lighthouse Performance Analysis endpoint
+  app.post('/api/lighthouse/performance', async (req, res) => {
+    try {
+      const { url } = req.body;
+      
+      if (!url || typeof url !== 'string') {
+        return res.status(400).json({ error: 'URL is required in request body' });
+      }
+
+      // Normalize URL
+      let normalizedUrl = url.trim();
+      if (!normalizedUrl.match(/^https?:\/\//)) {
+        normalizedUrl = `https://${normalizedUrl}`;
+      }
+
+      console.log(`⚡ Running Lighthouse Performance analysis for: ${normalizedUrl}`);
+      const performanceData = await getLighthousePerformance(normalizedUrl);
+      
+      res.json(performanceData);
+    } catch (error) {
+      console.error('Lighthouse Performance analysis error:', error);
+      res.status(500).json({ error: 'Failed to analyze performance with Lighthouse' });
+    }
+  });
+
+  // Lighthouse Best Practices Analysis endpoint
+  app.post('/api/lighthouse/best-practices', async (req, res) => {
+    try {
+      const { url } = req.body;
+      
+      if (!url || typeof url !== 'string') {
+        return res.status(400).json({ error: 'URL is required in request body' });
+      }
+
+      // Normalize URL
+      let normalizedUrl = url.trim();
+      if (!normalizedUrl.match(/^https?:\/\//)) {
+        normalizedUrl = `https://${normalizedUrl}`;
+      }
+
+      console.log(`📋 Running Lighthouse Best Practices analysis for: ${normalizedUrl}`);
+      const bestPracticesData = await getLighthouseBestPractices(normalizedUrl);
+      
+      res.json(bestPracticesData);
+    } catch (error) {
+      console.error('Lighthouse Best Practices analysis error:', error);
+      res.status(500).json({ error: 'Failed to analyze best practices with Lighthouse' });
+    }
+  });
+
+  // Enhanced Tech Analysis combining lightweight + Lighthouse Best Practices
+  app.post('/api/enhanced-tech', async (req, res) => {
+    try {
+      const { url } = req.body;
+      
+      if (!url || typeof url !== 'string') {
+        return res.status(400).json({ error: 'URL is required in request body' });
+      }
+
+      // Normalize URL
+      let normalizedUrl = url.trim();
+      if (!normalizedUrl.match(/^https?:\/\//)) {
+        normalizedUrl = `https://${normalizedUrl}`;
+      }
+
+      console.log(`🔧🔍 Running enhanced tech analysis (lightweight + Lighthouse) for: ${normalizedUrl}`);
+      const enhancedTechData = await getEnhancedTechAnalysis(normalizedUrl);
+      
+      res.json(enhancedTechData);
+    } catch (error) {
+      console.error('Enhanced tech analysis error:', error);
+      res.status(500).json({ error: 'Failed to perform enhanced tech analysis' });
     }
   });
 

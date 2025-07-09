@@ -2,12 +2,27 @@ import { chromium, Browser, BrowserContext } from 'playwright';
 import PQueue from 'p-queue';
 import { colord } from 'colord';
 import colorNamer from 'color-namer';
+import { getAccessibilityAnalysis } from './axe-integration';
 
 export interface ColorResult {
   hex: string;
   name: string;
   property: string;
   occurrences: number;
+}
+
+export interface ColorExtractionResult {
+  colors: ColorResult[];
+  contrastIssues: Array<{
+    element: string;
+    textColor: string;
+    backgroundColor: string;
+    ratio: number;
+    expectedRatio: number;
+    severity: string;
+    recommendation: string;
+  }>;
+  accessibilityScore: number;
 }
 
 interface ExtractedColor {
@@ -387,6 +402,59 @@ async function extractColorsFromPage(url: string): Promise<ColorResult[]> {
 
 export async function extractColors(url: string): Promise<ColorResult[]> {
   return queue.add(async () => extractColorsFromPage(url)) as Promise<ColorResult[]>;
+}
+
+// Enhanced color extraction with axe-core accessibility analysis
+export async function extractColorsWithAccessibility(url: string): Promise<ColorExtractionResult> {
+  return queue.add(async () => {
+    try {
+      console.log(`🎨 Extracting colors with accessibility analysis for: ${url}`);
+      
+      // First extract colors normally
+      const colors = await extractColorsFromPage(url);
+      
+      // Try accessibility analysis but fallback gracefully if it fails
+      try {
+        const browser = await initBrowser();
+        const context = await browser.newContext({
+          viewport: { width: 1366, height: 768 },
+          userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        });
+
+        const page = await context.newPage();
+        
+        // Navigate to the page
+        await page.goto(url, { 
+          waitUntil: 'domcontentloaded',
+          timeout: 30000 
+        });
+
+        // Wait for page to stabilize
+        await page.waitForTimeout(2000);
+
+        // Try to get accessibility analysis
+        const accessibilityAnalysis = await getAccessibilityAnalysis(page, url);
+        
+        await context.close();
+
+        return {
+          colors,
+          contrastIssues: accessibilityAnalysis.contrastIssues,
+          accessibilityScore: accessibilityAnalysis.score
+        };
+      } catch (axeError) {
+        console.warn('Accessibility analysis failed, returning colors only:', axeError.message);
+        return {
+          colors,
+          contrastIssues: [],
+          accessibilityScore: 0
+        };
+      }
+    } catch (error) {
+      console.error('Enhanced color extraction error:', error);
+      throw error;
+    }
+  }) as Promise<ColorExtractionResult>;
 }
 
 export async function closeBrowser(): Promise<void> {

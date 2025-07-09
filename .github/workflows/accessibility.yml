@@ -1,0 +1,70 @@
+name: Accessibility Testing
+
+on:
+  pull_request:
+    branches: [ main, master ]
+  push:
+    branches: [ main, master ]
+
+jobs:
+  accessibility:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Start application
+      run: |
+        npm run dev &
+        sleep 10
+        
+    - name: Wait for application to be ready
+      run: |
+        timeout 60 bash -c 'until curl -s http://localhost:5000 > /dev/null; do sleep 1; done'
+    
+    - name: Run pa11y accessibility tests
+      run: npm run pa11y
+      continue-on-error: true
+    
+    - name: Upload pa11y report
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: pa11y-accessibility-report
+        path: pa11y-report.html
+        retention-days: 7
+    
+    - name: Comment PR with results
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const path = 'pa11y-report.html';
+          
+          if (fs.existsSync(path)) {
+            const report = fs.readFileSync(path, 'utf8');
+            const issueCount = (report.match(/error/gi) || []).length;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## 🔍 Accessibility Test Results
+              
+Detected ${issueCount} accessibility issues.
+
+📊 **Report:** Download the full pa11y report from the artifacts section.
+
+🛠️ **Action Required:** Review the accessibility issues and fix them before merging.`
+            });
+          }

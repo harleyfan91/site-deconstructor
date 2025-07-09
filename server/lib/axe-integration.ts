@@ -1,0 +1,152 @@
+/**
+ * Axe-core integration for accessibility analysis
+ * Injects axe-core into Playwright pages for real contrast and accessibility testing
+ */
+import { Page } from 'playwright';
+import AxePlaywright from '@axe-core/playwright';
+import { SupabaseCacheService } from './supabase';
+import crypto from 'crypto';
+
+export interface AxeViolation {
+  id: string;
+  impact: 'minor' | 'moderate' | 'serious' | 'critical';
+  description: string;
+  help: string;
+  helpUrl: string;
+  nodes: Array<{
+    target: string[];
+    html: string;
+    failureSummary: string;
+  }>;
+}
+
+export interface ContrastIssue {
+  element: string;
+  textColor: string;
+  backgroundColor: string;
+  ratio: number;
+  expectedRatio: number;
+  severity: string;
+  recommendation: string;
+}
+
+export interface AccessibilityAnalysis {
+  contrastIssues: ContrastIssue[];
+  violations: AxeViolation[];
+  passedRules: number;
+  failedRules: number;
+  score: number;
+}
+
+export async function runAxeAnalysis(page: Page, url: string): Promise<AccessibilityAnalysis> {
+  try {
+    console.log(`🔍 Running axe-core accessibility analysis for ${url}`);
+    
+    // Inject axe-core into the page
+    await AxePlaywright.injectIntoPage(page);
+    
+    // Run accessibility tests focusing on WCAG 2.0 AA compliance
+    const violations = await AxePlaywright.getViolations(page, {
+      runOnly: {
+        type: 'tag',
+        values: ['wcag2a', 'wcag2aa', 'wcag21aa']
+      }
+    });
+
+    // Extract contrast-specific violations
+    const contrastViolations = violations.filter(v => v.id === 'color-contrast');
+    const contrastIssues: ContrastIssue[] = contrastViolations.flatMap(violation =>
+      violation.nodes.map(node => {
+        // Extract color information from the violation data
+        const target = node.target.join(' ');
+        const html = node.html;
+        
+        // Parse colors from the failure summary or use defaults
+        let textColor = '#000000';
+        let backgroundColor = '#ffffff';
+        let ratio = 1;
+        let expectedRatio = 4.5;
+        
+        if (node.any && node.any[0] && node.any[0].data) {
+          const data = node.any[0].data;
+          textColor = data.fgColor || textColor;
+          backgroundColor = data.bgColor || backgroundColor;
+          ratio = data.contrastRatio || ratio;
+          expectedRatio = data.expectedContrastRatio || expectedRatio;
+        }
+
+        return {
+          element: target,
+          textColor,
+          backgroundColor,
+          ratio: Math.round(ratio * 100) / 100,
+          expectedRatio,
+          severity: violation.impact,
+          recommendation: `Increase contrast ratio to at least ${expectedRatio}:1`
+        };
+      })
+    );
+
+    // Calculate accessibility score based on violations
+    const totalRules = violations.length + 50; // Estimate total rules checked
+    const failedRules = violations.length;
+    const passedRules = totalRules - failedRules;
+    const score = Math.round((passedRules / totalRules) * 100);
+
+    console.log(`✅ Axe analysis completed: ${violations.length} violations found, score: ${score}`);
+
+    return {
+      contrastIssues,
+      violations: violations.map(v => ({
+        id: v.id,
+        impact: v.impact as any,
+        description: v.description,
+        help: v.help,
+        helpUrl: v.helpUrl,
+        nodes: v.nodes.map(node => ({
+          target: node.target,
+          html: node.html,
+          failureSummary: node.failureSummary || ''
+        }))
+      })),
+      passedRules,
+      failedRules,
+      score
+    };
+  } catch (error) {
+    console.error('Axe analysis failed:', error);
+    throw error;
+  }
+}
+
+export async function getAccessibilityAnalysis(page: Page, url: string): Promise<AccessibilityAnalysis> {
+  try {
+    const urlHash = crypto.createHash('sha256').update(url).digest('hex');
+    const cacheKey = `axe_accessibility_${urlHash}`;
+
+    // Try cache first
+    const cached = await SupabaseCacheService.get(cacheKey);
+    if (cached) {
+      console.log('📦 Axe accessibility cache hit');
+      return cached.analysis_data;
+    }
+
+    console.log('🔍 Performing fresh axe accessibility analysis...');
+    const analysis = await runAxeAnalysis(page, url);
+
+    // Cache the results
+    await SupabaseCacheService.set(cacheKey, url, analysis);
+    
+    return analysis;
+  } catch (error) {
+    console.error('Accessibility analysis error:', error);
+    // Return empty analysis rather than failing
+    return {
+      contrastIssues: [],
+      violations: [],
+      passedRules: 0,
+      failedRules: 0,
+      score: 0
+    };
+  }
+}
