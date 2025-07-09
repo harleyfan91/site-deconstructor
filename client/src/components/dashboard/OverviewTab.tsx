@@ -46,8 +46,8 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
     );
   }
 
-  // Show loading indicator while initial data is being fetched
-  if (loading && !data.data?.overview) {
+  // Show loading indicator only when no data at all
+  if (loading && !data) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
         <CircularProgress size={60} />

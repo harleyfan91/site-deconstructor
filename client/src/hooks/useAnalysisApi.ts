@@ -83,63 +83,31 @@ export const useAnalysisApi = () => {
     // Create the request promise and cache it
     const requestPromise = (async (): Promise<ExtendedAnalysisResponse | null> => {
       try {
-        console.log('🚀 Starting progressive analysis for:', url);
+        console.log('🚀 Starting comprehensive analysis for:', url);
 
-        // Step 1: Get immediate local analysis data (no PSI)
-        console.log('⚡ Fetching immediate local analysis...');
-        const immediateResponse = await fetch(`/api/analyze/immediate?url=${encodeURIComponent(url)}`, {
+        // Single comprehensive analysis endpoint
+        console.log('🔍 Fetching complete analysis...');
+        const analysisResponse = await fetch(`/api/analyze/full?url=${encodeURIComponent(url)}`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' }
         });
 
-        if (!immediateResponse.ok) {
-          throw new Error(`Immediate analysis failed: ${immediateResponse.status}`);
+        if (!analysisResponse.ok) {
+          throw new Error(`Analysis failed: ${analysisResponse.status}`);
         }
 
-        const immediateResult: ExtendedAnalysisResponse = await immediateResponse.json();
-        console.log('✅ Immediate analysis completed - showing Overview');
+        const analysisResult: ExtendedAnalysisResponse = await analysisResponse.json();
+        console.log('✅ Analysis completed');
 
-        // Update UI immediately with local data and clear loading
-        setData(immediateResult);
-        setLoading(false);
+        // Update UI with complete data
+        setData(analysisResult);
+        
+        if (analysisResult.mobileResponsiveness || analysisResult.securityScore || 
+            analysisResult.accessibility || analysisResult.headerChecks) {
+          console.log('Complete analysis data structure validated');
+        }
 
-        // Step 2: Get PSI data in background and update
-        console.log('🔍 Fetching PSI data in background...');
-        fetch(`/api/analyze/psi?url=${encodeURIComponent(url)}`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
-        }).then(async (psiResponse) => {
-          if (psiResponse.ok) {
-            const psiData = await psiResponse.json();
-            console.log('🎯 PSI data received - updating metrics');
-            
-            // Update only the PSI-dependent fields
-            setData(prevData => {
-              if (!prevData) return null;
-              return {
-                ...prevData,
-                data: {
-                  ...prevData.data,
-                  overview: {
-                    ...prevData.data.overview,
-                    pageLoadTime: psiData.pageLoadTime,
-                    coreWebVitals: psiData.coreWebVitals
-                  },
-                  performance: {
-                    ...prevData.data.performance,
-                    coreWebVitals: psiData.coreWebVitalsArray
-                  }
-                }
-              };
-            });
-          } else {
-            console.warn('PSI data failed, keeping local analysis');
-          }
-        }).catch((err) => {
-          console.warn('PSI error:', err);
-        });
-
-        return immediateResult;
+        return analysisResult;
 
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
@@ -153,7 +121,7 @@ export const useAnalysisApi = () => {
 
     try {
       const result = await requestPromise;
-      setLoading(false);  // Analysis complete, stop loading
+      setLoading(false);
       return result;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
