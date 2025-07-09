@@ -314,35 +314,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
     }
   };
 
-  // Loading: show spinner and message
-  if (loading || techLoading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
-        <CircularProgress size={60} />
-        <Typography variant="h6" sx={{ ml: 2 }}>
-          {loading ? 'Analyzing tech stack...' : 'Extracting comprehensive technology data...'}
-        </Typography>
-      </Box>
-    );
-  }
-
-  // Error state: show error alert
-  if (error || techError) {
-    return (
-      <Alert severity="error" sx={{ mt: 2 }}>
-        {error || techError}
-      </Alert>
-    );
-  }
-
-  // No data: prompt for input
-  if (!data) {
-    return (
-      <Alert severity="info" sx={{ mt: 2 }}>
-        Enter a URL to analyze website technology
-      </Alert>
-    );
-  }
+  // No tab-level loading - use section-level loading instead
 
   // Use comprehensive technical analysis data if available, fallback to basic data
   const displayTechStack = techAnalysis?.techStack || data.data.technical?.techStack || [];
@@ -367,7 +339,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
           <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ p: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Layers size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+                <Layers size={24} color={theme.palette.primary.main} style={{ marginRight: 8 }} />
                 <Typography 
                   variant="h6" 
                   sx={{ 
@@ -377,16 +349,32 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                 >
                   Tech Stack
                 </Typography>
-
               </Box>
-              <TechStackGrid techStack={displayTechStack} />
+              {techLoading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
+                  <CircularProgress size={32} sx={{ mr: 2 }} />
+                  <Typography variant="body2" color="text.secondary">
+                    Analyzing technologies...
+                  </Typography>
+                </Box>
+              ) : techError ? (
+                <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
+                  Technology analysis unavailable
+                </Typography>
+              ) : displayTechStack.length === 0 ? (
+                <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
+                  No technologies detected
+                </Typography>
+              ) : (
+                <TechStackGrid techStack={displayTechStack} />
+              )}
             </CardContent>
           </Card>
 
           <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ p: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Settings size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+                <Settings size={24} color={theme.palette.primary.main} style={{ marginRight: 8 }} />
                 <Typography 
                   variant="h6" 
                   sx={{ 
@@ -397,40 +385,57 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                   Minification Status
                 </Typography>
               </Box>
-              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr', gap: 2 }}>
-                <Tooltip
-                  title={displayMinification?.cssMinified ? 'CSS files are minified for better performance' : 'CSS files are not minified - consider minifying for better performance'}
-                  enterDelay={300}
-                  enterTouchDelay={300}
-                >
-                  <Chip
-                    label={`CSS: ${displayMinification?.cssMinified ? 'Minified' : 'Not Minified'}`}
-                    {...chipStateStyle(Boolean(displayMinification?.cssMinified), theme)}
-                    size="small"
-                    sx={{ 
-                      ...chipStateStyle(Boolean(displayMinification?.cssMinified), theme).sx, 
-                      width: '100%',
-                      cursor: 'help'
-                    }}
-                  />
-                </Tooltip>
-                <Tooltip
-                  title={displayMinification?.jsMinified ? 'JavaScript files are minified for better performance' : 'JavaScript files are not minified - consider minifying for better performance'}
-                  enterDelay={300}
-                  enterTouchDelay={300}
-                >
-                  <Chip
-                    label={`JavaScript: ${displayMinification?.jsMinified ? 'Minified' : 'Not Minified'}`}
-                    {...chipStateStyle(Boolean(displayMinification?.jsMinified), theme)}
-                    size="small"
-                    sx={{ 
-                      ...chipStateStyle(Boolean(displayMinification?.jsMinified), theme).sx, 
-                      width: '100%',
-                      cursor: 'help'
-                    }}
-                  />
-                </Tooltip>
-              </Box>
+              {techLoading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
+                  <CircularProgress size={32} sx={{ mr: 2 }} />
+                  <Typography variant="body2" color="text.secondary">
+                    Checking minification...
+                  </Typography>
+                </Box>
+              ) : techError ? (
+                <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
+                  Minification check unavailable
+                </Typography>
+              ) : !displayMinification ? (
+                <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
+                  Minification status pending...
+                </Typography>
+              ) : (
+                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr', gap: 2 }}>
+                  <Tooltip
+                    title={displayMinification?.cssMinified ? 'CSS files are minified for better performance' : 'CSS files are not minified - consider minifying for better performance'}
+                    enterDelay={300}
+                    enterTouchDelay={300}
+                  >
+                    <Chip
+                      label={`CSS: ${displayMinification?.cssMinified ? 'Minified' : 'Not Minified'}`}
+                      {...chipStateStyle(Boolean(displayMinification?.cssMinified), theme)}
+                      size="small"
+                      sx={{ 
+                        ...chipStateStyle(Boolean(displayMinification?.cssMinified), theme).sx, 
+                        width: '100%',
+                        cursor: 'help'
+                      }}
+                    />
+                  </Tooltip>
+                  <Tooltip
+                    title={displayMinification?.jsMinified ? 'JavaScript files are minified for better performance' : 'JavaScript files are not minified - consider minifying for better performance'}
+                    enterDelay={300}
+                    enterTouchDelay={300}
+                  >
+                    <Chip
+                      label={`JavaScript: ${displayMinification?.jsMinified ? 'Minified' : 'Not Minified'}`}
+                      {...chipStateStyle(Boolean(displayMinification?.jsMinified), theme)}
+                      size="small"
+                      sx={{ 
+                        ...chipStateStyle(Boolean(displayMinification?.jsMinified), theme).sx, 
+                        width: '100%',
+                        cursor: 'help'
+                      }}
+                    />
+                  </Tooltip>
+                </Box>
+              )}
             </CardContent>
           </Card>
         </Box>
@@ -439,184 +444,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-            <Zap size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-            <Typography 
-              variant="h6" 
-              sx={{ 
-                fontWeight: 'bold',
-                fontSize: { xs: '1.1rem', sm: '1.25rem' }
-              }}
-            >
-              Detected Ad Tags
-            </Typography>
-          </Box>
-          <Box sx={{
-            display: 'grid',
-            gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
-            gap: 2
-          }}>
-            {adTagDescriptors.map(({ label, key }) => {
-              const isDetected = Boolean(displayAdTags?.[key]);
-              return (
-                <Tooltip
-                  key={key}
-                  title={isDetected ? `${label} detected on this website` : `${label} not found on this website`}
-                  enterDelay={300}
-                  enterTouchDelay={300}
-                >
-                  <Chip
-                    label={label}
-                    {...chipStateStyle(isDetected, theme)}
-                    size="small"
-                    sx={{
-                      ...chipStateStyle(isDetected, theme).sx,
-                      justifyContent: 'center',
-                      textAlign: 'center',
-                      cursor: 'help',
-                      '& .MuiChip-label': {
-                        width: '100%',
-                        textAlign: 'center'
-                      }
-                    }}
-                  />
-                </Tooltip>
-              );
-            })}
-          </Box>
-        </CardContent>
-      </Card>
-
-        {/* Section: Detected Social Tags */}
-        <Card sx={{ borderRadius: 2 }}>
-          <CardContent sx={{ p: 2 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-            <Users size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-            <Typography 
-              variant="h6" 
-              sx={{ 
-                fontWeight: 'bold',
-                fontSize: { xs: '1.1rem', sm: '1.25rem' }
-              }}
-            >
-              Detected Social Tags
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 2 }}>
-            <Tooltip
-              title={displaySocial?.hasOpenGraph ? 'Open Graph meta tags detected' : 'Open Graph meta tags not found'}
-              enterDelay={300}
-              enterTouchDelay={300}
-            >
-              <Chip
-                label="Open Graph Meta Tags"
-                {...chipStateStyle(Boolean(displaySocial?.hasOpenGraph), theme)}
-                size="small"
-                sx={{ 
-                  ...chipStateStyle(Boolean(displaySocial?.hasOpenGraph), theme).sx, 
-                  width: '100%',
-                  cursor: 'help'
-                }}
-              />
-            </Tooltip>
-            <Tooltip
-              title={displaySocial?.hasTwitterCard ? 'Twitter card meta tags detected' : 'Twitter card meta tags not found'}
-              enterDelay={300}
-              enterTouchDelay={300}
-            >
-              <Chip
-                label="Twitter Card Meta Tags"
-                {...chipStateStyle(Boolean(displaySocial?.hasTwitterCard), theme)}
-                size="small"
-                sx={{ 
-                  ...chipStateStyle(Boolean(displaySocial?.hasTwitterCard), theme).sx, 
-                  width: '100%',
-                  cursor: 'help'
-                }}
-              />
-            </Tooltip>
-            <Tooltip
-              title={displaySocial?.hasShareButtons ? 'Share buttons detected on the website' : 'Share buttons not found on the website'}
-              enterDelay={300}
-              enterTouchDelay={300}
-            >
-              <Chip
-                label="Share Buttons"
-                {...chipStateStyle(Boolean(displaySocial?.hasShareButtons), theme)}
-                size="small"
-                sx={{ 
-                  ...chipStateStyle(Boolean(displaySocial?.hasShareButtons), theme).sx, 
-                  width: '100%',
-                  cursor: 'help'
-                }}
-              />
-            </Tooltip>
-          </Box>
-          </CardContent>
-        </Card>
-
-        {/* Section: Cookie Banner & Consent Script */}
-        <Card sx={{ borderRadius: 2 }}>
-        <CardContent sx={{ p: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-            <Cookie size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-            <Typography 
-              variant="h6" 
-              sx={{ 
-                fontWeight: 'bold',
-                fontSize: { xs: '1.1rem', sm: '1.25rem' }
-              }}
-            >
-              Detected Cookie Banner & Consent Script
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 2 }}>
-            {displayCookies?.hasCookieScript ? (
-              <Tooltip
-                title="Cookie consent script detected on this website"
-                enterDelay={300}
-                enterTouchDelay={300}
-              >
-                <Chip
-                  label="Cookie Consent Script Detected"
-                  {...chipStateStyle(true, theme)}
-                  size="small"
-                  sx={{ 
-                    ...chipStateStyle(true, theme).sx,
-                    width: '100%',
-                    cursor: 'help'
-                  }}
-                />
-              </Tooltip>
-            ) : (
-              <Tooltip
-                title="No cookie consent script found on this website"
-                enterDelay={300}
-                enterTouchDelay={300}
-              >
-                <Chip
-                  label="No Cookie Consent Script Found"
-                  {...chipStateStyle(false, theme)}
-                  size="small"
-                  sx={{ 
-                    ...chipStateStyle(false, theme).sx,
-                    width: '100%',
-                    cursor: 'help'
-                  }}
-                />
-              </Tooltip>
-            )}
-          </Box>
-        </CardContent>
-      </Card>
-
-
-
-        {/* Section: Technical Issues & Health */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 2 }}>
-          <Card sx={{ borderRadius: 2 }}>
-            <CardContent sx={{ p: 2 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-              <Shield size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+              <Zap size={24} color={theme.palette.primary.main} style={{ marginRight: 8 }} />
               <Typography 
                 variant="h6" 
                 sx={{ 
@@ -624,52 +452,292 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                   fontSize: { xs: '1.1rem', sm: '1.25rem' }
                 }}
               >
-                Technical Issues
+                Detected Ad Tags
               </Typography>
             </Box>
-            <div className="relative w-full overflow-auto">
-              <table className="w-full caption-bottom text-sm">
-                <thead className="[&_tr]:border-b">
-                  <tr>
-                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">Type</th>
-                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">Description</th>
-                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">Severity</th>
-                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="[&_tr:last-child]:border-0">
-                  {(techAnalysis?.issues ?? data?.data?.technical?.issues ?? []).map((issue, index) => (
-                    <tr key={index} className="border-b transition-colors [&:has([role=checkbox])]:pr-0">
-                      <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">{issue.type}</td>
-                      <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">{issue.description}</td>
-                      <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
-                        <Tooltip
-                          title={`${issue.severity.charAt(0).toUpperCase() + issue.severity.slice(1)} severity issue - ${
-                            issue.severity === 'high' ? 'requires immediate attention' :
-                            issue.severity === 'medium' ? 'should be addressed soon' :
-                            'low priority but worth fixing'
-                          }`}
-                          enterDelay={300}
-                          enterTouchDelay={300}
-                        >
-                          <Chip
-                            label={issue.severity}
-                            {...chipSeverityStyle(issue.severity, theme)}
-                            size="small"
-                            sx={{
-                              ...chipSeverityStyle(issue.severity, theme).sx,
-                              cursor: 'help'
-                            }}
-                          />
-                        </Tooltip>
-                      </td>
-                      <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">{issue.status}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            {techLoading ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
+                <CircularProgress size={32} sx={{ mr: 2 }} />
+                <Typography variant="body2" color="text.secondary">
+                  Scanning for ad tags...
+                </Typography>
+              </Box>
+            ) : techError ? (
+              <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
+                Ad tag analysis unavailable
+              </Typography>
+            ) : (
+              <Box sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
+                gap: 2
+              }}>
+                {adTagDescriptors.map(({ label, key }) => {
+                  const isDetected = Boolean(displayAdTags?.[key]);
+                  return (
+                    <Tooltip
+                      key={key}
+                      title={isDetected ? `${label} detected on this website` : `${label} not found on this website`}
+                      enterDelay={300}
+                      enterTouchDelay={300}
+                    >
+                      <Chip
+                        label={label}
+                        {...chipStateStyle(isDetected, theme)}
+                        size="small"
+                        sx={{
+                          ...chipStateStyle(isDetected, theme).sx,
+                          justifyContent: 'center',
+                          textAlign: 'center',
+                          cursor: 'help',
+                          '& .MuiChip-label': {
+                            width: '100%',
+                            textAlign: 'center'
+                          }
+                        }}
+                      />
+                    </Tooltip>
+                  );
+                })}
+              </Box>
+            )}
           </CardContent>
+        </Card>
+
+        {/* Section: Detected Social Tags */}
+        <Card sx={{ borderRadius: 2 }}>
+          <CardContent sx={{ p: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <Users size={24} color={theme.palette.primary.main} style={{ marginRight: 8 }} />
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  fontWeight: 'bold',
+                  fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                }}
+              >
+                Detected Social Tags
+              </Typography>
+            </Box>
+            {techLoading ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
+                <CircularProgress size={32} sx={{ mr: 2 }} />
+                <Typography variant="body2" color="text.secondary">
+                  Scanning for social tags...
+                </Typography>
+              </Box>
+            ) : techError ? (
+              <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
+                Social tag analysis unavailable
+              </Typography>
+            ) : (
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 2 }}>
+                <Tooltip
+                  title={displaySocial?.hasOpenGraph ? 'Open Graph meta tags detected' : 'Open Graph meta tags not found'}
+                  enterDelay={300}
+                  enterTouchDelay={300}
+                >
+                  <Chip
+                    label="Open Graph Meta Tags"
+                    {...chipStateStyle(Boolean(displaySocial?.hasOpenGraph), theme)}
+                    size="small"
+                    sx={{ 
+                      ...chipStateStyle(Boolean(displaySocial?.hasOpenGraph), theme).sx, 
+                      width: '100%',
+                      cursor: 'help'
+                    }}
+                  />
+                </Tooltip>
+                <Tooltip
+                  title={displaySocial?.hasTwitterCard ? 'Twitter card meta tags detected' : 'Twitter card meta tags not found'}
+                  enterDelay={300}
+                  enterTouchDelay={300}
+                >
+                  <Chip
+                    label="Twitter Card Meta Tags"
+                    {...chipStateStyle(Boolean(displaySocial?.hasTwitterCard), theme)}
+                    size="small"
+                    sx={{ 
+                      ...chipStateStyle(Boolean(displaySocial?.hasTwitterCard), theme).sx, 
+                      width: '100%',
+                      cursor: 'help'
+                    }}
+                  />
+                </Tooltip>
+                <Tooltip
+                  title={displaySocial?.hasShareButtons ? 'Share buttons detected on the website' : 'Share buttons not found on the website'}
+                  enterDelay={300}
+                  enterTouchDelay={300}
+                >
+                  <Chip
+                    label="Share Buttons"
+                    {...chipStateStyle(Boolean(displaySocial?.hasShareButtons), theme)}
+                    size="small"
+                    sx={{ 
+                      ...chipStateStyle(Boolean(displaySocial?.hasShareButtons), theme).sx, 
+                      width: '100%',
+                      cursor: 'help'
+                    }}
+                  />
+                </Tooltip>
+              </Box>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Section: Cookie Banner & Consent Script */}
+        <Card sx={{ borderRadius: 2 }}>
+          <CardContent sx={{ p: 3 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+              <Cookie size={24} color={theme.palette.primary.main} style={{ marginRight: 8 }} />
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  fontWeight: 'bold',
+                  fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                }}
+              >
+                Detected Cookie Banner & Consent Script
+              </Typography>
+            </Box>
+            {techLoading ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
+                <CircularProgress size={32} sx={{ mr: 2 }} />
+                <Typography variant="body2" color="text.secondary">
+                  Checking for cookies...
+                </Typography>
+              </Box>
+            ) : techError ? (
+              <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
+                Cookie analysis unavailable
+              </Typography>
+            ) : (
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 2 }}>
+                {displayCookies?.hasCookieScript ? (
+                  <Tooltip
+                    title="Cookie consent script detected on this website"
+                    enterDelay={300}
+                    enterTouchDelay={300}
+                  >
+                    <Chip
+                      label="Cookie Consent Script Detected"
+                      {...chipStateStyle(true, theme)}
+                      size="small"
+                      sx={{ 
+                        ...chipStateStyle(true, theme).sx,
+                        width: '100%',
+                        cursor: 'help'
+                      }}
+                    />
+                  </Tooltip>
+                ) : (
+                  <Tooltip
+                    title="No cookie consent script found on this website"
+                    enterDelay={300}
+                    enterTouchDelay={300}
+                  >
+                    <Chip
+                      label="No Cookie Consent Script Found"
+                      {...chipStateStyle(false, theme)}
+                      size="small"
+                      sx={{ 
+                        ...chipStateStyle(false, theme).sx,
+                        width: '100%',
+                        cursor: 'help'
+                      }}
+                    />
+                  </Tooltip>
+                )}
+              </Box>
+            )}
+          </CardContent>
+        </Card>
+
+
+
+        {/* Section: Technical Issues & Health */}
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 2 }}>
+          <Card sx={{ borderRadius: 2 }}>
+            <CardContent sx={{ p: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                <Shield size={24} color={theme.palette.primary.main} style={{ marginRight: 8 }} />
+                <Typography 
+                  variant="h6" 
+                  sx={{ 
+                    fontWeight: 'bold',
+                    fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                  }}
+                >
+                  Technical Issues
+                </Typography>
+              </Box>
+              {techLoading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
+                  <CircularProgress size={32} sx={{ mr: 2 }} />
+                  <Typography variant="body2" color="text.secondary">
+                    Analyzing technical issues...
+                  </Typography>
+                </Box>
+              ) : techError ? (
+                <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
+                  Technical issue analysis unavailable
+                </Typography>
+              ) : (techAnalysis?.issues ?? data?.data?.technical?.issues ?? []).length === 0 ? (
+                <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
+                  No technical issues detected
+                </Typography>
+              ) : (
+                <div className="relative w-full overflow-auto">
+                  <table className="w-full caption-bottom text-sm">
+                    <thead className="[&_tr]:border-b">
+                      <tr>
+                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">Type</th>
+                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">Description</th>
+                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">Severity</th>
+                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="[&_tr:last-child]:border-0">
+                      {(techAnalysis?.issues ?? data?.data?.technical?.issues ?? []).map((issue, index) => (
+                        <tr key={index} className="border-b transition-colors [&:has([role=checkbox])]:pr-0">
+                          <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">{issue.type}</td>
+                          <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">{issue.description}</td>
+                          <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
+                            <Tooltip
+                              title={`${issue.severity.charAt(0).toUpperCase() + issue.severity.slice(1)} severity issue - ${
+                                issue.severity === 'high' ? 'requires immediate attention' :
+                                issue.severity === 'medium' ? 'should be addressed soon' :
+                                'low priority but worth fixing'
+                              }`}
+                              enterDelay={300}
+                              enterTouchDelay={300}
+                            >
+                              <Chip
+                                label={issue.severity}
+                                {...chipSeverityStyle(issue.severity, theme)}
+                                size="small"
+                                sx={{
+                                  ...chipSeverityStyle(issue.severity, theme).sx,
+                                  cursor: 'help'
+                                }}
+                              />
+                            </Tooltip>
+                          </td>
+                          <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
+                            <Chip
+                              label="Active"
+                              color="error"
+                              size="small"
+                              variant="outlined"
+                            />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
           </Card>
           <TechnicalHealthSummary 
             healthGrade={data?.data?.technical?.healthGrade ?? 'C'} 

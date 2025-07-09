@@ -72,34 +72,6 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
     );
   }
 
-  // Show SEO loading state
-  if (seoLoading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
-        <CircularProgress size={60} />
-        <Typography variant="h6" sx={{ ml: 2 }}>Analyzing SEO...</Typography>
-      </Box>
-    );
-  }
-
-  // Show SEO error
-  if (seoError) {
-    return (
-      <Alert severity="warning" sx={{ mt: 2 }}>
-        SEO analysis is temporarily unavailable. {seoError}
-      </Alert>
-    );
-  }
-
-  // Show message when no SEO data is available yet
-  if (!seoData) {
-    return (
-      <Alert severity="info" sx={{ mt: 2 }}>
-        SEO analysis will begin shortly...
-      </Alert>
-    );
-  }
-
   const seo = seoData;
 
   const getStatusIcon = (status: string) => {
@@ -167,7 +139,7 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
     }
   };
 
-  const seoScore = seo.score;
+  const seoScore = seoData?.score || 0;
   const seoScoreColor =
     seoScore >= 80
       ? theme.palette.success.main
@@ -196,7 +168,7 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-              <Search size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+              <Search size={24} color={theme.palette.primary.main} style={{ marginRight: 8 }} />
               <Typography 
                 variant="h6" 
                 sx={{ 
@@ -208,14 +180,29 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
               </Typography>
             </Box>
             <Box>
-              {seo.checks.map((check, index) => (
+              {seoLoading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
+                  <CircularProgress size={32} sx={{ mr: 2 }} />
+                  <Typography variant="body2" color="text.secondary">
+                    Analyzing SEO checklist...
+                  </Typography>
+                </Box>
+              ) : seoError ? (
+                <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
+                  SEO analysis is temporarily unavailable. {seoError}
+                </Typography>
+              ) : !seoData ? (
+                <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
+                  SEO analysis will begin shortly...
+                </Typography>
+              ) : seoData?.checks?.map((check, index) => (
                 <Box
                   key={index}
                   sx={{
                     display: 'flex',
                     alignItems: 'center',
                     p: 2,
-                    borderBottom: index < seo.checks.length - 1 ? '1px solid #E0E0E0' : 'none',
+                    borderBottom: index < seoData.checks.length - 1 ? '1px solid #E0E0E0' : 'none',
                   }}
                 >
                   <Tooltip 
@@ -258,7 +245,7 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
           <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ p: 3, textAlign: 'center' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, justifyContent: 'center' }}>
-                <Target size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+                <Target size={24} color={theme.palette.primary.main} style={{ marginRight: 8 }} />
                 <Typography 
                   variant="h6" 
                   sx={{ 
@@ -269,30 +256,49 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
                   SEO Score
                 </Typography>
               </Box>
-              <Tooltip 
-                title={getSeoScoreTooltip(seoScore)}
-                enterDelay={300}
-                enterTouchDelay={300}
-              >
-                <Typography variant="h2" sx={{ 
-                  fontWeight: 'bold', 
-                  color: seoScoreColor,
-                  mb: 1,
-                  cursor: 'help'
-                }}>
-                  {seoScore}
+              {seoLoading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
+                  <CircularProgress size={32} sx={{ mr: 2 }} />
+                  <Typography variant="body2" color="text.secondary">
+                    Calculating score...
+                  </Typography>
+                </Box>
+              ) : seoError ? (
+                <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', py: 3 }}>
+                  Score unavailable
                 </Typography>
-              </Tooltip>
-              <Typography variant="body2" color="text.secondary">
-                {seoScoreDescription}
-              </Typography>
+              ) : !seoData ? (
+                <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', py: 3 }}>
+                  Score pending...
+                </Typography>
+              ) : (
+                <>
+                  <Tooltip 
+                    title={getSeoScoreTooltip(seoScore)}
+                    enterDelay={300}
+                    enterTouchDelay={300}
+                  >
+                    <Typography variant="h2" sx={{ 
+                      fontWeight: 'bold', 
+                      color: seoScoreColor,
+                      mb: 1,
+                      cursor: 'help'
+                    }}>
+                      {seoScore}
+                    </Typography>
+                  </Tooltip>
+                  <Typography variant="body2" color="text.secondary">
+                    {seoScoreDescription}
+                  </Typography>
+                </>
+              )}
             </CardContent>
           </Card>
 
           <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                <TrendingUp size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+                <TrendingUp size={24} color={theme.palette.primary.main} style={{ marginRight: 8 }} />
                 <Typography 
                   variant="h6" 
                   sx={{ 
@@ -303,44 +309,61 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
                   Analysis Status
                 </Typography>
               </Box>
-              <Box sx={{ mb: 2 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography variant="body2">Checks Passed</Typography>
-                  <Tooltip 
-                    title="Number of SEO checks that passed"
-                    enterDelay={300}
-                    enterTouchDelay={300}
-                  >
-                    <Typography variant="body2" sx={{ fontWeight: 'bold', color: theme.palette.success.main, cursor: 'help' }}>
-                      {seo.checks.filter(c => c.status === 'good').length}/{seo.checks.length}
-                    </Typography>
-                  </Tooltip>
+              {seoLoading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
+                  <CircularProgress size={32} sx={{ mr: 2 }} />
+                  <Typography variant="body2" color="text.secondary">
+                    Analyzing status...
+                  </Typography>
                 </Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography variant="body2">Warnings</Typography>
-                  <Tooltip 
-                    title="Number of SEO warnings found"
-                    enterDelay={300}
-                    enterTouchDelay={300}
-                  >
-                    <Typography variant="body2" sx={{ fontWeight: 'bold', color: theme.palette.warning.main, cursor: 'help' }}>
-                      {seo.checks.filter(c => c.status === 'warning').length}
-                    </Typography>
-                  </Tooltip>
+              ) : seoError ? (
+                <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
+                  Status unavailable
+                </Typography>
+              ) : !seoData ? (
+                <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
+                  Status pending...
+                </Typography>
+              ) : (
+                <Box sx={{ mb: 2 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                    <Typography variant="body2">Checks Passed</Typography>
+                    <Tooltip 
+                      title="Number of SEO checks that passed"
+                      enterDelay={300}
+                      enterTouchDelay={300}
+                    >
+                      <Typography variant="body2" sx={{ fontWeight: 'bold', color: theme.palette.success.main, cursor: 'help' }}>
+                        {seoData.checks.filter(c => c.status === 'good').length}/{seoData.checks.length}
+                      </Typography>
+                    </Tooltip>
+                  </Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                    <Typography variant="body2">Warnings</Typography>
+                    <Tooltip 
+                      title="Number of SEO warnings found"
+                      enterDelay={300}
+                      enterTouchDelay={300}
+                    >
+                      <Typography variant="body2" sx={{ fontWeight: 'bold', color: theme.palette.warning.main, cursor: 'help' }}>
+                        {seoData.checks.filter(c => c.status === 'warning').length}
+                      </Typography>
+                    </Tooltip>
+                  </Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                    <Typography variant="body2">Errors</Typography>
+                    <Tooltip 
+                      title="Number of SEO errors found"
+                      enterDelay={300}
+                      enterTouchDelay={300}
+                    >
+                      <Typography variant="body2" sx={{ fontWeight: 'bold', color: theme.palette.error.main, cursor: 'help' }}>
+                        {seoData.checks.filter(c => c.status === 'error').length}
+                      </Typography>
+                    </Tooltip>
+                  </Box>
                 </Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography variant="body2">Errors</Typography>
-                  <Tooltip 
-                    title="Number of SEO errors found"
-                    enterDelay={300}
-                    enterTouchDelay={300}
-                  >
-                    <Typography variant="body2" sx={{ fontWeight: 'bold', color: theme.palette.error.main, cursor: 'help' }}>
-                      {seo.checks.filter(c => c.status === 'error').length}
-                    </Typography>
-                  </Tooltip>
-                </Box>
-              </Box>
+              )}
             </CardContent>
           </Card>
         </Box>
@@ -349,7 +372,7 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
       <Card sx={{ borderRadius: 2 }}>
         <CardContent sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-            <Target size={24} color="#FF6B35" style={{ marginRight: 8 }} />
+            <Target size={24} color={theme.palette.primary.main} style={{ marginRight: 8 }} />
             <Typography 
               variant="h6" 
               sx={{ 
@@ -360,8 +383,24 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
               SEO Recommendations
             </Typography>
           </Box>
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 2 }}>
-            {seo.recommendations.map((rec, index) => (
+          {seoLoading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
+              <CircularProgress size={32} sx={{ mr: 2 }} />
+              <Typography variant="body2" color="text.secondary">
+                Generating recommendations...
+              </Typography>
+            </Box>
+          ) : seoError ? (
+            <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
+              Recommendations unavailable
+            </Typography>
+          ) : !seoData ? (
+            <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
+              Recommendations pending...
+            </Typography>
+          ) : (
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 2 }}>
+              {seoData.recommendations?.map((rec, index) => (
               <Tooltip 
                 key={index} 
                 title={getPriorityTooltip(rec.priority)}
@@ -400,23 +439,39 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
                   </Typography>
                 </Box>
               </Tooltip>
-            ))}
-          </Box>
+              ))}
+            </Box>
+          )}
         </CardContent>
       </Card>
 
       {/* Additional SEO Data Sections - 2x2 Layout matching other tabs */}
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 2, mt: 2 }}>
         {/* Keywords Section */}
-        {seo.keywords && seo.keywords.length > 0 && seo.keywords[0]?.keyword !== '!analysis pending' && (
-          <Card sx={{ borderRadius: 2 }}>
-            <CardContent sx={{ p: 3 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                <Hash size={24} color={theme.palette.primary.main} style={{ marginRight: 8 }} />
-                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                  Top Keywords
+        <Card sx={{ borderRadius: 2 }}>
+          <CardContent sx={{ p: 3 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+              <Hash size={24} color={theme.palette.primary.main} style={{ marginRight: 8 }} />
+              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                Top Keywords
+              </Typography>
+            </Box>
+            {seoLoading ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
+                <CircularProgress size={32} sx={{ mr: 2 }} />
+                <Typography variant="body2" color="text.secondary">
+                  Analyzing keywords...
                 </Typography>
               </Box>
+            ) : seoError ? (
+              <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
+                Keywords unavailable
+              </Typography>
+            ) : !seoData || !seoData.keywords || seoData.keywords.length === 0 || seoData.keywords[0]?.keyword === '!analysis pending' ? (
+              <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
+                No keywords detected
+              </Typography>
+            ) : (
               <TableContainer component={Paper} sx={{ boxShadow: 'none', border: '1px solid', borderColor: 'divider' }}>
                 <Table size="small">
                   <TableHead>
@@ -427,7 +482,7 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {seo.keywords.slice(0, 6).map((keyword, index) => (
+                    {seoData.keywords.slice(0, 6).map((keyword, index) => (
                       <TableRow key={index}>
                         <TableCell component="th" scope="row">
                           {keyword.keyword}
@@ -439,9 +494,9 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
                   </TableBody>
                 </Table>
               </TableContainer>
-            </CardContent>
-          </Card>
-        )}
+            )}
+          </CardContent>
+        </Card>
 
         {/* Heading Hierarchy Section - Always show */}
         <Card sx={{ borderRadius: 2 }}>
@@ -452,28 +507,45 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
                 Heading Structure
               </Typography>
             </Box>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-              {seo.headings && Object.entries(seo.headings).map(([level, count]) => (
-                <Box key={level} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                    {level.toUpperCase()}
-                  </Typography>
-                  <Tooltip
-                    title={(typeof count === 'number' && count > 0) ? `${count} ${level.toUpperCase()} heading${count === 1 ? '' : 's'} found - good for SEO structure` : `No ${level.toUpperCase()} headings found - consider adding for better content hierarchy`}
-                    enterDelay={300}
-                    enterTouchDelay={300}
-                  >
-                    <Chip 
-                      label={String(count)} 
-                      size="small" 
-                      color={(typeof count === 'number' && count > 0) ? 'success' : 'default'}
-                      variant="outlined"
-                      sx={{ cursor: 'help' }}
-                    />
-                  </Tooltip>
-                </Box>
-              ))}
-            </Box>
+            {seoLoading ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
+                <CircularProgress size={32} sx={{ mr: 2 }} />
+                <Typography variant="body2" color="text.secondary">
+                  Analyzing headings...
+                </Typography>
+              </Box>
+            ) : seoError ? (
+              <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
+                Heading analysis unavailable
+              </Typography>
+            ) : !seoData ? (
+              <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
+                Heading analysis pending...
+              </Typography>
+            ) : (
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                {seoData.headings && Object.entries(seoData.headings).map(([level, count]) => (
+                  <Box key={level} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
+                      {level.toUpperCase()}
+                    </Typography>
+                    <Tooltip
+                      title={(typeof count === 'number' && count > 0) ? `${count} ${level.toUpperCase()} heading${count === 1 ? '' : 's'} found - good for SEO structure` : `No ${level.toUpperCase()} headings found - consider adding for better content hierarchy`}
+                      enterDelay={300}
+                      enterTouchDelay={300}
+                    >
+                      <Chip 
+                        label={String(count)} 
+                        size="small" 
+                        color={(typeof count === 'number' && count > 0) ? 'success' : 'default'}
+                        variant="outlined"
+                        sx={{ cursor: 'help' }}
+                      />
+                    </Tooltip>
+                  </Box>
+                ))}
+              </Box>
+            )}
           </CardContent>
         </Card>
 
@@ -486,47 +558,64 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
                 Technical SEO
               </Typography>
             </Box>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="body2">Robots.txt</Typography>
-                <Chip
-                  label={seo.hasRobotsTxt ? 'Present' : 'Missing'}
-                  color={seo.hasRobotsTxt ? 'success' : 'error'}
-                  size="small"
-                  variant="outlined"
-                />
+            {seoLoading ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
+                <CircularProgress size={32} sx={{ mr: 2 }} />
+                <Typography variant="body2" color="text.secondary">
+                  Checking technical SEO...
+                </Typography>
               </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="body2">XML Sitemap</Typography>
-                <Chip
-                  label={seo.hasSitemap ? 'Present' : 'Missing'}
-                  color={seo.hasSitemap ? 'success' : 'error'}
-                  size="small"
-                  variant="outlined"
-                />
-              </Box>
-              {seo.structuredData && seo.structuredData.length > 0 ? (
+            ) : seoError ? (
+              <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
+                Technical SEO check unavailable
+              </Typography>
+            ) : !seoData ? (
+              <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
+                Technical SEO check pending...
+              </Typography>
+            ) : (
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography variant="body2">Structured Data</Typography>
+                  <Typography variant="body2">Robots.txt</Typography>
                   <Chip
-                    label={`${seo.structuredData.length} items`}
-                    color="success"
+                    label={seoData.hasRobotsTxt ? 'Present' : 'Missing'}
+                    color={seoData.hasRobotsTxt ? 'success' : 'error'}
                     size="small"
                     variant="outlined"
                   />
                 </Box>
-              ) : (
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography variant="body2">Structured Data</Typography>
+                  <Typography variant="body2">XML Sitemap</Typography>
                   <Chip
-                    label="None detected"
-                    color="default"
+                    label={seoData.hasSitemap ? 'Present' : 'Missing'}
+                    color={seoData.hasSitemap ? 'success' : 'error'}
                     size="small"
                     variant="outlined"
                   />
                 </Box>
-              )}
-            </Box>
+                {seoData.structuredData && seoData.structuredData.length > 0 ? (
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="body2">Structured Data</Typography>
+                    <Chip
+                      label={`${seoData.structuredData.length} items`}
+                      color="success"
+                      size="small"
+                      variant="outlined"
+                    />
+                  </Box>
+                ) : (
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="body2">Structured Data</Typography>
+                    <Chip
+                      label="None detected"
+                      color="default"
+                      size="small"
+                      variant="outlined"
+                    />
+                  </Box>
+                )}
+              </Box>
+            )}
           </CardContent>
         </Card>
 
