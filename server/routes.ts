@@ -12,6 +12,21 @@ import { getLighthouseSEO, getLighthousePerformance, getLighthouseBestPractices,
 import { getAccessibilityAnalysis } from './lib/axe-integration';
 import { getEnhancedTechAnalysis } from './lib/enhanced-tech-analysis';
 
+// Helper function to normalize URLs with proper protocol
+function normalizeUrl(url: string): string {
+  if (!url) return url;
+  
+  // Remove trailing slash
+  url = url.trim().replace(/\/$/, '');
+  
+  // Add https:// if no protocol is specified
+  if (!url.match(/^https?:\/\//)) {
+    url = `https://${url}`;
+  }
+  
+  return url;
+}
+
 // Helper function to map score to letter grade
 function mapScoreToGrade(score: number): string {
   if (score >= 90) return 'A';
@@ -189,13 +204,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'URL parameter is required' });
       }
 
-      console.log('⚡ Getting performance data for:', url);
+      const normalizedUrl = normalizeUrl(url);
+      console.log('⚡ Getting performance data for:', normalizedUrl);
       
       // Get page load times from Lighthouse (both desktop and mobile)
-      const pageLoadTimeData = await getLighthousePageLoadTime(url);
+      const pageLoadTimeData = await getLighthousePageLoadTime(normalizedUrl);
       
       // Get Core Web Vitals from Lighthouse Performance analysis
-      const lighthousePerformance = await getLighthousePerformance(url);
+      const lighthousePerformance = await getLighthousePerformance(normalizedUrl);
       
       const performanceData = {
         coreWebVitals: {
@@ -224,11 +240,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'URL is required in request body' });
       }
       
-      console.log('🔧 Running enhanced tech analysis (lightweight + Lighthouse) for:', url);
+      const normalizedUrl = normalizeUrl(url);
+      console.log('🔧 Running enhanced tech analysis (lightweight + Lighthouse) for:', normalizedUrl);
       
       // Use enhanced tech analysis combining lightweight and Lighthouse
       const { getEnhancedTechAnalysis } = await import('./lib/enhanced-tech-analysis');
-      const technicalAnalysis = await getEnhancedTechAnalysis(url);
+      const technicalAnalysis = await getEnhancedTechAnalysis(normalizedUrl);
       
       res.json(technicalAnalysis);
     } catch (error) {
@@ -246,29 +263,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'URL is required in request body' });
       }
 
+      const normalizedUrl = normalizeUrl(url);
+      
       // Validate URL format
       try {
-        new URL(url);
+        new URL(normalizedUrl);
       } catch {
         return res.status(400).json({ error: 'Invalid URL format' });
       }
 
       // Generate cache key for colors
-      const colorsCacheKey = `colors_${generateUrlHash(url)}`;
+      const colorsCacheKey = `colors_${generateUrlHash(normalizedUrl)}`;
       
       // Check cache first
       const cachedColors = await SupabaseCacheService.get(colorsCacheKey);
       if (cachedColors) {
-        console.log(`🎨 Color cache hit for: ${url}`);
+        console.log(`🎨 Color cache hit for: ${normalizedUrl}`);
         return res.json(cachedColors.analysis_data);
       }
 
-      console.log(`🎨 Extracting colors for: ${url}`);
+      console.log(`🎨 Extracting colors for: ${normalizedUrl}`);
       const extractStartTime = Date.now();
       
       // Use original color extraction
       const { extractColors } = await import('./lib/color-extraction');
-      const colors = await extractColors(url);
+      const colors = await extractColors(normalizedUrl);
       
       // Format as expected by frontend
       const colorAnalysis = { colors };
@@ -277,8 +296,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Extracted ${colorAnalysis.colors.length} unique colors`);
       
       // Cache the results
-      await SupabaseCacheService.set(colorsCacheKey, url, colorAnalysis);
-      console.log(`✅ Cached color data for ${url}`);
+      await SupabaseCacheService.set(colorsCacheKey, normalizedUrl, colorAnalysis);
+      console.log(`✅ Cached color data for ${normalizedUrl}`);
       
       res.json(colorAnalysis);
       
@@ -307,36 +326,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'URL is required in request body' });
       }
 
+      const normalizedUrl = normalizeUrl(url);
+      
       // Validate URL format
       try {
-        new URL(url);
+        new URL(normalizedUrl);
       } catch {
         return res.status(400).json({ error: 'Invalid URL format' });
       }
 
       // Generate cache key for fonts
-      const fontsCacheKey = `fonts_${generateUrlHash(url)}`;
+      const fontsCacheKey = `fonts_${generateUrlHash(normalizedUrl)}`;
       
       // Check cache first
       const cachedFonts = await SupabaseCacheService.get(fontsCacheKey);
       if (cachedFonts) {
-        console.log(`🔤 Font cache hit for: ${url}`);
+        console.log(`🔤 Font cache hit for: ${normalizedUrl}`);
         return res.json(cachedFonts.analysis_data);
       }
 
-      console.log(`🔤 Extracting fonts for: ${url}`);
+      console.log(`🔤 Extracting fonts for: ${normalizedUrl}`);
       const extractStartTime = Date.now();
       
       // Extract fonts using the scrapePageData function
-      const scrapedData = await scrapePageData(url);
+      const scrapedData = await scrapePageData(normalizedUrl);
       const fonts = scrapedData.fonts;
       
       logTiming('Font extraction', extractStartTime);
       console.log(`Extracted ${fonts.length} fonts`);
       
       // Cache the results
-      await SupabaseCacheService.set(fontsCacheKey, url, fonts);
-      console.log(`✅ Cached font data for ${url}`);
+      await SupabaseCacheService.set(fontsCacheKey, normalizedUrl, fonts);
+      console.log(`✅ Cached font data for ${normalizedUrl}`);
       
       res.json(fonts);
       
@@ -365,9 +386,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'URL is required in request body' });
       }
 
-      console.log('📄 Extracting content data for:', url);
+      const normalizedUrl = normalizeUrl(url);
+      console.log('📄 Extracting content data for:', normalizedUrl);
       
-      const scrapedData = await scrapePageData(url);
+      const scrapedData = await scrapePageData(normalizedUrl);
       const contentData = buildContentData(scrapedData);
       
       console.log(`✅ Content data extracted: ${contentData.wordCount} words, readability score ${contentData.readabilityScore}`);
@@ -388,9 +410,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'URL parameter is required' });
       }
 
-      console.log(`🔍 Extracting UI data for: ${url}`);
+      const normalizedUrl = normalizeUrl(url);
+      console.log(`🔍 Extracting UI data for: ${normalizedUrl}`);
       
-      const scrapedData = await scrapePageData(url);
+      const scrapedData = await scrapePageData(normalizedUrl);
       const uiData = buildUIData(scrapedData);
       
       console.log(`✅ UI data extracted: ${uiData.fonts.length} fonts, ${uiData.images.length} images, ${uiData.contrastIssues.length} contrast issues`);
@@ -411,17 +434,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'URL parameter is required' });
       }
 
-      console.log('📊 Aggregating overview data for:', url);
+      const normalizedUrl = normalizeUrl(url);
+      console.log('📊 Aggregating overview data for:', normalizedUrl);
       
       // Call all specialized endpoints and handle failures gracefully
       const results = await Promise.allSettled([
         // SEO data
-        extractSEOData(url).catch(error => {
+        extractSEOData(normalizedUrl).catch(error => {
           console.warn('⚠️  SEO analysis missing for overview:', error.message);
           return null;
         }),
         // Tech data  
-        getEnhancedTechAnalysis(url).catch(error => {
+        getEnhancedTechAnalysis(normalizedUrl).catch(error => {
           console.warn('⚠️  Tech analysis missing for overview:', error.message);
           return null;
         }),
@@ -429,8 +453,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         (async () => {
           try {
             const [pageLoadTimeData, lighthousePerformance] = await Promise.all([
-              getLighthousePageLoadTime(url),
-              getLighthousePerformance(url)
+              getLighthousePageLoadTime(normalizedUrl),
+              getLighthousePerformance(normalizedUrl)
             ]);
             return {
               pageLoadTime: pageLoadTimeData,
@@ -446,12 +470,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         })(),
         // UI data
-        scrapePageData(url).then(data => buildUIData(data)).catch(error => {
+        scrapePageData(normalizedUrl).then(data => buildUIData(data)).catch(error => {
           console.warn('⚠️  UI analysis missing for overview:', error.message);
           return null;
         }),
         // Content data
-        scrapePageData(url).then(data => buildContentData(data)).catch(error => {
+        scrapePageData(normalizedUrl).then(data => buildContentData(data)).catch(error => {
           console.warn('⚠️  Content analysis missing for overview:', error.message);
           return null;
         })
@@ -594,7 +618,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Format response to maintain backward compatibility
       const analysisResult = {
         id: crypto.randomUUID(),
-        url,
+        url: normalizedUrl,
         timestamp: new Date().toISOString(),
         status: 'complete',
         coreWebVitals: {
@@ -639,28 +663,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'URL parameter is required' });
       }
 
-      console.log(`🔄 Forwarding to main analysis for: ${url}`);
+      const normalizedUrl = normalizeUrl(url);
+      console.log(`🔄 Forwarding to main analysis for: ${normalizedUrl}`);
       const totalStartTime = Date.now();
       
       const [response, lighthousePerformance] = await Promise.all([
-        fetch(url, {
+        fetch(normalizedUrl, {
           headers: {
             'User-Agent': 'Mozilla/5.0 (compatible; WebsiteAnalyzer/1.0)',
           },
         }),
-        getLighthousePerformance(url)
+        getLighthousePerformance(normalizedUrl)
       ]);
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch ${url}: ${response.status}`);
+        throw new Error(`Failed to fetch ${normalizedUrl}: ${response.status}`);
       }
 
       const html = await response.text();
-      const localData = await performLocalAnalysis(url, html, response);
+      const localData = await performLocalAnalysis(normalizedUrl, html, response);
 
       const analysisResult = {
         id: crypto.randomUUID(),
-        url,
+        url: normalizedUrl,
         timestamp: new Date().toISOString(),
         status: 'complete',
         coreWebVitals: {
@@ -757,11 +782,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'URL is required in request body' });
       }
 
-      console.log(`📄 Starting enhanced content analysis for: ${url}`);
+      const normalizedUrl = normalizeUrl(url);
+      console.log(`📄 Starting enhanced content analysis for: ${normalizedUrl}`);
       const startTime = Date.now();
       
       // Perform comprehensive page scraping with content analysis
-      const scrapedData = await scrapePageData(url);
+      const scrapedData = await scrapePageData(normalizedUrl);
       
       logTiming('Enhanced content analysis', startTime);
       
