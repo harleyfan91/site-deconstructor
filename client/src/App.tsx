@@ -17,7 +17,7 @@ const App = () => {
   const theme = createAppTheme(darkMode);
 
   return (
-    <ThemeProvider theme={theme} data-replit-metadata="" data-component-name="">
+    <ThemeProvider theme={theme}>
       <CssBaseline />
       <AnalysisProvider>
         <Router>
