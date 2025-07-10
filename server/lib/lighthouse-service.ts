@@ -34,6 +34,10 @@ export interface LighthousePerformanceData {
     interactionToNextPaint: any;
   };
   opportunities: any[];
+  pageLoadTime?: {
+    desktop: number;
+    mobile: number;
+  };
 }
 
 export interface LighthouseBestPracticesData {
@@ -58,10 +62,10 @@ export interface LighthouseBestPracticesData {
   };
 }
 
-async function runLighthouse(url: string, categories: string[]): Promise<any> {
+async function runLighthouse(url: string, categories: string[], device: 'desktop' | 'mobile' = 'desktop'): Promise<any> {
   let chrome: any = null;
   try {
-    console.log(`🔍 Running Lighthouse analysis for ${url} (categories: ${categories.join(', ')})`);
+    console.log(`🔍 Running Lighthouse analysis for ${url} (categories: ${categories.join(', ')}, device: ${device})`);
     
     chrome = await launch({
       chromeFlags: [
@@ -73,23 +77,32 @@ async function runLighthouse(url: string, categories: string[]): Promise<any> {
       ]
     });
 
-    const result = await lighthouse(url, {
+    const config = {
       port: chrome.port,
       output: 'json',
       onlyCategories: categories,
-      // Remove unsupported flags
       throttlingMethod: 'simulate',
-      throttling: {
+      throttling: device === 'mobile' ? {
+        rttMs: 150,
+        throughputKbps: 1.6 * 1024,
+        cpuSlowdownMultiplier: 4,
+        requestLatencyMs: 0,
+        downloadThroughputKbps: 0,
+        uploadThroughputKbps: 0
+      } : {
         rttMs: 40,
         throughputKbps: 10 * 1024,
         cpuSlowdownMultiplier: 1,
         requestLatencyMs: 0,
         downloadThroughputKbps: 0,
         uploadThroughputKbps: 0
-      }
-    } as any);
+      },
+      emulatedFormFactor: device
+    } as any;
 
-    console.log(`✅ Lighthouse analysis completed for ${url}`);
+    const result = await lighthouse(url, config);
+
+    console.log(`✅ Lighthouse analysis completed for ${url} (${device})`);
     return result?.lhr;
   } catch (error) {
     console.error('Lighthouse analysis failed:', error);
@@ -232,6 +245,47 @@ export async function getLighthouseBestPractices(url: string): Promise<Lighthous
     return bestPracticesData;
   } catch (error) {
     console.error('Lighthouse Best Practices analysis error:', error);
+    throw error;
+  }
+}
+
+export async function getLighthousePageLoadTime(url: string): Promise<{ desktop: number; mobile: number }> {
+  try {
+    const urlHash = crypto.createHash('sha256').update(url).digest('hex');
+    const cacheKey = `lighthouse_pageload_${urlHash}`;
+
+    // Try cache first
+    const cached = await SupabaseCacheService.get(cacheKey);
+    if (cached) {
+      console.log('📦 Lighthouse Page Load Time cache hit');
+      return cached.analysis_data;
+    }
+
+    console.log('🔍 Performing fresh Lighthouse Page Load Time analysis (desktop & mobile)...');
+    
+    // Run analyses sequentially to avoid concurrency issues
+    console.log('🔍 Running desktop performance analysis...');
+    const desktopLhr = await runLighthouse(url, ['performance'], 'desktop');
+    
+    console.log('🔍 Running mobile performance analysis...');
+    const mobileLhr = await runLighthouse(url, ['performance'], 'mobile');
+    
+    // Extract Time to Interactive (TTI) as page load time metric
+    const desktopPageLoadTime = Math.round(desktopLhr.audits['interactive']?.numericValue || 3000);
+    const mobilePageLoadTime = Math.round(mobileLhr.audits['interactive']?.numericValue || 4000);
+    
+    const pageLoadTimeData = {
+      desktop: desktopPageLoadTime,
+      mobile: mobilePageLoadTime
+    };
+
+    // Cache the results
+    await SupabaseCacheService.set(cacheKey, url, pageLoadTimeData);
+    
+    console.log(`✅ Page Load Time: Desktop ${desktopPageLoadTime}ms, Mobile ${mobilePageLoadTime}ms`);
+    return pageLoadTimeData;
+  } catch (error) {
+    console.error('Lighthouse Page Load Time analysis error:', error);
     throw error;
   }
 }

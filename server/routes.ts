@@ -8,7 +8,7 @@ import * as crypto from 'crypto';
 import { scrapePageData } from './lib/page-scraper';
 import { extractSEOData, type SEOData } from './lib/seo-extractor';
 import { getTechnicalAnalysis, type TechnicalAnalysis } from './lib/tech-extractor';
-import { getLighthouseSEO, getLighthousePerformance, getLighthouseBestPractices } from './lib/lighthouse-service';
+import { getLighthouseSEO, getLighthousePerformance, getLighthouseBestPractices, getLighthousePageLoadTime } from './lib/lighthouse-service';
 import { getAccessibilityAnalysis } from './lib/axe-integration';
 import { getEnhancedTechAnalysis } from './lib/enhanced-tech-analysis';
 
@@ -22,30 +22,49 @@ function mapScoreToGrade(score: number): string {
 }
 
 // Helper function to build UI data with real extracted data
-function buildUIData(localData: any) {
-  return {
-    fonts: localData.extractedFonts || [],
-    images: localData.imageElements?.map((img: any) => ({
-      type: img.type,
-      count: 1,
-      format: img.type,
-      url: img.url,
-      alt: ''
-    })) || [],
-    imageAnalysis: {
-      totalImages: (() => {
-        const photos = localData.imageElements?.filter((img: any) => img.isPhoto).length || Math.floor(localData.extractedImageUrls.length * 0.6);
-        const icons = localData.imageElements?.filter((img: any) => img.isIcon).length || Math.floor(localData.extractedImageUrls.length * 0.4);
-        return photos + icons;
-      })(),
-      estimatedPhotos: localData.imageElements?.filter((img: any) => img.isPhoto).length || Math.floor(localData.extractedImageUrls.length * 0.6),
-      estimatedIcons: localData.imageElements?.filter((img: any) => img.isIcon).length || Math.floor(localData.extractedImageUrls.length * 0.4),
-      imageUrls: localData.extractedImageUrls,
-      photoUrls: localData.imageElements?.filter((img: any) => img.isPhoto).map((img: any) => img.url) || localData.extractedImageUrls.filter((_, index) => index % 2 === 0),
-      iconUrls: localData.imageElements?.filter((img: any) => img.isIcon).map((img: any) => img.url) || localData.extractedImageUrls.filter((_, index) => index % 2 === 1)
-    },
-    contrastIssues: [] // Will be enhanced later with real contrast analysis
-  };
+function buildUIData(scrapedData: any) {
+  try {
+    // Adapt to the actual scraping data structure
+    const fonts = Array.isArray(scrapedData?.fonts) ? scrapedData.fonts : [];
+    const images = Array.isArray(scrapedData?.images) ? scrapedData.images : [];
+    const imageUrls = images.length > 0 ? images.map((img: any) => img?.url || img || '') : [];
+    
+    return {
+      fonts: fonts,
+      images: images.map((img: any) => ({
+        type: img?.type || 'unknown',
+        count: 1,
+        format: img?.type || 'unknown',
+        url: img?.url || img || '',
+        alt: img?.alt || ''
+      })),
+      imageAnalysis: {
+        totalImages: images.length,
+        estimatedPhotos: images.filter((img: any) => img?.isPhoto).length || Math.floor(images.length * 0.6),
+        estimatedIcons: images.filter((img: any) => img?.isIcon).length || Math.floor(images.length * 0.4),
+        imageUrls: imageUrls,
+        photoUrls: images.filter((img: any) => img?.isPhoto).map((img: any) => img?.url || img || '') || [],
+        iconUrls: images.filter((img: any) => img?.isIcon).map((img: any) => img?.url || img || '') || []
+      },
+      contrastIssues: Array.isArray(scrapedData?.contrastIssues) ? scrapedData.contrastIssues : []
+    };
+  } catch (error) {
+    console.error('buildUIData error:', error);
+    // Return safe fallback data
+    return {
+      fonts: [],
+      images: [],
+      imageAnalysis: {
+        totalImages: 0,
+        estimatedPhotos: 0,
+        estimatedIcons: 0,
+        imageUrls: [],
+        photoUrls: [],
+        iconUrls: []
+      },
+      contrastIssues: []
+    };
+  }
 }
 
 function buildContentData(scrapedData?: any) {
@@ -271,6 +290,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     await SupabaseCacheService.cleanupExpired();
   }, 6 * 60 * 60 * 1000); // 6 hours
   
+  // Performance analysis endpoint with Lighthouse page load times
+  app.get('/api/performance', async (req, res) => {
+    try {
+      const { url } = req.query;
+      
+      if (!url || typeof url !== 'string') {
+        return res.status(400).json({ error: 'URL parameter is required' });
+      }
+
+      console.log('⚡ Getting performance data for:', url);
+      
+      // Get page load times from Lighthouse (both desktop and mobile)
+      const pageLoadTimeData = await getLighthousePageLoadTime(url);
+      
+      // Get Core Web Vitals from existing PSI endpoint for compatibility
+      const psiOverview = await fetchPageSpeedOverview(url);
+      
+      const performanceData = {
+        coreWebVitals: {
+          lcp: psiOverview.coreWebVitals.lcpMs,
+          fid: psiOverview.coreWebVitals.inpMs,
+          cls: psiOverview.coreWebVitals.cls
+        },
+        pageLoadTime: pageLoadTimeData
+      };
+      
+      console.log(`✅ Performance data: PLT Desktop ${pageLoadTimeData.desktop}ms, Mobile ${pageLoadTimeData.mobile}ms`);
+      res.json(performanceData);
+      
+    } catch (error) {
+      console.error('Performance analysis error:', error);
+      res.status(500).json({ error: 'Failed to analyze website performance' });
+    }
+  });
+
   // Tech analysis endpoint - Enhanced with Lighthouse Best Practices
   app.post('/api/tech', async (req, res) => {
     try {
@@ -412,8 +466,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Full UI data extraction API route
-  app.post('/api/ui-data', async (req, res) => {
+  // Content analysis endpoint
+  app.post('/api/content', async (req, res) => {
     try {
       const { url } = req.body;
       
@@ -421,211 +475,132 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'URL is required in request body' });
       }
 
-      // Validate URL format
-      try {
-        new URL(url);
-      } catch {
-        return res.status(400).json({ error: 'Invalid URL format' });
+      console.log('📄 Extracting content data for:', url);
+      
+      const scrapedData = await scrapePageData(url);
+      const contentData = buildContentData(scrapedData);
+      
+      console.log(`✅ Content data extracted: ${contentData.wordCount} words, readability score ${contentData.readabilityScore}`);
+      res.json(contentData);
+      
+    } catch (error) {
+      console.error('Content analysis failed:', error);
+      res.status(500).json({ error: 'Content analysis failed' });
+    }
+  });
+
+  // UI data extraction API route  
+  app.get('/api/ui', async (req, res) => {
+    try {
+      const { url } = req.query;
+      
+      if (!url || typeof url !== 'string') {
+        return res.status(400).json({ error: 'URL parameter is required' });
       }
 
       console.log(`🔍 Extracting UI data for: ${url}`);
       
-      // For now, return empty data until scraping is fixed
-      const scrapedData: {
-        fonts: any[];
-        images: Array<{
-          type: string;
-          url: string;
-          alt: string;
-          isPhoto: boolean;
-          isIcon: boolean;
-        }>;
-        contrastIssues: any[];
-      } = { fonts: [], images: [], contrastIssues: [] };
-      
-      // Format the data to match the expected structure
-      const uiData = {
-        fonts: scrapedData.fonts,
-        images: scrapedData.images.map(img => ({
-          type: img.type,
-          count: 1,
-          format: img.type,
-          url: img.url,
-          alt: img.alt
-        })),
-        imageAnalysis: {
-          totalImages: scrapedData.images.length,
-          estimatedPhotos: scrapedData.images.filter(img => img.isPhoto).length,
-          estimatedIcons: scrapedData.images.filter(img => img.isIcon).length,
-          imageUrls: scrapedData.images.map(img => img.url),
-          photoUrls: scrapedData.images.filter(img => img.isPhoto).map(img => img.url),
-          iconUrls: scrapedData.images.filter(img => img.isIcon).map(img => img.url)
-        },
-        contrastIssues: scrapedData.contrastIssues
-      };
+      const scrapedData = await scrapePageData(url);
+      const uiData = buildUIData(scrapedData);
       
       console.log(`✅ UI data extracted: ${uiData.fonts.length} fonts, ${uiData.images.length} images, ${uiData.contrastIssues.length} contrast issues`);
       res.json(uiData);
       
     } catch (error) {
       console.error('UI data extraction failed:', error);
-      
-      if (error instanceof Error) {
-        if (error.message.includes('timeout') || error.message.includes('TimeoutError')) {
-          return res.status(504).json({ error: 'Request timeout while extracting UI data' });
-        }
-        if (error.message.includes('net::ERR_') || error.message.includes('Navigation failed')) {
-          return res.status(400).json({ error: 'Unable to access the provided URL' });
-        }
-      }
-      
       res.status(500).json({ error: 'UI data extraction failed' });
     }
   });
 
-  // Helper function to perform local HTML analysis
-  async function performLocalAnalysis(url: string, html: string, response: Response) {
-    const startTime = Date.now();
-    
-    // Extract image URLs from HTML
-    const extractedImageUrls = extractImageUrls(html);
-    
-    // Basic mobile responsiveness check
-    const hasViewportMeta = html.includes('viewport');
-    const hasResponsiveCSS = html.includes('max-width') || html.includes('min-width');
-    const mobileScore = (hasViewportMeta ? 50 : 0) + (hasResponsiveCSS ? 50 : 0);
-    
-    const mobileIssues: { id: string; title: string; description: string }[] = [];
-    if (!hasViewportMeta) {
-      mobileIssues.push({
-        id: 'viewport-meta',
-        title: 'Missing Viewport Meta Tag',
-        description: 'Page does not have a viewport meta tag for mobile optimization'
-      });
-    }
-    if (!hasResponsiveCSS) {
-      mobileIssues.push({
-        id: 'responsive-css',
-        title: 'No Responsive CSS Detected',
-        description: 'Page may not have responsive CSS rules'
-      });
-    }
-
-    // Basic security checks
-    const hasHTTPS = url.startsWith('https://');
-    const securityScore = hasHTTPS ? 80 : 40;
-    
-    const securityFindings: { id: string; title: string; description: string }[] = [];
-    if (!hasHTTPS) {
-      securityFindings.push({
-        id: 'no-https',
-        title: 'No HTTPS',
-        description: 'Website is not using HTTPS encryption'
-      });
-    }
-
-    // Basic accessibility checks
-    const hasAltTags = html.includes('alt=');
-    const accessibilityViolations: { id: string; impact: string; description: string }[] = [];
-    if (!hasAltTags) {
-      accessibilityViolations.push({
-        id: 'images-alt',
-        impact: 'serious',
-        description: 'Images may be missing alt attributes'
-      });
-    }
-
-    // Header checks
-    const headerChecks = {
-      hsts: response.headers.get('strict-transport-security') || 'missing',
-      csp: response.headers.get('content-security-policy') || 'missing',
-      frameOptions: response.headers.get('x-frame-options') || 'missing'
-    };
-
-    // Calculate scores
-    const overallScore = Math.round((mobileScore + securityScore + (hasAltTags ? 80 : 60)) / 3);
-    const seoScore = hasViewportMeta && hasAltTags ? 85 : 65;
-    const userExperienceScore = mobileScore;
-
-    // Basic tech stack detection for quick analysis (comprehensive analysis available via /api/tech)
-    const techStack: { category: string; technology: string }[] = [];
+  // Overview aggregator endpoint - fetches data from specialized routes
+  app.get('/api/overview', async (req, res) => {
     try {
-      if (html.includes('react')) techStack.push({ category: 'JavaScript Frameworks', technology: 'React' });
-      if (html.includes('vue')) techStack.push({ category: 'JavaScript Frameworks', technology: 'Vue.js' });
-      if (html.includes('angular')) techStack.push({ category: 'JavaScript Frameworks', technology: 'Angular' });
-      if (html.includes('bootstrap')) techStack.push({ category: 'CSS Frameworks', technology: 'Bootstrap' });
-      if (html.includes('tailwind')) techStack.push({ category: 'CSS Frameworks', technology: 'Tailwind CSS' });
-      if (html.includes('jquery')) techStack.push({ category: 'JavaScript Libraries', technology: 'jQuery' });
-      if (hasHTTPS) techStack.push({ category: 'Security', technology: 'HTTPS' });
+      const { url } = req.query;
       
-      techStack.push({ category: 'Markup Languages', technology: 'HTML5' });
-      
-      const server = response.headers.get('server');
-      if (server) {
-        if (server.toLowerCase().includes('nginx')) techStack.push({ category: 'Web Servers', technology: 'Nginx' });
-        if (server.toLowerCase().includes('apache')) techStack.push({ category: 'Web Servers', technology: 'Apache' });
-        if (server.toLowerCase().includes('cloudflare')) techStack.push({ category: 'CDN', technology: 'Cloudflare' });
+      if (!url || typeof url !== 'string') {
+        return res.status(400).json({ error: 'URL parameter is required' });
       }
-    } catch (e) {
-      console.warn('Tech stack detection error:', e);
-      techStack.push({ category: 'Markup Languages', technology: 'HTML5' });
-    }
 
-    // Basic minification detection as fallback (comprehensive analysis available via /api/tech)
-    const minification = {
-      cssMinified: /<style[^>]*>[^<]*{[^}]*}[^<]*<\/style>/i.test(html.replace(/\s+/g, '')),
-      jsMinified: /<script[^>]*>[^<]*\w+\([^)]*\)[^<]*<\/script>/i.test(html.replace(/\s+/g, '')),
-      htmlMinified: !/>\s+</.test(html)
-    };
-
-    // Font extraction is handled by the dedicated /api/fonts endpoint
-    // which uses Playwright for real font detection. We don't generate
-    // fallback font data here to avoid showing incorrect information.
-    const extractedFonts: any[] = [];
-
-    // Enhanced image analysis
-    const imageElements = extractedImageUrls.map(url => {
-      const isIcon = url.toLowerCase().includes('icon') || 
-                     url.toLowerCase().includes('logo') || 
-                     url.toLowerCase().includes('.svg') ||
-                     url.includes('32x32') || url.includes('16x16');
+      console.log('📊 Aggregating overview data for:', url);
       
-      let type = 'unknown';
-      if (url.includes('.jpg') || url.includes('.jpeg')) type = 'JPEG';
-      else if (url.includes('.png')) type = 'PNG';
-      else if (url.includes('.gif')) type = 'GIF';
-      else if (url.includes('.webp')) type = 'WEBP';
-      else if (url.includes('.svg')) type = 'SVG';
+      // Call all specialized endpoints and handle failures gracefully
+      const results = await Promise.allSettled([
+        // SEO data
+        extractSEOData(url).catch(error => {
+          console.warn('⚠️  SEO analysis missing for overview:', error.message);
+          return null;
+        }),
+        // Tech data  
+        getEnhancedTechAnalysis(url).catch(error => {
+          console.warn('⚠️  Tech analysis missing for overview:', error.message);
+          return null;
+        }),
+        // Performance data (Core Web Vitals + Page Load Time)
+        (async () => {
+          try {
+            const [pageLoadTimeData, psiOverview] = await Promise.all([
+              getLighthousePageLoadTime(url),
+              fetchPageSpeedOverview(url)
+            ]);
+            return {
+              pageLoadTime: pageLoadTimeData,
+              coreWebVitals: psiOverview.coreWebVitals
+            };
+          } catch (error) {
+            console.warn('⚠️  Performance analysis missing for overview:', error.message);
+            return null;
+          }
+        })(),
+        // UI data
+        scrapePageData(url).then(data => buildUIData(data)).catch(error => {
+          console.warn('⚠️  UI analysis missing for overview:', error.message);
+          return null;
+        }),
+        // Content data
+        scrapePageData(url).then(data => buildContentData(data)).catch(error => {
+          console.warn('⚠️  Content analysis missing for overview:', error.message);
+          return null;
+        })
+      ]);
       
-      return {
-        url,
-        type,
-        isIcon,
-        isPhoto: !isIcon
+      const [seoResult, techResult, performanceResult, uiResult, contentResult] = results;
+      
+      // Extract data from results, using "!" for missing data
+      const seoData = seoResult.status === 'fulfilled' ? seoResult.value : null;
+      const techData = techResult.status === 'fulfilled' ? techResult.value : null;
+      const performanceData = performanceResult.status === 'fulfilled' ? performanceResult.value : null;
+      const uiData = uiResult.status === 'fulfilled' ? uiResult.value : null;
+      const contentData = contentResult.status === 'fulfilled' ? contentResult.value : null;
+      
+      // Build overview response with "!" for permanently missing data
+      const overviewData = {
+        overview: {
+          overallScore: seoData?.score || "!",
+          seoScore: seoData?.score || "!",
+          pageLoadTime: performanceData?.pageLoadTime?.desktop || "!",
+          coreWebVitals: performanceData?.coreWebVitals || { lcp: "!", fid: "!", cls: "!" },
+          userExperienceScore: "!" // No reliable source for this metric
+        },
+        seo: seoData || { score: "!", checks: [] },
+        tech: techData || { techStack: [{ category: "Unknown", technology: "!" }] },
+        performance: {
+          coreWebVitals: performanceData?.coreWebVitals || { lcp: "!", fid: "!", cls: "!" },
+          pageLoadTime: performanceData?.pageLoadTime || { desktop: "!", mobile: "!" }
+        },
+        ui: uiData || { fonts: [], images: [], imageAnalysis: { totalImages: "!" } },
+        content: contentData || { wordCount: "!", readabilityScore: "!" }
       };
-    });
+      
+      console.log('✅ Overview aggregation completed');
+      res.json(overviewData);
+      
+    } catch (error) {
+      console.error('Overview aggregation error:', error);
+      res.status(500).json({ error: 'Failed to aggregate overview data' });
+    }
+  });
 
-    logTiming('Local HTML analysis', startTime);
-    
-    return {
-      extractedImageUrls,
-      extractedFonts,
-      imageElements,
-      mobileScore,
-      mobileIssues,
-      securityScore,
-      securityFindings,
-      accessibilityViolations,
-      headerChecks,
-      overallScore,
-      seoScore,
-      userExperienceScore,
-      techStack,
-      minification,
-      html,
-      hasAltTags
-    };
-  }
+  // Deleted: performLocalAnalysis function removed as part of quick analysis deprecation
 
   // Main analysis endpoint - optimized for faster response
   app.get('/api/analyze/full', async (req, res) => {
@@ -660,107 +635,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const html = await response.text();
       logTiming('HTML fetch (immediate)', htmlStartTime);
       
-      // Perform local analysis immediately
-      const localData = await performLocalAnalysis(url, html, response);
+      // Simplified full analysis - use aggregated data from specialized endpoints
 
-      // Create initial analysis response with local data only
-      const immediateAnalysisResult = {
-        id: crypto.randomUUID(),
-        url,
-        timestamp: new Date().toISOString(),
-        status: 'analyzing', // Indicates PSI data is still loading
-        securityHeaders: {
-          csp: response.headers.get('content-security-policy') || '',
-          hsts: response.headers.get('strict-transport-security') || '',
-          xfo: response.headers.get('x-frame-options') || '',
-          xcto: response.headers.get('x-content-type-options') || '',
-          referrer: response.headers.get('referrer-policy') || ''
-        },
-        performanceScore: localData.overallScore,
-        seoScore: localData.seoScore,
-        readabilityScore: 75,
-        complianceStatus: localData.overallScore >= 80 ? 'pass' : localData.overallScore >= 60 ? 'warn' : 'fail',
-        mobileResponsiveness: {
-          score: localData.mobileScore,
-          issues: localData.mobileIssues
-        },
-        securityScore: {
-          grade: mapScoreToGrade(localData.securityScore),
-          findings: localData.securityFindings
-        },
-        accessibility: {
-          violations: localData.accessibilityViolations
-        },
-        headerChecks: localData.headerChecks,
-        data: {
-          overview: {
-            overallScore: localData.overallScore,
-            seoScore: localData.seoScore,
-            userExperienceScore: localData.userExperienceScore
-            // pageLoadTime and coreWebVitals will be undefined initially
-          },
-          ui: buildUIData(localData),
-          performance: {
-            performanceScore: localData.overallScore,
-            mobileResponsive: localData.mobileScore >= 50,
-            recommendations: localData.mobileIssues.map(issue => ({
-              type: 'warning' as const,
-              title: issue.title,
-              description: issue.description
-            }))
-          },
-          content: buildContentData(),
-          technical: {
-            techStack: localData.techStack,
-            healthGrade: mapScoreToGrade(localData.overallScore),
-            issues: localData.securityFindings.concat(localData.mobileIssues).map(issue => ({
-              type: 'security',
-              description: issue.description,
-              severity: 'medium' as const,
-              status: 'open'
-            })),
-            securityScore: localData.securityScore,
-            accessibility: {
-              violations: localData.accessibilityViolations
-            }
-          }
-        }
-      };
-
-      // Check if client wants immediate response (new query parameter)
-      const wantImmediate = req.query.immediate === 'true';
-      if (wantImmediate) {
-        logTiming('🔍 Immediate local analysis', totalStartTime);
-        return res.json(immediateAnalysisResult);
-      }
-
-      // Continue with PSI for full analysis
-      const psiStartTime = Date.now();
-      const seoStartTime = Date.now();
+      // Use the new aggregated approach via /api/overview
+      console.log('🔄 Redirecting to aggregated overview endpoint');
       
-      const [psiOverview, seoData] = await Promise.all([
-        fetchPageSpeedOverview(url),
-        extractSEOData(url).catch(error => {
-          console.warn('SEO extraction failed:', error);
-          return null;
-        })
-      ]);
-
-      if (seoData) {
-        logTiming('SEO extraction (full)', seoStartTime);
-        console.log(`SEO analysis: Score ${seoData.score}, ${seoData.checks.length} checks`);
+      // Make internal call to overview aggregator
+      const overviewResponse = await fetch(`http://localhost:5000/api/overview?url=${encodeURIComponent(url)}`);
+      
+      if (!overviewResponse.ok) {
+        throw new Error('Overview aggregation failed');
       }
-
-      // Create full analysis response
+      
+      const overviewData = await overviewResponse.json();
+      
+      // Format response to maintain backward compatibility
       const analysisResult = {
         id: crypto.randomUUID(),
         url,
         timestamp: new Date().toISOString(),
         status: 'complete',
         coreWebVitals: {
-          lcp: psiOverview.coreWebVitals.lcpMs,
-          fid: psiOverview.coreWebVitals.inpMs,
-          cls: psiOverview.coreWebVitals.cls
+          lcp: overviewData.performance.coreWebVitals.lcp,
+          fid: overviewData.performance.coreWebVitals.fid,
+          cls: overviewData.performance.coreWebVitals.cls
         },
         securityHeaders: {
           csp: response.headers.get('content-security-policy') || '',
@@ -769,66 +667,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           xcto: response.headers.get('x-content-type-options') || '',
           referrer: response.headers.get('referrer-policy') || ''
         },
-        performanceScore: localData.overallScore,
-        seoScore: localData.seoScore,
-        readabilityScore: 75,
-        complianceStatus: localData.overallScore >= 80 ? 'pass' : localData.overallScore >= 60 ? 'warn' : 'fail',
-        mobileResponsiveness: {
-          score: localData.mobileScore,
-          issues: localData.mobileIssues
-        },
-        securityScore: {
-          grade: mapScoreToGrade(localData.securityScore),
-          findings: localData.securityFindings
-        },
-        accessibility: {
-          violations: localData.accessibilityViolations
-        },
-        headerChecks: localData.headerChecks,
-        data: {
-          overview: {
-            overallScore: localData.overallScore,
-            pageLoadTime: psiOverview.pageLoadTime,
-            coreWebVitals: psiOverview.coreWebVitals,
-            seoScore: localData.seoScore,
-            userExperienceScore: localData.userExperienceScore
-          },
-          ui: buildUIData(localData),
-          performance: {
-            coreWebVitals: [
-              { name: 'LCP', value: Number((psiOverview.coreWebVitals.lcpMs / 1000).toFixed(1)), benchmark: 2.5 },
-              { name: 'FID', value: psiOverview.coreWebVitals.inpMs, benchmark: 100 },
-              { name: 'CLS', value: psiOverview.coreWebVitals.cls, benchmark: 0.1 }
-            ],
-            performanceScore: localData.overallScore,
-            mobileResponsive: localData.mobileScore >= 50,
-            recommendations: localData.mobileIssues.map(issue => ({
-              type: 'warning' as const,
-              title: issue.title,
-              description: issue.description
-            }))
-          },
-          // SEO data excluded when null - use dedicated /api/seo endpoint
-          ...(seoData ? { seo: buildSEOData(seoData, undefined) } : {}),
-          content: buildContentData(), // Use fallback markers initially
-          technical: {
-            techStack: localData.techStack,
-            healthGrade: mapScoreToGrade(localData.overallScore),
-            issues: localData.securityFindings.concat(localData.mobileIssues).map(issue => ({
-              type: 'security',
-              description: issue.description,
-              severity: 'medium' as const,
-              status: 'open'
-            })),
-            securityScore: localData.securityScore,
-            accessibility: {
-              violations: localData.accessibilityViolations
-            }
-          }
-        }
+        performanceScore: overviewData.overview.overallScore,
+        seoScore: overviewData.overview.seoScore,
+        readabilityScore: overviewData.content.readabilityScore,
+        complianceStatus: overviewData.overview.overallScore >= 80 ? 'pass' : overviewData.overview.overallScore >= 60 ? 'warn' : 'fail',
+        data: overviewData
       };
 
-      logTiming('🔍 Total optimized analysis', totalStartTime);
+      logTiming('🔍 Total aggregated analysis', totalStartTime);
       res.json(analysisResult);
 
     } catch (error) {

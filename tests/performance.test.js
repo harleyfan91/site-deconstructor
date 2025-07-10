@@ -1,14 +1,14 @@
 /**
  * Performance regression test for analysis endpoints
- * Tests quick vs full analysis response times and data completeness
+ * Tests full analysis response times and data completeness
  */
 
-const fetch = require('node-fetch');
+// Using built-in fetch (Node.js 18+)
 
 // Test configuration
 const TEST_URL = 'https://example.com';
 const SERVER_BASE = process.env.TEST_SERVER_BASE || 'http://localhost:5000';
-const QUICK_TIMEOUT = 5000; // 5 seconds for quick analysis
+const QUICK_TIMEOUT = 5000; // 5 seconds for performance endpoints
 const FULL_TIMEOUT = 30000; // 30 seconds for full analysis
 
 // Network throttling simulation
@@ -107,9 +107,9 @@ describe('Analysis Performance Tests', () => {
     
     const startTime = Date.now();
     
-    // Fire multiple requests simultaneously
+    // Fire multiple requests simultaneously  
     const promises = testUrls.map(url =>
-      throttledFetch(`${SERVER_BASE}/api/analyze/quick?url=${encodeURIComponent(url)}`)
+      throttledFetch(`${SERVER_BASE}/api/analyze/full?url=${encodeURIComponent(url)}`)
     );
     
     const responses = await Promise.all(promises);

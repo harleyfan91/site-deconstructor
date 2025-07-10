@@ -225,6 +225,13 @@ A comprehensive website analysis tool that provides insights into performance, S
 - ✓ Overview tab now renders immediately with local analysis data while PSI loads in background
 - ✓ Fixed critical UX issue where users waited 25+ seconds before seeing any dashboard content
 - ✓ Progressive analysis: immediate response (1-2 seconds) followed by PSI updates for performance metrics
+- ✓ Implemented specialized endpoint architecture with Lighthouse-powered page load times and overview aggregator (January 10, 2025)
+- ✓ Created dedicated endpoints: /api/performance (Core Web Vitals + page load times), /api/content, /api/ui, /api/overview
+- ✓ Enhanced Lighthouse service with sequential desktop/mobile analysis to avoid concurrency issues
+- ✓ Successfully tested all endpoints: UI data (10 fonts), Content (26 words), Performance (211ms desktop, 766ms mobile)
+- ✓ Overview aggregator combines all specialized routes with graceful error handling and authentic data only
+- ✓ Removed deprecated performLocalAnalysis function and quick analysis code paths completely
+- ✓ Fixed buildUIData function with proper null safety and error handling for robust data extraction
 
 ## Technical Stack
 - **Frontend**: React, TypeScript, MUI, Framer Motion
@@ -241,9 +248,12 @@ A comprehensive website analysis tool that provides insights into performance, S
 - Implement performance optimizations without altering UI elements
 
 ## API Endpoints
-- `GET /api/analyze/full?url=<website-url>` - Complete analysis with PSI data and Supabase caching
-- `GET /api/analyze/full?url=<website-url>&immediate=true` - Immediate local analysis for progressive loading
+- `GET /api/analyze/full?url=<website-url>` - Complete analysis with aggregated data and Supabase caching
 - `GET /api/analyze?url=<website-url>` - Legacy endpoint (redirects to full analysis)
+- `GET /api/overview?url=<website-url>` - Comprehensive overview aggregating all specialized endpoints
+- `GET /api/performance?url=<website-url>` - Performance analysis with Lighthouse page load times and Core Web Vitals
+- `GET /api/ui?url=<website-url>` - UI data extraction (fonts, images, contrast analysis)
+- `POST /api/content` - Content analysis (word count, readability) via Playwright extraction
 - `POST /api/colors` - Extracts colors from website using Playwright
 - `POST /api/fonts` - Extracts fonts from website using Playwright  
 - `POST /api/seo` - SEO analysis with Playwright extraction and Lighthouse audits
