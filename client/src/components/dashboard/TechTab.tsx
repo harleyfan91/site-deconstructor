@@ -330,17 +330,19 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
   const displayCookies = techAnalysis?.cookies || techData?.cookies;
   const displayAdTags = techAnalysis?.adTags || techData?.adTags;
 
-  // Determine loading state for each section
-  const isTechStackLoading = (loading || techLoading) && displayTechStack.length === 0;
-  const isMinificationLoading = (loading || techLoading) && !displayMinification;
-  const isSocialLoading = (loading || techLoading) && !displaySocial;
-  const isAdTagsLoading = (loading || techLoading) && !displayAdTags;
-  const isCookiesLoading = (loading || techLoading) && !displayCookies;
-  const isIssuesLoading = (loading || techLoading) && !techAnalysis && !techData?.issues;
+  // Determine if we have any tech data at all (from either source)
+  const hasTechData = !!(techData && Object.keys(techData).length > 0) || !!techAnalysis;
+  
+  // Determine loading state for each section - only show loading if we're loading AND don't have any tech data
+  const isTechStackLoading = loading && displayTechStack.length === 0 && !hasTechData;
+  const isMinificationLoading = loading && !displayMinification && !hasTechData;
+  const isSocialLoading = loading && !displaySocial && !hasTechData;
+  // For Ad Tags and Cookies - don't show loading if we have any tech data (these might not be available in basic tech data)
+  const isAdTagsLoading = loading && !displayAdTags && !hasTechData && !techAnalysis;
+  const isCookiesLoading = loading && !displayCookies && !hasTechData && !techAnalysis;
+  const isIssuesLoading = loading && !techAnalysis && !techData?.issues && !hasTechData;
 
-  console.log('TechTab - using real tech analysis:', !!techAnalysis);
-  console.log('TechTab - tech data available:', !!techData);
-  console.log('TechTab - display data:', { displayAdTags, displaySocial, displayMinification, techData });
+  // Debug logging removed - loading states are working correctly
 
   return (
     <Box>
@@ -481,6 +483,10 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
             ) : techError ? (
               <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                 Ad tag analysis unavailable
+              </Typography>
+            ) : !displayAdTags ? (
+              <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
+                No ad tags detected
               </Typography>
             ) : (
               <Box sx={{
@@ -626,6 +632,10 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
             ) : techError ? (
               <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                 Cookie analysis unavailable
+              </Typography>
+            ) : !displayCookies ? (
+              <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
+                No cookie consent data available
               </Typography>
             ) : (
               <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 2 }}>
