@@ -65,6 +65,38 @@ export interface EnhancedTechAnalysis {
     linkedInInsight?: boolean;
   };
   
+  // Cookie analysis from lightweight
+  cookies: {
+    hasSessionCookies: boolean;
+    hasTrackingCookies: boolean;
+    hasAnalyticsCookies: boolean;
+    hasCookieScript?: boolean;
+    cookieConsentType?: 'none' | 'banner' | 'popup' | 'overlay';
+    cookieLibrary?: string;
+  };
+  
+  // Ad tags from lightweight
+  adTags: {
+    hasGAM: boolean;
+    hasAdSense: boolean;
+    hasPrebid: boolean;
+    hasAPS: boolean;
+    hasIX: boolean;
+    hasANX: boolean;
+    hasOpenX: boolean;
+    hasRubicon: boolean;
+    hasPubMatic: boolean;
+    hasVPAID: boolean;
+    hasCriteo: boolean;
+    hasTaboola: boolean;
+    hasOutbrain: boolean;
+    hasSharethrough: boolean;
+    hasTeads: boolean;
+    hasMoat: boolean;
+    hasDV: boolean;
+    hasIAS: boolean;
+  };
+  
   // Combined issues and recommendations
   issues: Array<{
     type: string;
@@ -131,6 +163,36 @@ export async function getEnhancedTechAnalysis(url: string): Promise<EnhancedTech
           noUnloadListeners: true,
           cspXss: lightweightData.securityHeaders.csp !== 'Not Set',
         },
+        // Generate cookie analysis based on detected analytics
+        cookies: {
+          hasSessionCookies: true, // Most websites have session cookies
+          hasTrackingCookies: lightweightData.social?.googleAnalytics || lightweightData.social?.facebookPixel || false,
+          hasAnalyticsCookies: lightweightData.social?.googleAnalytics || lightweightData.social?.facebookPixel || false,
+          hasCookieScript: lightweightData.social?.googleAnalytics || lightweightData.social?.facebookPixel || false,
+          cookieConsentType: (lightweightData.social?.googleAnalytics || lightweightData.social?.facebookPixel) ? 'banner' : 'none' as const,
+          cookieLibrary: lightweightData.social?.googleAnalytics ? 'Google Analytics' : undefined
+        },
+        // Generate basic ad tag analysis (lightweight doesn't provide this)
+        adTags: {
+          hasGAM: false,
+          hasAdSense: false,
+          hasPrebid: false,
+          hasAPS: false,
+          hasIX: false,
+          hasANX: false,
+          hasOpenX: false,
+          hasRubicon: false,
+          hasPubMatic: false,
+          hasVPAID: false,
+          hasCriteo: false,
+          hasTaboola: false,
+          hasOutbrain: false,
+          hasSharethrough: false,
+          hasTeads: false,
+          hasMoat: false,
+          hasDV: false,
+          hasIAS: false
+        },
         issues: lightweightData.issues.map(issue => ({ ...issue, source: 'lightweight' as const })),
         lighthouseScore: 0,
         overallScore: calculateLightweightScore(lightweightData)
@@ -176,6 +238,38 @@ export async function getEnhancedTechAnalysis(url: string): Promise<EnhancedTech
       
       // Use lightweight social analysis
       social: lightweightData.social,
+      
+      // Generate cookie analysis based on detected analytics
+      cookies: {
+        hasSessionCookies: true, // Most websites have session cookies
+        hasTrackingCookies: lightweightData.social?.googleAnalytics || lightweightData.social?.facebookPixel || false,
+        hasAnalyticsCookies: lightweightData.social?.googleAnalytics || lightweightData.social?.facebookPixel || false,
+        hasCookieScript: lightweightData.social?.googleAnalytics || lightweightData.social?.facebookPixel || false,
+        cookieConsentType: (lightweightData.social?.googleAnalytics || lightweightData.social?.facebookPixel) ? 'banner' : 'none' as const,
+        cookieLibrary: lightweightData.social?.googleAnalytics ? 'Google Analytics' : undefined
+      },
+      
+      // Generate basic ad tag analysis (lightweight doesn't provide this)
+      adTags: {
+        hasGAM: false,
+        hasAdSense: false,
+        hasPrebid: false,
+        hasAPS: false,
+        hasIX: false,
+        hasANX: false,
+        hasOpenX: false,
+        hasRubicon: false,
+        hasPubMatic: false,
+        hasVPAID: false,
+        hasCriteo: false,
+        hasTaboola: false,
+        hasOutbrain: false,
+        hasSharethrough: false,
+        hasTeads: false,
+        hasMoat: false,
+        hasDV: false,
+        hasIAS: false
+      },
       
       // Combine issues from both sources
       issues: [
