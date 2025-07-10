@@ -330,6 +330,14 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
   const displayCookies = techAnalysis?.cookies || techData?.cookies;
   const displayAdTags = techAnalysis?.adTags || techData?.adTags;
 
+  // Determine loading state for each section
+  const isTechStackLoading = (loading || techLoading) && displayTechStack.length === 0;
+  const isMinificationLoading = (loading || techLoading) && !displayMinification;
+  const isSocialLoading = (loading || techLoading) && !displaySocial;
+  const isAdTagsLoading = (loading || techLoading) && !displayAdTags;
+  const isCookiesLoading = (loading || techLoading) && !displayCookies;
+  const isIssuesLoading = (loading || techLoading) && !techAnalysis && !techData?.issues;
+
   console.log('TechTab - using real tech analysis:', !!techAnalysis);
   console.log('TechTab - tech data available:', !!techData);
   console.log('TechTab - display data:', { displayAdTags, displaySocial, displayMinification, techData });
@@ -358,7 +366,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                   Tech Stack
                 </Typography>
               </Box>
-              {techLoading ? (
+              {isTechStackLoading ? (
                 <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
                   <CircularProgress size={32} sx={{ mr: 2 }} />
                   <Typography variant="body2" color="text.secondary">
@@ -393,7 +401,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                   Minification Status
                 </Typography>
               </Box>
-              {techLoading ? (
+              {isMinificationLoading ? (
                 <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
                   <CircularProgress size={32} sx={{ mr: 2 }} />
                   <Typography variant="body2" color="text.secondary">
@@ -463,7 +471,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                 Detected Ad Tags
               </Typography>
             </Box>
-            {techLoading ? (
+            {isAdTagsLoading ? (
               <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
                 <CircularProgress size={32} sx={{ mr: 2 }} />
                 <Typography variant="body2" color="text.secondary">
@@ -527,7 +535,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                 Detected Social Tags
               </Typography>
             </Box>
-            {techLoading ? (
+            {isSocialLoading ? (
               <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
                 <CircularProgress size={32} sx={{ mr: 2 }} />
                 <Typography variant="body2" color="text.secondary">
@@ -608,7 +616,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                 Detected Cookie Banner & Consent Script
               </Typography>
             </Box>
-            {techLoading ? (
+            {isCookiesLoading ? (
               <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
                 <CircularProgress size={32} sx={{ mr: 2 }} />
                 <Typography variant="body2" color="text.secondary">
@@ -679,7 +687,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                   Technical Issues
                 </Typography>
               </Box>
-              {techLoading ? (
+              {isIssuesLoading ? (
                 <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
                   <CircularProgress size={32} sx={{ mr: 2 }} />
                   <Typography variant="body2" color="text.secondary">

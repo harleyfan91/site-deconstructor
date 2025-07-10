@@ -171,9 +171,9 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
                 </Typography>
               </Box>
             ) : contentTypes.length > 0 ? (
-              <Box sx={{ height: 300, width: '100%' }}>
+              <Box sx={{ height: 300, width: '100%', minHeight: 300, minWidth: 300 }}>
                 <ChartContainer config={chartConfig} className="h-full w-full">
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="100%" height={300} minHeight={300}>
                     <RechartsPieChart>
                       <Pie
                         data={contentTypes}
@@ -221,9 +221,9 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
                 </Typography>
               </Box>
             ) : (
-              <Box sx={{ height: 300, width: '100%' }}>
+              <Box sx={{ height: 300, width: '100%', minHeight: 300, minWidth: 300 }}>
                 <ChartContainer config={chartConfig} className="h-full w-full">
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="100%" height={300} minHeight={300}>
                     <BarChart data={contentStructureData} margin={{ top: 20, right: 20, left: 0, bottom: 5 }}>
                       <XAxis dataKey="metric" tick={<ContentCustomTick />} />
                       <YAxis domain={[0, 100]} />
