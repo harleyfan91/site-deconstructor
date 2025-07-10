@@ -323,14 +323,16 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
   // No tab-level loading - use section-level loading instead
 
   // Use comprehensive technical analysis data if available, fallback to basic data
-  const displayTechStack = techAnalysis?.techStack || data?.data?.technical?.techStack || [];
-  const displayMinification = techAnalysis?.minification || data?.data?.technical?.minification;
-  const displaySocial = techAnalysis?.social || data?.data?.technical?.social;
-  const displayCookies = techAnalysis?.cookies || data?.data?.technical?.cookies;
-  const displayAdTags = techAnalysis?.adTags || (data as any)?.data?.adTags;
+  const techData = data?.data?.tech || {};
+  const displayTechStack = techAnalysis?.techStack || techData?.techStack || [];
+  const displayMinification = techAnalysis?.minification || techData?.minification;
+  const displaySocial = techAnalysis?.social || techData?.social;
+  const displayCookies = techAnalysis?.cookies || techData?.cookies;
+  const displayAdTags = techAnalysis?.adTags || techData?.adTags;
 
   console.log('TechTab - using real tech analysis:', !!techAnalysis);
-  console.log('TechTab - display data:', { displayAdTags, displaySocial, displayMinification });
+  console.log('TechTab - tech data available:', !!techData);
+  console.log('TechTab - display data:', { displayAdTags, displaySocial, displayMinification, techData });
 
   return (
     <Box>
@@ -688,7 +690,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                 <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                   Technical issue analysis unavailable
                 </Typography>
-              ) : (techAnalysis?.issues ?? data?.data?.technical?.issues ?? []).length === 0 ? (
+              ) : (techAnalysis?.issues ?? techData?.issues ?? []).length === 0 ? (
                 <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                   No technical issues detected
                 </Typography>
@@ -704,7 +706,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                       </tr>
                     </thead>
                     <tbody className="[&_tr:last-child]:border-0">
-                      {(techAnalysis?.issues ?? data?.data?.technical?.issues ?? []).map((issue, index) => (
+                      {(techAnalysis?.issues ?? techData?.issues ?? []).map((issue, index) => (
                         <tr key={index} className="border-b transition-colors [&:has([role=checkbox])]:pr-0">
                           <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">{issue.type}</td>
                           <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">{issue.description}</td>
@@ -746,8 +748,8 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
             </CardContent>
           </Card>
           <TechnicalHealthSummary 
-            healthGrade={data?.data?.technical?.healthGrade ?? 'C'} 
-            issues={techAnalysis?.issues ?? data?.data?.technical?.issues ?? []} 
+            healthGrade={techData?.healthGrade ?? 'C'} 
+            issues={techAnalysis?.issues ?? techData?.issues ?? []} 
           />
         </Box>
       </Box>
