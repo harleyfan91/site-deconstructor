@@ -605,7 +605,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Main analysis endpoint - optimized for faster response
   app.get('/api/analyze/full', async (req, res) => {
     try {
-      let { url } = req.query;
+      let { url, immediate } = req.query;
       
       if (!url || typeof url !== 'string') {
         return res.status(400).json({ error: 'URL parameter is required' });
@@ -616,7 +616,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         url = `https://${url}`;
       }
 
-      console.log(`🔍 Starting comprehensive analysis for: ${url}`);
+      const isImmediate = immediate === 'true';
+      console.log(`🔍 Starting ${isImmediate ? 'immediate' : 'comprehensive'} analysis for: ${url}`);
       console.log(`📱 Request source: ${req.get('User-Agent')?.includes('Mozilla') ? 'Web Browser' : 'API Call'}`);
       const totalStartTime = Date.now();
       
@@ -634,6 +635,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const html = await response.text();
       logTiming('HTML fetch (immediate)', htmlStartTime);
+      
+      // If immediate=true, return just local scraped data quickly
+      if (isImmediate) {
+        console.log('⚡ Returning immediate local analysis only');
+        
+        // Do basic page scraping without heavy analysis
+        const scrapedData = await scrapePageData(url);
+        const immediateData = {
+          ui: buildUIData(scrapedData),
+          content: buildContentData(scrapedData),
+          seo: { metaTags: scrapedData.metaTags || {} },
+          overview: {
+            overallScore: '!', // Marker for loading state
+            seoScore: '!',
+            performanceScore: '!',
+            securityScore: '!',
+            accessibilityScore: '!'
+          }
+        };
+        
+        const responseData = {
+          id: crypto.randomUUID(),
+          timestamp: new Date().toISOString(),
+          url,
+          data: immediateData,
+          title: scrapedData.title || url,
+          description: scrapedData.metaTags?.description || `Analysis of ${url}`,
+          loadingComplete: false,
+          immediateDataReady: true
+        };
+        
+        logTiming('⚡ Immediate analysis', totalStartTime);
+        return res.json(responseData);
+      }
       
       // Simplified full analysis - use aggregated data from specialized endpoints
 
