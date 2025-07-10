@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Box, Typography, Paper, Button, Alert } from '@mui/material';
+import { Box, Typography, Paper, Button } from '@mui/material';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { useAnalysisContext } from '../contexts/AnalysisContext';
 import { useSessionState } from '../hooks/useSessionState';
@@ -13,10 +14,10 @@ import UIAnalysisTab from './dashboard/UIAnalysisTab';
 import ComplianceTab from './dashboard/ComplianceTab';
 import ContentAnalysisTab from './dashboard/ContentAnalysisTab';
 import ExportModal from './export/ExportModal';
-import URLInputForm from './URLInputForm';
 
 const DashboardContent = () => {
   const { data: analysisData, loading, error } = useAnalysisContext();
+  const navigate = useNavigate();
   const sectionLoading = useSectionLoading(analysisData, loading);
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
@@ -56,67 +57,12 @@ const DashboardContent = () => {
     }
   }, [analysisData, backgroundLoadingStarted, activeTab]);
 
-  // Show URL input form only if we truly have no analysis data and we're not loading
-  // Never show this during progressive loading when we have immediate data
-  if (!analysisData && !loading) {
-    return (
-      <Box id="dashboard-root" data-dashboard="true">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-        >
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              mb: 2,
-              flexDirection: { xs: 'column', sm: 'row' },
-              gap: { xs: 1, sm: 0 }
-            }}
-          >
-            <Typography
-              variant="h4"
-              component="h1"
-              gutterBottom
-              sx={{
-                mb: { xs: 0.5, sm: 0 },
-                whiteSpace: { xs: 'nowrap', sm: 'normal' },
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                maxWidth: { xs: '100vw', sm: 'none' },
-              }}
-            >
-              Website Analysis Dashboard
-            </Typography>
-          </Box>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
-        >
-          <Paper elevation={3} sx={{ p: { xs: 3, sm: 4 }, borderRadius: 2, textAlign: 'center' }}>
-            <Box sx={{ maxWidth: 600, mx: 'auto' }}>
-              <Typography variant="h6" sx={{ mb: 2, color: 'text.secondary' }}>
-                Enter a URL to analyze a website
-              </Typography>
-              
-              <URLInputForm />
-              
-              {error && (
-                <Alert severity="error" sx={{ mt: 2 }}>
-                  {error}
-                </Alert>
-              )}
-            </Box>
-          </Paper>
-        </motion.div>
-      </Box>
-    );
-  }
+  // Redirect to the dedicated analyze page if no analysis data is available
+  useEffect(() => {
+    if (!analysisData && !loading) {
+      navigate('/analyze');
+    }
+  }, [analysisData, loading, navigate]);
 
   return (
     <Box id="dashboard-root" data-dashboard="true">
