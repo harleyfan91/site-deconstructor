@@ -183,6 +183,8 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
                         fill={theme.palette.grey[400]}
                         dataKey="value"
                         label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        labelLine={false}
+                        style={{ fontSize: '14px', fontWeight: '500' }}
                       >
                         {contentTypes.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.color} />
