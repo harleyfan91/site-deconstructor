@@ -15,15 +15,6 @@ interface UIAnalysisTabProps {
 }
 
 const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) => {
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
-        <CircularProgress size={60} />
-        <Typography variant="h6" sx={{ ml: 2 }}>Analyzing UI elements...</Typography>
-      </Box>
-    );
-  }
-
   if (error) {
     return (
       <Alert severity="error" sx={{ mt: 2 }}>
@@ -32,7 +23,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
     );
   }
 
-  if (!data) {
+  if (!data && !loading) {
     return (
       <Alert severity="info" sx={{ mt: 2 }}>
         Enter a URL to analyze website UI elements
@@ -40,17 +31,8 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
     );
   }
 
-  const ui = data.data.ui;
-  
-  if (!ui) {
-    return (
-      <Alert severity="info" sx={{ mt: 2 }}>
-        No UI analysis data available
-      </Alert>
-    );
-  }
-
-  const { colors, fonts, images, imageAnalysis } = ui;
+  const ui = data?.data?.ui;
+  const { colors, fonts, images, imageAnalysis } = ui || {};
 
   return (
     <Box>

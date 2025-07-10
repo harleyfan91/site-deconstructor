@@ -62,18 +62,6 @@ const ContentCustomTick = (props: any) => {
 const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) => {
   const theme = useTheme();
 
-  // Loading state
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
-        <CircularProgress />
-        <Typography variant="h6" sx={{ ml: 2 }}>
-          Analyzing content...
-        </Typography>
-      </Box>
-    );
-  }
-
   // Error state
   if (error) {
     return (
@@ -85,8 +73,8 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
     );
   }
 
-  // No data state
-  if (!data) {
+  // No data state (only when not loading)
+  if (!data && !loading) {
     return (
       <Box sx={{ p: 3 }}>
         <Alert severity="info">
@@ -174,7 +162,14 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
                   Content Distribution
                 </Typography>
               </Box>
-            {contentTypes.length > 0 ? (
+            {loading || (!data && loading) ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px' }}>
+                <CircularProgress size={40} />
+                <Typography variant="body2" sx={{ ml: 2 }}>
+                  Analyzing content distribution...
+                </Typography>
+              </Box>
+            ) : contentTypes.length > 0 ? (
               <ChartContainer config={chartConfig} className="h-80">
                 <RechartsPieChart>
                   <Pie
@@ -211,15 +206,24 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
                   Content Structure Analysis
                 </Typography>
               </Box>
-            <ChartContainer config={chartConfig} className="h-80 w-full">
-              <BarChart data={contentStructureData} margin={{ top: 20, right: 20, left: 0, bottom: 5 }}>
-                <XAxis dataKey="metric" tick={<ContentCustomTick />} />
-                <YAxis domain={[0, 100]} />
-                <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-                <Bar dataKey="score" fill={theme.palette.primary.main} />
-                <Bar dataKey="benchmark" fill={theme.palette.grey[300]} />
-              </BarChart>
-            </ChartContainer>
+            {loading || (!data && loading) ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px' }}>
+                <CircularProgress size={40} />
+                <Typography variant="body2" sx={{ ml: 2 }}>
+                  Analyzing content structure...
+                </Typography>
+              </Box>
+            ) : (
+              <ChartContainer config={chartConfig} className="h-80 w-full">
+                <BarChart data={contentStructureData} margin={{ top: 20, right: 20, left: 0, bottom: 5 }}>
+                  <XAxis dataKey="metric" tick={<ContentCustomTick />} />
+                  <YAxis domain={[0, 100]} />
+                  <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                  <Bar dataKey="score" fill={theme.palette.primary.main} />
+                  <Bar dataKey="benchmark" fill={theme.palette.grey[300]} />
+                </BarChart>
+              </ChartContainer>
+            )}
             </CardContent>
           </Card>
         </Box>
@@ -234,7 +238,15 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
                 </Typography>
               </Box>
             
-            
+            {loading || (!data && loading) ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
+                <CircularProgress size={40} />
+                <Typography variant="body2" sx={{ ml: 2 }}>
+                  Analyzing text quality...
+                </Typography>
+              </Box>
+            ) : (
+            <Box>
             <Box sx={{ mb: 3 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography variant="body2">Readability Score (Flesch Reading Ease)</Typography>
@@ -339,6 +351,8 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
                 Your alt text coverage scores better than {totalImages > 0 ? Math.round((estimatedPhotos / totalImages) * 100) : 0}% of websites
               </Typography>
             </Box>
+            </Box>
+            )}
             </CardContent>
           </Card>
 
@@ -351,7 +365,15 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
               </Typography>
             </Box>
             
-            
+            {loading || (!data && loading) ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '150px' }}>
+                <CircularProgress size={40} />
+                <Typography variant="body2" sx={{ ml: 2 }}>
+                  Analyzing metadata...
+                </Typography>
+              </Box>
+            ) : (
+            <Box>
             <Box sx={{ mb: 2 }}>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>Title Tag</Typography>
               <Tooltip 
@@ -420,6 +442,8 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
               <Typography variant="body2" color="text.secondary">Content Images</Typography>
               <Typography variant="body2">{totalImages} total images detected</Typography>
             </Box>
+            </Box>
+            )}
             </CardContent>
           </Card>
         </Box>
