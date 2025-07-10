@@ -639,41 +639,54 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
               </Typography>
             ) : (
               <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 2 }}>
-                {displayCookies?.hasCookieScript ? (
-                  <Tooltip
-                    title="Cookie consent script detected on this website"
-                    enterDelay={300}
-                    enterTouchDelay={300}
-                  >
-                    <Chip
-                      label="Cookie Consent Script Detected"
-                      {...chipStateStyle(true, theme)}
-                      size="small"
-                      sx={{ 
-                        ...chipStateStyle(true, theme).sx,
-                        width: '100%',
-                        cursor: 'help'
-                      }}
-                    />
-                  </Tooltip>
-                ) : (
-                  <Tooltip
-                    title="No cookie consent script found on this website"
-                    enterDelay={300}
-                    enterTouchDelay={300}
-                  >
-                    <Chip
-                      label="No Cookie Consent Script Found"
-                      {...chipStateStyle(false, theme)}
-                      size="small"
-                      sx={{ 
-                        ...chipStateStyle(false, theme).sx,
-                        width: '100%',
-                        cursor: 'help'
-                      }}
-                    />
-                  </Tooltip>
-                )}
+                <Tooltip
+                  title={displayCookies?.hasSessionCookies ? 'Session cookies detected on this website' : 'No session cookies found on this website'}
+                  enterDelay={300}
+                  enterTouchDelay={300}
+                >
+                  <Chip
+                    label="Session Cookies"
+                    {...chipStateStyle(Boolean(displayCookies?.hasSessionCookies), theme)}
+                    size="small"
+                    sx={{ 
+                      ...chipStateStyle(Boolean(displayCookies?.hasSessionCookies), theme).sx,
+                      width: '100%',
+                      cursor: 'help'
+                    }}
+                  />
+                </Tooltip>
+                <Tooltip
+                  title={displayCookies?.hasTrackingCookies ? 'Tracking cookies detected on this website' : 'No tracking cookies found on this website'}
+                  enterDelay={300}
+                  enterTouchDelay={300}
+                >
+                  <Chip
+                    label="Tracking Cookies"
+                    {...chipStateStyle(Boolean(displayCookies?.hasTrackingCookies), theme)}
+                    size="small"
+                    sx={{ 
+                      ...chipStateStyle(Boolean(displayCookies?.hasTrackingCookies), theme).sx,
+                      width: '100%',
+                      cursor: 'help'
+                    }}
+                  />
+                </Tooltip>
+                <Tooltip
+                  title={displayCookies?.hasAnalyticsCookies ? 'Analytics cookies detected on this website' : 'No analytics cookies found on this website'}
+                  enterDelay={300}
+                  enterTouchDelay={300}
+                >
+                  <Chip
+                    label="Analytics Cookies"
+                    {...chipStateStyle(Boolean(displayCookies?.hasAnalyticsCookies), theme)}
+                    size="small"
+                    sx={{ 
+                      ...chipStateStyle(Boolean(displayCookies?.hasAnalyticsCookies), theme).sx,
+                      width: '100%',
+                      cursor: 'help'
+                    }}
+                  />
+                </Tooltip>
               </Box>
             )}
           </CardContent>
