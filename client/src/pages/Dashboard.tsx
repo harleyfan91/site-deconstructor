@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Box, Container } from '@mui/material';
 import { motion } from 'framer-motion';
+import { useLocation } from 'react-router-dom';
 import AppHeader from '../components/AppHeader';
 import DashboardContent from '../components/DashboardContent';
+import { useAnalysisContext } from '../contexts/AnalysisContext';
 
 interface DashboardProps {
   darkMode: boolean;
@@ -10,6 +12,20 @@ interface DashboardProps {
 }
 
 const Dashboard = ({ darkMode, toggleDarkMode }: DashboardProps) => {
+  const location = useLocation();
+  const { analyzeWebsite, data } = useAnalysisContext();
+
+  useEffect(() => {
+    // Check if there's a URL parameter and no current analysis data
+    const urlParams = new URLSearchParams(location.search);
+    const urlToAnalyze = urlParams.get('url');
+    
+    if (urlToAnalyze && !data) {
+      console.log('🚀 Starting analysis from URL parameter:', urlToAnalyze);
+      analyzeWebsite(urlToAnalyze);
+    }
+  }, [location.search, analyzeWebsite, data]);
+
   return (
     <Box>
       <motion.div
