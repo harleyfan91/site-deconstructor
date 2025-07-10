@@ -220,7 +220,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
                             borderRadius: '4px 0 0 4px',
                           }}
                         >
-                          <Typography variant="body2" sx={{ fontWeight: 'medium', color: 'white', fontSize: '0.75rem' }}>
+                          <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'white', fontSize: '0.8rem' }}>
                             Desktop: {desktopTimeSec.toFixed(1)}s
                           </Typography>
                         </Box>
@@ -240,7 +240,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
                             borderRadius: '0 4px 4px 0',
                           }}
                         >
-                          <Typography variant="body2" sx={{ fontWeight: 'medium', color: 'white', fontSize: '0.75rem' }}>
+                          <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'white', fontSize: '0.8rem' }}>
                             Mobile: {mobileTimeSec.toFixed(1)}s
                           </Typography>
                         </Box>

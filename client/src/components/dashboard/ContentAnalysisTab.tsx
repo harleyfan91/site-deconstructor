@@ -93,10 +93,6 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
   // Content readability and text analysis data - should pull from Playwright
   const contentData = data?.data?.content;
   
-  // Debug logging to understand data structure
-  console.log('ContentAnalysisTab - Full data:', data);
-  console.log('ContentAnalysisTab - Content data:', contentData);
-  
   const readabilityScore: number = typeof contentData?.readabilityScore === 'number' ? contentData.readabilityScore : 
     (contentData?.readabilityScore === "!" ? 0 : Number(contentData?.readabilityScore) || 0);
   const wordCount: number = typeof contentData?.wordCount === 'number' ? contentData.wordCount : 
@@ -175,24 +171,28 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
                 </Typography>
               </Box>
             ) : contentTypes.length > 0 ? (
-              <ChartContainer config={chartConfig} className="h-80">
-                <RechartsPieChart>
-                  <Pie
-                    data={contentTypes}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={80}
-                    fill={theme.palette.grey[400]}
-                    dataKey="value"
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  >
-                    {contentTypes.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                </RechartsPieChart>
-              </ChartContainer>
+              <Box sx={{ height: 300, width: '100%' }}>
+                <ChartContainer config={chartConfig} className="h-full w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RechartsPieChart>
+                      <Pie
+                        data={contentTypes}
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={80}
+                        fill={theme.palette.grey[400]}
+                        dataKey="value"
+                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      >
+                        {contentTypes.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                    </RechartsPieChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </Box>
             ) : (
               <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px' }}>
                 <Typography variant="body2" color="text.secondary">
