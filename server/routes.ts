@@ -435,8 +435,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             return {
               pageLoadTime: pageLoadTimeData,
               coreWebVitals: {
-                lcp: lighthousePerformance.metrics.largestContentfulPaint?.numericValue / 1000 || 2.5,
-                fid: lighthousePerformance.metrics.firstInputDelay?.numericValue || 100,
+                lcpMs: lighthousePerformance.metrics.largestContentfulPaint?.numericValue || 2500,
+                inpMs: lighthousePerformance.metrics.firstInputDelay?.numericValue || 100,
                 cls: lighthousePerformance.metrics.cumulativeLayoutShift?.numericValue || 0.1
               }
             };
@@ -472,13 +472,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           overallScore: seoData?.score || "!",
           seoScore: seoData?.score || "!",
           pageLoadTime: performanceData?.pageLoadTime?.desktop || "!",
-          coreWebVitals: performanceData?.coreWebVitals || { lcp: "!", fid: "!", cls: "!" },
+          coreWebVitals: performanceData?.coreWebVitals || { lcpMs: "!", inpMs: "!", cls: "!" },
           userExperienceScore: "!" // No reliable source for this metric
         },
         seo: seoData || { score: "!", checks: [] },
         tech: techData || { techStack: [{ category: "Unknown", technology: "!" }] },
         performance: {
-          coreWebVitals: performanceData?.coreWebVitals || { lcp: "!", fid: "!", cls: "!" },
+          coreWebVitals: performanceData?.coreWebVitals || { lcpMs: "!", inpMs: "!", cls: "!" },
           pageLoadTime: performanceData?.pageLoadTime || { desktop: "!", mobile: "!" }
         },
         ui: uiData || { fonts: [], images: [], imageAnalysis: { totalImages: "!" } },
