@@ -346,6 +346,9 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
   const isCookiesLoading = loading && !displayCookies && !hasTechData && !techAnalysis;
   const isIssuesLoading = loading && !techAnalysis && !techData?.issues && !hasTechData;
 
+  // Only show error state if we have no data at all AND there's an error
+  const shouldShowError = techError && !hasTechData;
+
   // Debug logging removed - loading states are working correctly
 
   return (
@@ -379,7 +382,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                     Analyzing technologies...
                   </Typography>
                 </Box>
-              ) : techError ? (
+              ) : shouldShowError ? (
                 <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                   Technology analysis unavailable
                 </Typography>
@@ -414,7 +417,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                     Checking minification...
                   </Typography>
                 </Box>
-              ) : techError ? (
+              ) : shouldShowError ? (
                 <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                   Minification check unavailable
                 </Typography>
@@ -484,7 +487,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                   Scanning for ad tags...
                 </Typography>
               </Box>
-            ) : techError ? (
+            ) : shouldShowError ? (
               <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                 Ad tag analysis unavailable
               </Typography>
@@ -552,7 +555,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                   Scanning for social tags...
                 </Typography>
               </Box>
-            ) : techError ? (
+            ) : shouldShowError ? (
               <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                 Social tag analysis unavailable
               </Typography>
@@ -633,7 +636,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                   Checking for cookies...
                 </Typography>
               </Box>
-            ) : techError ? (
+            ) : shouldShowError ? (
               <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                 Cookie analysis unavailable
               </Typography>
@@ -717,7 +720,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                     Analyzing technical issues...
                   </Typography>
                 </Box>
-              ) : techError ? (
+              ) : shouldShowError ? (
                 <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                   Technical issue analysis unavailable
                 </Typography>
