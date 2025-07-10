@@ -1,5 +1,5 @@
 /**
- * Comprehensive SEO data extraction using Playwright and PageSpeed Insights
+ * Comprehensive SEO data extraction using Playwright and Lighthouse
  */
 import { Browser, chromium } from 'playwright';
 

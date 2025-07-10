@@ -1,6 +1,6 @@
 /**
  * Lighthouse-powered analysis service
- * Replaces PageSpeed Insights with comprehensive Lighthouse audits
+ * Comprehensive performance, SEO, and best practices audits
  */
 import lighthouse from 'lighthouse';
 import { launch } from 'chrome-launcher';

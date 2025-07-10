@@ -137,8 +137,8 @@ function calculateFleschKincaidScore(text: string): number {
 
 ### Integration with Existing Endpoints
 
-- **Quick Analysis**: Includes content data with fallback markers
-- **Full Analysis**: Merges Playwright data with PSI performance metrics
+- **Immediate Analysis**: Includes content data with fallback markers
+- **Full Analysis**: Merges Playwright data with Lighthouse performance metrics
 - **Color Extraction**: Already using Playwright for color analysis
 
 ## Performance Considerations

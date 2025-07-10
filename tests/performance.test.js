@@ -45,7 +45,7 @@ describe('Analysis Performance Tests', () => {
     expect(data).toHaveProperty('data.seo');
     expect(data).toHaveProperty('data.technical');
     
-    // PSI data should be present
+    // Performance data should be present
     expect(data.data.overview).toHaveProperty('pageLoadTime');
     expect(data.data.overview).toHaveProperty('coreWebVitals');
     expect(typeof data.data.overview.pageLoadTime).toBe('number');

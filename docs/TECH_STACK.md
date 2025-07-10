@@ -46,7 +46,7 @@ The application features a sophisticated multi-tier analysis system powered by i
 
 #### Performance & SEO Analysis
 * **Lighthouse** - Package: `lighthouse`
-  * Comprehensive performance auditing (replacing PageSpeed Insights)
+  * Comprehensive performance auditing
   * SEO audit scoring and recommendations
   * Best practices compliance assessment
   * Core Web Vitals measurement from real scenarios
@@ -139,14 +139,14 @@ The application features a sophisticated multi-tier analysis system powered by i
 - **Section-level loading**: Each dashboard section shows loading indicators independently
 - **Fallback handling**: Graceful degradation when comprehensive analysis fails
 
-## Migration from PageSpeed Insights to Lighthouse
+## Lighthouse-Powered Architecture
 
-The application has undergone a significant backend architecture upgrade:
+The application uses a comprehensive Lighthouse-based analysis system:
 
-### Previous Architecture (Deprecated)
-- **PageSpeed Insights API** - External API calls with rate limits and API key requirements
-- **Wappalyzer** - Technology detection (deprecated package)
-- **Basic HTML parsing** - Limited technical analysis capabilities
+### Current Architecture
+- **Lighthouse** - Local comprehensive auditing without external API dependencies
+- **Enhanced Tech Detection** - Custom pattern-based technology detection
+- **Playwright Integration** - Real browser-based analysis for authentic dataities
 
 ### Current Architecture (Enhanced)
 - **Lighthouse** - Local Lighthouse audits providing comprehensive analysis without external API dependencies

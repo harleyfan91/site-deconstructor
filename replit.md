@@ -74,10 +74,10 @@ A comprehensive website analysis tool that provides insights into performance, S
 - ✓ Added centered text overlay to expanded color squares with hex codes and human-friendly names (June 29, 2025)
 - - ✓ Reorganized Performance tab layout: Core Web Vitals (2x2), Speed Index and Mobile Responsiveness stacked (1x1 each)
 - ✓ Implemented performance optimization refactoring (June 30, 2025)
-- ✓ Enhanced full analysis endpoint (/api/analyze/full) with PSI data and caching
+- ✓ Enhanced full analysis endpoint (/api/analyze/full) with Lighthouse data and caching
 - ✓ Implemented 3-tier caching: in-memory (30min), database (24hr), and request deduplication
-- ✓ Added precise timing logs and AbortController timeout (25s) for PSI calls
-- ✓ Parallelized HTML fetch and PSI calls using Promise.all
+- ✓ Added precise timing logs and comprehensive Lighthouse analysis
+- ✓ Parallelized HTML fetch and Lighthouse calls using Promise.all
 - ✓ Created analysis_cache table with SHA256 URL hashing
 - ✓ Enhanced client-side to call quick then full analysis for progressive loading
 - ✓ Added comprehensive performance regression tests
@@ -186,6 +186,7 @@ A comprehensive website analysis tool that provides insights into performance, S
 - ✓ Added comprehensive social tag analysis, minification detection, and security header parsing
 - ✓ Fixed caching system with tech_lightweight_ prefix for proper cache management
 - ✓ Successfully replaced PageSpeed Insights with Lighthouse for comprehensive SEO, Performance, and Best Practices analysis (January 9, 2025)
+- ✓ Completely removed Google PageSpeed Insights (PSI) from entire codebase including code, endpoints, tests, and documentation (January 10, 2025)
 - ✓ Integrated axe-core accessibility testing into color extraction API for real contrast warnings and accessibility scores
 - ✓ Created enhanced Tech analysis combining lightweight HTTP detection with Lighthouse Best Practices data
 - ✓ Added new Lighthouse-powered endpoints: /api/lighthouse/seo, /api/lighthouse/performance, /api/lighthouse/best-practices

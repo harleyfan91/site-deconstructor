@@ -149,7 +149,7 @@ function extractImageUrls(html: string): string[] {
   return imageUrls;
 }
 
-const PSI_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+const LIGHTHOUSE_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 const IN_MEMORY_CACHE_TTL = 30 * 60 * 1000; // 30 minutes
 
 // In-memory cache for faster repeated requests
@@ -167,117 +167,7 @@ function logTiming(operation: string, startTime: number) {
   return duration;
 }
 
-// DEPRECATED: PSI function - replaced with Lighthouse
-// Keeping for backward compatibility during transition
-async function fetchPageSpeedOverview(url: string): Promise<any> {
-  const startTime = Date.now();
-  const urlHash = generateUrlHash(url);
-  
-  // Check in-memory cache first
-  const memCached = inMemoryCache.get(`psi_${urlHash}`);
-  if (memCached && Date.now() - memCached.timestamp < IN_MEMORY_CACHE_TTL) {
-    logTiming('PSI (in-memory cache hit)', startTime);
-    return memCached.data;
-  }
 
-  // Check Supabase database cache
-  const dbStartTime = Date.now();
-  try {
-    const cached = await SupabaseCacheService.get(urlHash);
-    
-    logTiming('🗄️  Supabase cache lookup', dbStartTime);
-    
-    if (cached) {
-      const data = cached.analysis_data;
-      // Store in memory cache
-      inMemoryCache.set(`psi_${urlHash}`, { data, timestamp: Date.now() });
-      logTiming('PSI (Supabase cache hit)', startTime);
-      return data;
-    }
-  } catch (error) {
-    console.error('Supabase cache lookup failed:', error);
-  }
-
-  // Fetch from PSI API with timeout
-  const psiStartTime = Date.now();
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 25000);
-
-  try {
-    const apiKey = process.env.PSI_API_KEY;
-    const apiUrl =
-      `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&category=performance` +
-      (apiKey ? `&key=${apiKey}` : "");
-    
-    const res = await fetch(apiUrl, { signal: controller.signal });
-    clearTimeout(timeoutId);
-    
-    if (!res.ok) {
-      throw new Error(`PSI request failed: ${res.status}`);
-    }
-    
-    const json = await res.json();
-    logTiming('PSI API call', psiStartTime);
-    
-    const audits = json.lighthouseResult?.audits || {};
-    const metrics = audits['metrics']?.details?.items?.[0] || {};
-    const overview = {
-      pageLoadTime: Number(((metrics.observedLoad || 0) / 1000).toFixed(1)),
-      coreWebVitals: {
-        lcpMs: Math.round(audits['largest-contentful-paint']?.numericValue || 2500),
-        inpMs: Math.round(audits['total-blocking-time']?.numericValue || 100),
-        cls: audits['cumulative-layout-shift']?.numericValue || 0.1,
-      },
-    };
-
-    // Cache in Supabase and memory
-    const cacheStartTime = Date.now();
-    try {
-      const success = await SupabaseCacheService.set(urlHash, url, overview);
-      if (success) {
-        logTiming('🗄️  Supabase cache write', cacheStartTime);
-      } else {
-        console.warn('Failed to write to Supabase cache');
-      }
-    } catch (error) {
-      console.error('Failed to cache PSI data in Supabase:', error);
-    }
-
-    inMemoryCache.set(`psi_${urlHash}`, { data: overview, timestamp: Date.now() });
-    logTiming('PSI (fresh data)', startTime);
-    return overview;
-
-  } catch (error) {
-    clearTimeout(timeoutId);
-    if (error instanceof Error && error.name === 'AbortError') {
-      console.warn('PSI request timed out for:', url);
-      // Return fallback data on timeout and cache it
-      const fallbackData = {
-        pageLoadTime: 3.0,
-        coreWebVitals: { lcpMs: 2500, inpMs: 100, cls: 0.1 }
-      };
-
-      // Cache the fallback data in Supabase and memory
-      const cacheStartTime = Date.now();
-      try {
-        const success = await SupabaseCacheService.set(urlHash, url, fallbackData);
-        if (success) {
-          logTiming('🗄️  Supabase cache write (fallback)', cacheStartTime);
-          console.log(`✅ Cached fallback PSI data for ${url} in Supabase`);
-        } else {
-          console.warn('Failed to write fallback PSI data to Supabase cache');
-        }
-      } catch (cacheError) {
-        console.error('Failed to cache fallback PSI data in Supabase:', cacheError);
-      }
-
-      inMemoryCache.set(`psi_${urlHash}`, { data: fallbackData, timestamp: Date.now() });
-      logTiming('PSI (fallback data)', startTime);
-      return fallbackData;
-    }
-    throw error;
-  }
-}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize Supabase cache service and create table if needed
@@ -304,14 +194,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get page load times from Lighthouse (both desktop and mobile)
       const pageLoadTimeData = await getLighthousePageLoadTime(url);
       
-      // Get Core Web Vitals from existing PSI endpoint for compatibility
-      const psiOverview = await fetchPageSpeedOverview(url);
+      // Get Core Web Vitals from Lighthouse Performance analysis
+      const lighthousePerformance = await getLighthousePerformance(url);
       
       const performanceData = {
         coreWebVitals: {
-          lcp: psiOverview.coreWebVitals.lcpMs,
-          fid: psiOverview.coreWebVitals.inpMs,
-          cls: psiOverview.coreWebVitals.cls
+          lcp: lighthousePerformance.metrics.largestContentfulPaint?.numericValue / 1000 || 2.5,
+          fid: lighthousePerformance.metrics.firstInputDelay?.numericValue || 100,
+          cls: lighthousePerformance.metrics.cumulativeLayoutShift?.numericValue || 0.1
         },
         pageLoadTime: pageLoadTimeData
       };
@@ -538,13 +428,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Performance data (Core Web Vitals + Page Load Time)
         (async () => {
           try {
-            const [pageLoadTimeData, psiOverview] = await Promise.all([
+            const [pageLoadTimeData, lighthousePerformance] = await Promise.all([
               getLighthousePageLoadTime(url),
-              fetchPageSpeedOverview(url)
+              getLighthousePerformance(url)
             ]);
             return {
               pageLoadTime: pageLoadTimeData,
-              coreWebVitals: psiOverview.coreWebVitals
+              coreWebVitals: {
+                lcp: lighthousePerformance.metrics.largestContentfulPaint?.numericValue / 1000 || 2.5,
+                fid: lighthousePerformance.metrics.firstInputDelay?.numericValue || 100,
+                cls: lighthousePerformance.metrics.cumulativeLayoutShift?.numericValue || 0.1
+              }
             };
           } catch (error) {
             console.warn('⚠️  Performance analysis missing for overview:', error.message);
@@ -735,13 +629,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`🔄 Forwarding to main analysis for: ${url}`);
       const totalStartTime = Date.now();
       
-      const [response, psiOverview] = await Promise.all([
+      const [response, lighthousePerformance] = await Promise.all([
         fetch(url, {
           headers: {
             'User-Agent': 'Mozilla/5.0 (compatible; WebsiteAnalyzer/1.0)',
           },
         }),
-        fetchPageSpeedOverview(url)
+        getLighthousePerformance(url)
       ]);
 
       if (!response.ok) {
@@ -757,9 +651,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         timestamp: new Date().toISOString(),
         status: 'complete',
         coreWebVitals: {
-          lcp: psiOverview.coreWebVitals.lcpMs,
-          fid: psiOverview.coreWebVitals.inpMs,
-          cls: psiOverview.coreWebVitals.cls
+          lcp: lighthousePerformance.metrics.largestContentfulPaint?.numericValue / 1000 || 2.5,
+          fid: lighthousePerformance.metrics.firstInputDelay?.numericValue || 100,
+          cls: lighthousePerformance.metrics.cumulativeLayoutShift?.numericValue || 0.1
         },
         securityHeaders: {
           csp: response.headers.get('content-security-policy') || '',
@@ -787,17 +681,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         data: {
           overview: {
             overallScore: localData.overallScore,
-            pageLoadTime: psiOverview.pageLoadTime,
-            coreWebVitals: psiOverview.coreWebVitals,
+            pageLoadTime: 3.0, // Fallback value for legacy endpoint
+            coreWebVitals: {
+              lcpMs: lighthousePerformance.metrics.largestContentfulPaint?.numericValue || 2500,
+              inpMs: lighthousePerformance.metrics.firstInputDelay?.numericValue || 100,
+              cls: lighthousePerformance.metrics.cumulativeLayoutShift?.numericValue || 0.1
+            },
             seoScore: localData.seoScore,
             userExperienceScore: localData.userExperienceScore
           },
           ui: buildUIData(localData),
           performance: {
             coreWebVitals: [
-              { name: 'LCP', value: Number((psiOverview.coreWebVitals.lcpMs / 1000).toFixed(1)), benchmark: 2.5 },
-              { name: 'FID', value: psiOverview.coreWebVitals.inpMs, benchmark: 100 },
-              { name: 'CLS', value: psiOverview.coreWebVitals.cls, benchmark: 0.1 }
+              { name: 'LCP', value: Number((lighthousePerformance.metrics.largestContentfulPaint?.numericValue / 1000 || 2.5).toFixed(1)), benchmark: 2.5 },
+              { name: 'FID', value: lighthousePerformance.metrics.firstInputDelay?.numericValue || 100, benchmark: 100 },
+              { name: 'CLS', value: lighthousePerformance.metrics.cumulativeLayoutShift?.numericValue || 0.1, benchmark: 0.1 }
             ],
             performanceScore: localData.overallScore,
             mobileResponsive: localData.mobileScore >= 50,

@@ -103,23 +103,23 @@ export const useAnalysisApi = () => {
         setData(immediateResult);
         setLoading(false); // Allow Overview tab to render
 
-        // Step 2: Get complete analysis with PSI data in background
-        console.log('🔍 Fetching PSI data in background...');
+        // Step 2: Get complete analysis with Lighthouse data in background
+        console.log('🔍 Fetching comprehensive analysis in background...');
         fetch(`/api/analyze/full?url=${encodeURIComponent(url)}`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' }
         }).then(async (fullResponse) => {
           if (fullResponse.ok) {
             const fullResult: ExtendedAnalysisResponse = await fullResponse.json();
-            console.log('🎯 PSI data received - updating Performance metrics');
+            console.log('🎯 Comprehensive data received - updating Performance metrics');
             
-            // Update with complete data including PSI
+            // Update with complete data including Lighthouse
             setData(fullResult);
           } else {
-            console.warn('PSI data failed, keeping local analysis');
+            console.warn('Comprehensive analysis failed, keeping local analysis');
           }
         }).catch((err) => {
-          console.warn('PSI background fetch error:', err);
+          console.warn('Background fetch error:', err);
         });
 
         return immediateResult;
