@@ -103,13 +103,44 @@ async function runLighthouse(url: string, categories: string[], device: 'desktop
     const result = await lighthouse(url, config);
 
     console.log(`✅ Lighthouse analysis completed for ${url} (${device})`);
+    
+    // Clear any performance marks to prevent DOMException errors
+    if (result?.lhr) {
+      if (result.lhr.timing) {
+        delete result.lhr.timing;
+      }
+      // Clear performance marks that might cause issues
+      try {
+        if (typeof performance !== 'undefined' && performance.clearMarks) {
+          performance.clearMarks();
+        }
+      } catch (perfError) {
+        // Ignore performance mark clearing errors
+        console.warn('Could not clear performance marks:', perfError.message);
+      }
+    }
+    
     return result?.lhr;
   } catch (error) {
     console.error('Lighthouse analysis failed:', error);
+    
+    // Clear any performance marks even on error
+    try {
+      if (typeof performance !== 'undefined' && performance.clearMarks) {
+        performance.clearMarks();
+      }
+    } catch (perfError) {
+      // Ignore performance mark clearing errors
+    }
+    
     throw error;
   } finally {
     if (chrome && chrome.kill) {
-      await chrome.kill();
+      try {
+        await chrome.kill();
+      } catch (killError) {
+        console.warn('Error killing Chrome process:', killError.message);
+      }
     }
   }
 }

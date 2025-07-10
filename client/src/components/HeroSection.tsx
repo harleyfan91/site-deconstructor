@@ -216,66 +216,68 @@ const HeroSection = () => {
             zIndex: 2,
           }}
         >
-          <motion.div {...motionProps.heading}>
-            <Typography
-              variant="h1"
-              component="div"
-              sx={{
-                // Reduce bottom margin
-                mb: { xs: 2, md: 2.5 },
-                // Slightly reduce font sizes for better fit
-                fontSize: { xs: '2.2rem', md: '3rem', lg: '3.2rem' },
-                lineHeight: { xs: 1.1, md: 1.15 },
-                background: 'linear-gradient(135deg, #FFFFFF 0%, rgba(255, 255, 255, 0.8) 100%)',
+          <Typography
+            variant="h1"
+            component={motion.div}
+            {...motionProps.heading}
+            sx={{
+              // Reduce bottom margin
+              mb: { xs: 2, md: 2.5 },
+              // Slightly reduce font sizes for better fit
+              fontSize: { xs: '2.2rem', md: '3rem', lg: '3.2rem' },
+              lineHeight: { xs: 1.1, md: 1.15 },
+              background: 'linear-gradient(135deg, #FFFFFF 0%, rgba(255, 255, 255, 0.8) 100%)',
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              textShadow: '0 4px 20px rgba(255, 107, 53, 0.3)',
+              zIndex: 2,
+              position: 'relative',
+            }}
+          >
+            Deconstruct Any Website
+            <br />
+            <span
+              style={{
+                background: 'linear-gradient(45deg, #FF6B35 30%, #0984E3 90%)',
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
-                textShadow: '0 4px 20px rgba(255, 107, 53, 0.3)',
-                zIndex: 2,
-                position: 'relative',
               }}
             >
-              Deconstruct Any Website
-              <br />
-              <span
-                style={{
-                  background: 'linear-gradient(45deg, #FF6B35 30%, #0984E3 90%)',
-                  backgroundClip: 'text',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                }}
-              >
-                In Seconds
-              </span>
-            </Typography>
-          </motion.div>
-          <motion.div {...motionProps.subheading}>
-            <Typography
-              variant="h6"
-              component="div"
-              color="text.secondary"
-              sx={{
-                // Reduce bottom margin significantly
-                mb: { xs: 3, md: 4 },
-                maxWidth: 600,
-                mx: 'auto',
-                // Slightly reduce font size for better fit
-                fontSize: { xs: '1rem', md: '1.1rem' },
-                lineHeight: 1.5,
-                zIndex: 2,
-                position: 'relative',
-              }}
-            >
-              Analyze colors, fonts, images, and technology stack of any website.
-              Perfect for designers, developers, and digital marketers.
-            </Typography>
-          </motion.div>
+              In Seconds
+            </span>
+          </Typography>
+          <Typography
+            variant="h6"
+            component={motion.div}
+            {...motionProps.subheading}
+            color="text.secondary"
+            sx={{
+              // Reduce bottom margin significantly
+              mb: { xs: 3, md: 4 },
+              maxWidth: 600,
+              mx: 'auto',
+              // Slightly reduce font size for better fit
+              fontSize: { xs: '1rem', md: '1.1rem' },
+              lineHeight: 1.5,
+              zIndex: 2,
+              position: 'relative',
+            }}
+          >
+            Analyze colors, fonts, images, and technology stack of any website.
+            Perfect for designers, developers, and digital marketers.
+          </Typography>
           {/* Input & popular sites shortcuts */}
           <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center', zIndex: 3, position: 'relative' }}>
             <URLInputForm
               onAnalysisComplete={result => handleAnalysisComplete(result, navigate, error)}
             />
-            <motion.div {...motionProps.formSection}>
+            <Box 
+              component={motion.div}
+              {...motionProps.formSection}
+              sx={{ width: '100%' }}
+            >
               <Typography
                 variant="body2"
                 component="div"
@@ -342,37 +344,39 @@ const HeroSection = () => {
                   </motion.div>
                 ))}
               </Box>
-            </motion.div>
+            </Box>
           </Box>
-          <motion.div {...motionProps.scrollIndicator}>
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{
-                // Reduce top margin
-                mt: { xs: 2, md: 3 },
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 1,
-                zIndex: 2,
-                position: 'relative',
-                fontSize: { xs: '0.85rem', md: '0.9rem' },
-                cursor: 'pointer',
-                '&:hover': {
-                  color: 'text.primary',
-                },
-                transition: 'color 0.3s ease',
-              }}
-              onClick={() => {
-                window.scrollTo({
-                  top: window.innerHeight,
-                  behavior: 'smooth'
-                });
-              }}
+          <Typography
+            variant="body2"
+            component={motion.div}
+            {...motionProps.scrollIndicator}
+            color="text.secondary"
+            sx={{
+              // Reduce top margin
+              mt: { xs: 2, md: 3 },
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 1,
+              zIndex: 2,
+              position: 'relative',
+              fontSize: { xs: '0.85rem', md: '0.9rem' },
+              cursor: 'pointer',
+              '&:hover': {
+                color: 'text.primary',
+              },
+              transition: 'color 0.3s ease',
+            }}
+            onClick={() => {
+              window.scrollTo({
+                top: window.innerHeight,
+                behavior: 'smooth'
+              });
+            }}
             >
               See what SiteDeconstructor can do
-              <motion.div
+              <Box 
+                component={motion.div}
                 animate={{
                   y: [0, 4, 0],
                 }}
@@ -381,6 +385,7 @@ const HeroSection = () => {
                   repeat: Infinity,
                   ease: "easeInOut",
                 }}
+                sx={{ display: 'inline-flex', alignItems: 'center' }}
               >
                 <KeyboardArrowDown 
                   sx={{ 
@@ -390,9 +395,8 @@ const HeroSection = () => {
                     position: 'relative',
                   }} 
                 />
-              </motion.div>
+              </Box>
             </Typography>
-          </motion.div>
         </Box>
       </Container>
     </Box>

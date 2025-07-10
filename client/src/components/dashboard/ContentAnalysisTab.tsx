@@ -219,15 +219,19 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
                 </Typography>
               </Box>
             ) : (
-              <ChartContainer config={chartConfig} className="h-80 w-full">
-                <BarChart data={contentStructureData} margin={{ top: 20, right: 20, left: 0, bottom: 5 }}>
-                  <XAxis dataKey="metric" tick={<ContentCustomTick />} />
-                  <YAxis domain={[0, 100]} />
-                  <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-                  <Bar dataKey="score" fill={theme.palette.primary.main} />
-                  <Bar dataKey="benchmark" fill={theme.palette.grey[300]} />
-                </BarChart>
-              </ChartContainer>
+              <Box sx={{ height: 300, width: '100%' }}>
+                <ChartContainer config={chartConfig} className="h-full w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={contentStructureData} margin={{ top: 20, right: 20, left: 0, bottom: 5 }}>
+                      <XAxis dataKey="metric" tick={<ContentCustomTick />} />
+                      <YAxis domain={[0, 100]} />
+                      <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                      <Bar dataKey="score" fill={theme.palette.primary.main} />
+                      <Bar dataKey="benchmark" fill={theme.palette.grey[300]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </Box>
             )}
             </CardContent>
           </Card>
