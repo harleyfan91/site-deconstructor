@@ -86,10 +86,11 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
     );
   }
 
-  const { performance } = data.data;
-  const performanceScore = performance?.performanceScore || 0;
-  const mobileScore = contextData?.mobileResponsiveness?.score || 0;
-  const securityScore = contextData?.lhr ? Math.round(contextData.lhr.categories.security.score * 100) : 0;
+  const { performance, overview, tech } = data.data;
+  const performanceScore = overview?.overallScore || 0;
+  const mobileScore = Math.round((performance?.pageLoadTime?.mobile || 0) < 3000 ? 90 : 
+                                 (performance?.pageLoadTime?.mobile || 0) < 5000 ? 70 : 50);
+  const securityScore = tech?.lighthouseScore || 0;
   
   // Handle both old array format and new object format
   const coreWebVitals = performance?.coreWebVitals;
@@ -103,6 +104,12 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
     { name: 'INP', value: Math.round(coreWebVitals.inpMs || 0), benchmark: 200 },
     { name: 'CLS', value: Math.round((coreWebVitals.cls || 0) * 100), benchmark: 10 }
   ] : [];
+
+  // Convert page load times to seconds with proper fallbacks
+  const desktopTimeMs = pageLoadTime?.desktop || 0;
+  const mobileTimeMs = pageLoadTime?.mobile || 0;
+  const desktopTimeSec = Number(desktopTimeMs) / 1000;
+  const mobileTimeSec = Number(mobileTimeMs) / 1000;
 
   const chartConfig = {
     value: { label: 'Your Site', color: theme.palette.primary.main },
@@ -175,8 +182,8 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
                   </Typography>
                 </Box>
 
-                {/* Page Load Time Slider */}
-                {pageLoadTime && (
+                {/* Page Load Time Toggle Slider */}
+                {pageLoadTime && desktopTimeMs > 0 && mobileTimeMs > 0 && (
                   <Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                       <Clock size={20} style={{ marginRight: 8, color: theme.palette.primary.main }} />
@@ -185,41 +192,68 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
                       </Typography>
                     </Box>
                     <Box sx={{ px: 1 }}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                        <Typography variant="body2" color="text.secondary">Desktop</Typography>
-                        <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                          {pageLoadTime.desktop}ms
-                        </Typography>
-                      </Box>
-                      <Slider
-                        value={pageLoadTime.desktop}
-                        min={0}
-                        max={5000}
-                        disabled
+                      {/* Toggle Button Style Slider */}
+                      <Box
                         sx={{
-                          color: getScoreColor(pageLoadTime.desktop < 1000 ? 90 : pageLoadTime.desktop < 3000 ? 70 : 40, theme),
-                          mb: 2,
-                          '& .MuiSlider-thumb': { display: 'none' },
-                          '& .MuiSlider-track': { border: 'none' },
+                          position: 'relative',
+                          height: 48,
+                          borderRadius: 6,
+                          border: '2px solid',
+                          borderColor: theme.palette.divider,
+                          overflow: 'hidden',
+                          backgroundColor: theme.palette.background.paper,
+                          mb: 1
                         }}
-                      />
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                        <Typography variant="body2" color="text.secondary">Mobile</Typography>
-                        <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                          {pageLoadTime.mobile}ms
-                        </Typography>
+                      >
+                        {/* Desktop side */}
+                        <Box
+                          sx={{
+                            position: 'absolute',
+                            left: 0,
+                            top: 0,
+                            width: '50%',
+                            height: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: desktopTimeSec < 2 ? theme.palette.success.light : 
+                                           desktopTimeSec < 4 ? theme.palette.warning.light : 
+                                           theme.palette.error.light,
+                            borderRadius: '4px 0 0 4px',
+                          }}
+                        >
+                          <Typography variant="body2" sx={{ fontWeight: 'medium', color: 'white' }}>
+                            Desktop: {desktopTimeSec.toFixed(1)}s
+                          </Typography>
+                        </Box>
+                        
+                        {/* Mobile side */}
+                        <Box
+                          sx={{
+                            position: 'absolute',
+                            right: 0,
+                            top: 0,
+                            width: '50%',
+                            height: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: mobileTimeSec < 3 ? theme.palette.success.main : 
+                                           mobileTimeSec < 6 ? theme.palette.warning.main : 
+                                           theme.palette.error.main,
+                            borderRadius: '0 4px 4px 0',
+                          }}
+                        >
+                          <Typography variant="body2" sx={{ fontWeight: 'medium', color: 'white' }}>
+                            Mobile: {mobileTimeSec.toFixed(1)}s
+                          </Typography>
+                        </Box>
                       </Box>
-                      <Slider
-                        value={pageLoadTime.mobile}
-                        min={0}
-                        max={10000}
-                        disabled
-                        sx={{
-                          color: getScoreColor(pageLoadTime.mobile < 2000 ? 90 : pageLoadTime.mobile < 5000 ? 70 : 40, theme),
-                          '& .MuiSlider-thumb': { display: 'none' },
-                          '& .MuiSlider-track': { border: 'none' },
-                        }}
-                      />
+                      
+                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center' }}>
+                        {desktopTimeSec < 2 && mobileTimeSec < 3 ? 'Excellent performance' :
+                         desktopTimeSec < 4 && mobileTimeSec < 6 ? 'Good performance' : 'Needs improvement'}
+                      </Typography>
                     </Box>
                   </Box>
                 )}
@@ -267,28 +301,61 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <Smartphone size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+              <Smartphone size={24} style={{ marginRight: 8, color: theme.palette.primary.main }} />
+              <Typography variant="h6">
                 Mobile Analysis
               </Typography>
             </Box>
-            <Typography variant="body2" color="text.secondary">
-              Mobile responsiveness score: {mobileScore}%
-            </Typography>
+            {loading ? (
+              <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
+                <CircularProgress size={20} sx={{ mr: 1 }} />
+                <Typography variant="body2" color="text.secondary">
+                  Analyzing mobile responsiveness...
+                </Typography>
+              </Box>
+            ) : (
+              <>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                  <Typography variant="body2">Mobile Score</Typography>
+                  <Typography variant="h4" sx={{ color: getScoreColor(mobileScore, theme) }}>
+                    {mobileScore}%
+                  </Typography>
+                </Box>
+                <Typography variant="body2" color="text.secondary">
+                  {mobileScore >= 90 ? 'Excellent mobile experience' : 
+                   mobileScore >= 70 ? 'Good mobile experience' : 'Mobile needs improvement'}
+                </Typography>
+              </>
+            )}
           </CardContent>
         </Card>
         
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <Activity size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+              <Activity size={24} style={{ marginRight: 8, color: theme.palette.primary.main }} />
+              <Typography variant="h6">
                 Recommendations
               </Typography>
             </Box>
-            <Typography variant="body2" color="text.secondary">
-              {performance?.recommendations?.length || 0} performance improvements suggested
-            </Typography>
+            {loading ? (
+              <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
+                <CircularProgress size={20} sx={{ mr: 1 }} />
+                <Typography variant="body2" color="text.secondary">
+                  Generating recommendations...
+                </Typography>
+              </Box>
+            ) : (
+              <>
+                <Typography variant="body2" sx={{ mb: 1 }}>
+                  Performance improvements available
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {performanceScore >= 90 ? 'Site is well optimized' : 
+                   performanceScore >= 70 ? 'Some optimizations possible' : 'Multiple improvements needed'}
+                </Typography>
+              </>
+            )}
           </CardContent>
         </Card>
       </Box>
