@@ -56,7 +56,8 @@ const DashboardContent = () => {
     }
   }, [analysisData, backgroundLoadingStarted, activeTab]);
 
-  // Show URL input form if no analysis data is available and not currently loading
+  // Show URL input form only if we truly have no analysis data and we're not loading
+  // Never show this during progressive loading when we have immediate data
   if (!analysisData && !loading) {
     return (
       <Box id="dashboard-root" data-dashboard="true">

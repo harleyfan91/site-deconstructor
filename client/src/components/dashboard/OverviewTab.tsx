@@ -37,8 +37,8 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
     );
   }
 
-  // Show "idle" state before analysis starts
-  if (!data) {
+  // Show "idle" state only when there's no data AND no loading in progress
+  if (!data && !loading) {
     return (
       <Alert severity="info" sx={{ mt: 2 }}>
         Enter a URL to analyze a website
