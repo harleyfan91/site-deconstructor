@@ -85,13 +85,13 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
   }
 
   // Extract content-specific data from API response
-  const imageData = data.data?.ui?.imageAnalysis;
+  const imageData = data?.data?.ui?.imageAnalysis;
   const totalImages = imageData?.totalImages || 0;
   const estimatedPhotos = imageData?.estimatedPhotos || 0;
   const estimatedIcons = imageData?.estimatedIcons || 0;
 
   // Content readability and text analysis data - should pull from Playwright
-  const contentData = data.data?.content;
+  const contentData = data?.data?.content;
   const readabilityScore: number = typeof contentData?.readabilityScore === 'number' ? contentData.readabilityScore : 
     (contentData?.readabilityScore === "!" ? 0 : Number(contentData?.readabilityScore) || 0);
   const wordCount: number = typeof contentData?.wordCount === 'number' ? contentData.wordCount : 
@@ -99,7 +99,7 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
 
   // Use real word count from Playwright content analysis
   const estimatedTextContent = wordCount > 0 ? Math.min(wordCount / 10, 100) : 
-    (data.data?.seo?.metaTags ? (Object.keys(data.data.seo.metaTags).length * 10) + 50 : 50);
+    (data?.data?.seo?.metaTags ? (Object.keys(data?.data?.seo?.metaTags).length * 10) + 50 : 50);
 
   // Create content distribution data with consistent colors including text
   const contentTypes = [
@@ -108,8 +108,8 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
     { name: 'Text Content', value: estimatedTextContent, color: theme.palette.secondary.main },
     { name: 'Other Images', value: Math.max(0, totalImages - estimatedPhotos - estimatedIcons), color: theme.palette.grey[400] },
   ].filter(item => item.value > 0);
-  const seoChecks = data.data?.seo?.checks || [];
-  const metaTags = data.data?.seo?.metaTags || {};
+  const seoChecks = data?.data?.seo?.checks || [];
+  const metaTags = data?.data?.seo?.metaTags || {};
 
   // Content structure analysis with consistent colors and abbreviated names
   const contentStructureData = [
