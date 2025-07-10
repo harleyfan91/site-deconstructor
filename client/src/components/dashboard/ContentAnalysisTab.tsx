@@ -92,6 +92,11 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
 
   // Content readability and text analysis data - should pull from Playwright
   const contentData = data?.data?.content;
+  
+  // Debug logging to understand data structure
+  console.log('ContentAnalysisTab - Full data:', data);
+  console.log('ContentAnalysisTab - Content data:', contentData);
+  
   const readabilityScore: number = typeof contentData?.readabilityScore === 'number' ? contentData.readabilityScore : 
     (contentData?.readabilityScore === "!" ? 0 : Number(contentData?.readabilityScore) || 0);
   const wordCount: number = typeof contentData?.wordCount === 'number' ? contentData.wordCount : 
