@@ -327,8 +327,12 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
   const displayTechStack = techAnalysis?.techStack || techData?.techStack || [];
   const displayMinification = techAnalysis?.minification || techData?.minification;
   const displaySocial = techAnalysis?.social || techData?.social;
-  const displayCookies = techAnalysis?.cookies || techData?.cookies;
-  const displayAdTags = techAnalysis?.adTags || techData?.adTags;
+  const displayCookies = techAnalysis?.cookies || techData?.cookies || {
+    hasSessionCookies: false,
+    hasTrackingCookies: false,
+    hasAnalyticsCookies: false
+  };
+  const displayAdTags = techAnalysis?.adTags || techData?.adTags || [];
 
   // Determine if we have any tech data at all (from either source)
   const hasTechData = !!(techData && Object.keys(techData).length > 0) || !!techAnalysis;
@@ -484,7 +488,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
               <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                 Ad tag analysis unavailable
               </Typography>
-            ) : !displayAdTags ? (
+            ) : displayAdTags.length === 0 ? (
               <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                 No ad tags detected
               </Typography>
@@ -632,10 +636,6 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
             ) : techError ? (
               <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                 Cookie analysis unavailable
-              </Typography>
-            ) : !displayCookies ? (
-              <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
-                No cookie consent data available
               </Typography>
             ) : (
               <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 2 }}>
