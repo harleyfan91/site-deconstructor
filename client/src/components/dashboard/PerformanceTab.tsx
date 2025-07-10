@@ -196,7 +196,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
                       <Box
                         sx={{
                           position: 'relative',
-                          height: 48,
+                          height: 36,
                           borderRadius: 6,
                           border: '2px solid',
                           borderColor: theme.palette.divider,
@@ -216,13 +216,11 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            backgroundColor: desktopTimeSec < 2 ? theme.palette.success.light : 
-                                           desktopTimeSec < 4 ? theme.palette.warning.light : 
-                                           theme.palette.error.light,
+                            backgroundColor: '#FF6B35', // Bright orange for desktop
                             borderRadius: '4px 0 0 4px',
                           }}
                         >
-                          <Typography variant="body2" sx={{ fontWeight: 'medium', color: 'white' }}>
+                          <Typography variant="body2" sx={{ fontWeight: 'medium', color: 'white', fontSize: '0.75rem' }}>
                             Desktop: {desktopTimeSec.toFixed(1)}s
                           </Typography>
                         </Box>
@@ -238,13 +236,11 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            backgroundColor: mobileTimeSec < 3 ? theme.palette.success.main : 
-                                           mobileTimeSec < 6 ? theme.palette.warning.main : 
-                                           theme.palette.error.main,
+                            backgroundColor: '#CC5429', // Darker orange for mobile
                             borderRadius: '0 4px 4px 0',
                           }}
                         >
-                          <Typography variant="body2" sx={{ fontWeight: 'medium', color: 'white' }}>
+                          <Typography variant="body2" sx={{ fontWeight: 'medium', color: 'white', fontSize: '0.75rem' }}>
                             Mobile: {mobileTimeSec.toFixed(1)}s
                           </Typography>
                         </Box>
