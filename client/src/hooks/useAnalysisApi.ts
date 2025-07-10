@@ -103,23 +103,30 @@ export const useAnalysisApi = () => {
         setData(immediateResult);
         setLoading(false); // Allow Overview tab to render
 
-        // Step 2: Get complete analysis with Lighthouse data in background
-        console.log('🔍 Fetching comprehensive analysis in background...');
-        fetch(`/api/analyze/full?url=${encodeURIComponent(url)}`, {
+        // Step 2: Get complete analysis from overview aggregator in background
+        console.log('🔍 Fetching comprehensive overview data in background...');
+        fetch(`/api/overview?url=${encodeURIComponent(url)}`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' }
-        }).then(async (fullResponse) => {
-          if (fullResponse.ok) {
-            const fullResult: ExtendedAnalysisResponse = await fullResponse.json();
-            console.log('🎯 Comprehensive data received - updating Performance metrics');
+        }).then(async (overviewResponse) => {
+          if (overviewResponse.ok) {
+            const overviewData = await overviewResponse.json();
+            console.log('🎯 Complete overview data received - updating all metrics');
             
-            // Update with complete data including Lighthouse
-            setData(fullResult);
+            // Transform overview data to match expected structure
+            const completeResult: ExtendedAnalysisResponse = {
+              ...immediateResult,
+              data: overviewData,
+              loadingComplete: true
+            };
+            
+            // Update with complete data including all analysis
+            setData(completeResult);
           } else {
-            console.warn('Comprehensive analysis failed, keeping local analysis');
+            console.warn('Overview analysis failed, keeping immediate analysis');
           }
         }).catch((err) => {
-          console.warn('Background fetch error:', err);
+          console.warn('Background overview fetch error:', err);
         });
 
         return immediateResult;

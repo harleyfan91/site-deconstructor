@@ -530,16 +530,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const html = await response.text();
       logTiming('HTML fetch (immediate)', htmlStartTime);
       
-      // If immediate=true, return just local scraped data quickly
+      // If immediate=true, return just HTML-based data quickly (no Playwright)
       if (isImmediate) {
-        console.log('⚡ Returning immediate local analysis only');
+        console.log('⚡ Returning immediate HTML-only analysis');
         
-        // Do basic page scraping without heavy analysis
-        const scrapedData = await scrapePageData(url);
+        // Extract basic data from HTML without Playwright
+        const title = html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1] || url;
+        const metaDescription = html.match(/<meta[^>]*name="description"[^>]*content="([^"]*)"[^>]*>/i)?.[1] || '';
+        
         const immediateData = {
-          ui: buildUIData(scrapedData),
-          content: buildContentData(scrapedData),
-          seo: { metaTags: scrapedData.metaTags || {} },
+          ui: {
+            fonts: [],
+            images: [],
+            imageAnalysis: { totalImages: '!' },
+            contrastIssues: []
+          },
+          content: {
+            wordCount: '!',
+            readabilityScore: '!'
+          },
+          seo: { 
+            metaTags: { description: metaDescription },
+            score: '!'
+          },
           overview: {
             overallScore: '!', // Marker for loading state
             seoScore: '!',
@@ -554,8 +567,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           timestamp: new Date().toISOString(),
           url,
           data: immediateData,
-          title: scrapedData.title || url,
-          description: scrapedData.metaTags?.description || `Analysis of ${url}`,
+          title,
+          description: metaDescription || `Analysis of ${url}`,
           loadingComplete: false,
           immediateDataReady: true
         };
