@@ -7,11 +7,12 @@ import {
   CircularProgress,
   Alert,
   Tooltip,
+  Slider,
 } from '@mui/material';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart';
 import { BarChart as RechartsBarChart, Bar, XAxis, YAxis } from 'recharts';
 import { useTheme } from '@mui/material/styles';
-import { Shield, Smartphone, Zap, Activity, BarChart } from 'lucide-react';
+import { Shield, Smartphone, Zap, Activity, BarChart, Clock } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 import { useAnalysisContext } from '../../contexts/AnalysisContext';
 
@@ -89,7 +90,19 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
   const performanceScore = performance?.performanceScore || 0;
   const mobileScore = contextData?.mobileResponsiveness?.score || 0;
   const securityScore = contextData?.lhr ? Math.round(contextData.lhr.categories.security.score * 100) : 0;
-  const showLoadingForPerformance = loading || !performance?.coreWebVitals || (performance.coreWebVitals && performance.coreWebVitals.length === 0);
+  
+  // Handle both old array format and new object format
+  const coreWebVitals = performance?.coreWebVitals;
+  const pageLoadTime = performance?.pageLoadTime;
+  
+  const showLoadingForPerformance = loading || !coreWebVitals;
+
+  // Convert Core Web Vitals object to chart data
+  const vitalsChartData = coreWebVitals ? [
+    { name: 'LCP', value: Math.round(coreWebVitals.lcpMs || 0), benchmark: 2500 },
+    { name: 'INP', value: Math.round(coreWebVitals.inpMs || 0), benchmark: 200 },
+    { name: 'CLS', value: Math.round((coreWebVitals.cls || 0) * 100), benchmark: 10 }
+  ] : [];
 
   const chartConfig = {
     value: { label: 'Your Site', color: theme.palette.primary.main },
@@ -150,17 +163,66 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
                   </Typography>
                 </Box>
 
-                <Box>
+                <Box sx={{ mb: 3 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                     <Typography variant="body2">Security Score</Typography>
                     <Typography variant="h4" sx={{ color: getScoreColor(securityScore, theme) }}>
                       {securityScore}%
                     </Typography>
                   </Box>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                     Based on Lighthouse security audits
                   </Typography>
                 </Box>
+
+                {/* Page Load Time Slider */}
+                {pageLoadTime && (
+                  <Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                      <Clock size={20} style={{ marginRight: 8, color: theme.palette.primary.main }} />
+                      <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
+                        Page Load Time
+                      </Typography>
+                    </Box>
+                    <Box sx={{ px: 1 }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                        <Typography variant="body2" color="text.secondary">Desktop</Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
+                          {pageLoadTime.desktop}ms
+                        </Typography>
+                      </Box>
+                      <Slider
+                        value={pageLoadTime.desktop}
+                        min={0}
+                        max={5000}
+                        disabled
+                        sx={{
+                          color: getScoreColor(pageLoadTime.desktop < 1000 ? 90 : pageLoadTime.desktop < 3000 ? 70 : 40, theme),
+                          mb: 2,
+                          '& .MuiSlider-thumb': { display: 'none' },
+                          '& .MuiSlider-track': { border: 'none' },
+                        }}
+                      />
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                        <Typography variant="body2" color="text.secondary">Mobile</Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
+                          {pageLoadTime.mobile}ms
+                        </Typography>
+                      </Box>
+                      <Slider
+                        value={pageLoadTime.mobile}
+                        min={0}
+                        max={10000}
+                        disabled
+                        sx={{
+                          color: getScoreColor(pageLoadTime.mobile < 2000 ? 90 : pageLoadTime.mobile < 5000 ? 70 : 40, theme),
+                          '& .MuiSlider-thumb': { display: 'none' },
+                          '& .MuiSlider-track': { border: 'none' },
+                        }}
+                      />
+                    </Box>
+                  </Box>
+                )}
               </>
             )}
           </CardContent>
@@ -185,13 +247,13 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
             ) : (
               <ChartContainer config={chartConfig} className="h-80 w-full">
                 <RechartsBarChart
-                  data={performance?.coreWebVitals || []}
+                  data={vitalsChartData}
                   margin={{ top: 20, right: 30, left: 10, bottom: 5 }}
                 >
                   <XAxis dataKey="name" tick={<CustomTick />} />
-                  <YAxis domain={[0, 100]} />
+                  <YAxis />
                   <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-                  <Bar dataKey="value" fill="#FF6B35" />
+                  <Bar dataKey="value" fill={theme.palette.primary.main} />
                   <Bar dataKey="benchmark" fill={theme.palette.grey[300]} />
                 </RechartsBarChart>
               </ChartContainer>
