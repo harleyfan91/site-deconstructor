@@ -5,7 +5,7 @@ import type { AnalysisResponse } from '@/types/analysis';
 import ColorExtractionCard from './ui-analysis/ColorExtractionCard';
 import FontAnalysisCard from './ui-analysis/FontAnalysisCard';
 import ImageAnalysisCard from './ui-analysis/ImageAnalysisCard';
-import ContrastWarningsCard from './ui-analysis/ContrastWarningsCard';
+import AccessibilityCard from './ui-analysis/AccessibilityCard';
 import LegendContainer from './LegendContainer';
 
 interface UIAnalysisTabProps {
@@ -59,11 +59,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
 
           <Card sx={{ borderRadius: 2, width: '100%' }}>
             <CardContent sx={{ p: 2 }}>
-              <ContrastWarningsCard 
-                issues={ui?.contrastIssues ?? []} 
-                data={data}
-                loading={loading}
-              />
+              <AccessibilityCard url={data?.url} />
             </CardContent>
           </Card>
         </Box>
