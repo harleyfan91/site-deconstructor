@@ -4,6 +4,8 @@ import { Box, Typography, Card, CardContent, Chip, CircularProgress, Alert, Tool
 import { CheckCircle, AlertCircle, XCircle, Search, Target, TrendingUp, Hash, FileText, Globe, Shield, Check, X } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 import { useTheme } from '@mui/material/styles';
+import SocialPreviewAudit from './SocialPreviewAudit';
+import CompetitorInsights from './CompetitorInsights';
 
 interface SEOAnalysisTabProps {
   data: AnalysisResponse | null;
@@ -164,6 +166,28 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
           SEO Analysis
         </Typography>
       </Box>
+      
+      {/* Social Preview Audit - New first section */}
+      <Box sx={{ mb: 3 }}>
+        <SocialPreviewAudit seoData={seoData} loading={seoLoading} url={url} />
+      </Box>
+      
+      {/* Competitor Insights - New second section */}
+      <Box sx={{ mb: 3 }}>
+        <CompetitorInsights 
+          currentWebsite={data && seoData ? {
+            url: decodeURIComponent(url),
+            seoScore: seoData.score || 0,
+            performanceScore: (data as any)?.performance?.overallScore || 0,
+            techStack: (data as any)?.tech?.techStack?.map((t: any) => t.technology) || [],
+            loadTime: (data as any)?.performance?.pageLoadTime || 0,
+            trackingPixels: Object.values((data as any)?.tech?.adTags || {}).filter(Boolean).length,
+            securityScore: (data as any)?.tech?.securityHeaders ? 
+              Object.values((data as any).tech.securityHeaders).filter((h: any) => h !== 'Not Set').length * 20 : 0
+          } : undefined}
+        />
+      </Box>
+      
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 2, mb: 2 }}>
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 3 }}>

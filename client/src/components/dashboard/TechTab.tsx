@@ -75,8 +75,17 @@ function getHealthGradeColor(grade: string): string {
  *  ==============
  */
 
-// Descriptor for ad tag detection chips
+// Descriptor for tracking pixels and ad tag detection chips
 const adTagDescriptors = [
+  // Enhanced tracking pixels (most common)
+  { label: 'Google Analytics 4', key: 'hasGA4' },
+  { label: 'Google Tag Manager', key: 'hasGTM' },
+  { label: 'Meta/Facebook Pixel', key: 'hasMetaPixel' },
+  { label: 'LinkedIn Insight Tag', key: 'hasLinkedInInsight' },
+  { label: 'TikTok Pixel', key: 'hasTikTokPixel' },
+  { label: 'Twitter Pixel', key: 'hasTwitterPixel' },
+  
+  // Traditional ad networks
   { label: 'Google GAM/GPT', key: 'hasGAM' },
   { label: 'AdSense/DFP', key: 'hasAdSense' },
   { label: 'Prebid.js', key: 'hasPrebid' },
@@ -218,6 +227,13 @@ interface TechnicalAnalysis {
     hasMoat: boolean;
     hasDV: boolean;
     hasIAS: boolean;
+    // Enhanced tracking pixels
+    hasGA4: boolean;
+    hasGTM: boolean;
+    hasMetaPixel: boolean;
+    hasLinkedInInsight: boolean;
+    hasTikTokPixel: boolean;
+    hasTwitterPixel: boolean;
   };
   securityHeaders: {
     csp: string;
@@ -485,23 +501,23 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                   fontSize: { xs: '1.1rem', sm: '1.25rem' }
                 }}
               >
-                Detected Ad Tags
+                Tracking Pixels & Ad Tags
               </Typography>
             </Box>
             {isAdTagsLoading ? (
               <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
                 <CircularProgress size={32} sx={{ mr: 2 }} />
                 <Typography variant="body2" color="text.secondary">
-                  Scanning for ad tags...
+                  Scanning for tracking pixels and ad tags...
                 </Typography>
               </Box>
             ) : shouldShowError ? (
               <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
-                Ad tag analysis unavailable
+                Tracking pixel analysis unavailable
               </Typography>
             ) : displayAdTags.length === 0 ? (
               <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
-                No ad tags detected
+                No tracking pixels or ad tags detected
               </Typography>
             ) : (
               <Box sx={{

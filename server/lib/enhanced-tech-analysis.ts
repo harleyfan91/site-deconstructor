@@ -95,6 +95,13 @@ export interface EnhancedTechAnalysis {
     hasMoat: boolean;
     hasDV: boolean;
     hasIAS: boolean;
+    // Enhanced tracking pixels
+    hasGA4: boolean;
+    hasGTM: boolean;
+    hasMetaPixel: boolean;
+    hasLinkedInInsight: boolean;
+    hasTikTokPixel: boolean;
+    hasTwitterPixel: boolean;
   };
   
   // Combined issues and recommendations
@@ -172,26 +179,33 @@ export async function getEnhancedTechAnalysis(url: string): Promise<EnhancedTech
           cookieConsentType: (lightweightData.social?.googleAnalytics || lightweightData.social?.facebookPixel) ? 'banner' : 'none' as const,
           cookieLibrary: lightweightData.social?.googleAnalytics ? 'Google Analytics' : undefined
         },
-        // Generate basic ad tag analysis (lightweight doesn't provide this)
+        // Use real ad tag analysis from lightweight detection
         adTags: {
-          hasGAM: false,
-          hasAdSense: false,
-          hasPrebid: false,
-          hasAPS: false,
-          hasIX: false,
-          hasANX: false,
-          hasOpenX: false,
-          hasRubicon: false,
-          hasPubMatic: false,
-          hasVPAID: false,
-          hasCriteo: false,
-          hasTaboola: false,
-          hasOutbrain: false,
-          hasSharethrough: false,
-          hasTeads: false,
-          hasMoat: false,
-          hasDV: false,
-          hasIAS: false
+          hasGAM: lightweightData.adTags?.hasGAM || false,
+          hasAdSense: lightweightData.adTags?.hasAdSense || false,
+          hasPrebid: lightweightData.adTags?.hasPrebid || false,
+          hasAPS: lightweightData.adTags?.hasAPS || false,
+          hasIX: lightweightData.adTags?.hasIX || false,
+          hasANX: lightweightData.adTags?.hasANX || false,
+          hasOpenX: lightweightData.adTags?.hasOpenX || false,
+          hasRubicon: lightweightData.adTags?.hasRubicon || false,
+          hasPubMatic: lightweightData.adTags?.hasPubMatic || false,
+          hasVPAID: lightweightData.adTags?.hasVPAID || false,
+          hasCriteo: lightweightData.adTags?.hasCriteo || false,
+          hasTaboola: lightweightData.adTags?.hasTaboola || false,
+          hasOutbrain: lightweightData.adTags?.hasOutbrain || false,
+          hasSharethrough: lightweightData.adTags?.hasSharethrough || false,
+          hasTeads: lightweightData.adTags?.hasTeads || false,
+          hasMoat: lightweightData.adTags?.hasMoat || false,
+          hasDV: lightweightData.adTags?.hasDV || false,
+          hasIAS: lightweightData.adTags?.hasIAS || false,
+          // Enhanced tracking pixels
+          hasGA4: lightweightData.adTags?.hasGA4 || false,
+          hasGTM: lightweightData.adTags?.hasGTM || false,
+          hasMetaPixel: lightweightData.adTags?.hasMetaPixel || false,
+          hasLinkedInInsight: lightweightData.adTags?.hasLinkedInInsight || false,
+          hasTikTokPixel: lightweightData.adTags?.hasTikTokPixel || false,
+          hasTwitterPixel: lightweightData.adTags?.hasTwitterPixel || false
         },
         issues: lightweightData.issues.map(issue => ({ ...issue, source: 'lightweight' as const })),
         lighthouseScore: 0,

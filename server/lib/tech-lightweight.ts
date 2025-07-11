@@ -36,11 +36,40 @@ export interface SocialAnalysis {
   linkedInInsight?: boolean;
 }
 
+export interface AdTagsAnalysis {
+  hasGAM: boolean;
+  hasAdSense: boolean;
+  hasPrebid: boolean;
+  hasAPS: boolean;
+  hasIX: boolean;
+  hasANX: boolean;
+  hasOpenX: boolean;
+  hasRubicon: boolean;
+  hasPubMatic: boolean;
+  hasVPAID: boolean;
+  hasCriteo: boolean;
+  hasTaboola: boolean;
+  hasOutbrain: boolean;
+  hasSharethrough: boolean;
+  hasTeads: boolean;
+  hasMoat: boolean;
+  hasDV: boolean;
+  hasIAS: boolean;
+  // Enhanced tracking pixels
+  hasGA4: boolean;
+  hasGTM: boolean;
+  hasMetaPixel: boolean;
+  hasLinkedInInsight: boolean;
+  hasTikTokPixel: boolean;
+  hasTwitterPixel: boolean;
+}
+
 export interface TechnicalAnalysis {
   techStack: TechStackItem[];
   securityHeaders: SecurityHeaders;
   minification: MinificationResult;
   social: SocialAnalysis;
+  adTags: AdTagsAnalysis;
   issues: Array<{
     type: string;
     description: string;
@@ -178,6 +207,38 @@ function analyzeSocialTags(html: string): SocialAnalysis {
   };
 }
 
+function analyzeAdTags(html: string): AdTagsAnalysis {
+  return {
+    // Traditional ad networks
+    hasGAM: /googletag|gpt\.js|doubleclick\.net/i.test(html),
+    hasAdSense: /googlesyndication\.com|google_ads/i.test(html),
+    hasPrebid: /prebid\.js|pbjs\./i.test(html),
+    hasAPS: /amazon-adsystem\.com|apstag/i.test(html),
+    hasIX: /casalemedia\.com|indexexchange/i.test(html),
+    hasANX: /appnexus\.com|adnxs\.com/i.test(html),
+    hasOpenX: /openx\.net|ox-d\.js/i.test(html),
+    hasRubicon: /rubiconproject\.com|rpfl_\d+/i.test(html),
+    hasPubMatic: /pubmatic\.com|pwt\.js/i.test(html),
+    hasVPAID: /vpaid|video.*ad/i.test(html),
+    hasCriteo: /criteo\.com|cto_bundle/i.test(html),
+    hasTaboola: /taboola\.com|_taboola/i.test(html),
+    hasOutbrain: /outbrain\.com|_ob_/i.test(html),
+    hasSharethrough: /sharethrough\.com|sfp\.js/i.test(html),
+    hasTeads: /teads\.tv|inread/i.test(html),
+    hasMoat: /moatads\.com|moat\.js/i.test(html),
+    hasDV: /doubleverify\.com|dvbs_src/i.test(html),
+    hasIAS: /adsystem\.com|ias\.js/i.test(html),
+    
+    // Enhanced tracking pixels
+    hasGA4: /gtag\(|GA_MEASUREMENT_ID|google-analytics\.com\/analytics\.js/i.test(html),
+    hasGTM: /googletagmanager\.com|gtm\.js/i.test(html),
+    hasMetaPixel: /connect\.facebook\.net|fbq\(|facebook\.com\/tr/i.test(html),
+    hasLinkedInInsight: /snap\.licdn\.com|linkedin\.com\/px/i.test(html),
+    hasTikTokPixel: /analytics\.tiktok\.com|ttq\./i.test(html),
+    hasTwitterPixel: /static\.ads-twitter\.com|analytics\.twitter\.com|twq\(/i.test(html)
+  };
+}
+
 function analyzeCDN(headers: Headers): boolean {
   const server = headers.get('server')?.toLowerCase() || '';
   const cfRay = headers.get('cf-ray');
@@ -205,6 +266,7 @@ export async function extractTechnicalData(url: string): Promise<TechnicalAnalys
     const securityHeaders = analyzeSecurityHeaders(headers);
     const minification = analyzeMinification(html);
     const social = analyzeSocialTags(html);
+    const adTags = analyzeAdTags(html);
     const cdn = analyzeCDN(headers);
     const gzip = analyzeCompression(headers);
     
@@ -243,6 +305,7 @@ export async function extractTechnicalData(url: string): Promise<TechnicalAnalys
       securityHeaders,
       minification,
       social,
+      adTags,
       issues,
       tlsVersion,
       cdn,
