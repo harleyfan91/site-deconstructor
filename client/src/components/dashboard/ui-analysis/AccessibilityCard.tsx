@@ -93,9 +93,15 @@ const AccessibilityCard: React.FC<AccessibilityCardProps> = ({ url }) => {
   }, [url]);
 
   const getScoreColor = (score: number) => {
-    if (score >= 90) return 'success.main';
-    if (score >= 70) return 'warning.main';
+    if (score >= 80) return 'success.main';
+    if (score >= 60) return 'warning.main';
     return 'error.main';
+  };
+
+  const getScoreLabel = (score: number) => {
+    if (score >= 80) return 'Excellent';
+    if (score >= 60) return 'Good';
+    return 'Needs Improvement';
   };
 
   const getImpactColor = (impact: string) => {
@@ -137,15 +143,26 @@ const AccessibilityCard: React.FC<AccessibilityCardProps> = ({ url }) => {
               <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
                 Accessibility Score
               </Typography>
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  fontWeight: 'bold', 
-                  color: getScoreColor(data.score) 
-                }}
-              >
-                {data.score}%
-              </Typography>
+              <Box sx={{ textAlign: 'right' }}>
+                <Typography 
+                  variant="h6" 
+                  sx={{ 
+                    fontWeight: 'bold', 
+                    color: getScoreColor(data.score) 
+                  }}
+                >
+                  {data.score}%
+                </Typography>
+                <Typography 
+                  variant="caption" 
+                  sx={{ 
+                    color: getScoreColor(data.score),
+                    fontWeight: 'medium'
+                  }}
+                >
+                  {getScoreLabel(data.score)}
+                </Typography>
+              </Box>
             </Box>
             <LinearProgress
               variant="determinate"
@@ -160,12 +177,15 @@ const AccessibilityCard: React.FC<AccessibilityCardProps> = ({ url }) => {
             />
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
               <Typography variant="caption" color="text.secondary">
-                {data.passedRules} passed
+                {data.passedRules} rules passed
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                {data.failedRules} failed
+                {data.failedRules} violations found
               </Typography>
             </Box>
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+              Higher scores indicate better accessibility compliance
+            </Typography>
           </Box>
 
           {/* Summary */}
