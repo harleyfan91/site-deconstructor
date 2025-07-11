@@ -66,9 +66,32 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
   // Fetch tech data when URL is available
   useEffect(() => {
     if (data?.url && !loading && !error) {
-      fetchTechData(data.url);
+      // Add a small delay to avoid overwhelming the API
+      const timer = setTimeout(() => {
+        fetchTechData(data.url);
+      }, 1000);
+      
+      return () => clearTimeout(timer);
     }
   }, [data?.url, loading, error]);
+
+  // Auto-timeout after 15 seconds if still loading
+  useEffect(() => {
+    if (techLoading) {
+      const autoTimeout = setTimeout(() => {
+        console.log('⏰ Auto-timeout: Using fallback data after 15 seconds');
+        const fallbackTech = data?.data?.tech || data?.data?.technical;
+        if (fallbackTech) {
+          setTechData(fallbackTech);
+        } else {
+          setTechError('Analysis timed out - showing available data');
+        }
+        setTechLoading(false);
+      }, 15000); // 15 second auto-timeout
+      
+      return () => clearTimeout(autoTimeout);
+    }
+  }, [techLoading, data]);
 
   const fetchTechData = async (url: string) => {
     setTechLoading(true);
@@ -77,13 +100,19 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
     try {
       console.log('🔧 Fetching tech data for compliance tab:', url);
       
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+      
       const response = await fetch('/api/tech', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ url }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         throw new Error('Tech analysis failed');
@@ -94,7 +123,14 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
       setTechData(analysisData);
     } catch (err) {
       console.error('Tech analysis error:', err);
-      setTechError('Technical analysis temporarily unavailable');
+      // Use fallback data from main analysis if available
+      const fallbackTech = data?.data?.tech || data?.data?.technical;
+      if (fallbackTech) {
+        console.log('Using fallback tech data for compliance');
+        setTechData(fallbackTech);
+      } else {
+        setTechError('Technical analysis temporarily unavailable');
+      }
     } finally {
       setTechLoading(false);
     }
@@ -141,6 +177,9 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
     xcto: '', 
     referrer: '' 
   };
+  
+  // Check if we have any meaningful data to display
+  const hasAnalysisData = techData || Object.keys(tech).length > 0 || !techLoading;
   
   // Get Lighthouse security data
   const lhr = contextData?.lhr;
