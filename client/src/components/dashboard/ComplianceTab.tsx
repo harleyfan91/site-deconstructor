@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Box,
   Typography,
@@ -103,8 +103,8 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
   // Simplified security score logic to avoid dependency issues
   const showSeparateSecurityGrade = false; // Disable separate security grade for now
 
-  // Security header categories with actual header values
-  const headerCategories = [
+  // Memoize header categories to prevent infinite loops in useEffect
+  const headerCategories = useMemo(() => [
     {
       name: 'Content Security Policy',
       headers: [
@@ -132,19 +132,44 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
         { name: 'Referrer-Policy', value: securityHeaders.referrer, description: 'Controls referrer information' }
       ]
     }
-  ];
+  ], [securityHeaders.csp, securityHeaders.hsts, securityHeaders.xfo, securityHeaders.xcto, securityHeaders.referrer]);
 
-  // Simplified initialization - avoid complex effects that could cause infinite loops
+  // Restored auto-collapse animation with fixed dependencies
   React.useEffect(() => {
-    if (data?.url && headerCategories.length > 0) {
-      // Simple initialization on URL change
-      const initialState: Record<string, boolean> = {};
+    if (!data || headerCategories.length === 0) return;
+    
+    // Always initialize sections as expanded for fresh data
+    const initialState: Record<string, boolean> = {};
+    headerCategories.forEach(category => {
+      initialState[category.name] = true;
+    });
+    setHeaderSectionsExpanded(initialState);
+
+    // Start glow animation 1 second before collapse
+    const glowTimer = setTimeout(() => {
+      const glowState: Record<string, boolean> = {};
       headerCategories.forEach(category => {
-        initialState[category.name] = false; // Start collapsed
+        glowState[category.name] = true;
       });
-      setHeaderSectionsExpanded(initialState);
-    }
-  }, [data?.url]); // Only depend on URL change
+      setGlowingSections(glowState);
+    }, 1500); // Start glowing at 1.5s (collapse happens at 2.5s)
+
+    // Auto-collapse all sections after delay
+    const collapseTimer = setTimeout(() => {
+      const collapsedState: Record<string, boolean> = {};
+      headerCategories.forEach(category => {
+        collapsedState[category.name] = false;
+      });
+      setHeaderSectionsExpanded(collapsedState);
+      // Stop glowing after collapse
+      setGlowingSections({});
+    }, 2500);
+
+    return () => {
+      clearTimeout(glowTimer);
+      clearTimeout(collapseTimer);
+    };
+  }, [data?.url, headerCategories]); // Fixed dependencies - now memoized
 
   return (
     <Box>
