@@ -50,10 +50,12 @@ const ContrastWarningsCard: React.FC<ContrastWarningsCardProps> = ({ issues, dat
   // Defensive: always work with an array
   const issuesSafe = Array.isArray(issues) ? issues : [];
 
-  // Extract accessibility data
+  // Extract real accessibility data from color extraction API
   const violations = data?.accessibility?.violations || [];
-  const totalChecks = 50;
-  const score = Math.max(0, Math.round((1 - violations.length / totalChecks) * 100));
+  // Use real accessibility score from color extraction if available, otherwise fallback calculation
+  const realAccessibilityScore = data?.data?.ui?.accessibilityScore;
+  const score = realAccessibilityScore !== undefined ? realAccessibilityScore : 
+    Math.max(0, Math.round((1 - violations.length / 50) * 100));
 
   if (loading) {
     return (

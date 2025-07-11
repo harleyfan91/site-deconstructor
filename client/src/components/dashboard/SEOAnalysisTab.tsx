@@ -4,7 +4,7 @@ import { Box, Typography, Card, CardContent, Chip, CircularProgress, Alert, Tool
 import { CheckCircle, AlertCircle, XCircle, Search, Target, TrendingUp, Hash, FileText, Globe, Shield, Check, X } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 import { useTheme } from '@mui/material/styles';
-import SocialPreviewAudit from './SocialPreviewAudit';
+
 
 interface SEOAnalysisTabProps {
   data: AnalysisResponse | null;
@@ -164,11 +164,6 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
         <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', flexGrow: 1 }}>
           SEO Analysis
         </Typography>
-      </Box>
-      
-      {/* Social Preview Audit - New first section */}
-      <Box sx={{ mb: 3 }}>
-        <SocialPreviewAudit seoData={seoData} loading={seoLoading} url={url} />
       </Box>
       
 
