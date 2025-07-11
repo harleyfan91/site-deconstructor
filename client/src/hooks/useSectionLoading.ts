@@ -34,14 +34,14 @@ export const useSectionLoading = (data: AnalysisResponse | null, globalLoading: 
       return;
     }
 
-    // Check which sections have loaded based on data availability
+    // Check which sections have loaded based on data availability (fixed data structure)
     setSectionLoading({
-      performance: !data.data?.performance?.coreWebVitals || data.data.performance.coreWebVitals.length === 0,
-      seo: !data.data?.seo?.score && data.data?.seo?.score !== 0,
-      technical: !data.data?.technical?.accessibility,
-      ui: !data.data?.ui, // UI tab loads when ui section exists, regardless of colors
-      content: !data.data?.overview,
-      compliance: !data.data?.technical?.accessibility, // Use accessibility data for compliance until PSI loads
+      performance: !data.data?.performance,
+      seo: !data.data?.seo,
+      technical: !data.data?.tech && !data.data?.technical, // Check both possible locations
+      ui: !data.data?.ui,
+      content: !data.data?.content && !data.data?.overview,
+      compliance: !data.data?.tech && !data.data?.technical, // Compliance uses tech data
     });
   }, [data, globalLoading]);
 

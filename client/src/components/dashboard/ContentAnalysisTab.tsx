@@ -221,7 +221,7 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
             ) : (
               <Box sx={{ height: 300, width: '100%', minHeight: 300, minWidth: 300 }}>
                 <ChartContainer config={chartConfig}>
-                  <BarChart width={350} height={280} data={contentStructureData} margin={{ top: 20, right: 20, left: 0, bottom: 5 }}>
+                  <BarChart width={380} height={300} data={contentStructureData} margin={{ top: 20, right: 20, left: 0, bottom: 5 }}>
                     <XAxis dataKey="metric" tick={<ContentCustomTick />} />
                     <YAxis domain={[0, 100]} />
                     <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
