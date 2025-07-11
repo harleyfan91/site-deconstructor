@@ -2,6 +2,25 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
+// Global error handlers to prevent process crashes from Lighthouse performance mark errors
+process.on('uncaughtException', (error) => {
+  if (error instanceof DOMException && error.message.includes('performance mark')) {
+    console.warn('Caught DOMException for performance mark, continuing...', error.message);
+    return;
+  }
+  console.error('Uncaught Exception:', error);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  if (reason instanceof DOMException && reason.message.includes('performance mark')) {
+    console.warn('Caught unhandled rejection for performance mark, continuing...', reason.message);
+    return;
+  }
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  process.exit(1);
+});
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

@@ -7,6 +7,50 @@ import { launch } from 'chrome-launcher';
 import { SupabaseCacheService } from './supabase';
 import * as crypto from 'crypto';
 
+// Prevent DOMException errors by stubbing problematic performance methods
+const originalPerformance = global.performance;
+
+// Handle performance mark errors globally
+const safeMark = (name: string) => {
+  try {
+    if (originalPerformance?.mark) {
+      originalPerformance.mark(name);
+    }
+  } catch (error) {
+    // Silently ignore performance mark errors
+  }
+};
+
+const safeMeasure = (name: string, startMark?: string, endMark?: string) => {
+  try {
+    if (originalPerformance?.measure) {
+      originalPerformance.measure(name, startMark, endMark);
+    }
+  } catch (error) {
+    // Silently ignore performance measure errors
+  }
+};
+
+const safeClearMarks = (name?: string) => {
+  try {
+    if (originalPerformance?.clearMarks) {
+      originalPerformance.clearMarks(name);
+    }
+  } catch (error) {
+    // Silently ignore performance clear errors
+  }
+};
+
+const safeClearMeasures = (name?: string) => {
+  try {
+    if (originalPerformance?.clearMeasures) {
+      originalPerformance.clearMeasures(name);
+    }
+  } catch (error) {
+    // Silently ignore performance clear errors
+  }
+};
+
 export interface LighthouseSEOData {
   score: number;
   audits: {
@@ -67,13 +111,21 @@ async function runLighthouse(url: string, categories: string[], device: 'desktop
   try {
     console.log(`🔍 Running Lighthouse analysis for ${url} (categories: ${categories.join(', ')}, device: ${device})`);
     
+    // Clear any existing performance marks before starting
+    safeClearMarks();
+    safeClearMeasures();
+    
     chrome = await launch({
       chromeFlags: [
         '--headless',
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
-        '--disable-extensions'
+        '--disable-extensions',
+        '--disable-gpu',
+        '--disable-background-timer-throttling',
+        '--disable-backgrounding-occluded-windows',
+        '--disable-renderer-backgrounding'
       ]
     });
 
@@ -97,44 +149,40 @@ async function runLighthouse(url: string, categories: string[], device: 'desktop
         downloadThroughputKbps: 0,
         uploadThroughputKbps: 0
       },
-      emulatedFormFactor: device
+      emulatedFormFactor: device,
+      // Disable timing measurements that cause DOMException
+      disableStorageReset: false,
+      skipAudits: ['largest-contentful-paint-element']
     } as any;
 
     const result = await lighthouse(url, config);
 
     console.log(`✅ Lighthouse analysis completed for ${url} (${device})`);
     
-    // Clear any performance marks to prevent DOMException errors
+    // Clean up the result to prevent serialization issues
     if (result?.lhr) {
+      // Remove timing data that can cause performance mark errors
       if (result.lhr.timing) {
         delete result.lhr.timing;
       }
-      // Clear performance marks that might cause issues
-      try {
-        if (typeof performance !== 'undefined' && performance.clearMarks) {
-          performance.clearMarks();
-        }
-      } catch (perfError) {
-        // Ignore performance mark clearing errors
-        console.warn('Could not clear performance marks:', perfError.message);
+      if (result.lhr.i18n) {
+        delete result.lhr.i18n;
+      }
+      // Remove any trace data
+      if (result.lhr.artifacts) {
+        delete result.lhr.artifacts;
       }
     }
     
     return result?.lhr;
   } catch (error) {
     console.error('Lighthouse analysis failed:', error);
-    
-    // Clear any performance marks even on error
-    try {
-      if (typeof performance !== 'undefined' && performance.clearMarks) {
-        performance.clearMarks();
-      }
-    } catch (perfError) {
-      // Ignore performance mark clearing errors
-    }
-    
     throw error;
   } finally {
+    // Always clean up performance marks and Chrome process
+    safeClearMarks();
+    safeClearMeasures();
+    
     if (chrome && chrome.kill) {
       try {
         await chrome.kill();
