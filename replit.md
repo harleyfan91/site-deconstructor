@@ -273,6 +273,8 @@ A comprehensive website analysis tool that provides insights into performance, S
 - ✓ Updated TechTab "Ad Tags" section to "Tracking Pixels & Ad Tags" with comprehensive tracking pixel detection
 - ✓ Added ResponsiveLayoutProbe component in Performance tab for cross-device layout analysis and viewport testing
 - ✓ Enhanced backend tech-lightweight.ts with real tracking pixel detection patterns and analysis
+- ✓ Completely removed Social Preview Audit section and all related social media preview components (January 11, 2025)
+- ✓ Fixed Accessibility & Contrast section to use only real API data, removed fallback calculations, shows "!" for true analysis failures
 
 ## Technical Stack
 - **Frontend**: React, TypeScript, MUI, Framer Motion

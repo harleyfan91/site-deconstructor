@@ -50,12 +50,13 @@ const ContrastWarningsCard: React.FC<ContrastWarningsCardProps> = ({ issues, dat
   // Defensive: always work with an array
   const issuesSafe = Array.isArray(issues) ? issues : [];
 
-  // Extract real accessibility data from color extraction API
+  // Extract real accessibility data from color extraction API or axe analysis
   const violations = data?.accessibility?.violations || [];
-  // Use real accessibility score from color extraction if available, otherwise fallback calculation
   const realAccessibilityScore = data?.data?.ui?.accessibilityScore;
-  const score = realAccessibilityScore !== undefined ? realAccessibilityScore : 
-    Math.max(0, Math.round((1 - violations.length / 50) * 100));
+  
+  // Only use real data - no fallback calculations
+  const hasRealAccessibilityData = realAccessibilityScore !== undefined;
+  const score = realAccessibilityScore || 0;
 
   if (loading) {
     return (
@@ -89,18 +90,28 @@ const ContrastWarningsCard: React.FC<ContrastWarningsCardProps> = ({ issues, dat
           <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
             Accessibility Score
           </Typography>
-          <Typography variant="h6" sx={{ fontWeight: 'bold', color: score >= 80 ? 'success.main' : score >= 60 ? 'warning.main' : 'error.main' }}>
-            {score}%
+          <Typography variant="h6" sx={{ fontWeight: 'bold', color: hasRealAccessibilityData ? (score >= 80 ? 'success.main' : score >= 60 ? 'warning.main' : 'error.main') : 'text.secondary' }}>
+            {hasRealAccessibilityData ? `${score}%` : '!'}
           </Typography>
         </Box>
-        <LinearProgress
-          variant="determinate"
-          value={score}
-          sx={{
-            height: 8,
-            borderRadius: 4,
-          }}
-        />
+        {hasRealAccessibilityData ? (
+          <LinearProgress
+            variant="determinate"
+            value={score}
+            sx={{
+              height: 8,
+              borderRadius: 4,
+            }}
+          />
+        ) : (
+          <Box sx={{ 
+            height: 8, 
+            borderRadius: 4, 
+            border: '1px dashed',
+            borderColor: 'text.secondary',
+            opacity: 0.5
+          }} />
+        )}
       </Box>
 
       {/* Top Violations */}
@@ -108,7 +119,11 @@ const ContrastWarningsCard: React.FC<ContrastWarningsCardProps> = ({ issues, dat
         <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 2 }}>
           Top Violations
         </Typography>
-        {violations.length > 0 ? (
+        {!hasRealAccessibilityData ? (
+          <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'text.secondary' }}>
+            Accessibility analysis unavailable !
+          </Typography>
+        ) : violations.length > 0 ? (
           violations.slice(0, 3).map((violation, index) => (
             <ViolationCard
               key={index}
