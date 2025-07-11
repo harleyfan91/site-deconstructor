@@ -15,6 +15,7 @@ import { useTheme } from '@mui/material/styles';
 import { Shield, Smartphone, Zap, Activity, BarChart, Clock } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 import { useAnalysisContext } from '../../contexts/AnalysisContext';
+import ResponsiveLayoutProbe from './ResponsiveLayoutProbe';
 
 interface PerformanceTabProps {
   data: AnalysisResponse | null;
@@ -354,6 +355,11 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
             )}
           </CardContent>
         </Card>
+      </Box>
+
+      {/* Responsive Layout Probe - New section */}
+      <Box sx={{ mt: 3 }}>
+        <ResponsiveLayoutProbe url={data?.data ? (data as any).url : undefined} />
       </Box>
     </Box>
   );
