@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -57,6 +57,48 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
   );
   const [glowingSections, setGlowingSections] = React.useState<Record<string, boolean>>({});
   const { data: contextData } = useAnalysisContext();
+  
+  // State for tech analysis data
+  const [techData, setTechData] = useState<any>(null);
+  const [techLoading, setTechLoading] = useState(false);
+  const [techError, setTechError] = useState<string | null>(null);
+
+  // Fetch tech data when URL is available
+  useEffect(() => {
+    if (data?.url && !loading && !error) {
+      fetchTechData(data.url);
+    }
+  }, [data?.url, loading, error]);
+
+  const fetchTechData = async (url: string) => {
+    setTechLoading(true);
+    setTechError(null);
+    
+    try {
+      console.log('🔧 Fetching tech data for compliance tab:', url);
+      
+      const response = await fetch('/api/tech', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Tech analysis failed');
+      }
+
+      const analysisData = await response.json();
+      console.log('✅ Tech data received for compliance:', analysisData);
+      setTechData(analysisData);
+    } catch (err) {
+      console.error('Tech analysis error:', err);
+      setTechError('Technical analysis temporarily unavailable');
+    } finally {
+      setTechLoading(false);
+    }
+  };
 
   const toggleHeaderSection = (sectionName: string) => {
     setHeaderSectionsExpanded(prev => ({
@@ -83,15 +125,22 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
     );
   }
 
-  const tech = data.data.tech || data.data.technical || {};
+  // Use fetched tech data or fallback to original data structure
+  const tech = techData || data?.data?.tech || data?.data?.technical || {};
   const violations = tech.accessibility?.violations || [];
   const social = tech.social || { hasOpenGraph: false, hasTwitterCard: false, hasShareButtons: false };
   const cookies = tech.cookies || { hasCookieScript: false, scripts: [] };
   const minify = tech.minification || { cssMinified: false, jsMinified: false };
   const links = tech.linkIssues || { brokenLinks: [], mixedContentLinks: [] };
 
-  // Get security headers from the data
-  const securityHeaders = data.securityHeaders || { csp: '', hsts: '', xfo: '', xcto: '', referrer: '' };
+  // Get security headers from the tech data (new structure)
+  const securityHeaders = tech.securityHeaders || data?.securityHeaders || { 
+    csp: '', 
+    hsts: '', 
+    xfo: '', 
+    xcto: '', 
+    referrer: '' 
+  };
   
   // Get Lighthouse security data
   const lhr = contextData?.lhr;
@@ -198,7 +247,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
               </Typography>
             </Box>
             
-            {loading ? (
+            {loading || techLoading ? (
               <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
                 <CircularProgress size={20} sx={{ mr: 1 }} />
                 <Typography variant="body2" color="text.secondary">
@@ -389,7 +438,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
                 Accessibility Violations
               </Typography>
             </Box>
-            {loading ? (
+            {loading || techLoading ? (
               <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
                 <CircularProgress size={20} sx={{ mr: 1 }} />
                 <Typography variant="body2" color="text.secondary">
@@ -426,7 +475,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
               Other Checks
             </Typography>
           </Box>
-          {loading ? (
+          {loading || techLoading ? (
             <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
               <CircularProgress size={20} sx={{ mr: 1 }} />
               <Typography variant="body2" color="text.secondary">
