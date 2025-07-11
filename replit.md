@@ -275,6 +275,8 @@ A comprehensive website analysis tool that provides insights into performance, S
 - ✓ Enhanced backend tech-lightweight.ts with real tracking pixel detection patterns and analysis
 - ✓ Completely removed Social Preview Audit section and all related social media preview components (January 11, 2025)
 - ✓ Fixed Accessibility & Contrast section to use only real API data, removed fallback calculations, shows "!" for true analysis failures
+- ✓ Integrated axe-core accessibility analysis into color extraction API (/api/colors) for real accessibility scores and violations
+- ✓ Updated ContrastWarningsCard to fetch authentic accessibility data from enhanced color extraction endpoint
 
 ## Technical Stack
 - **Frontend**: React, TypeScript, MUI, Framer Motion

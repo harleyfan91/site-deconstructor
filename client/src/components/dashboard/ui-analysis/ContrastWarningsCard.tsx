@@ -50,15 +50,54 @@ const ContrastWarningsCard: React.FC<ContrastWarningsCardProps> = ({ issues, dat
   // Defensive: always work with an array
   const issuesSafe = Array.isArray(issues) ? issues : [];
 
-  // Extract real accessibility data from color extraction API or axe analysis
-  const violations = data?.accessibility?.violations || [];
-  const realAccessibilityScore = data?.data?.ui?.accessibilityScore;
-  
-  // Only use real data - no fallback calculations
-  const hasRealAccessibilityData = realAccessibilityScore !== undefined;
-  const score = realAccessibilityScore || 0;
+  // Extract real accessibility data from color extraction API
+  // The accessibility data comes from the color extraction endpoint
+  const [accessibilityData, setAccessibilityData] = React.useState<{
+    score: number;
+    violations: any[];
+    contrastIssues: any[];
+  } | null>(null);
+  const [accessibilityLoading, setAccessibilityLoading] = React.useState(false);
 
-  if (loading) {
+  // Fetch accessibility data when URL is available
+  React.useEffect(() => {
+    if (data?.url && !loading) {
+      fetchAccessibilityData(data.url);
+    }
+  }, [data?.url, loading]);
+
+  const fetchAccessibilityData = async (url: string) => {
+    setAccessibilityLoading(true);
+    try {
+      const response = await fetch('/api/colors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url })
+      });
+      
+      if (response.ok) {
+        const colorData = await response.json();
+        if (colorData.accessibilityScore !== undefined) {
+          setAccessibilityData({
+            score: colorData.accessibilityScore,
+            violations: colorData.violations || [],
+            contrastIssues: colorData.contrastIssues || []
+          });
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to fetch accessibility data:', error);
+    } finally {
+      setAccessibilityLoading(false);
+    }
+  };
+
+  // Only use real data - no fallback calculations
+  const hasRealAccessibilityData = accessibilityData !== null;
+  const score = accessibilityData?.score || 0;
+  const violations = accessibilityData?.violations || [];
+
+  if (loading || accessibilityLoading) {
     return (
       <Box>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>

@@ -285,15 +285,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`🎨 Extracting colors for: ${normalizedUrl}`);
       const extractStartTime = Date.now();
       
-      // Use original color extraction
+      // Use original color extraction + accessibility analysis
       const { extractColors } = await import('./lib/color-extraction');
       const colors = await extractColors(normalizedUrl);
       
-      // Format as expected by frontend
-      const colorAnalysis = { colors };
+      // Run axe-core accessibility analysis
+      let accessibilityData = null;
+      try {
+        const { chromium } = await import('playwright');
+        const { getAccessibilityAnalysis } = await import('./lib/axe-integration');
+        
+        const browser = await chromium.launch({
+          headless: true,
+          executablePath: '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium',
+          args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+        });
+        
+        const page = await browser.newPage();
+        await page.goto(normalizedUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
+        await page.waitForTimeout(2000);
+        
+        accessibilityData = await getAccessibilityAnalysis(page, normalizedUrl);
+        await browser.close();
+        
+        console.log(`🛡️ Accessibility analysis completed: ${accessibilityData.violations.length} violations, score: ${accessibilityData.score}`);
+      } catch (error) {
+        console.warn('⚠️ Accessibility analysis failed:', error.message);
+        accessibilityData = {
+          contrastIssues: [],
+          violations: [],
+          passedRules: 0,
+          failedRules: 0,
+          score: 0
+        };
+      }
       
-      logTiming('Color extraction', extractStartTime);
-      console.log(`Extracted ${colorAnalysis.colors.length} unique colors`);
+      // Format as expected by frontend with accessibility data
+      const colorAnalysis = { 
+        colors,
+        accessibilityScore: accessibilityData.score,
+        contrastIssues: accessibilityData.contrastIssues,
+        violations: accessibilityData.violations
+      };
+      
+      logTiming('Color extraction + accessibility', extractStartTime);
+      console.log(`Extracted ${colorAnalysis.colors.length} unique colors, accessibility score: ${accessibilityData.score}`);
       
       // Cache the results
       await SupabaseCacheService.set(colorsCacheKey, normalizedUrl, colorAnalysis);
