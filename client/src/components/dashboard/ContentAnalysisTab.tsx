@@ -173,26 +173,24 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
             ) : contentTypes.length > 0 ? (
               <Box sx={{ height: 300, width: '100%', minHeight: 300, minWidth: 300 }}>
                 <ChartContainer config={chartConfig}>
-                  <ResponsiveContainer width={350} height={280} aspect={1.2}>
-                    <RechartsPieChart>
-                      <Pie
-                        data={contentTypes}
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={80}
-                        fill={theme.palette.grey[400]}
-                        dataKey="value"
-                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                        labelLine={false}
-                        style={{ fontSize: '14px', fontWeight: '500' }}
-                      >
-                        {contentTypes.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                    </RechartsPieChart>
-                  </ResponsiveContainer>
+                  <RechartsPieChart width={350} height={280}>
+                    <Pie
+                      data={contentTypes}
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={80}
+                      fill={theme.palette.grey[400]}
+                      dataKey="value"
+                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      labelLine={false}
+                      style={{ fontSize: '14px', fontWeight: '500' }}
+                    >
+                      {contentTypes.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                  </RechartsPieChart>
                 </ChartContainer>
               </Box>
             ) : (
@@ -223,15 +221,13 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
             ) : (
               <Box sx={{ height: 300, width: '100%', minHeight: 300, minWidth: 300 }}>
                 <ChartContainer config={chartConfig}>
-                  <ResponsiveContainer width={350} height={280} aspect={1.2}>
-                    <BarChart data={contentStructureData} margin={{ top: 20, right: 20, left: 0, bottom: 5 }}>
-                      <XAxis dataKey="metric" tick={<ContentCustomTick />} />
-                      <YAxis domain={[0, 100]} />
-                      <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-                      <Bar dataKey="score" fill={theme.palette.primary.main} />
-                      <Bar dataKey="benchmark" fill={theme.palette.grey[300]} />
-                    </BarChart>
-                  </ResponsiveContainer>
+                  <BarChart width={350} height={280} data={contentStructureData} margin={{ top: 20, right: 20, left: 0, bottom: 5 }}>
+                    <XAxis dataKey="metric" tick={<ContentCustomTick />} />
+                    <YAxis domain={[0, 100]} />
+                    <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                    <Bar dataKey="score" fill={theme.palette.primary.main} />
+                    <Bar dataKey="benchmark" fill={theme.palette.grey[300]} />
+                  </BarChart>
                 </ChartContainer>
               </Box>
             )}

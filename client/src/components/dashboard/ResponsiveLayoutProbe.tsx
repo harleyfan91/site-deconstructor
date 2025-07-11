@@ -189,7 +189,7 @@ const ResponsiveLayoutProbe: React.FC<ResponsiveLayoutProbeProps> = ({ url }) =>
               const DeviceIcon = devices.find(d => d.name === device.device)?.icon || Monitor;
               
               return (
-                <Grid item xs={12} md={4} key={device.device}>
+                <Grid size={{ xs: 12, md: 4 }} key={device.device}>
                   <Card variant="outlined" sx={{ height: '100%' }}>
                     <CardContent sx={{ p: 2 }}>
                       {/* Device Header */}
