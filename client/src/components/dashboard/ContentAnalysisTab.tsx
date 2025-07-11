@@ -163,10 +163,10 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
                   Content Distribution
                 </Typography>
               </Box>
-            {loading || (!data && loading) ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px' }}>
-                <CircularProgress size={40} />
-                <Typography variant="body2" sx={{ ml: 2 }}>
+            {loading ? (
+              <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
+                <CircularProgress size={20} sx={{ mr: 1 }} />
+                <Typography variant="body2" color="text.secondary">
                   Analyzing content distribution...
                 </Typography>
               </Box>
@@ -211,10 +211,10 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
                   Content Structure Analysis
                 </Typography>
               </Box>
-            {loading || (!data && loading) ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px' }}>
-                <CircularProgress size={40} />
-                <Typography variant="body2" sx={{ ml: 2 }}>
+            {loading ? (
+              <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
+                <CircularProgress size={20} sx={{ mr: 1 }} />
+                <Typography variant="body2" color="text.secondary">
                   Analyzing content structure...
                 </Typography>
               </Box>
@@ -245,10 +245,10 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
                 </Typography>
               </Box>
             
-            {loading || (!data && loading) ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
-                <CircularProgress size={40} />
-                <Typography variant="body2" sx={{ ml: 2 }}>
+            {loading ? (
+              <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
+                <CircularProgress size={20} sx={{ mr: 1 }} />
+                <Typography variant="body2" color="text.secondary">
                   Analyzing text quality...
                 </Typography>
               </Box>
@@ -372,10 +372,10 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
               </Typography>
             </Box>
             
-            {loading || (!data && loading) ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '150px' }}>
-                <CircularProgress size={40} />
-                <Typography variant="body2" sx={{ ml: 2 }}>
+            {loading ? (
+              <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
+                <CircularProgress size={20} sx={{ mr: 1 }} />
+                <Typography variant="body2" color="text.secondary">
                   Analyzing metadata...
                 </Typography>
               </Box>

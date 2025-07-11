@@ -22,11 +22,13 @@ const TwitterPreview: React.FC<TwitterPreviewProps> = ({
       variant="outlined" 
       sx={{ 
         maxWidth: 506, 
-        borderRadius: 2,
-        border: `1px solid ${theme.palette.divider}`,
+        borderRadius: '16px',
+        border: '1px solid rgb(207, 217, 222)',
+        backgroundColor: '#ffffff',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto',
         '&:hover': {
-          borderColor: theme.palette.primary.main,
-          boxShadow: theme.shadows[2]
+          borderColor: 'rgb(29, 155, 240)',
+          boxShadow: '0 0 15px rgba(29, 155, 240, 0.2)'
         }
       }}
     >
@@ -45,11 +47,11 @@ const TwitterPreview: React.FC<TwitterPreviewProps> = ({
       <CardContent sx={{ p: 2 }}>
         <Typography 
           variant="caption" 
-          color="text.secondary" 
           sx={{ 
-            fontSize: '0.8rem',
-            textTransform: 'uppercase',
-            fontWeight: 500
+            fontSize: '15px',
+            color: 'rgb(83, 100, 113)',
+            fontWeight: 400,
+            lineHeight: 1.3125
           }}
         >
           {domain}
@@ -57,10 +59,11 @@ const TwitterPreview: React.FC<TwitterPreviewProps> = ({
         <Typography 
           variant="h6" 
           sx={{ 
-            fontSize: '1rem',
-            fontWeight: 600,
-            lineHeight: 1.3,
-            mt: 0.5,
+            fontSize: '15px',
+            fontWeight: 700,
+            lineHeight: 1.3125,
+            color: 'rgb(15, 20, 25)',
+            mt: 0.25,
             display: '-webkit-box',
             WebkitBoxOrient: 'vertical',
             WebkitLineClamp: 2,

@@ -22,12 +22,13 @@ const InstagramPreview: React.FC<InstagramPreviewProps> = ({
       variant="outlined" 
       sx={{ 
         maxWidth: 400, 
-        borderRadius: 3,
-        border: `1px solid ${theme.palette.divider}`,
-        backgroundColor: theme.palette.background.paper,
+        borderRadius: '12px',
+        border: '1px solid rgb(219, 219, 219)',
+        backgroundColor: '#ffffff',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto',
         '&:hover': {
-          borderColor: theme.palette.primary.main,
-          boxShadow: theme.shadows[2]
+          borderColor: 'rgb(255, 48, 64)',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
         }
       }}
     >
@@ -46,12 +47,12 @@ const InstagramPreview: React.FC<InstagramPreviewProps> = ({
       <CardContent sx={{ p: 2 }}>
         <Typography 
           variant="caption" 
-          color="text.secondary" 
           sx={{ 
-            fontSize: '0.7rem',
-            textTransform: 'uppercase',
+            fontSize: '11px',
+            color: 'rgb(142, 142, 142)',
             fontWeight: 600,
-            letterSpacing: 0.5
+            textTransform: 'uppercase',
+            letterSpacing: '1px'
           }}
         >
           {domain}
@@ -59,10 +60,11 @@ const InstagramPreview: React.FC<InstagramPreviewProps> = ({
         <Typography 
           variant="h6" 
           sx={{ 
-            fontSize: '0.95rem',
+            fontSize: '14px',
             fontWeight: 600,
-            lineHeight: 1.2,
-            mt: 0.5,
+            lineHeight: 1.3,
+            color: 'rgb(38, 38, 38)',
+            mt: 0.25,
             display: '-webkit-box',
             WebkitBoxOrient: 'vertical',
             WebkitLineClamp: 2,

@@ -65,14 +65,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
     }));
   };
   
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
-        <CircularProgress size={60} />
-        <Typography variant="h6" sx={{ ml: 2 }}>Analyzing compliance...</Typography>
-      </Box>
-    );
-  }
+  // Remove tab-level loading - we use section-level loading instead
 
   if (error) {
     return (
@@ -90,8 +83,8 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
     );
   }
 
-  const tech = data.data.technical;
-  const violations = tech.accessibility.violations;
+  const tech = data.data.tech || data.data.technical || {};
+  const violations = tech.accessibility?.violations || [];
   const social = tech.social || { hasOpenGraph: false, hasTwitterCard: false, hasShareButtons: false };
   const cookies = tech.cookies || { hasCookieScript: false, scripts: [] };
   const minify = tech.minification || { cssMinified: false, jsMinified: false };
@@ -205,6 +198,14 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
               </Typography>
             </Box>
             
+            {loading ? (
+              <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
+                <CircularProgress size={20} sx={{ mr: 1 }} />
+                <Typography variant="body2" color="text.secondary">
+                  Analyzing security headers...
+                </Typography>
+              </Box>
+            ) : (
             <Box>
               {headerCategories.map((category, categoryIndex) => (
                 <Box key={categoryIndex} sx={{ mb: 2 }}>
@@ -294,6 +295,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
                 </Box>
               ))}
             </Box>
+            )}
           </CardContent>
         </Card>
 
@@ -387,7 +389,14 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
                 Accessibility Violations
               </Typography>
             </Box>
-            {violations.length === 0 ? (
+            {loading ? (
+              <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
+                <CircularProgress size={20} sx={{ mr: 1 }} />
+                <Typography variant="body2" color="text.secondary">
+                  Analyzing accessibility...
+                </Typography>
+              </Box>
+            ) : violations.length === 0 ? (
               <Typography variant="body2">None</Typography>
             ) : (
               <Box component="ul" sx={{ pl: 2 }}>
@@ -417,6 +426,14 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
               Other Checks
             </Typography>
           </Box>
+          {loading ? (
+            <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
+              <CircularProgress size={20} sx={{ mr: 1 }} />
+              <Typography variant="body2" color="text.secondary">
+                Analyzing compliance checks...
+              </Typography>
+            </Box>
+          ) : (
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
             <Tooltip
               title={social.hasOpenGraph ? 'Open Graph tags detected' : 'Open Graph tags missing'}
@@ -491,6 +508,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
               />
             </Tooltip>
           </Box>
+          )}
           <Typography variant="body2">
             <strong>Broken Links:</strong> {links.brokenLinks.length || 0}
           </Typography>

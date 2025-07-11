@@ -22,11 +22,13 @@ const FacebookPreview: React.FC<FacebookPreviewProps> = ({
       variant="outlined" 
       sx={{ 
         maxWidth: 500, 
-        borderRadius: 2,
-        border: `1px solid ${theme.palette.divider}`,
+        borderRadius: '8px',
+        border: '1px solid rgb(221, 223, 226)',
+        backgroundColor: '#ffffff',
+        fontFamily: 'Helvetica, Arial, sans-serif',
         '&:hover': {
-          borderColor: theme.palette.primary.main,
-          boxShadow: theme.shadows[2]
+          borderColor: 'rgb(24, 119, 242)',
+          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
         }
       }}
     >
@@ -45,11 +47,12 @@ const FacebookPreview: React.FC<FacebookPreviewProps> = ({
       <CardContent sx={{ p: 2 }}>
         <Typography 
           variant="caption" 
-          color="text.secondary" 
           sx={{ 
-            fontSize: '0.75rem',
+            fontSize: '12px',
+            color: 'rgb(101, 103, 107)',
+            fontWeight: 400,
             textTransform: 'uppercase',
-            fontWeight: 500
+            letterSpacing: '0.5px'
           }}
         >
           {domain}
@@ -57,10 +60,11 @@ const FacebookPreview: React.FC<FacebookPreviewProps> = ({
         <Typography 
           variant="h6" 
           sx={{ 
-            fontSize: '1.1rem',
+            fontSize: '16px',
             fontWeight: 600,
-            lineHeight: 1.2,
-            mt: 0.5,
+            lineHeight: 1.25,
+            color: 'rgb(5, 5, 5)',
+            mt: 0.25,
             display: '-webkit-box',
             WebkitBoxOrient: 'vertical',
             WebkitLineClamp: 2,
