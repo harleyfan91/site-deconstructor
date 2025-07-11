@@ -77,20 +77,29 @@ const ContrastWarningsCard: React.FC<ContrastWarningsCardProps> = ({ issues, dat
       
       if (response.ok) {
         const colorData = await response.json();
-        console.log('🛡️ Received accessibility data:', colorData);
+        console.log('🛡️ Received accessibility data:', {
+          hasScore: colorData.accessibilityScore !== undefined,
+          score: colorData.accessibilityScore,
+          violationsCount: colorData.violations?.length,
+          contrastIssuesCount: colorData.contrastIssues?.length
+        });
+        
         if (colorData.accessibilityScore !== undefined) {
           setAccessibilityData({
             score: colorData.accessibilityScore,
             violations: colorData.violations || [],
             contrastIssues: colorData.contrastIssues || []
           });
-          console.log('🎯 Set accessibility data:', { score: colorData.accessibilityScore, violations: colorData.violations?.length, contrastIssues: colorData.contrastIssues?.length });
+          console.log('✅ Successfully set accessibility data with score:', colorData.accessibilityScore);
         } else {
-          console.warn('⚠️ No accessibility score in response:', Object.keys(colorData));
+          console.warn('⚠️ No accessibility score in response. Available keys:', Object.keys(colorData));
         }
+      } else {
+        console.error('❌ Failed to fetch accessibility data:', response.status, response.statusText);
       }
     } catch (error) {
-      console.warn('Failed to fetch accessibility data:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch accessibility data';
+      console.warn('Failed to fetch accessibility data:', errorMessage);
     } finally {
       setAccessibilityLoading(false);
     }

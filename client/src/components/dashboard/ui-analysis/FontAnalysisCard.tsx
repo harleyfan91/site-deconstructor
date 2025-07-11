@@ -75,7 +75,8 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, u
         const fontData = await response.json();
         setFonts(fontData);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to extract fonts');
+        const errorMessage = err instanceof Error ? err.message : 'Failed to extract fonts';
+        setError(errorMessage);
         console.error('Font extraction error:', err);
       } finally {
         setLoading(false);

@@ -212,8 +212,9 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
         }, 2500);
 
       } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to extract colors from website';
         console.error('Color extraction error:', err);
-        setError('Failed to extract colors from website');
+        setError(errorMessage);
         setUsageGroups([]);
       } finally {
         setLoading(false);
