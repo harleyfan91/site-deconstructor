@@ -77,12 +77,16 @@ const ContrastWarningsCard: React.FC<ContrastWarningsCardProps> = ({ issues, dat
       
       if (response.ok) {
         const colorData = await response.json();
+        console.log('🛡️ Received accessibility data:', colorData);
         if (colorData.accessibilityScore !== undefined) {
           setAccessibilityData({
             score: colorData.accessibilityScore,
             violations: colorData.violations || [],
             contrastIssues: colorData.contrastIssues || []
           });
+          console.log('🎯 Set accessibility data:', { score: colorData.accessibilityScore, violations: colorData.violations?.length, contrastIssues: colorData.contrastIssues?.length });
+        } else {
+          console.warn('⚠️ No accessibility score in response:', Object.keys(colorData));
         }
       }
     } catch (error) {

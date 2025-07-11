@@ -63,12 +63,11 @@ export async function runAxeAnalysis(page: Page, url: string): Promise<Accessibi
     const violations = (axeResults as any).violations || [];
 
     // Extract contrast-specific violations
-    const contrastViolations = violations.filter(v => v.id === 'color-contrast');
-    const contrastIssues: ContrastIssue[] = contrastViolations.flatMap(violation =>
-      violation.nodes.map(node => {
+    const contrastViolations = violations.filter((v: any) => v.id === 'color-contrast');
+    const contrastIssues: ContrastIssue[] = contrastViolations.flatMap((violation: any) =>
+      violation.nodes.map((node: any) => {
         // Extract color information from the violation data
         const target = node.target.join(' ');
-        const html = node.html;
         
         // Parse colors from the failure summary or use defaults
         let textColor = '#000000';
@@ -106,13 +105,13 @@ export async function runAxeAnalysis(page: Page, url: string): Promise<Accessibi
 
     return {
       contrastIssues,
-      violations: violations.map(v => ({
+      violations: violations.map((v: any) => ({
         id: v.id,
-        impact: v.impact as any,
+        impact: v.impact,
         description: v.description,
         help: v.help,
         helpUrl: v.helpUrl,
-        nodes: v.nodes.map(node => ({
+        nodes: v.nodes.map((node: any) => ({
           target: node.target,
           html: node.html,
           failureSummary: node.failureSummary || ''

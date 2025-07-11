@@ -293,7 +293,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let accessibilityData = null;
       try {
         const { chromium } = await import('playwright');
-        const { getAccessibilityAnalysis } = await import('./lib/axe-integration');
+        const { getAccessibilityAnalysis } = await import('./lib/axe-integration-new');
         
         const browser = await chromium.launch({
           headless: true,
