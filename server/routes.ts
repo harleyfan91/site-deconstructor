@@ -39,17 +39,22 @@ function mapScoreToGrade(score: number): string {
 // Helper function to build UI data with real extracted data
 function buildUIData(scrapedData: any) {
   try {
-    // Import shared utilities
-    const { getAltStats, calculateAltTextScore } = require('../shared/getAltStats');
-    
     // Adapt to the actual scraping data structure
     const fonts = Array.isArray(scrapedData?.fonts) ? scrapedData.fonts : [];
     const images = Array.isArray(scrapedData?.images) ? scrapedData.images : [];
     const imageUrls = images.length > 0 ? images.map((img: any) => img?.url || img || '') : [];
     
-    // Use shared alt text analysis
-    const altStats = getAltStats(images);
-    const altTextScore = calculateAltTextScore(altStats);
+    // Calculate alt text statistics manually (avoiding require in ES module)
+    const totalImages = images.length;
+    const withAlt = images.filter((img: any) => img?.alt && img.alt.trim().length > 0).length;
+    const suspectAltCount = images.filter((img: any) => {
+      const alt = img?.alt;
+      if (!alt || alt.trim().length === 0) return false;
+      const suspectTerms = ['image', 'photo', 'picture', 'pic', 'img', 'logo', 'icon'];
+      return suspectTerms.some(term => alt.toLowerCase() === term.toLowerCase()) || alt.length < 3;
+    }).length;
+    const altStats = { totalImages, withAlt, suspectAlt: suspectAltCount };
+    const altTextScore = totalImages === 0 ? 100 : Math.round(((withAlt - suspectAltCount) / totalImages) * 100);
     
     return {
       fonts: fonts,
