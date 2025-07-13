@@ -24,12 +24,14 @@ interface AccessibilityCardProps {
 }
 
 const AccessibilityCard: React.FC<AccessibilityCardProps> = ({ url }) => {
-  const { score, isLoading: scoreLoading, isError: scoreError } = useAccessibilityScore(url || '');
+  const { score, contrastIssues, violations, isLoading: scoreLoading, isError: scoreError } = useAccessibilityScore(url || '');
   const { data: uiData, isLoading: uiLoading, error: uiError } = useUIAnalysis(url || '');
 
-  // Extract data from UI analysis response
-  const axeColorContrast = uiData?.contrastIssues || [];
-  const altStats = uiData?.imageAnalysis?.altStats || { coverage: 0, suspicious: 0, totalImages: 0 };
+  // Extract data from UI analysis response (this includes alt text stats)
+  const altStats = uiData?.imageAnalysis?.altStats || { totalImages: 0, withAlt: 0, suspectAlt: 0 };
+  
+  // Use contrast issues from accessibility analysis
+  const axeColorContrast = contrastIssues;
   
   // Calculate WCAG summary from contrast issues
   const wcagSummary = React.useMemo(() => {

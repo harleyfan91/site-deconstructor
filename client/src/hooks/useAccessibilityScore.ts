@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 
 // Simple fetcher function for API calls
-const fetcher = async (url: string) => {
-  const response = await fetch(url);
+const fetcher = async (url: string, options?: RequestInit) => {
+  const response = await fetch(url, options);
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
@@ -28,7 +28,12 @@ export function useAccessibilityScore(url: string) {
 
     const fetchData = async () => {
       try {
-        const result = await fetcher(`/api/performance?url=${encodeURIComponent(url)}`);
+        // Try to get accessibility score from colors endpoint which includes axe-core analysis
+        const result = await fetcher(`/api/colors`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url })
+        });
         if (!isCancelled) {
           setData(result);
           setError(null);
@@ -55,10 +60,11 @@ export function useAccessibilityScore(url: string) {
   }, [url]);
 
   return {
-    score: data?.lighthouse?.categories?.accessibility?.score
-      ? Math.round(data.lighthouse.categories.accessibility.score * 100)
-      : undefined,
+    score: data?.accessibilityScore ? Math.round(data.accessibilityScore) : undefined,
+    contrastIssues: data?.contrastIssues || [],
+    violations: data?.violations || [],
     isLoading,
     isError: error,
+    rawData: data,
   };
 }
