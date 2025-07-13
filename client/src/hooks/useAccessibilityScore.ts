@@ -67,7 +67,7 @@ export function useAccessibilityScore(url: string) {
   }, [url]);
 
   return {
-    score: data?.accessibilityScore ? Math.round(data.accessibilityScore) : undefined,
+    score: data?.accessibilityScore !== undefined ? Math.round(data.accessibilityScore) : undefined,
     contrastIssues: data?.contrastIssues || [],
     violations: data?.violations || [],
     isLoading,

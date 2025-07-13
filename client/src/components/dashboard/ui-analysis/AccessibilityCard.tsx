@@ -81,7 +81,7 @@ const AccessibilityCard: React.FC<AccessibilityCardProps> = ({ url }) => {
             </Box>
           ) : scoreError ? (
             <Alert severity="error" sx={{ py: 0.5 }}>Error loading score</Alert>
-          ) : score !== undefined ? (
+          ) : score !== undefined && score !== null ? (
             <Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                 <Typography variant="h6" sx={{ color: getScoreColor(score) }}>
@@ -265,7 +265,7 @@ const AccessibilityCard: React.FC<AccessibilityCardProps> = ({ url }) => {
                 })
             ) : (
               <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-                All landmarks present
+                No landmark issues detected
               </Typography>
             )}
           </Box>
