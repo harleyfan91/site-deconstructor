@@ -39,10 +39,17 @@ function mapScoreToGrade(score: number): string {
 // Helper function to build UI data with real extracted data
 function buildUIData(scrapedData: any) {
   try {
+    // Import shared utilities
+    const { getAltStats, calculateAltTextScore } = require('../shared/getAltStats');
+    
     // Adapt to the actual scraping data structure
     const fonts = Array.isArray(scrapedData?.fonts) ? scrapedData.fonts : [];
     const images = Array.isArray(scrapedData?.images) ? scrapedData.images : [];
     const imageUrls = images.length > 0 ? images.map((img: any) => img?.url || img || '') : [];
+    
+    // Use shared alt text analysis
+    const altStats = getAltStats(images);
+    const altTextScore = calculateAltTextScore(altStats);
     
     return {
       fonts: fonts,
@@ -59,7 +66,9 @@ function buildUIData(scrapedData: any) {
         estimatedIcons: images.filter((img: any) => img?.isIcon).length || Math.floor(images.length * 0.4),
         imageUrls: imageUrls,
         photoUrls: images.filter((img: any) => img?.isPhoto).map((img: any) => img?.url || img || '') || [],
-        iconUrls: images.filter((img: any) => img?.isIcon).map((img: any) => img?.url || img || '') || []
+        iconUrls: images.filter((img: any) => img?.isIcon).map((img: any) => img?.url || img || '') || [],
+        altStats: altStats,
+        altTextScore: altTextScore
       },
       contrastIssues: Array.isArray(scrapedData?.contrastIssues) ? scrapedData.contrastIssues : []
     };
@@ -75,7 +84,9 @@ function buildUIData(scrapedData: any) {
         estimatedIcons: 0,
         imageUrls: [],
         photoUrls: [],
-        iconUrls: []
+        iconUrls: [],
+        altStats: { totalImages: 0, withAlt: 0, suspectAlt: 0 },
+        altTextScore: 100
       },
       contrastIssues: []
     };
@@ -320,11 +331,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
       }
       
+      // Use shared axeUtils to get contrast report with suggestions
+      const { getColorContrastReport } = await import('../shared/axeUtils');
+      const contrastReport = getColorContrastReport(accessibilityData.violations);
+      
       // Format as expected by frontend with accessibility data
       const colorAnalysis = { 
         colors,
         accessibilityScore: accessibilityData.score,
-        contrastIssues: accessibilityData.contrastIssues,
+        contrastIssues: contrastReport.map(issue => ({
+          element: issue.element,
+          textColor: issue.fg,
+          backgroundColor: issue.bg,
+          ratio: issue.ratio,
+          expectedRatio: issue.expectedRatio,
+          severity: issue.severity,
+          recommendation: issue.recommendation,
+          suggestedColor: issue.suggestedColor
+        })),
         violations: accessibilityData.violations
       };
       

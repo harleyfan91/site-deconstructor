@@ -1,0 +1,70 @@
+You are a **world‑class full‑stack developer** (Next.js + React, TypeScript, Tailwind) working in Replit on the open‑source **Site‑Deconstructor** repository.
+
+---
+
+## 🏁 Mission
+
+**Refactor the *****************Accessibility & Contrast***************** infrastructure**: keep the existing card shell (header + icon) in the *User Interface* tab but clear out its inner content, and streamline the backend to eliminate duplicate logic while adding smarter contrast suggestions. No other UI component must be altered in this task.  A follow‑up ticket will wire new data into fresh UI elements.
+
+---
+
+## 📋 Acceptance Checklist
+
+1. **Frontend trim (the only UI change)**
+
+   * Locate the React component(s) that render the *Accessibility & Contrast* card under `tabs/ui/AccessibilitySection.*`.
+   * **Retain** the card container, header, and icon (e.g., `<Card title="Accessibility & Contrast" icon={...}>`).
+   * \*\*Remove \*\* *all*\*\* *all* child elements (MetricRow, Paragraph, Table, Gauge, etc.) so the card body is empty except for a terse `TODO: re‑inject content once backend refactor lands` comment.
+   * Verify Storybook and `npm run type‑check` pass with the empty card in place.
+
+2. **Backend refactor – eliminate redundancies**
+
+   * **Color‑contrast**: Stop re‑computing ratios in `extractPalette.ts`. Instead, pipe axe‑core element‑level `color‑contrast` results into the Colours API response (`/api/colors`) via `shared/axeUtils.ts#getColorContrastReport()`.
+   * **Alt‑text stats**: Create `shared/getAltStats.ts` that returns `{ totalImages, withAlt, suspectAlt }`. Import this helper into both:
+
+     * `analysis/ui/imageAnalysis.ts` (was already there)
+     * `analysis/ui/accessibility.ts` (remove local duplicate logic).
+   * **WCAG ratio helper**: Create `shared/wcag.ts` with:
+
+     ```ts
+     export function contrastRatio(fg: string, bg: string): number;
+     export function passesAA(ratio: number, largeText = false): boolean;
+     export function passesAAA(ratio: number, largeText = false): boolean;
+     ```
+
+     Replace bespoke ratio code in Colours & Accessibility collectors with calls to these functions.
+
+3. **New feature – contrast suggestions**
+
+   * Extend `shared/axeUtils.ts` to pick `node.any[0].data.contrastSuggestions[0]` (if present) for each failing `color‑contrast` node.
+   * Augment the backend JSON schema (supabase `site_runs` → `ui_contrast` JSONB) to include `suggestedColor`.
+   * Update types in `@/types/analysis.d.ts` with:
+
+     ```ts
+     interface ColorContrastIssue {
+       element: string;
+       fg: string;
+       bg: string;
+       ratio: number;
+       suggestedColor?: string; // new
+     }
+     ```
+
+4. **Regression safety nets**
+
+   * Add Jest tests for `wcag.ts` (ratio edge cases) and `getAltStats.ts`.
+   * Update existing axe‑mock fixture files to include a `contrastSuggestions` entry so tests don’t break.
+
+5. **Delivery constraints**
+
+   * **Don’t touch** any other tab’s UI components or styles.
+   * Keep PR atomic: one commit for frontend trim, one for backend refactor, one for tests.
+   * Ensure `yarn test && yarn lint && yarn build` succeed before pushing.
+
+---
+
+### ⏭️ After this PR
+
+A separate ticket will insert new UI elements into the preserved card, consuming the refactored JSON (contrast issues, alt‑text stats, colour ratios, suggestions).  No further visual work is required now.
+
+Good luck 🚀
