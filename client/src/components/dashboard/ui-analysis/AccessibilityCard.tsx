@@ -109,18 +109,18 @@ const AccessibilityCard: React.FC<AccessibilityCardProps> = ({ url }) => {
         </Box>
 
         {/* 2. Hard-to-read spots table */}
-        {uiLoading ? (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <CircularProgress size={16} />
-            <Typography variant="body2" color="text.secondary">Loading contrast data...</Typography>
-          </Box>
-        ) : uiError ? (
-          <Alert severity="error" sx={{ py: 0.5 }}>Error loading contrast data</Alert>
-        ) : axeColorContrast.length > 0 ? (
-          <Box>
-            <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
-              Hard-to-read spots
-            </Typography>
+        <Box>
+          <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
+            Hard-to-read spots
+          </Typography>
+          {uiLoading ? (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <CircularProgress size={16} />
+              <Typography variant="body2" color="text.secondary">Loading contrast data...</Typography>
+            </Box>
+          ) : uiError ? (
+            <Alert severity="error" sx={{ py: 0.5 }}>Error loading contrast data</Alert>
+          ) : axeColorContrast.length > 0 ? (
             <TableContainer component={Paper} sx={{ maxHeight: 200 }}>
               <Table size="small">
                 <TableHead>
@@ -164,8 +164,12 @@ const AccessibilityCard: React.FC<AccessibilityCardProps> = ({ url }) => {
                 </TableBody>
               </Table>
             </TableContainer>
-          </Box>
-        ) : null}
+          ) : (
+            <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+              No contrast issues detected or analysis unavailable due to website security restrictions
+            </Typography>
+          )}
+        </Box>
 
         {/* 3. Contrast ratio summary badge */}
         <Box>
@@ -219,8 +223,53 @@ const AccessibilityCard: React.FC<AccessibilityCardProps> = ({ url }) => {
           </Box>
         </Box>
 
-        {/* 5. Missing landmark / lang chips (placeholder for future enhancement) */}
-        {/* This would be implemented when backend provides landmark data */}
+        {/* 5. Missing landmarks section */}
+        <Box>
+          <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
+            Missing landmarks
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+            {violations && violations.length > 0 ? (
+              violations
+                .filter((violation: any) => 
+                  violation.id === 'landmark-one-main' || 
+                  violation.id === 'page-has-heading-one' ||
+                  violation.id === 'region' ||
+                  violation.id === 'landmark-main-is-top-level' ||
+                  violation.id === 'landmark-no-duplicate-main' ||
+                  violation.id === 'landmark-unique' ||
+                  violation.id === 'html-has-lang' ||
+                  violation.id === 'valid-lang'
+                )
+                .slice(0, 3)
+                .map((violation: any, index: number) => {
+                  const landmarkType = violation.id.includes('main') ? '[main]' :
+                                     violation.id.includes('lang') ? '[lang]' :
+                                     violation.id.includes('heading') ? '[h1]' :
+                                     violation.id.includes('region') ? '[nav]' : '[other]';
+                  
+                  return (
+                    <Chip
+                      key={index}
+                      label={landmarkType}
+                      size="small"
+                      sx={{
+                        backgroundColor: '#fff3cd',
+                        color: '#856404',
+                        border: '1px solid #ffeaa7',
+                        fontSize: '0.75rem',
+                        height: 24
+                      }}
+                    />
+                  );
+                })
+            ) : (
+              <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                All landmarks present
+              </Typography>
+            )}
+          </Box>
+        </Box>
       </Box>
     </Box>
   );

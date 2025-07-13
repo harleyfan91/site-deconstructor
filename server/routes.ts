@@ -326,7 +326,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         console.log(`🛡️ Accessibility analysis completed: ${accessibilityData.violations.length} violations, score: ${accessibilityData.score}`);
       } catch (error) {
-        console.warn('⚠️ Accessibility analysis failed:', error.message);
+        console.error('Accessibility analysis error:', error);
         accessibilityData = {
           contrastIssues: [],
           violations: [],
