@@ -83,7 +83,13 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, u
       }
     };
 
-    fetchFonts();
+    // Wrap in Promise and catch to prevent unhandled rejections
+    fetchFonts().catch(err => {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to extract fonts';
+      setError(errorMessage);
+      setLoading(false);
+      console.error('Font extraction error:', err);
+    });
   }, [url]);
 
   // Check scrollable after fonts load

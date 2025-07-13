@@ -145,7 +145,7 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
     let glowTimer: NodeJS.Timeout;
     let collapseTimer: NodeJS.Timeout;
 
-    (async () => {
+    const fetchColors = async () => {
       try {
         setLoading(true);
         setError(null);
@@ -219,7 +219,15 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
       } finally {
         setLoading(false);
       }
-    })();
+    };
+
+    // Call fetchColors with proper error handling
+    fetchColors().catch(err => {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to extract colors from website';
+      console.error('Color extraction error:', err);
+      setError(errorMessage);
+      setLoading(false);
+    });
 
     return () => {
       clearTimeout(glowTimer);
