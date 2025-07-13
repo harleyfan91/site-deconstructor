@@ -67,8 +67,8 @@ function buildUIData(scrapedData: any) {
       })),
       imageAnalysis: {
         totalImages: images.length,
-        estimatedPhotos: images.filter((img: any) => img?.isPhoto).length || Math.floor(images.length * 0.6),
-        estimatedIcons: images.filter((img: any) => img?.isIcon).length || Math.floor(images.length * 0.4),
+        estimatedPhotos: images.filter((img: any) => img?.isPhoto).length,
+        estimatedIcons: images.filter((img: any) => img?.isIcon).length,
         imageUrls: imageUrls,
         photoUrls: images.filter((img: any) => img?.isPhoto).map((img: any) => img?.url || img || '') || [],
         iconUrls: images.filter((img: any) => img?.isIcon).map((img: any) => img?.url || img || '') || [],
