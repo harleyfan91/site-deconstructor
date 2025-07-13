@@ -51,7 +51,14 @@ export function useAccessibilityScore(url: string) {
     };
 
     // Add a small delay to prevent excessive API calls
-    const timeoutId = setTimeout(fetchData, 100);
+    const timeoutId = setTimeout(() => {
+      fetchData().catch(err => {
+        if (!isCancelled) {
+          setError(err instanceof Error ? err : new Error('Unknown error'));
+          setIsLoading(false);
+        }
+      });
+    }, 100);
 
     return () => {
       isCancelled = true;
