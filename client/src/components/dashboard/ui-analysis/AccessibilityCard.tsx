@@ -16,8 +16,6 @@ import {
   Alert
 } from '@mui/material';
 import { Shield, Copy, CheckCircle, XCircle } from 'lucide-react';
-import { useAccessibilityScore } from '../../../hooks/useAccessibilityScore';
-import { useUIAnalysis } from '../../../hooks/useUIAnalysis';
 
 interface AccessibilityCardProps {
   url?: string;
@@ -85,14 +83,7 @@ const AccessibilityCard: React.FC<AccessibilityCardProps> = ({ url, contrastIssu
           <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
             Accessibility Score
           </Typography>
-          {scoreLoading ? (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <CircularProgress size={16} />
-              <Typography variant="body2" color="text.secondary">Loading...</Typography>
-            </Box>
-          ) : scoreError ? (
-            <Alert severity="error" sx={{ py: 0.5 }}>Error loading score</Alert>
-          ) : score !== undefined && score !== null ? (
+          {score !== undefined && score !== null ? (
             <Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                 <Typography variant="h6" sx={{ color: getScoreColor(score) }}>
@@ -129,14 +120,7 @@ const AccessibilityCard: React.FC<AccessibilityCardProps> = ({ url, contrastIssu
           <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
             Hard-to-read spots
           </Typography>
-          {uiLoading ? (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <CircularProgress size={16} />
-              <Typography variant="body2" color="text.secondary">Loading contrast data...</Typography>
-            </Box>
-          ) : uiError ? (
-            <Alert severity="error" sx={{ py: 0.5 }}>Error loading contrast data</Alert>
-          ) : axeColorContrast.length > 0 ? (
+          {axeColorContrast.length > 0 ? (
             <TableContainer component={Paper} sx={{ maxHeight: 200 }}>
               <Table size="small">
                 <TableHead>
@@ -224,15 +208,15 @@ const AccessibilityCard: React.FC<AccessibilityCardProps> = ({ url, contrastIssu
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Typography variant="body2">
-              {altStats.totalImages > 0 
-                ? `${Math.round((altStats.withAlt / altStats.totalImages) * 100)}% with alt`
+              {imageStats.totalImages > 0 
+                ? `${Math.round((imageStats.withAlt / imageStats.totalImages) * 100)}% with alt`
                 : '0% with alt'
               }
             </Typography>
             <Typography variant="body2">•</Typography>
             <Typography variant="body2" color="warning.main">
-              {altStats.totalImages > 0 
-                ? `${Math.round((altStats.suspectAlt / altStats.totalImages) * 100)}% poor`
+              {imageStats.totalImages > 0 
+                ? `${Math.round((imageStats.suspectAlt / imageStats.totalImages) * 100)}% poor`
                 : '0% poor'
               }
             </Typography>
@@ -246,16 +230,7 @@ const AccessibilityCard: React.FC<AccessibilityCardProps> = ({ url, contrastIssu
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
             {(() => {
-              const landmarkViolations = violations?.filter((violation: any) => 
-                violation.id === 'landmark-one-main' || 
-                violation.id === 'page-has-heading-one' ||
-                violation.id === 'region' ||
-                violation.id === 'landmark-main-is-top-level' ||
-                violation.id === 'landmark-no-duplicate-main' ||
-                violation.id === 'landmark-unique' ||
-                violation.id === 'html-has-lang' ||
-                violation.id === 'valid-lang'
-              ) || [];
+              const landmarkViolations: any[] = [];
               
               return landmarkViolations.length > 0 ? (
                 landmarkViolations.slice(0, 3).map((violation: any, index: number) => {
