@@ -610,6 +610,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         headers: {
           'User-Agent': 'Mozilla/5.0 (compatible; WebsiteAnalyzer/1.0)',
         },
+        signal: AbortSignal.timeout(15000), // 15 second timeout
       });
 
       if (!response.ok) {
@@ -710,9 +711,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     } catch (error) {
       console.error('Analysis error:', error);
-      res.status(500).json({ 
+      
+      // Provide more specific error messages based on error type
+      let errorMessage = 'Unknown error';
+      let statusCode = 500;
+      
+      if (error instanceof Error) {
+        if (error.message.includes('timeout') || error.message.includes('TIMEOUT') || error.name === 'TimeoutError') {
+          errorMessage = 'Website took too long to respond. Please try again.';
+          statusCode = 408; // Request Timeout
+        } else if (error.message.includes('ENOTFOUND') || error.message.includes('DNS')) {
+          errorMessage = 'Website not found. Please check the URL.';
+          statusCode = 404;
+        } else if (error.message.includes('ECONNREFUSED')) {
+          errorMessage = 'Connection refused by website.';
+          statusCode = 503; // Service Unavailable
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      res.status(statusCode).json({ 
         error: 'Analysis failed', 
-        message: error instanceof Error ? error.message : 'Unknown error' 
+        message: errorMessage
       });
     }
   });
