@@ -16,6 +16,7 @@ interface ImageAnalysisCardProps {
     iconUrls?: string[];
   };
   url?: string;
+  loading?: boolean;
 }
 
 interface AdaptiveLinkProps {
@@ -91,7 +92,7 @@ const AdaptiveLink: React.FC<AdaptiveLinkProps> = ({ url, index }) => {
   );
 };
 
-const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnalysis, url }) => {
+const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnalysis, url, loading: parentLoading }) => {
   const theme = useTheme();
   const [expandedSections, setExpandedSections] = useSessionState<Record<string, boolean>>(
     'ui-image-analysis-expanded',
@@ -109,8 +110,8 @@ const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnal
     }));
   };
 
-  // Show loading state only if we have no imageAnalysis data at all
-  if (!imageAnalysis) {
+  // Show loading state when parent is loading or we have no imageAnalysis data
+  if (parentLoading || !imageAnalysis) {
     return (
       <Box>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -145,15 +146,7 @@ const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnal
           </Typography>
         </Box>
 
-        {!imageAnalysis ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
-            <CircularProgress size={24} sx={{ mr: 2 }} />
-            <Typography variant="body2" color="text.secondary">
-              Analyzing images...
-            </Typography>
-          </Box>
-        ) : (
-          <Box>
+        <Box>
           {[
             { key: 'total', title: 'Total Images', count: totalImagesCount, urls: imageUrls, empty: 'No images found on this page.' },
             { key: 'photos', title: 'Estimated Photos', count: photosCount, urls: photoUrls, empty: 'No photos found on this page.' },
@@ -203,7 +196,6 @@ const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnal
             </Box>
           ))}
         </Box>
-        )}
     </Box>
   );
 };

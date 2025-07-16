@@ -26,9 +26,10 @@ interface AccessibilityCardProps {
     withAlt: number;
     suspectAlt: number;
   };
+  loading?: boolean;
 }
 
-const AccessibilityCard: React.FC<AccessibilityCardProps> = ({ url, contrastIssues, accessibilityScore, altStats }) => {
+const AccessibilityCard: React.FC<AccessibilityCardProps> = ({ url, contrastIssues, accessibilityScore, altStats, loading: parentLoading }) => {
   // Use props data instead of making API calls
   const axeColorContrast = contrastIssues || [];
   const score = accessibilityScore || 0;
@@ -69,7 +70,7 @@ const AccessibilityCard: React.FC<AccessibilityCardProps> = ({ url, contrastIssu
         </Typography>
       </Box>
 
-      {(!contrastIssues && !accessibilityScore && !altStats) ? (
+      {(parentLoading || (!contrastIssues && !accessibilityScore && !altStats)) ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
           <CircularProgress size={24} sx={{ mr: 2 }} />
           <Typography variant="body2" color="text.secondary">

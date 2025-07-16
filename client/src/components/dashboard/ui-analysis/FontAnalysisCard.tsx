@@ -6,13 +6,14 @@ import { Type } from 'lucide-react';
 interface FontAnalysisCardProps {
   fonts?: Array<{name: string, category: string, usage: string, weight?: string, isLoaded?: boolean, isPublic?: boolean}>;
   url?: string;
+  loading?: boolean;
 }
 
-const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, url }) => {
+const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, url, loading: parentLoading }) => {
   const theme = useTheme();
   // Use fonts from props instead of making API calls
   const fonts = propFonts || [];
-  const loading = false; // No loading since we use parent data
+  const loading = parentLoading || false; // Use parent loading state
   const error = null; // No error since we use parent data
   const hasStartedLoading = true;
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);

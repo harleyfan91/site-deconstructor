@@ -91,6 +91,7 @@ interface ColorResult {
 interface ColorExtractionCardProps {
   colors?: ColorResult[];
   url?: string;
+  loading?: boolean;
 }
 
 interface ColorDetail {
@@ -98,7 +99,7 @@ interface ColorDetail {
   name: string;
 }
 
-export default function ColorExtractionCard({ colors, url }: ColorExtractionCardProps) {
+export default function ColorExtractionCard({ colors, url, loading: parentLoading }: ColorExtractionCardProps) {
   const theme = useTheme();
   const [usageGroups, setUsageGroups] = useState<UsageGroup[]>([]);
   const [loading, setLoading] = useState(false);
@@ -258,7 +259,7 @@ export default function ColorExtractionCard({ colors, url }: ColorExtractionCard
       </Box>
       
       <Box>
-        {loading ? (
+        {(loading || parentLoading) ? (
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', py: 4 }}>
             <CircularProgress size={32} sx={{ color: 'primary.main', mr: 2 }} />
             <Typography variant="body2" color="text.secondary">
