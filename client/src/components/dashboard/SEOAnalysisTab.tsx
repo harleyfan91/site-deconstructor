@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Box, Typography, Card, CardContent, Chip, CircularProgress, Alert, Tooltip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import { CheckCircle, AlertCircle, XCircle, Search, Target, TrendingUp, Hash, FileText, Globe, Shield, Check, X } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
@@ -14,46 +14,11 @@ interface SEOAnalysisTabProps {
 
 const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error }) => {
   const theme = useTheme();
-  const [seoData, setSeoData] = useState<any>(null);
-  const [seoLoading, setSeoLoading] = useState(false);
-  const [seoError, setSeoError] = useState<string | null>(null);
-
-  // Extract URL from the data
-  const url = (data as any)?.url;
-
-  useEffect(() => {
-    if (url && !seoData && !seoLoading) {
-      fetchSEOData();
-    }
-  }, [url]);
-
-  const fetchSEOData = async () => {
-    if (!url) return;
-    
-    setSeoLoading(true);
-    setSeoError(null);
-    
-    try {
-      const response = await fetch('/api/seo', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ url: decodeURIComponent(url) }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('SEO analysis failed');
-      }
-      
-      const result = await response.json();
-      setSeoData(result);
-    } catch (err) {
-      setSeoError(err instanceof Error ? err.message : 'SEO analysis failed');
-    } finally {
-      setSeoLoading(false);
-    }
-  };
+  
+  // Use SEO data directly from main analysis instead of making separate API call
+  const seoData = data?.data?.seo || {};
+  const seoLoading = loading || !data?.data?.seo;
+  const seoError = null;
 
   // Show general error
   if (error) {
@@ -64,8 +29,8 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
     );
   }
 
-  // Show message when no URL is available
-  if (!data || !url) {
+  // Show message when no data is available
+  if (!data) {
     return (
       <Alert severity="info" sx={{ mt: 2 }}>
         Enter a URL to analyze website SEO
@@ -73,7 +38,7 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
     );
   }
 
-  const seo = seoData || {};
+  const seo = seoData;
 
   const getStatusIcon = (status: string) => {
     switch (status) {

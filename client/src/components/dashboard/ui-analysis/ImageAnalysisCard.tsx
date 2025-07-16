@@ -109,6 +109,24 @@ const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnal
     }));
   };
 
+  // Show loading state only if we have no imageAnalysis data at all
+  if (!imageAnalysis) {
+    return (
+      <Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+          <Image size={24} style={{ marginRight: 8, color: theme.palette.primary.main }} />
+          <Typography variant="h6">Image Analysis</Typography>
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
+          <CircularProgress size={20} sx={{ mr: 2 }} />
+          <Typography variant="body2" color="text.secondary">
+            Analyzing images...
+          </Typography>
+        </Box>
+      </Box>
+    );
+  }
+
   // Use real scraped URLs, make sure they're arrays even if undefined
   const imageUrls = imageAnalysis?.imageUrls || [];
   const photoUrls = imageAnalysis?.photoUrls || [];
