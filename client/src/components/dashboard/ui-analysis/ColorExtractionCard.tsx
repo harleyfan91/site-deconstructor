@@ -269,6 +269,10 @@ export default function ColorExtractionCard({ colors, url }: ColorExtractionCard
           <Alert severity="error" sx={{ mt: 2 }}>
             {error}
           </Alert>
+        ) : (!colors || colors.length === 0) ? (
+          <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
+            Color extraction temporarily unavailable - analysis in progress.
+          </Typography>
         ) : usageGroups.length === 0 ? (
           <Alert severity="error" sx={{ mt: 2 }}>
             No colors could be extracted from this website

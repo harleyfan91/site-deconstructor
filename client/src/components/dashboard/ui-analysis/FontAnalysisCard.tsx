@@ -1,8 +1,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Box, Typography, Chip, CircularProgress, useTheme } from '@mui/material';
+import { Box, Typography, Chip, useTheme } from '@mui/material';
 import { Type } from 'lucide-react';
-import type { AnalysisResponse } from '@/types/analysis';
 
 interface FontAnalysisCardProps {
   fonts?: Array<{name: string, category: string, usage: string, weight?: string, isLoaded?: boolean, isPublic?: boolean}>;
@@ -92,24 +91,9 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, u
       </Box>
       
       <Box>
-        {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
-            <CircularProgress size={32} sx={{ mr: 2 }} />
-            <Typography variant="body2" color="text.secondary">
-              Extracting fonts...
-            </Typography>
-          </Box>
-        ) : error ? (
-          <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
-            {error}
-          </Typography>
-        ) : fontsToDisplay.length === 0 && hasStartedLoading ? (
+        {fontsToDisplay.length === 0 ? (
           <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
             No fonts detected for this website.
-          </Typography>
-        ) : fontsToDisplay.length === 0 ? (
-          <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
-            Enter a URL to analyze fonts.
           </Typography>
         ) : (
           <Box sx={{ position: 'relative' }}>
