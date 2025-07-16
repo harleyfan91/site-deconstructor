@@ -683,7 +683,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Format response to maintain backward compatibility
       const analysisResult = {
         id: crypto.randomUUID(),
-        url: normalizedUrl,
+        url: url,
         timestamp: new Date().toISOString(),
         status: 'complete',
         coreWebVitals: {
@@ -691,12 +691,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           fid: overviewData.performance.coreWebVitals.fid,
           cls: overviewData.performance.coreWebVitals.cls
         },
-        securityHeaders: {
-          csp: response.headers.get('content-security-policy') || '',
-          hsts: response.headers.get('strict-transport-security') || '',
-          xfo: response.headers.get('x-frame-options') || '',
-          xcto: response.headers.get('x-content-type-options') || '',
-          referrer: response.headers.get('referrer-policy') || ''
+        securityHeaders: overviewData.tech?.securityHeaders || {
+          csp: '',
+          hsts: '',
+          xfo: '',
+          xcto: '',
+          referrer: ''
         },
         performanceScore: overviewData.overview.overallScore,
         seoScore: overviewData.overview.seoScore,
