@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, Card, CardContent, Chip, CircularProgress, Alert, Tooltip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import { CheckCircle, AlertCircle, XCircle, Search, Target, TrendingUp, Hash, FileText, Globe, Shield, Check, X } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
@@ -14,11 +14,46 @@ interface SEOAnalysisTabProps {
 
 const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error }) => {
   const theme = useTheme();
-  
-  // Use SEO data directly from main analysis instead of making separate API call
-  const seoData = data?.data?.seo || {};
-  const seoLoading = loading || !data?.data?.seo;
-  const seoError = null;
+  const [seoData, setSeoData] = useState<any>(null);
+  const [seoLoading, setSeoLoading] = useState(false);
+  const [seoError, setSeoError] = useState<string | null>(null);
+
+  // Extract URL from the data
+  const url = (data as any)?.url;
+
+  useEffect(() => {
+    if (url && !seoData && !seoLoading) {
+      fetchSEOData();
+    }
+  }, [url]);
+
+  const fetchSEOData = async () => {
+    if (!url) return;
+    
+    setSeoLoading(true);
+    setSeoError(null);
+    
+    try {
+      const response = await fetch('/api/seo', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url: decodeURIComponent(url) }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('SEO analysis failed');
+      }
+      
+      const result = await response.json();
+      setSeoData(result);
+    } catch (err) {
+      setSeoError(err instanceof Error ? err.message : 'SEO analysis failed');
+    } finally {
+      setSeoLoading(false);
+    }
+  };
 
   // Show general error
   if (error) {
@@ -29,8 +64,8 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
     );
   }
 
-  // Show message when no data is available
-  if (!data) {
+  // Show message when no URL is available
+  if (!data || !url) {
     return (
       <Alert severity="info" sx={{ mt: 2 }}>
         Enter a URL to analyze website SEO
@@ -38,7 +73,7 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
     );
   }
 
-  const seo = seoData;
+  const seo = seoData || {};
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -164,14 +199,14 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
                 <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                   SEO analysis will begin shortly...
                 </Typography>
-              ) : seoData?.checks && Array.isArray(seoData.checks) ? seoData.checks.map((check, index) => (
+              ) : seoData?.checks?.map((check, index) => (
                 <Box
                   key={index}
                   sx={{
                     display: 'flex',
                     alignItems: 'center',
                     p: 2,
-                    borderBottom: index < (seoData.checks?.length || 0) - 1 ? '1px solid #E0E0E0' : 'none',
+                    borderBottom: index < seoData.checks.length - 1 ? '1px solid #E0E0E0' : 'none',
                   }}
                 >
                   <Tooltip 
@@ -205,11 +240,7 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
                     />
                   </Tooltip>
                 </Box>
-              )) : (
-                <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
-                  No SEO checks available
-                </Typography>
-              )}
+              ))}
             </Box>
           </CardContent>
         </Card>
@@ -307,7 +338,7 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
                       enterTouchDelay={300}
                     >
                       <Typography variant="body2" sx={{ fontWeight: 'bold', color: theme.palette.success.main, cursor: 'help' }}>
-                        {seoData.checks?.filter(c => c.status === 'good').length || 0}/{seoData.checks?.length || 0}
+                        {seoData.checks.filter(c => c.status === 'good').length}/{seoData.checks.length}
                       </Typography>
                     </Tooltip>
                   </Box>
@@ -319,7 +350,7 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
                       enterTouchDelay={300}
                     >
                       <Typography variant="body2" sx={{ fontWeight: 'bold', color: theme.palette.warning.main, cursor: 'help' }}>
-                        {seoData.checks?.filter(c => c.status === 'warning').length || 0}
+                        {seoData.checks.filter(c => c.status === 'warning').length}
                       </Typography>
                     </Tooltip>
                   </Box>
@@ -331,7 +362,7 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
                       enterTouchDelay={300}
                     >
                       <Typography variant="body2" sx={{ fontWeight: 'bold', color: theme.palette.error.main, cursor: 'help' }}>
-                        {seoData.checks?.filter(c => c.status === 'error').length || 0}
+                        {seoData.checks.filter(c => c.status === 'error').length}
                       </Typography>
                     </Tooltip>
                   </Box>

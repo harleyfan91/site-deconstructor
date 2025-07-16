@@ -1,68 +1,120 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Box, 
   Typography, 
   LinearProgress, 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableContainer, 
-  TableHead, 
-  TableRow, 
-  Paper, 
-  Chip, 
-  Button, 
   CircularProgress,
-  Alert
+  Chip,
+  Alert,
+  Collapse,
+  IconButton
 } from '@mui/material';
-import { Shield, Copy, CheckCircle, XCircle } from 'lucide-react';
+import { Shield, AlertTriangle, CheckCircle, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface AccessibilityCardProps {
   url?: string;
-  contrastIssues?: any[];
-  accessibilityScore?: number;
-  altStats?: {
-    totalImages: number;
-    withAlt: number;
-    suspectAlt: number;
-  };
-  loading?: boolean;
 }
 
-const AccessibilityCard: React.FC<AccessibilityCardProps> = ({ url, contrastIssues, accessibilityScore, altStats, loading: parentLoading }) => {
-  // Use props data instead of making API calls
-  const axeColorContrast = contrastIssues || [];
-  const score = accessibilityScore || 0;
-  const imageStats = altStats || { totalImages: 0, withAlt: 0, suspectAlt: 0 };
-  
-  // Calculate WCAG summary from contrast issues
-  const wcagSummary = React.useMemo(() => {
-    if (axeColorContrast.length === 0) {
-      return { ratio: 0, passAA: true, passAAA: true };
-    }
-    
-    const avgRatio = axeColorContrast.reduce((sum: number, issue: any) => sum + (issue.ratio || 0), 0) / axeColorContrast.length;
-    const passAA = avgRatio >= 4.5;
-    const passAAA = avgRatio >= 7.0;
-    
-    return { ratio: avgRatio, passAA, passAAA };
-  }, [axeColorContrast]);
+interface AccessibilityData {
+  score: number;
+  violations: Array<{
+    id: string;
+    impact: 'minor' | 'moderate' | 'serious' | 'critical';
+    description: string;
+    help: string;
+    nodes: Array<{
+      target: string[];
+      html: string;
+      failureSummary: string;
+    }>;
+  }>;
+  contrastIssues: Array<{
+    element: string;
+    textColor: string;
+    backgroundColor: string;
+    ratio: number;
+    expectedRatio: number;
+    severity: string;
+    recommendation: string;
+  }>;
+  passedRules: number;
+  failedRules: number;
+}
 
-  // Get score color based on value
+const AccessibilityCard: React.FC<AccessibilityCardProps> = ({ url }) => {
+  const [data, setData] = useState<AccessibilityData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState(false);
+
+  useEffect(() => {
+    if (!url) {
+      setData(null);
+      setError(null);
+      return;
+    }
+
+    const fetchAccessibilityData = async () => {
+      setLoading(true);
+      setError(null);
+      
+      try {
+        const response = await fetch('/api/colors', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url })
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const result = await response.json();
+        
+        if (result.accessibilityScore !== undefined) {
+          setData({
+            score: result.accessibilityScore,
+            violations: result.violations || [],
+            contrastIssues: result.contrastIssues || [],
+            passedRules: result.passedRules || 0,
+            failedRules: result.failedRules || 0
+          });
+        } else {
+          setError('Accessibility analysis not available');
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch accessibility data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAccessibilityData();
+  }, [url]);
+
   const getScoreColor = (score: number) => {
-    if (score >= 90) return '#4CAF50'; // Green
-    if (score >= 50) return '#FF9800'; // Amber
-    return '#F44336'; // Red
+    if (score >= 80) return 'success.main';
+    if (score >= 60) return 'warning.main';
+    return 'error.main';
   };
 
-  // Copy to clipboard handler
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text).catch(console.error);
+  const getScoreLabel = (score: number) => {
+    if (score >= 80) return 'Excellent';
+    if (score >= 60) return 'Good';
+    return 'Needs Improvement';
+  };
+
+  const getImpactColor = (impact: string) => {
+    switch (impact) {
+      case 'critical': return 'error';
+      case 'serious': return 'warning';
+      case 'moderate': return 'info';
+      default: return 'default';
+    }
   };
 
   return (
     <Box>
-      {/* Header (keep existing) */}
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
         <Shield size={24} style={{ marginRight: 8, color: '#FF6B35' }} />
         <Typography variant="h6">
@@ -70,200 +122,201 @@ const AccessibilityCard: React.FC<AccessibilityCardProps> = ({ url, contrastIssu
         </Typography>
       </Box>
 
-      {(parentLoading || (!contrastIssues && !accessibilityScore && !altStats)) ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
+      {loading && (
+        <Box sx={{ display: 'flex', alignItems: 'center', py: 4 }}>
           <CircularProgress size={24} sx={{ mr: 2 }} />
-          <Typography variant="body2" color="text.secondary">
-            Analyzing accessibility...
-          </Typography>
+          <Typography variant="body2">Analyzing accessibility...</Typography>
         </Box>
-      ) : (
-        <Box sx={{ display: 'grid', gap: 2, gridTemplateRows: 'auto' }}>
-        {/* 1. Accessibility Score */}
+      )}
+
+      {error && (
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+
+      {data && (
         <Box>
-          <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
-            Accessibility Score
-          </Typography>
-          {score !== undefined && score !== null ? (
-            <Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <Typography variant="h6" sx={{ color: getScoreColor(score) }}>
-                  {score}
+          {/* Accessibility Score */}
+          <Box sx={{ mb: 3 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                Accessibility Score
+              </Typography>
+              <Box sx={{ textAlign: 'right' }}>
+                <Typography 
+                  variant="h6" 
+                  sx={{ 
+                    fontWeight: 'bold', 
+                    color: getScoreColor(data.score) 
+                  }}
+                >
+                  {data.score}%
                 </Typography>
-                <Typography variant="body2" color="text.secondary">/ 100</Typography>
-                {score === 0 && (
-                  <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic', ml: 1 }}>
-                    No Lighthouse accessibility score available
-                  </Typography>
-                )}
+                <Typography 
+                  variant="caption" 
+                  sx={{ 
+                    color: getScoreColor(data.score),
+                    fontWeight: 'medium'
+                  }}
+                >
+                  {getScoreLabel(data.score)}
+                </Typography>
               </Box>
-              <LinearProgress
-                variant="determinate"
-                value={score}
-                sx={{
-                  height: 8,
-                  borderRadius: 1,
-                  backgroundColor: '#f5f5f5',
-                  '& .MuiLinearProgress-bar': {
-                    backgroundColor: getScoreColor(score),
-                    borderRadius: 1,
-                  },
-                }}
+            </Box>
+            <LinearProgress
+              variant="determinate"
+              value={data.score}
+              sx={{
+                height: 8,
+                borderRadius: 4,
+                '& .MuiLinearProgress-bar': {
+                  backgroundColor: getScoreColor(data.score)
+                }
+              }}
+            />
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+              <Typography variant="caption" color="text.secondary">
+                {data.passedRules} rules passed
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {data.failedRules} violations found
+              </Typography>
+            </Box>
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+              Higher scores indicate better accessibility compliance
+            </Typography>
+          </Box>
+
+          {/* Summary */}
+          <Box sx={{ mb: 3 }}>
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+              <Chip 
+                icon={<CheckCircle size={16} />}
+                label={`${data.passedRules} Rules Passed`}
+                color="success"
+                variant="outlined"
+                size="small"
               />
-            </Box>
-          ) : (
-            <Typography variant="body2" color="text.secondary">No score available</Typography>
-          )}
-        </Box>
-
-        {/* 2. Hard-to-read spots table */}
-        <Box>
-          <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
-            Hard-to-read spots
-          </Typography>
-          {axeColorContrast.length > 0 ? (
-            <TableContainer component={Paper} sx={{ maxHeight: 200 }}>
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Selector</TableCell>
-                    <TableCell align="right">Contrast ratio</TableCell>
-                    <TableCell align="right">Suggested hex</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {axeColorContrast.slice(0, 5).map((issue: any, index: number) => (
-                    <TableRow key={index}>
-                      <TableCell sx={{ maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        <Typography variant="body2" component="code" sx={{ fontSize: '0.75rem' }}>
-                          {issue.element || issue.selector || 'Unknown'}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="right">
-                        <Typography variant="body2">
-                          {issue.ratio ? `${issue.ratio.toFixed(1)}:1` : 'N/A'}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="right">
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'flex-end' }}>
-                          <Typography variant="body2" component="code" sx={{ fontSize: '0.75rem' }}>
-                            {issue.suggestedColor || issue.suggestion || 'N/A'}
-                          </Typography>
-                          {issue.suggestedColor && (
-                            <Button
-                              size="small"
-                              onClick={() => copyToClipboard(issue.suggestedColor)}
-                              sx={{ minWidth: 'auto', p: 0.25 }}
-                            >
-                              <Copy size={12} />
-                            </Button>
-                          )}
-                        </Box>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          ) : (
-            <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-              No contrast issues detected or analysis unavailable due to website security restrictions
-            </Typography>
-          )}
-        </Box>
-
-        {/* 3. Contrast ratio summary badge */}
-        <Box>
-          <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
-            WCAG Compliance
-          </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant="body2">
-              {wcagSummary.ratio > 0 ? `${wcagSummary.ratio.toFixed(1)}:1` : 'N/A'}
-            </Typography>
-            <Typography variant="body2">•</Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Typography variant="body2">AA</Typography>
-              {wcagSummary.passAA ? (
-                <CheckCircle size={16} color="#4CAF50" />
-              ) : (
-                <XCircle size={16} color="#F44336" />
+              {data.violations.length > 0 && (
+                <Chip 
+                  icon={<AlertTriangle size={16} />}
+                  label={`${data.violations.length} Violations`}
+                  color="error"
+                  variant="outlined"
+                  size="small"
+                />
               )}
-            </Box>
-            <Typography variant="body2">/</Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Typography variant="body2">AAA</Typography>
-              {wcagSummary.passAAA ? (
-                <CheckCircle size={16} color="#4CAF50" />
-              ) : (
-                <XCircle size={16} color="#F44336" />
+              {data.contrastIssues.length > 0 && (
+                <Chip 
+                  label={`${data.contrastIssues.length} Contrast Issues`}
+                  color="warning"
+                  variant="outlined"
+                  size="small"
+                />
               )}
             </Box>
           </Box>
-        </Box>
 
-        {/* 4. Alt-text coverage metric row */}
-        <Box>
-          <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
-            Alt-text Coverage
-          </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant="body2">
-              {imageStats.totalImages > 0 
-                ? `${Math.round((imageStats.withAlt / imageStats.totalImages) * 100)}% with alt`
-                : '0% with alt'
-              }
-            </Typography>
-            <Typography variant="body2">•</Typography>
-            <Typography variant="body2" color="warning.main">
-              {imageStats.totalImages > 0 
-                ? `${Math.round((imageStats.suspectAlt / imageStats.totalImages) * 100)}% poor`
-                : '0% poor'
-              }
-            </Typography>
-          </Box>
-        </Box>
-
-        {/* 5. Missing landmarks section */}
-        <Box>
-          <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
-            Missing landmarks
-          </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-            {(() => {
-              const landmarkViolations: any[] = [];
-              
-              return landmarkViolations.length > 0 ? (
-                landmarkViolations.slice(0, 3).map((violation: any, index: number) => {
-                  const landmarkType = violation.id.includes('main') ? '[main]' :
-                                     violation.id.includes('lang') ? '[lang]' :
-                                     violation.id.includes('heading') ? '[h1]' :
-                                     violation.id.includes('region') ? '[nav]' : '[other]';
-                  
-                  return (
-                    <Chip
-                      key={index}
-                      label={landmarkType}
-                      size="small"
-                      sx={{
-                        backgroundColor: '#fff3cd',
-                        color: '#856404',
-                        border: '1px solid #ffeaa7',
-                        fontSize: '0.75rem',
-                        height: 24
-                      }}
-                    />
-                  );
-                })
-              ) : (
-                <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-                  No landmark issues detected
+          {/* Top Issues */}
+          {data.violations.length > 0 && (
+            <Box sx={{ mb: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                  Top Issues
                 </Typography>
-              );
-            })()}
-          </Box>
+                <IconButton
+                  size="small"
+                  onClick={() => setExpanded(!expanded)}
+                  sx={{ ml: 1 }}
+                >
+                  {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                </IconButton>
+              </Box>
+              
+              {/* Always show first 2 issues */}
+              {data.violations.slice(0, 2).map((violation, index) => (
+                <Box
+                  key={index}
+                  sx={{
+                    p: 2,
+                    mb: 1,
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    borderRadius: 1,
+                    bgcolor: 'background.paper'
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mr: 1 }}>
+                      {violation.id}
+                    </Typography>
+                    <Chip
+                      label={violation.impact}
+                      color={getImpactColor(violation.impact) as any}
+                      size="small"
+                    />
+                  </Box>
+                  <Typography variant="body2" color="text.secondary">
+                    {violation.description}
+                  </Typography>
+                </Box>
+              ))}
+
+              {/* Expandable section for additional issues */}
+              <Collapse in={expanded}>
+                {data.violations.slice(2).map((violation, index) => (
+                  <Box
+                    key={index + 2}
+                    sx={{
+                      p: 2,
+                      mb: 1,
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      borderRadius: 1,
+                      bgcolor: 'background.paper'
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mr: 1 }}>
+                        {violation.id}
+                      </Typography>
+                      <Chip
+                        label={violation.impact}
+                        color={getImpactColor(violation.impact) as any}
+                        size="small"
+                      />
+                    </Box>
+                    <Typography variant="body2" color="text.secondary">
+                      {violation.description}
+                    </Typography>
+                  </Box>
+                ))}
+              </Collapse>
+            </Box>
+          )}
+
+          {/* No Issues State */}
+          {data.violations.length === 0 && data.contrastIssues.length === 0 && (
+            <Box sx={{ textAlign: 'center', py: 3 }}>
+              <CheckCircle size={48} style={{ color: '#4caf50', marginBottom: 16 }} />
+              <Typography variant="h6" color="success.main" sx={{ fontWeight: 'bold' }}>
+                No Accessibility Issues Found
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                This website follows accessibility best practices
+              </Typography>
+            </Box>
+          )}
         </Box>
-      </Box>
+      )}
+
+      {!loading && !data && !error && (
+        <Box sx={{ textAlign: 'center', py: 4 }}>
+          <Typography variant="body2" color="text.secondary">
+            Enter a URL to analyze accessibility
+          </Typography>
+        </Box>
       )}
     </Box>
   );

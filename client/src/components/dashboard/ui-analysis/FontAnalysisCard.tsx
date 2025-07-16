@@ -1,21 +1,20 @@
 
-import React, { useEffect, useRef, useState } from 'react';
-import { Box, Typography, Chip, useTheme } from '@mui/material';
+import React, { useState, useEffect, useRef } from 'react';
+import { Box, Typography, Chip, CircularProgress, useTheme } from '@mui/material';
 import { Type } from 'lucide-react';
+import type { AnalysisResponse } from '@/types/analysis';
 
 interface FontAnalysisCardProps {
   fonts?: Array<{name: string, category: string, usage: string, weight?: string, isLoaded?: boolean, isPublic?: boolean}>;
   url?: string;
-  loading?: boolean;
 }
 
-const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, url, loading: parentLoading }) => {
+const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, url }) => {
   const theme = useTheme();
-  // Use fonts from props instead of making API calls
-  const fonts = propFonts || [];
-  const loading = parentLoading || false; // Use parent loading state
-  const error = null; // No error since we use parent data
-  const hasStartedLoading = true;
+  const [fonts, setFonts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [hasStartedLoading, setHasStartedLoading] = useState(false);
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
   const [hasUserScrolled, setHasUserScrolled] = useState(false);
   const [canScroll, setCanScroll] = useState(false);
@@ -52,9 +51,40 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, u
   };
 
   useEffect(() => {
-    // No longer making API calls - fonts come from parent component props
-    checkScrollable();
-  }, []);
+    if (!url) {
+      setHasStartedLoading(false);
+      return;
+    }
+    
+    const fetchFonts = async () => {
+      setLoading(true);
+      setError(null);
+      setHasStartedLoading(true);
+      
+      try {
+        const response = await fetch('/api/fonts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url })
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch fonts: ${response.status}`);
+        }
+        
+        const fontData = await response.json();
+        setFonts(fontData);
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to extract fonts';
+        setError(errorMessage);
+        console.error('Font extraction error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFonts();
+  }, [url]);
 
   // Check scrollable after fonts load
   useEffect(() => {
@@ -67,6 +97,7 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, u
   useEffect(() => {
     setHasUserScrolled(false);
     setShowScrollIndicator(false);
+    setFonts([]); // Clear previous fonts when URL changes
   }, [url]);
 
   // Cleanup timeout on unmount
@@ -78,8 +109,8 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, u
     };
   }, []);
 
-  // Use fonts from props
-  const fontsToDisplay = fonts;
+  // Use fetched font data or fallback to props
+  const fontsToDisplay = fonts.length > 0 ? fonts : (propFonts || []);
 
   return (
     <Box>
@@ -92,9 +123,24 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, u
       </Box>
       
       <Box>
-        {fontsToDisplay.length === 0 ? (
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
+            <CircularProgress size={32} sx={{ mr: 2 }} />
+            <Typography variant="body2" color="text.secondary">
+              Extracting fonts...
+            </Typography>
+          </Box>
+        ) : error ? (
+          <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
+            {error}
+          </Typography>
+        ) : fontsToDisplay.length === 0 && hasStartedLoading ? (
           <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
             No fonts detected for this website.
+          </Typography>
+        ) : fontsToDisplay.length === 0 ? (
+          <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
+            Enter a URL to analyze fonts.
           </Typography>
         ) : (
           <Box sx={{ position: 'relative' }}>

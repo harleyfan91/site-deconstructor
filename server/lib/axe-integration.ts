@@ -4,7 +4,6 @@
  */
 import { Page } from 'playwright';
 import { SupabaseCacheService } from './supabase';
-import { processAxeResults, getColorContrastReport } from '../../shared/axeUtils';
 import * as crypto from 'crypto';
 
 export interface AxeViolation {
@@ -28,7 +27,6 @@ export interface ContrastIssue {
   expectedRatio: number;
   severity: string;
   recommendation: string;
-  suggestedColor?: string;
 }
 
 export interface AccessibilityAnalysis {
@@ -62,27 +60,67 @@ export async function runAxeAnalysis(page: Page, url: string): Promise<Accessibi
       new Promise((_, reject) => setTimeout(() => reject(new Error('Axe analysis timeout')), 15000))
     ]);
     
-    // Use shared utility to process axe results
-    const processedResults = processAxeResults(axeResults);
-    const contrastReport = getColorContrastReport(processedResults.violations);
+    const violations = (axeResults as any).violations || [];
 
-    console.log(`✅ Axe analysis completed: ${processedResults.violations.length} violations found, ${processedResults.passedRules} passed, score: ${processedResults.score}`);
+    // Extract contrast-specific violations
+    const contrastViolations = violations.filter(v => v.id === 'color-contrast');
+    const contrastIssues: ContrastIssue[] = contrastViolations.flatMap(violation =>
+      violation.nodes.map(node => {
+        // Extract color information from the violation data
+        const target = node.target.join(' ');
+        const html = node.html;
+        
+        // Parse colors from the failure summary or use defaults
+        let textColor = '#000000';
+        let backgroundColor = '#ffffff';
+        let ratio = 1;
+        let expectedRatio = 4.5;
+        
+        if (node.any && node.any[0] && node.any[0].data) {
+          const data = node.any[0].data;
+          textColor = data.fgColor || textColor;
+          backgroundColor = data.bgColor || backgroundColor;
+          ratio = data.contrastRatio || ratio;
+          expectedRatio = data.expectedContrastRatio || expectedRatio;
+        }
+
+        return {
+          element: target,
+          textColor,
+          backgroundColor,
+          ratio: Math.round(ratio * 100) / 100,
+          expectedRatio,
+          severity: violation.impact,
+          recommendation: `Increase contrast ratio to at least ${expectedRatio}:1`
+        };
+      })
+    );
+
+    // Calculate accessibility score based on violations
+    const totalRules = ((axeResults as any).passes?.length || 0) + violations.length;
+    const failedRules = violations.length;
+    const passedRules = totalRules - failedRules;
+    const score = totalRules > 0 ? Math.round((passedRules / totalRules) * 100) : 0;
+
+    console.log(`✅ Axe analysis completed: ${violations.length} violations found, ${passedRules} passed, score: ${score}`);
 
     return {
-      contrastIssues: contrastReport.map(issue => ({
-        element: issue.element,
-        textColor: issue.fg,
-        backgroundColor: issue.bg,
-        ratio: issue.ratio,
-        expectedRatio: issue.expectedRatio,
-        severity: issue.severity,
-        recommendation: issue.recommendation,
-        suggestedColor: issue.suggestedColor
+      contrastIssues,
+      violations: violations.map(v => ({
+        id: v.id,
+        impact: v.impact as any,
+        description: v.description,
+        help: v.help,
+        helpUrl: v.helpUrl,
+        nodes: v.nodes.map(node => ({
+          target: node.target,
+          html: node.html,
+          failureSummary: node.failureSummary || ''
+        }))
       })),
-      violations: processedResults.violations,
-      passedRules: processedResults.passedRules,
-      failedRules: processedResults.failedRules,
-      score: processedResults.score
+      passedRules,
+      failedRules,
+      score
     };
   } catch (error) {
     console.error('Axe analysis failed:', error);

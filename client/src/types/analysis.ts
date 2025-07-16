@@ -18,16 +18,6 @@ export interface AccessibilityViolation {
   description: string;
 }
 
-export interface ColorContrastIssue {
-  element: string;
-  fg: string;
-  bg: string;
-  ratio: number;
-  expectedRatio?: number;
-  suggestedColor?: string; // new
-  isAccessible: boolean;
-}
-
 export interface SecurityHeaders {
   csp: string;
   hsts: string;

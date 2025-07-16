@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, Card, CardContent, Chip, CircularProgress, Alert, Tooltip } from '@mui/material';
 import { Shield, Globe, Server, Database, Code, Layers, Zap, Activity, BarChart, Users, Cookie, Settings } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
@@ -260,15 +260,86 @@ interface TechnicalAnalysis {
 const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
   const theme = useTheme();
   
-  // Use tech data directly from main analysis instead of making separate API call
-  const techData = data?.data?.tech || data?.data?.technical;
-  const techAnalysis = techData;
-  const techLoading = loading || !techData;
-  const techError = null;
+  // State for comprehensive technical analysis
+  const [techAnalysis, setTechAnalysis] = useState<TechnicalAnalysis | null>(null);
+  const [techLoading, setTechLoading] = useState(false);
+  const [techError, setTechError] = useState<string | null>(null);
+
+  // Fetch comprehensive technical data when URL is available
+  useEffect(() => {
+    if (data?.url && !loading && !error) {
+      fetchTechnicalAnalysis(data.url);
+    }
+  }, [data?.url, loading, error]);
+
+  const fetchTechnicalAnalysis = async (url: string) => {
+    setTechLoading(true);
+    setTechError(null);
+    
+    try {
+      console.log('🔧 Fetching comprehensive tech analysis for:', url);
+      
+      const response = await fetch('/api/tech', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url }),
+      });
+
+      if (!response.ok) {
+        // Try to get fallback data from the main analysis
+        console.warn('Enhanced tech analysis failed, using basic data if available');
+        const fallbackData = data?.data?.technical;
+        if (fallbackData && 'techStack' in fallbackData) {
+          setTechAnalysis({
+            ...fallbackData,
+            adTags: fallbackData.adTags || [],
+            securityHeaders: fallbackData.securityHeaders || { csp: 'Not Set', hsts: 'Not Set', xfo: 'Not Set', xss: 'Not Set', xcto: 'Not Set', referrer: 'Not Set' },
+            tlsVersion: fallbackData.tlsVersion || 'Unknown',
+            cdn: fallbackData.cdn || false,
+            gzip: fallbackData.gzip || false
+          });
+          return;
+        }
+        throw new Error('Technical analysis temporarily unavailable');
+      }
+
+      const analysisData = await response.json();
+      console.log('✅ Technical analysis data received:', analysisData);
+      setTechAnalysis(analysisData);
+    } catch (err) {
+      console.error('Technical analysis error:', err);
+      // Use fallback data from main analysis if available
+      const fallbackData = data?.data?.technical;
+      if (fallbackData && 'techStack' in fallbackData) {
+        console.log('Using fallback technical data from main analysis');
+        setTechAnalysis({
+          techStack: fallbackData.techStack || [],
+          thirdPartyScripts: fallbackData.thirdPartyScripts || [],
+          minification: fallbackData.minification || { cssMinified: false, jsMinified: false, htmlMinified: false },
+          social: fallbackData.social || { hasOpenGraph: false, hasTwitterCard: false, hasShareButtons: false },
+          cookies: fallbackData.cookies || { hasSessionCookies: false, hasTrackingCookies: false, hasAnalyticsCookies: false },
+          adTags: (fallbackData as any).adTags || [],
+          securityHeaders: (fallbackData as any).securityHeaders || { csp: 'Not Set', hsts: 'Not Set', xfo: 'Not Set', xss: 'Not Set', xcto: 'Not Set', referrer: 'Not Set' },
+          tlsVersion: (fallbackData as any).tlsVersion || 'Unknown',
+          cdn: (fallbackData as any).cdn || false,
+          gzip: (fallbackData as any).gzip || false,
+          accessibility: fallbackData.accessibility || { violations: [] },
+          issues: []
+        });
+      } else {
+        setTechError('Technical analysis temporarily unavailable');
+      }
+    } finally {
+      setTechLoading(false);
+    }
+  };
 
   // No tab-level loading - use section-level loading instead
 
   // Use comprehensive technical analysis data if available, fallback to basic data
+  const techData = data?.data?.tech || {};
   const displayTechStack = techAnalysis?.techStack || techData?.techStack || [];
   const displayMinification = techAnalysis?.minification || techData?.minification;
   const displaySocial = techAnalysis?.social || techData?.social;

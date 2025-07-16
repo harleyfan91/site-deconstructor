@@ -89,8 +89,7 @@ export const useAnalysisApi = () => {
         console.log('⚡ Fetching immediate local analysis...');
         const immediateResponse = await fetch(`/api/analyze/full?url=${encodeURIComponent(url)}&immediate=true`, {
           method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-          signal: AbortSignal.timeout(20000), // 20 second timeout for frontend
+          headers: { 'Content-Type': 'application/json' }
         });
 
         if (!immediateResponse.ok) {
@@ -108,8 +107,7 @@ export const useAnalysisApi = () => {
         console.log('🔍 Fetching comprehensive overview data in background...');
         fetch(`/api/overview?url=${encodeURIComponent(url)}`, {
           method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-          signal: AbortSignal.timeout(30000), // 30 second timeout for overview
+          headers: { 'Content-Type': 'application/json' }
         }).then(async (overviewResponse) => {
           if (overviewResponse.ok) {
             const overviewData = await overviewResponse.json();
@@ -128,28 +126,14 @@ export const useAnalysisApi = () => {
             console.warn('Overview analysis failed, keeping immediate analysis');
           }
         }).catch((err) => {
-          if (err.name === 'TimeoutError' || err.name === 'AbortError') {
-            console.warn('Background overview fetch timed out, keeping immediate analysis');
-          } else {
-            console.warn('Background overview fetch error:', err.message || err);
-          }
+          console.warn('Background overview fetch error:', err);
         });
 
         return immediateResult;
 
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-        console.error('Analysis API Error:', errorMessage);
-        
-        // Provide more specific error messages
-        if (err instanceof Error) {
-          if (err.name === 'TimeoutError' || err.name === 'AbortError') {
-            throw new Error('Analysis timed out. Please try again or check if the website is accessible.');
-          } else if (err.message.includes('fetch')) {
-            throw new Error('Unable to analyze this website. Please check the URL and try again.');
-          }
-        }
-        
+        console.error('Analysis API Error:', err);
         throw new Error(errorMessage);
       }
     })();

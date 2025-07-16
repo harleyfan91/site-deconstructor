@@ -89,9 +89,7 @@ interface ColorResult {
 }
 
 interface ColorExtractionCardProps {
-  colors?: ColorResult[];
   url?: string;
-  loading?: boolean;
 }
 
 interface ColorDetail {
@@ -99,10 +97,10 @@ interface ColorDetail {
   name: string;
 }
 
-export default function ColorExtractionCard({ colors, url, loading: parentLoading }: ColorExtractionCardProps) {
+export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
   const theme = useTheme();
   const [usageGroups, setUsageGroups] = useState<UsageGroup[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedSections, setExpandedSections] = useSessionState<Record<string, boolean>>(
     'ui-color-extraction-expanded',
@@ -147,46 +145,30 @@ export default function ColorExtractionCard({ colors, url, loading: parentLoadin
     let glowTimer: NodeJS.Timeout;
     let collapseTimer: NodeJS.Timeout;
 
-    const processColors = () => {
+    (async () => {
       try {
-        setLoading(false);
+        setLoading(true);
         setError(null);
         
-        // Log for debugging the data structure
-        console.log('ColorExtractionCard received colors:', colors);
+        const res = await fetch('/api/colors', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: url ?? window.location.href })
+        });
         
-        if (!colors || colors.length === 0) {
-          setUsageGroups([]);
-          return;
-        }
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const response = await res.json();
+        const flat: ColorResult[] = response.colors || response;
 
-        // Map colors to grouped structure expected by the UI
+        // Map flat response to grouped structure expected by the UI
         const groups: Record<string, { name: string; colors: { hex: string; name: string }[] }[]> = {};
-        colors.forEach((colorItem) => {
-          // Handle both direct array and object with colors property
-          const colorData = Array.isArray(colorItem) ? colorItem : colorItem.colors || [colorItem];
+        flat.forEach(({ hex, property, name }) => {
+          const key = property; // Backend now returns bucket name directly
+          groups[key] ??= [{ name: 'All', colors: [] }];
           
-          if (Array.isArray(colorData)) {
-            colorData.forEach(({ hex, property, name }) => {
-              if (hex && property && name) {
-                const key = property; // Backend returns bucket name directly
-                groups[key] ??= [{ name: 'All', colors: [] }];
-                
-                // Avoid duplicates
-                if (!groups[key][0].colors.some(c => c.hex === hex)) {
-                  groups[key][0].colors.push({ hex, name });
-                }
-              }
-            });
-          } else if (colorData.hex && colorData.property && colorData.name) {
-            const { hex, property, name } = colorData;
-            const key = property;
-            groups[key] ??= [{ name: 'All', colors: [] }];
-            
-            // Avoid duplicates
-            if (!groups[key][0].colors.some(c => c.hex === hex)) {
-              groups[key][0].colors.push({ hex, name });
-            }
+          // Avoid duplicates
+          if (!groups[key][0].colors.some(c => c.hex === hex)) {
+            groups[key][0].colors.push({ hex, name });
           }
         });
 
@@ -230,20 +212,20 @@ export default function ColorExtractionCard({ colors, url, loading: parentLoadin
         }, 2500);
 
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to process colors';
-        console.error('Color processing error:', err);
+        const errorMessage = err instanceof Error ? err.message : 'Failed to extract colors from website';
+        console.error('Color extraction error:', err);
         setError(errorMessage);
         setUsageGroups([]);
+      } finally {
+        setLoading(false);
       }
-    };
-
-    processColors();
+    })();
 
     return () => {
-      if (glowTimer) clearTimeout(glowTimer);
-      if (collapseTimer) clearTimeout(collapseTimer);
+      clearTimeout(glowTimer);
+      clearTimeout(collapseTimer);
     };
-  }, [colors]);
+  }, [url]);
 
   // Removed early returns - header will always be rendered
 
@@ -280,7 +262,7 @@ export default function ColorExtractionCard({ colors, url, loading: parentLoadin
       </Box>
       
       <Box>
-        {(loading || parentLoading) ? (
+        {loading ? (
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', py: 4 }}>
             <CircularProgress size={32} sx={{ color: 'primary.main', mr: 2 }} />
             <Typography variant="body2" color="text.secondary">
@@ -291,10 +273,6 @@ export default function ColorExtractionCard({ colors, url, loading: parentLoadin
           <Alert severity="error" sx={{ mt: 2 }}>
             {error}
           </Alert>
-        ) : (!colors || colors.length === 0) ? (
-          <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
-            Color extraction temporarily unavailable - analysis in progress.
-          </Typography>
         ) : usageGroups.length === 0 ? (
           <Alert severity="error" sx={{ mt: 2 }}>
             No colors could be extracted from this website

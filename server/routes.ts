@@ -44,18 +44,6 @@ function buildUIData(scrapedData: any) {
     const images = Array.isArray(scrapedData?.images) ? scrapedData.images : [];
     const imageUrls = images.length > 0 ? images.map((img: any) => img?.url || img || '') : [];
     
-    // Calculate alt text statistics manually (avoiding require in ES module)
-    const totalImages = images.length;
-    const withAlt = images.filter((img: any) => img?.alt && img.alt.trim().length > 0).length;
-    const suspectAltCount = images.filter((img: any) => {
-      const alt = img?.alt;
-      if (!alt || alt.trim().length === 0) return false;
-      const suspectTerms = ['image', 'photo', 'picture', 'pic', 'img', 'logo', 'icon'];
-      return suspectTerms.some(term => alt.toLowerCase() === term.toLowerCase()) || alt.length < 3;
-    }).length;
-    const altStats = { totalImages, withAlt, suspectAlt: suspectAltCount };
-    const altTextScore = totalImages === 0 ? 100 : Math.round(((withAlt - suspectAltCount) / totalImages) * 100);
-    
     return {
       fonts: fonts,
       images: images.map((img: any) => ({
@@ -67,13 +55,11 @@ function buildUIData(scrapedData: any) {
       })),
       imageAnalysis: {
         totalImages: images.length,
-        estimatedPhotos: images.filter((img: any) => img?.isPhoto).length,
-        estimatedIcons: images.filter((img: any) => img?.isIcon).length,
+        estimatedPhotos: images.filter((img: any) => img?.isPhoto).length || Math.floor(images.length * 0.6),
+        estimatedIcons: images.filter((img: any) => img?.isIcon).length || Math.floor(images.length * 0.4),
         imageUrls: imageUrls,
         photoUrls: images.filter((img: any) => img?.isPhoto).map((img: any) => img?.url || img || '') || [],
-        iconUrls: images.filter((img: any) => img?.isIcon).map((img: any) => img?.url || img || '') || [],
-        altStats: altStats,
-        altTextScore: altTextScore
+        iconUrls: images.filter((img: any) => img?.isIcon).map((img: any) => img?.url || img || '') || []
       },
       contrastIssues: Array.isArray(scrapedData?.contrastIssues) ? scrapedData.contrastIssues : []
     };
@@ -89,9 +75,7 @@ function buildUIData(scrapedData: any) {
         estimatedIcons: 0,
         imageUrls: [],
         photoUrls: [],
-        iconUrls: [],
-        altStats: { totalImages: 0, withAlt: 0, suspectAlt: 0 },
-        altTextScore: 100
+        iconUrls: []
       },
       contrastIssues: []
     };
@@ -326,7 +310,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         console.log(`🛡️ Accessibility analysis completed: ${accessibilityData.violations.length} violations, score: ${accessibilityData.score}`);
       } catch (error) {
-        console.error('Accessibility analysis error:', error);
+        console.warn('⚠️ Accessibility analysis failed:', error.message);
         accessibilityData = {
           contrastIssues: [],
           violations: [],
@@ -336,24 +320,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
       }
       
-      // Use shared axeUtils to get contrast report with suggestions
-      const { getColorContrastReport } = await import('../shared/axeUtils');
-      const contrastReport = getColorContrastReport(accessibilityData.violations);
-      
       // Format as expected by frontend with accessibility data
       const colorAnalysis = { 
         colors,
         accessibilityScore: accessibilityData.score,
-        contrastIssues: contrastReport.map(issue => ({
-          element: issue.element,
-          textColor: issue.fg,
-          backgroundColor: issue.bg,
-          ratio: issue.ratio,
-          expectedRatio: issue.expectedRatio,
-          severity: issue.severity,
-          recommendation: issue.recommendation,
-          suggestedColor: issue.suggestedColor
-        })),
+        contrastIssues: accessibilityData.contrastIssues,
         violations: accessibilityData.violations
       };
       
@@ -610,7 +581,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         headers: {
           'User-Agent': 'Mozilla/5.0 (compatible; WebsiteAnalyzer/1.0)',
         },
-        signal: AbortSignal.timeout(15000), // 15 second timeout
       });
 
       if (!response.ok) {
@@ -684,7 +654,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Format response to maintain backward compatibility
       const analysisResult = {
         id: crypto.randomUUID(),
-        url: url,
+        url: normalizedUrl,
         timestamp: new Date().toISOString(),
         status: 'complete',
         coreWebVitals: {
@@ -692,12 +662,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           fid: overviewData.performance.coreWebVitals.fid,
           cls: overviewData.performance.coreWebVitals.cls
         },
-        securityHeaders: overviewData.tech?.securityHeaders || {
-          csp: '',
-          hsts: '',
-          xfo: '',
-          xcto: '',
-          referrer: ''
+        securityHeaders: {
+          csp: response.headers.get('content-security-policy') || '',
+          hsts: response.headers.get('strict-transport-security') || '',
+          xfo: response.headers.get('x-frame-options') || '',
+          xcto: response.headers.get('x-content-type-options') || '',
+          referrer: response.headers.get('referrer-policy') || ''
         },
         performanceScore: overviewData.overview.overallScore,
         seoScore: overviewData.overview.seoScore,
@@ -711,29 +681,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     } catch (error) {
       console.error('Analysis error:', error);
-      
-      // Provide more specific error messages based on error type
-      let errorMessage = 'Unknown error';
-      let statusCode = 500;
-      
-      if (error instanceof Error) {
-        if (error.message.includes('timeout') || error.message.includes('TIMEOUT') || error.name === 'TimeoutError') {
-          errorMessage = 'Website took too long to respond. Please try again.';
-          statusCode = 408; // Request Timeout
-        } else if (error.message.includes('ENOTFOUND') || error.message.includes('DNS')) {
-          errorMessage = 'Website not found. Please check the URL.';
-          statusCode = 404;
-        } else if (error.message.includes('ECONNREFUSED')) {
-          errorMessage = 'Connection refused by website.';
-          statusCode = 503; // Service Unavailable
-        } else {
-          errorMessage = error.message;
-        }
-      }
-      
-      res.status(statusCode).json({ 
+      res.status(500).json({ 
         error: 'Analysis failed', 
-        message: errorMessage
+        message: error instanceof Error ? error.message : 'Unknown error' 
       });
     }
   });

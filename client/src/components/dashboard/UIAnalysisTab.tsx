@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Box, Typography, Card, CardContent, CircularProgress, Alert } from '@mui/material';
-import { Palette, Type } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 import ColorExtractionCard from './ui-analysis/ColorExtractionCard';
 import FontAnalysisCard from './ui-analysis/FontAnalysisCard';
@@ -34,10 +33,6 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
 
   const ui = data?.data?.ui;
   const { colors, fonts, images, imageAnalysis } = ui || {};
-  
-  // Check if we have any UI data at all - if not and we have data, we're still loading UI components
-  const hasUIData = colors || fonts || images || imageAnalysis;
-  const isUILoading = data && !hasUIData; // We have initial data but no UI data yet
 
   return (
     <Box>
@@ -50,7 +45,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
         {/* Color Extraction */}
         <Card sx={{ borderRadius: 2, width: '100%' }}>
           <CardContent sx={{ p: 2 }}>
-            <ColorExtractionCard colors={colors} url={data?.url} loading={loading || isUILoading || !colors} />
+            <ColorExtractionCard url={data?.url} />
           </CardContent>
         </Card>
 
@@ -58,19 +53,13 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
           <Card sx={{ borderRadius: 2, width: '100%' }}>
             <CardContent sx={{ p: 2 }}>
-              <FontAnalysisCard fonts={fonts ?? []} url={data?.url} loading={loading || isUILoading || !fonts} />
+              <FontAnalysisCard fonts={fonts ?? []} url={data?.url} />
             </CardContent>
           </Card>
 
           <Card sx={{ borderRadius: 2, width: '100%' }}>
             <CardContent sx={{ p: 2 }}>
-              <AccessibilityCard 
-                url={data?.url} 
-                contrastIssues={ui?.contrastIssues}
-                accessibilityScore={ui?.accessibilityScore}
-                altStats={imageAnalysis?.altStats}
-                loading={loading || isUILoading || (!ui?.contrastIssues && !ui?.accessibilityScore)}
-              />
+              <AccessibilityCard url={data?.url} />
             </CardContent>
           </Card>
         </Box>
@@ -81,8 +70,6 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
             <ImageAnalysisCard
               images={images ?? []}
               imageAnalysis={imageAnalysis}
-              url={data?.url}
-              loading={loading || isUILoading || !images}
             />
           </CardContent>
         </Card>

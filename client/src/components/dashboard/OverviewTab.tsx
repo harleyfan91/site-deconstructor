@@ -46,13 +46,13 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
     );
   }
 
-  // Show minimal loading indicator only when no data at all
+  // Show loading indicator only when no data at all
   if (loading && !data) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 4 }}>
-        <CircularProgress size={24} />
-        <Typography variant="body2" sx={{ ml: 2, color: 'text.secondary' }}>
-          Starting analysis...
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
+        <CircularProgress size={60} />
+        <Typography variant="h6" sx={{ ml: 2 }}>
+          Analyzing website...
         </Typography>
       </Box>
     );
