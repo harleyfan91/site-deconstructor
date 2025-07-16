@@ -15,6 +15,7 @@ interface ImageAnalysisCardProps {
     photoUrls?: string[];
     iconUrls?: string[];
   };
+  url?: string;
 }
 
 interface AdaptiveLinkProps {
@@ -90,7 +91,7 @@ const AdaptiveLink: React.FC<AdaptiveLinkProps> = ({ url, index }) => {
   );
 };
 
-const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnalysis }) => {
+const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnalysis, url }) => {
   const theme = useTheme();
   const [expandedSections, setExpandedSections] = useSessionState<Record<string, boolean>>(
     'ui-image-analysis-expanded',

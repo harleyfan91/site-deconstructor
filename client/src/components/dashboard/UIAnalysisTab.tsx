@@ -70,6 +70,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
             <ImageAnalysisCard
               images={images ?? []}
               imageAnalysis={imageAnalysis}
+              url={data?.url}
             />
           </CardContent>
         </Card>

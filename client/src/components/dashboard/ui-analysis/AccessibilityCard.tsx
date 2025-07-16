@@ -88,6 +88,11 @@ const AccessibilityCard: React.FC<AccessibilityCardProps> = ({ url }) => {
                   {score}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">/ 100</Typography>
+                {score === 0 && (
+                  <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic', ml: 1 }}>
+                    No Lighthouse accessibility score available
+                  </Typography>
+                )}
               </Box>
               <LinearProgress
                 variant="determinate"
@@ -229,20 +234,20 @@ const AccessibilityCard: React.FC<AccessibilityCardProps> = ({ url }) => {
             Missing landmarks
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-            {violations && violations.length > 0 ? (
-              violations
-                .filter((violation: any) => 
-                  violation.id === 'landmark-one-main' || 
-                  violation.id === 'page-has-heading-one' ||
-                  violation.id === 'region' ||
-                  violation.id === 'landmark-main-is-top-level' ||
-                  violation.id === 'landmark-no-duplicate-main' ||
-                  violation.id === 'landmark-unique' ||
-                  violation.id === 'html-has-lang' ||
-                  violation.id === 'valid-lang'
-                )
-                .slice(0, 3)
-                .map((violation: any, index: number) => {
+            {(() => {
+              const landmarkViolations = violations?.filter((violation: any) => 
+                violation.id === 'landmark-one-main' || 
+                violation.id === 'page-has-heading-one' ||
+                violation.id === 'region' ||
+                violation.id === 'landmark-main-is-top-level' ||
+                violation.id === 'landmark-no-duplicate-main' ||
+                violation.id === 'landmark-unique' ||
+                violation.id === 'html-has-lang' ||
+                violation.id === 'valid-lang'
+              ) || [];
+              
+              return landmarkViolations.length > 0 ? (
+                landmarkViolations.slice(0, 3).map((violation: any, index: number) => {
                   const landmarkType = violation.id.includes('main') ? '[main]' :
                                      violation.id.includes('lang') ? '[lang]' :
                                      violation.id.includes('heading') ? '[h1]' :
@@ -263,11 +268,12 @@ const AccessibilityCard: React.FC<AccessibilityCardProps> = ({ url }) => {
                     />
                   );
                 })
-            ) : (
-              <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-                No landmark issues detected
-              </Typography>
-            )}
+              ) : (
+                <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                  No landmark issues detected
+                </Typography>
+              );
+            })()}
           </Box>
         </Box>
       </Box>
