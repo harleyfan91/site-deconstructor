@@ -59,7 +59,12 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
 
           <Card sx={{ borderRadius: 2, width: '100%' }}>
             <CardContent sx={{ p: 2 }}>
-              <AccessibilityCard url={data?.url} />
+              <AccessibilityCard 
+                url={data?.url} 
+                contrastIssues={ui?.contrastIssues}
+                accessibilityScore={ui?.accessibilityScore}
+                altStats={imageAnalysis?.altStats}
+              />
             </CardContent>
           </Card>
         </Box>

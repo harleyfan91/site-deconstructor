@@ -21,17 +21,20 @@ import { useUIAnalysis } from '../../../hooks/useUIAnalysis';
 
 interface AccessibilityCardProps {
   url?: string;
+  contrastIssues?: any[];
+  accessibilityScore?: number;
+  altStats?: {
+    totalImages: number;
+    withAlt: number;
+    suspectAlt: number;
+  };
 }
 
-const AccessibilityCard: React.FC<AccessibilityCardProps> = ({ url }) => {
-  const { score, contrastIssues, violations, isLoading: scoreLoading, isError: scoreError } = useAccessibilityScore(url || '');
-  const { data: uiData, isLoading: uiLoading, error: uiError } = useUIAnalysis(url || '');
-
-  // Extract data from UI analysis response (this includes alt text stats)
-  const altStats = uiData?.imageAnalysis?.altStats || { totalImages: 0, withAlt: 0, suspectAlt: 0 };
-  
-  // Use contrast issues from accessibility analysis
-  const axeColorContrast = contrastIssues;
+const AccessibilityCard: React.FC<AccessibilityCardProps> = ({ url, contrastIssues, accessibilityScore, altStats }) => {
+  // Use props data instead of making API calls
+  const axeColorContrast = contrastIssues || [];
+  const score = accessibilityScore || 0;
+  const imageStats = altStats || { totalImages: 0, withAlt: 0, suspectAlt: 0 };
   
   // Calculate WCAG summary from contrast issues
   const wcagSummary = React.useMemo(() => {
@@ -68,7 +71,15 @@ const AccessibilityCard: React.FC<AccessibilityCardProps> = ({ url }) => {
         </Typography>
       </Box>
 
-      <Box sx={{ display: 'grid', gap: 2, gridTemplateRows: 'auto' }}>
+      {(!contrastIssues && !accessibilityScore && !altStats) ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
+          <CircularProgress size={24} sx={{ mr: 2 }} />
+          <Typography variant="body2" color="text.secondary">
+            Analyzing accessibility...
+          </Typography>
+        </Box>
+      ) : (
+        <Box sx={{ display: 'grid', gap: 2, gridTemplateRows: 'auto' }}>
         {/* 1. Accessibility Score */}
         <Box>
           <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
@@ -277,6 +288,7 @@ const AccessibilityCard: React.FC<AccessibilityCardProps> = ({ url }) => {
           </Box>
         </Box>
       </Box>
+      )}
     </Box>
   );
 };

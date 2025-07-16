@@ -145,7 +145,15 @@ const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnal
           </Typography>
         </Box>
 
-        <Box>
+        {!imageAnalysis ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
+            <CircularProgress size={24} sx={{ mr: 2 }} />
+            <Typography variant="body2" color="text.secondary">
+              Analyzing images...
+            </Typography>
+          </Box>
+        ) : (
+          <Box>
           {[
             { key: 'total', title: 'Total Images', count: totalImagesCount, urls: imageUrls, empty: 'No images found on this page.' },
             { key: 'photos', title: 'Estimated Photos', count: photosCount, urls: photoUrls, empty: 'No photos found on this page.' },
@@ -195,6 +203,7 @@ const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnal
             </Box>
           ))}
         </Box>
+        )}
     </Box>
   );
 };
