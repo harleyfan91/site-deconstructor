@@ -164,14 +164,14 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
                 <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                   SEO analysis will begin shortly...
                 </Typography>
-              ) : seoData?.checks?.map((check, index) => (
+              ) : seoData?.checks && Array.isArray(seoData.checks) ? seoData.checks.map((check, index) => (
                 <Box
                   key={index}
                   sx={{
                     display: 'flex',
                     alignItems: 'center',
                     p: 2,
-                    borderBottom: index < seoData.checks.length - 1 ? '1px solid #E0E0E0' : 'none',
+                    borderBottom: index < (seoData.checks?.length || 0) - 1 ? '1px solid #E0E0E0' : 'none',
                   }}
                 >
                   <Tooltip 
@@ -205,7 +205,11 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
                     />
                   </Tooltip>
                 </Box>
-              ))}
+              )) : (
+                <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
+                  No SEO checks available
+                </Typography>
+              )}
             </Box>
           </CardContent>
         </Card>
@@ -303,7 +307,7 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
                       enterTouchDelay={300}
                     >
                       <Typography variant="body2" sx={{ fontWeight: 'bold', color: theme.palette.success.main, cursor: 'help' }}>
-                        {seoData.checks.filter(c => c.status === 'good').length}/{seoData.checks.length}
+                        {seoData.checks?.filter(c => c.status === 'good').length || 0}/{seoData.checks?.length || 0}
                       </Typography>
                     </Tooltip>
                   </Box>
@@ -315,7 +319,7 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
                       enterTouchDelay={300}
                     >
                       <Typography variant="body2" sx={{ fontWeight: 'bold', color: theme.palette.warning.main, cursor: 'help' }}>
-                        {seoData.checks.filter(c => c.status === 'warning').length}
+                        {seoData.checks?.filter(c => c.status === 'warning').length || 0}
                       </Typography>
                     </Tooltip>
                   </Box>
@@ -327,7 +331,7 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
                       enterTouchDelay={300}
                     >
                       <Typography variant="body2" sx={{ fontWeight: 'bold', color: theme.palette.error.main, cursor: 'help' }}>
-                        {seoData.checks.filter(c => c.status === 'error').length}
+                        {seoData.checks?.filter(c => c.status === 'error').length || 0}
                       </Typography>
                     </Tooltip>
                   </Box>

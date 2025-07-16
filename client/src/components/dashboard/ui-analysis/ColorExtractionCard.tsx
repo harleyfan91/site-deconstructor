@@ -89,6 +89,7 @@ interface ColorResult {
 }
 
 interface ColorExtractionCardProps {
+  colors?: ColorResult[];
   url?: string;
 }
 
@@ -97,10 +98,10 @@ interface ColorDetail {
   name: string;
 }
 
-export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
+export default function ColorExtractionCard({ colors, url }: ColorExtractionCardProps) {
   const theme = useTheme();
   const [usageGroups, setUsageGroups] = useState<UsageGroup[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expandedSections, setExpandedSections] = useSessionState<Record<string, boolean>>(
     'ui-color-extraction-expanded',
@@ -145,25 +146,20 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
     let glowTimer: NodeJS.Timeout;
     let collapseTimer: NodeJS.Timeout;
 
-    const fetchColors = async () => {
+    const processColors = () => {
       try {
-        setLoading(true);
+        setLoading(false);
         setError(null);
         
-        const res = await fetch('/api/colors', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: url ?? window.location.href })
-        });
-        
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const response = await res.json();
-        const flat: ColorResult[] = response.colors || response;
+        if (!colors || colors.length === 0) {
+          setUsageGroups([]);
+          return;
+        }
 
-        // Map flat response to grouped structure expected by the UI
+        // Map colors to grouped structure expected by the UI
         const groups: Record<string, { name: string; colors: { hex: string; name: string }[] }[]> = {};
-        flat.forEach(({ hex, property, name }) => {
-          const key = property; // Backend now returns bucket name directly
+        colors.forEach(({ hex, property, name }) => {
+          const key = property; // Backend returns bucket name directly
           groups[key] ??= [{ name: 'All', colors: [] }];
           
           // Avoid duplicates
@@ -212,28 +208,20 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
         }, 2500);
 
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to extract colors from website';
-        console.error('Color extraction error:', err);
+        const errorMessage = err instanceof Error ? err.message : 'Failed to process colors';
+        console.error('Color processing error:', err);
         setError(errorMessage);
         setUsageGroups([]);
-      } finally {
-        setLoading(false);
       }
     };
 
-    // Call fetchColors with proper error handling
-    fetchColors().catch(err => {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to extract colors from website';
-      console.error('Color extraction error:', err);
-      setError(errorMessage);
-      setLoading(false);
-    });
+    processColors();
 
     return () => {
-      clearTimeout(glowTimer);
-      clearTimeout(collapseTimer);
+      if (glowTimer) clearTimeout(glowTimer);
+      if (collapseTimer) clearTimeout(collapseTimer);
     };
-  }, [url]);
+  }, [colors]);
 
   // Removed early returns - header will always be rendered
 

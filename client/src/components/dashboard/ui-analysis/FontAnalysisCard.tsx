@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Box, Typography, Chip, CircularProgress, useTheme } from '@mui/material';
 import { Type } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
@@ -11,10 +11,11 @@ interface FontAnalysisCardProps {
 
 const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, url }) => {
   const theme = useTheme();
-  const [fonts, setFonts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [hasStartedLoading, setHasStartedLoading] = useState(false);
+  // Use fonts from props instead of making API calls
+  const fonts = propFonts || [];
+  const loading = false; // No loading since we use parent data
+  const error = null; // No error since we use parent data
+  const hasStartedLoading = true;
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
   const [hasUserScrolled, setHasUserScrolled] = useState(false);
   const [canScroll, setCanScroll] = useState(false);
@@ -51,46 +52,9 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, u
   };
 
   useEffect(() => {
-    if (!url) {
-      setHasStartedLoading(false);
-      return;
-    }
-    
-    const fetchFonts = async () => {
-      setLoading(true);
-      setError(null);
-      setHasStartedLoading(true);
-      
-      try {
-        const response = await fetch('/api/fonts', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url })
-        });
-        
-        if (!response.ok) {
-          throw new Error(`Failed to fetch fonts: ${response.status}`);
-        }
-        
-        const fontData = await response.json();
-        setFonts(fontData);
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to extract fonts';
-        setError(errorMessage);
-        console.error('Font extraction error:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    // Wrap in Promise and catch to prevent unhandled rejections
-    fetchFonts().catch(err => {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to extract fonts';
-      setError(errorMessage);
-      setLoading(false);
-      console.error('Font extraction error:', err);
-    });
-  }, [url]);
+    // No longer making API calls - fonts come from parent component props
+    checkScrollable();
+  }, []);
 
   // Check scrollable after fonts load
   useEffect(() => {
@@ -103,7 +67,6 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, u
   useEffect(() => {
     setHasUserScrolled(false);
     setShowScrollIndicator(false);
-    setFonts([]); // Clear previous fonts when URL changes
   }, [url]);
 
   // Cleanup timeout on unmount
@@ -115,8 +78,8 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, u
     };
   }, []);
 
-  // Use fetched font data or fallback to props
-  const fontsToDisplay = fonts.length > 0 ? fonts : (propFonts || []);
+  // Use fonts from props
+  const fontsToDisplay = fonts;
 
   return (
     <Box>

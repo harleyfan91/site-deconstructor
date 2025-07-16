@@ -45,7 +45,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
         {/* Color Extraction */}
         <Card sx={{ borderRadius: 2, width: '100%' }}>
           <CardContent sx={{ p: 2 }}>
-            <ColorExtractionCard url={data?.url} />
+            <ColorExtractionCard colors={colors} url={data?.url} />
           </CardContent>
         </Card>
 
