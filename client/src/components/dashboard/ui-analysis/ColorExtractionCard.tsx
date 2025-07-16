@@ -152,6 +152,9 @@ export default function ColorExtractionCard({ colors, url, loading: parentLoadin
         setLoading(false);
         setError(null);
         
+        // Log for debugging the data structure
+        console.log('ColorExtractionCard received colors:', colors);
+        
         if (!colors || colors.length === 0) {
           setUsageGroups([]);
           return;
@@ -159,13 +162,31 @@ export default function ColorExtractionCard({ colors, url, loading: parentLoadin
 
         // Map colors to grouped structure expected by the UI
         const groups: Record<string, { name: string; colors: { hex: string; name: string }[] }[]> = {};
-        colors.forEach(({ hex, property, name }) => {
-          const key = property; // Backend returns bucket name directly
-          groups[key] ??= [{ name: 'All', colors: [] }];
+        colors.forEach((colorItem) => {
+          // Handle both direct array and object with colors property
+          const colorData = Array.isArray(colorItem) ? colorItem : colorItem.colors || [colorItem];
           
-          // Avoid duplicates
-          if (!groups[key][0].colors.some(c => c.hex === hex)) {
-            groups[key][0].colors.push({ hex, name });
+          if (Array.isArray(colorData)) {
+            colorData.forEach(({ hex, property, name }) => {
+              if (hex && property && name) {
+                const key = property; // Backend returns bucket name directly
+                groups[key] ??= [{ name: 'All', colors: [] }];
+                
+                // Avoid duplicates
+                if (!groups[key][0].colors.some(c => c.hex === hex)) {
+                  groups[key][0].colors.push({ hex, name });
+                }
+              }
+            });
+          } else if (colorData.hex && colorData.property && colorData.name) {
+            const { hex, property, name } = colorData;
+            const key = property;
+            groups[key] ??= [{ name: 'All', colors: [] }];
+            
+            // Avoid duplicates
+            if (!groups[key][0].colors.some(c => c.hex === hex)) {
+              groups[key][0].colors.push({ hex, name });
+            }
           }
         });
 
