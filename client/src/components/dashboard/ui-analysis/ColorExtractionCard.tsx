@@ -90,9 +90,6 @@ interface ColorResult {
 
 interface ColorExtractionCardProps {
   url?: string;
-  colors?: ColorResult[];
-  loading?: boolean;
-  disableAPICall?: boolean;
 }
 
 interface ColorDetail {
@@ -100,7 +97,7 @@ interface ColorDetail {
   name: string;
 }
 
-export default function ColorExtractionCard({ url, colors: propColors, loading: parentLoading, disableAPICall }: ColorExtractionCardProps) {
+export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
   const theme = useTheme();
   const [usageGroups, setUsageGroups] = useState<UsageGroup[]>([]);
   const [loading, setLoading] = useState(true);
@@ -148,33 +145,20 @@ export default function ColorExtractionCard({ url, colors: propColors, loading: 
     let glowTimer: NodeJS.Timeout;
     let collapseTimer: NodeJS.Timeout;
 
-    const processColors = async () => {
+    (async () => {
       try {
         setLoading(true);
         setError(null);
         
-        let flat: ColorResult[] = [];
+        const res = await fetch('/api/colors', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: url ?? window.location.href })
+        });
         
-        // Use prop colors if API calls are disabled, otherwise fetch from API
-        if (disableAPICall && propColors && propColors.length > 0) {
-          console.log('Using propColors:', propColors.length, 'colors');
-          flat = propColors;
-        } else if (!disableAPICall && url) {
-          const res = await fetch('/api/colors', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url })
-          });
-          
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const response = await res.json();
-          flat = response.colors || response;
-        } else {
-          // No data available
-          setLoading(false);
-          setUsageGroups([]);
-          return;
-        }
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const response = await res.json();
+        const flat: ColorResult[] = response.colors || response;
 
         // Map flat response to grouped structure expected by the UI
         const groups: Record<string, { name: string; colors: { hex: string; name: string }[] }[]> = {};
@@ -228,20 +212,20 @@ export default function ColorExtractionCard({ url, colors: propColors, loading: 
         }, 2500);
 
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to process colors';
-        console.error('Color processing error:', err);
+        const errorMessage = err instanceof Error ? err.message : 'Failed to extract colors from website';
+        console.error('Color extraction error:', err);
         setError(errorMessage);
         setUsageGroups([]);
+      } finally {
+        setLoading(false);
       }
-    };
-
-    processColors();
+    })();
 
     return () => {
-      if (glowTimer) clearTimeout(glowTimer);
-      if (collapseTimer) clearTimeout(collapseTimer);
+      clearTimeout(glowTimer);
+      clearTimeout(collapseTimer);
     };
-  }, [propColors, disableAPICall, url]);
+  }, [url]);
 
   // Removed early returns - header will always be rendered
 
@@ -289,10 +273,10 @@ export default function ColorExtractionCard({ url, colors: propColors, loading: 
           <Alert severity="error" sx={{ mt: 2 }}>
             {error}
           </Alert>
-        ) : (!propColors || propColors.length === 0) && usageGroups.length === 0 ? (
-          <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
-            Color extraction temporarily unavailable - analysis in progress.
-          </Typography>
+        ) : usageGroups.length === 0 ? (
+          <Alert severity="error" sx={{ mt: 2 }}>
+            No colors could be extracted from this website
+          </Alert>
         ) : (
           <>
             {usageGroups.filter(usageGroup => categoryFilters[usageGroup.name]).map((usageGroup, usageIndex) => (
