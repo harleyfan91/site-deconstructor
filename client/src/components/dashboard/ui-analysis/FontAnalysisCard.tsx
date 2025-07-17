@@ -7,9 +7,10 @@ import type { AnalysisResponse } from '@/types/analysis';
 interface FontAnalysisCardProps {
   fonts?: Array<{name: string, category: string, usage: string, weight?: string, isLoaded?: boolean, isPublic?: boolean}>;
   url?: string;
+  disableAPICall?: boolean;
 }
 
-const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, url }) => {
+const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, url, disableAPICall = false }) => {
   const theme = useTheme();
   const [fonts, setFonts] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -51,6 +52,14 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, u
   };
 
   useEffect(() => {
+    // If we have prop fonts and API is disabled, use them directly
+    if (disableAPICall && propFonts) {
+      setFonts(propFonts);
+      setLoading(false);
+      setHasStartedLoading(true);
+      return;
+    }
+
     if (!url) {
       setHasStartedLoading(false);
       return;
@@ -84,7 +93,7 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, u
     };
 
     fetchFonts();
-  }, [url]);
+  }, [url, propFonts, disableAPICall]);
 
   // Check scrollable after fonts load
   useEffect(() => {

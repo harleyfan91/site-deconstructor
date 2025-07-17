@@ -32,7 +32,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
   }
 
   const ui = data?.data?.ui;
-  const { colors, fonts, images, imageAnalysis } = ui || {};
+  const { colors, fonts, images, imageAnalysis, contrastIssues, violations, accessibilityScore } = ui || {};
 
   return (
     <Box>
@@ -45,7 +45,11 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
         {/* Color Extraction */}
         <Card sx={{ borderRadius: 2, width: '100%' }}>
           <CardContent sx={{ p: 2 }}>
-            <ColorExtractionCard url={data?.url} />
+            <ColorExtractionCard 
+              colors={colors} 
+              url={data?.url}
+              disableAPICall={true}
+            />
           </CardContent>
         </Card>
 
@@ -53,13 +57,23 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
           <Card sx={{ borderRadius: 2, width: '100%' }}>
             <CardContent sx={{ p: 2 }}>
-              <FontAnalysisCard fonts={fonts ?? []} url={data?.url} />
+              <FontAnalysisCard 
+                fonts={fonts ?? []} 
+                url={data?.url}
+                disableAPICall={true}
+              />
             </CardContent>
           </Card>
 
           <Card sx={{ borderRadius: 2, width: '100%' }}>
             <CardContent sx={{ p: 2 }}>
-              <AccessibilityCard url={data?.url} />
+              <AccessibilityCard 
+                url={data?.url}
+                contrastIssues={contrastIssues}
+                accessibilityScore={accessibilityScore}
+                violations={violations}
+                disableAPICall={true}
+              />
             </CardContent>
           </Card>
         </Box>
@@ -70,6 +84,8 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
             <ImageAnalysisCard
               images={images ?? []}
               imageAnalysis={imageAnalysis}
+              url={data?.url}
+              disableAPICall={true}
             />
           </CardContent>
         </Card>

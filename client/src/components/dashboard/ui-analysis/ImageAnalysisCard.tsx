@@ -6,7 +6,7 @@ import type { AnalysisResponse } from '@/types/analysis';
 import { useSessionState } from '@/hooks/useSessionState';
 
 interface ImageAnalysisCardProps {
-  images: Array<{url: string, alt?: string, type?: string}>;
+  images?: Array<{url: string, alt?: string, type?: string}>;
   imageAnalysis?: {
     totalImages: number;
     estimatedPhotos: number;
@@ -15,6 +15,8 @@ interface ImageAnalysisCardProps {
     photoUrls?: string[];
     iconUrls?: string[];
   };
+  url?: string;
+  disableAPICall?: boolean;
 }
 
 interface AdaptiveLinkProps {

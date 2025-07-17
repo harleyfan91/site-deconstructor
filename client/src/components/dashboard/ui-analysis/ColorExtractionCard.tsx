@@ -90,6 +90,13 @@ interface ColorResult {
 
 interface ColorExtractionCardProps {
   url?: string;
+  colors?: Array<{
+    hex: string;
+    name: string;
+    property: string;
+    occurrences: number;
+  }>;
+  disableAPICall?: boolean;
 }
 
 interface ColorDetail {
@@ -97,7 +104,7 @@ interface ColorDetail {
   name: string;
 }
 
-export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
+export default function ColorExtractionCard({ url, colors, disableAPICall = false }: ColorExtractionCardProps) {
   const theme = useTheme();
   const [usageGroups, setUsageGroups] = useState<UsageGroup[]>([]);
   const [loading, setLoading] = useState(true);
@@ -141,10 +148,77 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
     setFilterAnchor(null);
   };
 
+  const processColorData = (flat: ColorResult[], glowTimer?: NodeJS.Timeout, collapseTimer?: NodeJS.Timeout) => {
+    setLoading(true);
+    
+    // Map flat response to grouped structure expected by the UI
+    const groups: Record<string, { name: string; colors: { hex: string; name: string }[] }[]> = {};
+    flat.forEach(({ hex, property, name }) => {
+      const key = property; // Backend now returns bucket name directly
+      groups[key] ??= [{ name: 'All', colors: [] }];
+      
+      // Avoid duplicates
+      if (!groups[key][0].colors.some(c => c.hex === hex)) {
+        groups[key][0].colors.push({ hex, name });
+      }
+    });
+
+    // Filter to only include non-empty buckets in the specified order
+    const sections = SECTION_ORDER.filter(bucket => groups[bucket] && groups[bucket][0].colors.length > 0);
+    const arr = sections.map(name => ({ name, groups: groups[name] }));
+    setUsageGroups(arr);
+
+    // Initialize expanded sections for new data
+    const initialState: Record<string, boolean> = {};
+    arr.forEach(group => {
+      initialState[group.name] = true;
+    });
+    setExpandedSections(initialState);
+
+    // Apply glow effect after data loads (only if we have timers)
+    if (glowTimer && collapseTimer) {
+      glowTimer = setTimeout(() => {
+        const glowState: Record<string, boolean> = {};
+        arr.forEach(group => {
+          if (group.name !== 'background') {
+            glowState[group.name] = true;
+          }
+        });
+        setGlowingSections(glowState);
+        setCogGlowing(true);
+      }, 1500);
+
+      collapseTimer = setTimeout(() => {
+        setExpandedSections(prev => {
+          const updated = { ...prev };
+          Object.keys(updated).forEach(name => {
+            if (name !== 'background') {
+              updated[name] = false;
+            }
+          });
+          return updated;
+        });
+        setGlowingSections({});
+        setCogGlowing(false);
+      }, 2500);
+    }
+
+    setLoading(false);
+  };
+
   useEffect(() => {
     let glowTimer: NodeJS.Timeout;
     let collapseTimer: NodeJS.Timeout;
 
+    // If we have data passed as props and API is disabled, use it directly
+    if (disableAPICall && colors) {
+      const flat: ColorResult[] = colors;
+      // Process the data immediately
+      processColorData(flat);
+      return;
+    }
+
+    // Otherwise, fetch from API (original behavior)
     (async () => {
       try {
         setLoading(true);
@@ -160,56 +234,7 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
         const response = await res.json();
         const flat: ColorResult[] = response.colors || response;
 
-        // Map flat response to grouped structure expected by the UI
-        const groups: Record<string, { name: string; colors: { hex: string; name: string }[] }[]> = {};
-        flat.forEach(({ hex, property, name }) => {
-          const key = property; // Backend now returns bucket name directly
-          groups[key] ??= [{ name: 'All', colors: [] }];
-          
-          // Avoid duplicates
-          if (!groups[key][0].colors.some(c => c.hex === hex)) {
-            groups[key][0].colors.push({ hex, name });
-          }
-        });
-
-        // Filter to only include non-empty buckets in the specified order
-        const sections = SECTION_ORDER.filter(bucket => groups[bucket] && groups[bucket][0].colors.length > 0);
-        const arr = sections.map(name => ({ name, groups: groups[name] }));
-        setUsageGroups(arr);
-
-        // Initialize expanded sections for new data
-        const initialState: Record<string, boolean> = {};
-        arr.forEach(group => {
-          initialState[group.name] = true;
-        });
-        setExpandedSections(initialState);
-
-        // Apply glow effect after data loads
-        glowTimer = setTimeout(() => {
-          const glowState: Record<string, boolean> = {};
-          arr.forEach(group => {
-            if (group.name !== 'background') {
-              glowState[group.name] = true;
-            }
-          });
-          setGlowingSections(glowState);
-          // Also glow the cog icon to indicate filtering capability
-          setCogGlowing(true);
-        }, 1500);
-
-        collapseTimer = setTimeout(() => {
-          setExpandedSections(prev => {
-            const updated = { ...prev };
-            Object.keys(updated).forEach(name => {
-              if (name !== 'background') {
-                updated[name] = false;
-              }
-            });
-            return updated;
-          });
-          setGlowingSections({});
-          setCogGlowing(false);
-        }, 2500);
+        processColorData(flat, glowTimer, collapseTimer);
 
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to extract colors from website';
@@ -225,7 +250,7 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
       clearTimeout(glowTimer);
       clearTimeout(collapseTimer);
     };
-  }, [url]);
+  }, [url, colors, disableAPICall]);
 
   // Removed early returns - header will always be rendered
 

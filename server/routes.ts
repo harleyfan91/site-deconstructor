@@ -437,8 +437,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // UI data extraction API route  
-  app.get('/api/ui', async (req, res) => {
+  // Import unified UI scanner routes
+  const { default: uiRoutes } = await import('./routes/uiScan.js');
+  app.use('/api/ui', uiRoutes);
+
+  // Legacy UI data extraction API route - redirects to new unified endpoint
+  app.get('/api/ui-legacy', async (req, res) => {
     try {
       const { url } = req.query;
       
@@ -447,12 +451,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const normalizedUrl = normalizeUrl(url);
-      console.log(`🔍 Extracting UI data for: ${normalizedUrl}`);
+      console.log(`🔍 Legacy UI endpoint called, redirecting to unified scanner for: ${normalizedUrl}`);
       
-      const scrapedData = await scrapePageData(normalizedUrl);
-      const uiData = buildUIData(scrapedData);
+      const { UIScraperService } = await import('./services/uiScraper');
+      const uiData = await UIScraperService.analyzeUI(normalizedUrl);
       
-      console.log(`✅ UI data extracted: ${uiData.fonts.length} fonts, ${uiData.images.length} images, ${uiData.contrastIssues.length} contrast issues`);
+      console.log(`✅ UI data extracted via unified scanner: ${uiData.fonts.length} fonts, ${uiData.colors.length} colors, ${uiData.images.length} images`);
       res.json(uiData);
       
     } catch (error) {
@@ -505,11 +509,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
             return null;
           }
         })(),
-        // UI data
-        scrapePageData(normalizedUrl).then(data => buildUIData(data)).catch(error => {
-          console.warn('⚠️  UI analysis missing for overview:', error.message);
-          return null;
-        }),
+        // UI data using unified scanner
+        (async () => {
+          try {
+            const { UIScraperService } = await import('./services/uiScraper');
+            return await UIScraperService.analyzeUI(normalizedUrl);
+          } catch (error) {
+            console.warn('⚠️  UI analysis missing for overview:', error.message);
+            return null;
+          }
+        })(),
         // Content data
         scrapePageData(normalizedUrl).then(data => buildContentData(data)).catch(error => {
           console.warn('⚠️  Content analysis missing for overview:', error.message);

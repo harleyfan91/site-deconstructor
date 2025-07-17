@@ -13,6 +13,28 @@ import { Shield, AlertTriangle, CheckCircle, ChevronDown, ChevronUp } from 'luci
 
 interface AccessibilityCardProps {
   url?: string;
+  contrastIssues?: Array<{
+    element: string;
+    textColor: string;
+    backgroundColor: string;
+    ratio: number;
+    expectedRatio: number;
+    severity: string;
+    recommendation: string;
+  }>;
+  accessibilityScore?: number;
+  violations?: Array<{
+    id: string;
+    impact: 'minor' | 'moderate' | 'serious' | 'critical';
+    description: string;
+    help: string;
+    nodes: Array<{
+      target: string[];
+      html: string;
+      failureSummary?: string;
+    }>;
+  }>;
+  disableAPICall?: boolean;
 }
 
 interface AccessibilityData {
@@ -41,13 +63,32 @@ interface AccessibilityData {
   failedRules: number;
 }
 
-const AccessibilityCard: React.FC<AccessibilityCardProps> = ({ url }) => {
+const AccessibilityCard: React.FC<AccessibilityCardProps> = ({ 
+  url, 
+  contrastIssues, 
+  accessibilityScore, 
+  violations, 
+  disableAPICall = false 
+}) => {
   const [data, setData] = useState<AccessibilityData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
+    // If we have prop data and API is disabled, use it directly
+    if (disableAPICall && (contrastIssues || accessibilityScore || violations)) {
+      setData({
+        score: accessibilityScore || 0,
+        violations: violations || [],
+        contrastIssues: contrastIssues || [],
+        passedRules: 0,
+        failedRules: violations?.length || 0
+      });
+      setLoading(false);
+      return;
+    }
+
     if (!url) {
       setData(null);
       setError(null);
@@ -90,7 +131,7 @@ const AccessibilityCard: React.FC<AccessibilityCardProps> = ({ url }) => {
     };
 
     fetchAccessibilityData();
-  }, [url]);
+  }, [url, contrastIssues, accessibilityScore, violations, disableAPICall]);
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return 'success.main';
