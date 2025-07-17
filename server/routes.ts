@@ -437,7 +437,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // UI data extraction API route  
+  // Unified UI analysis endpoint - combines fonts, colors, images, and accessibility
+  app.get('/api/ui-complete', async (req, res) => {
+    try {
+      const { url } = req.query;
+      
+      if (!url || typeof url !== 'string') {
+        return res.status(400).json({ error: 'URL parameter is required' });
+      }
+
+      const normalizedUrl = normalizeUrl(url);
+      const urlHash = generateUrlHash(normalizedUrl);
+      const cacheKey = `ui_complete_${urlHash}`;
+      
+      // Check cache first
+      const cachedData = await SupabaseCacheService.get(cacheKey);
+      if (cachedData) {
+        console.log(`🎨 UI complete cache hit for: ${normalizedUrl}`);
+        return res.json(cachedData.analysis_data);
+      }
+
+      console.log(`🎨 Complete UI analysis for: ${normalizedUrl}`);
+      const startTime = Date.now();
+      
+      // Single scrape for all UI data
+      const scrapedData = await scrapePageData(normalizedUrl);
+      
+      // Build complete UI data including colors and accessibility
+      const uiData = buildUIData(scrapedData);
+      
+      // Extract colors with accessibility analysis
+      const colorsWithAccessibility = await extractColors(normalizedUrl);
+      
+      // Combine all UI data
+      const completeUIData = {
+        ...uiData,
+        colors: colorsWithAccessibility.colors || [],
+        contrastIssues: colorsWithAccessibility.contrastIssues || [],
+        accessibilityScore: colorsWithAccessibility.accessibilityScore || 0,
+        violations: colorsWithAccessibility.violations || []
+      };
+      
+      logTiming('Complete UI analysis', startTime);
+      console.log(`✅ Complete UI extracted: ${completeUIData.fonts.length} fonts, ${completeUIData.colors.length} colors, ${completeUIData.images.length} images`);
+      
+      // Cache the results
+      await SupabaseCacheService.set(cacheKey, normalizedUrl, completeUIData);
+      
+      res.json(completeUIData);
+      
+    } catch (error) {
+      console.error('Complete UI analysis failed:', error);
+      res.status(500).json({ error: 'Complete UI analysis failed' });
+    }
+  });
+
+  // Legacy UI endpoint for backward compatibility
   app.get('/api/ui', async (req, res) => {
     try {
       const { url } = req.query;
@@ -447,7 +502,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const normalizedUrl = normalizeUrl(url);
-      console.log(`🔍 Extracting UI data for: ${normalizedUrl}`);
+      console.log(`🔍 Extracting basic UI data for: ${normalizedUrl}`);
       
       const scrapedData = await scrapePageData(normalizedUrl);
       const uiData = buildUIData(scrapedData);
@@ -505,26 +560,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
             return null;
           }
         })(),
-        // UI data
-        scrapePageData(normalizedUrl).then(data => buildUIData(data)).catch(error => {
-          console.warn('⚠️  UI analysis missing for overview:', error.message);
-          return null;
-        }),
-        // Content data
-        scrapePageData(normalizedUrl).then(data => buildContentData(data)).catch(error => {
-          console.warn('⚠️  Content analysis missing for overview:', error.message);
-          return null;
-        })
+        // Combined UI and Content data (single scrape with cached UI complete data)
+        (async () => {
+          try {
+            const urlHash = generateUrlHash(normalizedUrl);
+            const uiCacheKey = `ui_complete_${urlHash}`;
+            
+            // Try to get UI data from unified endpoint cache first
+            const cachedUI = await SupabaseCacheService.get(uiCacheKey);
+            
+            let uiData;
+            let scrapedData;
+            
+            if (cachedUI) {
+              console.log('📋 Using cached UI data for overview');
+              uiData = cachedUI.analysis_data;
+              // Still need to scrape for content data
+              scrapedData = await scrapePageData(normalizedUrl);
+            } else {
+              // Single scrape for both UI and content
+              scrapedData = await scrapePageData(normalizedUrl);
+              uiData = buildUIData(scrapedData);
+              
+              // Extract colors with accessibility for complete UI data
+              const colorsWithAccessibility = await extractColors(normalizedUrl);
+              uiData = {
+                ...uiData,
+                colors: colorsWithAccessibility.colors || [],
+                contrastIssues: colorsWithAccessibility.contrastIssues || [],
+                accessibilityScore: colorsWithAccessibility.accessibilityScore || 0,
+                violations: colorsWithAccessibility.violations || []
+              };
+              
+              // Cache the complete UI data for future use
+              await SupabaseCacheService.set(uiCacheKey, normalizedUrl, uiData);
+            }
+            
+            return {
+              ui: uiData,
+              content: buildContentData(scrapedData)
+            };
+          } catch (error) {
+            console.warn('⚠️  UI/Content analysis missing for overview:', error.message);
+            return null;
+          }
+        })()
       ]);
       
-      const [seoResult, techResult, performanceResult, uiResult, contentResult] = results;
+      const [seoResult, techResult, performanceResult, uiContentResult] = results;
       
       // Extract data from results, using "!" for missing data
       const seoData = seoResult.status === 'fulfilled' ? seoResult.value : null;
       const techData = techResult.status === 'fulfilled' ? techResult.value : null;
       const performanceData = performanceResult.status === 'fulfilled' ? performanceResult.value : null;
-      const uiData = uiResult.status === 'fulfilled' ? uiResult.value : null;
-      const contentData = contentResult.status === 'fulfilled' ? contentResult.value : null;
+      const uiContentData = uiContentResult.status === 'fulfilled' ? uiContentResult.value : null;
+      const uiData = uiContentData?.ui || null;
+      const contentData = uiContentData?.content || null;
       
       // Build overview response with "!" for permanently missing data
       const overviewData = {

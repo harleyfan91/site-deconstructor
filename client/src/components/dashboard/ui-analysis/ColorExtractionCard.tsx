@@ -90,6 +90,9 @@ interface ColorResult {
 
 interface ColorExtractionCardProps {
   url?: string;
+  colors?: ColorResult[];
+  loading?: boolean;
+  disableAPICall?: boolean;
 }
 
 interface ColorDetail {
@@ -97,7 +100,7 @@ interface ColorDetail {
   name: string;
 }
 
-export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
+export default function ColorExtractionCard({ url, colors: propColors, loading: parentLoading, disableAPICall }: ColorExtractionCardProps) {
   const theme = useTheme();
   const [usageGroups, setUsageGroups] = useState<UsageGroup[]>([]);
   const [loading, setLoading] = useState(true);
@@ -145,20 +148,31 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
     let glowTimer: NodeJS.Timeout;
     let collapseTimer: NodeJS.Timeout;
 
-    (async () => {
+    const processColors = async () => {
       try {
         setLoading(true);
         setError(null);
         
-        const res = await fetch('/api/colors', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: url ?? window.location.href })
-        });
+        let flat: ColorResult[] = [];
         
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const response = await res.json();
-        const flat: ColorResult[] = response.colors || response;
+        // Use prop colors if API calls are disabled, otherwise fetch from API
+        if (disableAPICall && propColors) {
+          flat = propColors;
+        } else if (!disableAPICall && url) {
+          const res = await fetch('/api/colors', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url })
+          });
+          
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const response = await res.json();
+          flat = response.colors || response;
+        } else {
+          // No data available and no URL to fetch from
+          setLoading(false);
+          return;
+        }
 
         // Map flat response to grouped structure expected by the UI
         const groups: Record<string, { name: string; colors: { hex: string; name: string }[] }[]> = {};
@@ -212,20 +226,20 @@ export default function ColorExtractionCard({ url }: ColorExtractionCardProps) {
         }, 2500);
 
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to extract colors from website';
-        console.error('Color extraction error:', err);
+        const errorMessage = err instanceof Error ? err.message : 'Failed to process colors';
+        console.error('Color processing error:', err);
         setError(errorMessage);
         setUsageGroups([]);
-      } finally {
-        setLoading(false);
       }
-    })();
+    };
+
+    processColors();
 
     return () => {
-      clearTimeout(glowTimer);
-      clearTimeout(collapseTimer);
+      if (glowTimer) clearTimeout(glowTimer);
+      if (collapseTimer) clearTimeout(collapseTimer);
     };
-  }, [url]);
+  }, [propColors, disableAPICall, url]);
 
   // Removed early returns - header will always be rendered
 

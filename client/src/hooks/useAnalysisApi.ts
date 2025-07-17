@@ -107,7 +107,8 @@ export const useAnalysisApi = () => {
         console.log('🔍 Fetching comprehensive overview data in background...');
         fetch(`/api/overview?url=${encodeURIComponent(url)}`, {
           method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 'Content-Type': 'application/json' },
+          signal: AbortSignal.timeout(30000) // 30 second timeout for overview
         }).then(async (overviewResponse) => {
           if (overviewResponse.ok) {
             const overviewData = await overviewResponse.json();
@@ -126,7 +127,7 @@ export const useAnalysisApi = () => {
             console.warn('Overview analysis failed, keeping immediate analysis');
           }
         }).catch((err) => {
-          console.warn('Background overview fetch error:', err);
+          console.warn('Background overview fetch timed out, keeping immediate analysis');
         });
 
         return immediateResult;
