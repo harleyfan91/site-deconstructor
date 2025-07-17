@@ -52,19 +52,22 @@ const FontAnalysisCard: React.FC<FontAnalysisCardProps> = ({ fonts: propFonts, u
   };
 
   useEffect(() => {
-    // If we have prop fonts and API is disabled, use them directly
-    if (disableAPICall && propFonts) {
-      setLoading(true); // Show loading indicator first
-      setHasStartedLoading(true);
-      
-      // Simulate brief loading to show the indicator
-      setTimeout(() => {
-        setFonts(propFonts);
-        setLoading(false);
-      }, 300); // Brief delay to show loading state
-      return;
+    // If API calls are disabled, only process when we have font data
+    if (disableAPICall) {
+      if (propFonts && propFonts.length > 0) {
+        setLoading(true); // Show loading indicator first
+        setHasStartedLoading(true);
+        
+        // Simulate brief loading to show the indicator
+        setTimeout(() => {
+          setFonts(propFonts);
+          setLoading(false);
+        }, 300); // Brief delay to show loading state
+      }
+      return; // Don't make API calls when disabled
     }
 
+    // Only make API calls when API is enabled and we have a URL
     if (!url) {
       setHasStartedLoading(false);
       return;

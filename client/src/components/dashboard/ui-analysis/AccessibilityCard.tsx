@@ -76,19 +76,22 @@ const AccessibilityCard: React.FC<AccessibilityCardProps> = ({
   const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
-    // If we have prop data and API is disabled, use it directly
-    if (disableAPICall && (contrastIssues || accessibilityScore || violations)) {
-      setData({
-        score: accessibilityScore || 0,
-        violations: violations || [],
-        contrastIssues: contrastIssues || [],
-        passedRules: 0,
-        failedRules: violations?.length || 0
-      });
-      setLoading(false);
-      return;
+    // If API calls are disabled, only process when we have accessibility data
+    if (disableAPICall) {
+      if (contrastIssues || accessibilityScore || violations) {
+        setData({
+          score: accessibilityScore || 0,
+          violations: violations || [],
+          contrastIssues: contrastIssues || [],
+          passedRules: 0,
+          failedRules: violations?.length || 0
+        });
+        setLoading(false);
+      }
+      return; // Don't make API calls when disabled
     }
 
+    // Only make API calls when API is enabled and we have a URL
     if (!url) {
       setData(null);
       setError(null);

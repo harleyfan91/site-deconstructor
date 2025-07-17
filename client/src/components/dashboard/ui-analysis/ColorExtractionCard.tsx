@@ -214,18 +214,25 @@ export default function ColorExtractionCard({ url, colors, disableAPICall = fals
   };
 
   useEffect(() => {
+    // If API calls are disabled, only process when we have color data
+    if (disableAPICall) {
+      if (colors && colors.length > 0) {
+        const flat: ColorResult[] = colors;
+        const cleanup = processColorData(flat, true);
+        return cleanup;
+      }
+      return; // Don't make API calls when disabled
+    }
+
+    // Only make API calls when API is enabled and we have a URL
+    if (!url) {
+      return;
+    }
+
     let glowTimer: NodeJS.Timeout;
     let collapseTimer: NodeJS.Timeout;
 
-    // If we have data passed as props and API is disabled, use it directly
-    if (disableAPICall && colors) {
-      const flat: ColorResult[] = colors;
-      // Process the data immediately with auto-collapse timers enabled
-      const cleanup = processColorData(flat, true);
-      return cleanup;
-    }
-
-    // Otherwise, fetch from API (original behavior)
+    // Fetch from API (original behavior)
     (async () => {
       try {
         setLoading(true);
