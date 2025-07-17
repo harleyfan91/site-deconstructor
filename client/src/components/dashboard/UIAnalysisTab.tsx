@@ -46,9 +46,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
         <Card sx={{ borderRadius: 2, width: '100%' }}>
           <CardContent sx={{ p: 2 }}>
             <ColorExtractionCard 
-              colors={colors} 
-              url={data?.url}
-              disableAPICall={true}
+              colors={colors || []} 
             />
           </CardContent>
         </Card>
@@ -59,8 +57,6 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
             <CardContent sx={{ p: 2 }}>
               <FontAnalysisCard 
                 fonts={fonts ?? []} 
-                url={data?.url}
-                disableAPICall={true}
               />
             </CardContent>
           </Card>
@@ -68,11 +64,9 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
           <Card sx={{ borderRadius: 2, width: '100%' }}>
             <CardContent sx={{ p: 2 }}>
               <AccessibilityCard 
-                url={data?.url}
                 contrastIssues={contrastIssues}
                 accessibilityScore={accessibilityScore}
                 violations={violations}
-                disableAPICall={true}
               />
             </CardContent>
           </Card>
@@ -84,8 +78,6 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
             <ImageAnalysisCard
               images={images ?? []}
               imageAnalysis={imageAnalysis}
-              url={data?.url}
-              disableAPICall={true}
             />
           </CardContent>
         </Card>

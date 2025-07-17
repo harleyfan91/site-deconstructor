@@ -12,7 +12,6 @@ import {
 import { Shield, AlertTriangle, CheckCircle, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface AccessibilityCardProps {
-  url?: string;
   contrastIssues?: Array<{
     element: string;
     textColor: string;
@@ -34,7 +33,6 @@ interface AccessibilityCardProps {
       failureSummary?: string;
     }>;
   }>;
-  disableAPICall?: boolean;
 }
 
 interface AccessibilityData {
@@ -64,77 +62,19 @@ interface AccessibilityData {
 }
 
 const AccessibilityCard: React.FC<AccessibilityCardProps> = ({ 
-  url, 
   contrastIssues, 
   accessibilityScore, 
-  violations, 
-  disableAPICall = false 
+  violations
 }) => {
-  const [data, setData] = useState<AccessibilityData | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(false);
 
-  useEffect(() => {
-    // If API calls are disabled, only process when we have accessibility data
-    if (disableAPICall) {
-      if (contrastIssues || accessibilityScore || violations) {
-        setData({
-          score: accessibilityScore || 0,
-          violations: violations || [],
-          contrastIssues: contrastIssues || [],
-          passedRules: 0,
-          failedRules: violations?.length || 0
-        });
-        setLoading(false);
-      }
-      return; // Don't make API calls when disabled
-    }
-
-    // Only make API calls when API is enabled and we have a URL
-    if (!url) {
-      setData(null);
-      setError(null);
-      return;
-    }
-
-    const fetchAccessibilityData = async () => {
-      setLoading(true);
-      setError(null);
-      
-      try {
-        const response = await fetch('/api/colors', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url })
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-
-        const result = await response.json();
-        
-        if (result.accessibilityScore !== undefined) {
-          setData({
-            score: result.accessibilityScore,
-            violations: result.violations || [],
-            contrastIssues: result.contrastIssues || [],
-            passedRules: result.passedRules || 0,
-            failedRules: result.failedRules || 0
-          });
-        } else {
-          setError('Accessibility analysis not available');
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch accessibility data');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAccessibilityData();
-  }, [url, contrastIssues, accessibilityScore, violations, disableAPICall]);
+  const data = {
+    score: accessibilityScore || 0,
+    violations: violations || [],
+    contrastIssues: contrastIssues || [],
+    passedRules: 0,
+    failedRules: violations?.length || 0
+  };
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return 'success.main';
@@ -166,20 +106,11 @@ const AccessibilityCard: React.FC<AccessibilityCardProps> = ({
         </Typography>
       </Box>
 
-      {loading && (
-        <Box sx={{ display: 'flex', alignItems: 'center', py: 4 }}>
-          <CircularProgress size={24} sx={{ mr: 2 }} />
-          <Typography variant="body2">Analyzing accessibility...</Typography>
-        </Box>
-      )}
-
-      {error && (
-        <Alert severity="warning" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
-
-      {data && (
+      {data.score === 0 && data.violations.length === 0 && data.contrastIssues.length === 0 ? (
+        <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
+          No accessibility data available for this website.
+        </Typography>
+      ) : (
         <Box>
           {/* Accessibility Score */}
           <Box sx={{ mb: 3 }}>
@@ -355,13 +286,7 @@ const AccessibilityCard: React.FC<AccessibilityCardProps> = ({
         </Box>
       )}
 
-      {!loading && !data && !error && (
-        <Box sx={{ textAlign: 'center', py: 4 }}>
-          <Typography variant="body2" color="text.secondary">
-            Enter a URL to analyze accessibility
-          </Typography>
-        </Box>
-      )}
+
     </Box>
   );
 };

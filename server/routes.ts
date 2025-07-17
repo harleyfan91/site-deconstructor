@@ -439,7 +439,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Import unified UI scanner routes
   const { default: uiRoutes } = await import('./routes/uiScan.js');
-  app.use('/api/ui', uiRoutes);
+  // UI analysis routes removed - now using unified overview endpoint
 
   // Legacy UI data extraction API route - redirects to new unified endpoint
   app.get('/api/ui-legacy', async (req, res) => {

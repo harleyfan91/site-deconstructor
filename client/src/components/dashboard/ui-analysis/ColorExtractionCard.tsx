@@ -89,14 +89,12 @@ interface ColorResult {
 }
 
 interface ColorExtractionCardProps {
-  url?: string;
-  colors?: Array<{
+  colors: Array<{
     hex: string;
     name: string;
     property: string;
     occurrences: number;
   }>;
-  disableAPICall?: boolean;
 }
 
 interface ColorDetail {
@@ -104,7 +102,7 @@ interface ColorDetail {
   name: string;
 }
 
-export default function ColorExtractionCard({ url, colors, disableAPICall = false }: ColorExtractionCardProps) {
+export default function ColorExtractionCard({ colors }: ColorExtractionCardProps) {
   const theme = useTheme();
   const [usageGroups, setUsageGroups] = useState<UsageGroup[]>([]);
   const [loading, setLoading] = useState(true);
@@ -214,57 +212,16 @@ export default function ColorExtractionCard({ url, colors, disableAPICall = fals
   };
 
   useEffect(() => {
-    // If API calls are disabled, only process when we have color data
-    if (disableAPICall) {
-      if (colors && colors.length > 0) {
-        const flat: ColorResult[] = colors;
-        const cleanup = processColorData(flat, true);
-        return cleanup;
-      }
-      return; // Don't make API calls when disabled
+    if (colors && colors.length > 0) {
+      const flat: ColorResult[] = colors;
+      const cleanup = processColorData(flat, true);
+      return cleanup;
+    } else {
+      // No colors provided
+      setUsageGroups([]);
+      setLoading(false);
     }
-
-    // Only make API calls when API is enabled and we have a URL
-    if (!url) {
-      return;
-    }
-
-    let glowTimer: NodeJS.Timeout;
-    let collapseTimer: NodeJS.Timeout;
-
-    // Fetch from API (original behavior)
-    (async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const res = await fetch('/api/colors', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: url ?? window.location.href })
-        });
-        
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const response = await res.json();
-        const flat: ColorResult[] = response.colors || response;
-
-        processColorData(flat, true);
-
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to extract colors from website';
-        console.error('Color extraction error:', err);
-        setError(errorMessage);
-        setUsageGroups([]);
-      } finally {
-        setLoading(false);
-      }
-    })();
-
-    return () => {
-      clearTimeout(glowTimer);
-      clearTimeout(collapseTimer);
-    };
-  }, [url, colors, disableAPICall]);
+  }, [colors]);
 
   // Removed early returns - header will always be rendered
 
