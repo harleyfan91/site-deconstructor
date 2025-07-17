@@ -560,45 +560,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
             return null;
           }
         })(),
-        // Combined UI and Content data (single scrape with cached UI complete data)
+        // Combined UI and Content data using unified endpoints
         (async () => {
           try {
-            const urlHash = generateUrlHash(normalizedUrl);
-            const uiCacheKey = `ui_complete_${urlHash}`;
+            // Use the unified UI endpoint for consistent data structure
+            const uiResponse = await fetch(`http://localhost:5000/api/ui-complete?url=${encodeURIComponent(normalizedUrl)}`);
+            const uiData = uiResponse.ok ? await uiResponse.json() : null;
             
-            // Try to get UI data from unified endpoint cache first
-            const cachedUI = await SupabaseCacheService.get(uiCacheKey);
-            
-            let uiData;
-            let scrapedData;
-            
-            if (cachedUI) {
-              console.log('📋 Using cached UI data for overview');
-              uiData = cachedUI.analysis_data;
-              // Still need to scrape for content data
-              scrapedData = await scrapePageData(normalizedUrl);
-            } else {
-              // Single scrape for both UI and content
-              scrapedData = await scrapePageData(normalizedUrl);
-              uiData = buildUIData(scrapedData);
-              
-              // Extract colors with accessibility for complete UI data
-              const colorsWithAccessibility = await extractColors(normalizedUrl);
-              uiData = {
-                ...uiData,
-                colors: colorsWithAccessibility.colors || [],
-                contrastIssues: colorsWithAccessibility.contrastIssues || [],
-                accessibilityScore: colorsWithAccessibility.accessibilityScore || 0,
-                violations: colorsWithAccessibility.violations || []
-              };
-              
-              // Cache the complete UI data for future use
-              await SupabaseCacheService.set(uiCacheKey, normalizedUrl, uiData);
-            }
+            // Get content data separately to avoid duplicate scraping
+            const scrapedData = await scrapePageData(normalizedUrl);
+            const contentData = buildContentData(scrapedData);
             
             return {
               ui: uiData,
-              content: buildContentData(scrapedData)
+              content: contentData
             };
           } catch (error) {
             console.warn('⚠️  UI/Content analysis missing for overview:', error.message);

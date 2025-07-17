@@ -156,7 +156,8 @@ export default function ColorExtractionCard({ url, colors: propColors, loading: 
         let flat: ColorResult[] = [];
         
         // Use prop colors if API calls are disabled, otherwise fetch from API
-        if (disableAPICall && propColors) {
+        if (disableAPICall && propColors && propColors.length > 0) {
+          console.log('Using propColors:', propColors.length, 'colors');
           flat = propColors;
         } else if (!disableAPICall && url) {
           const res = await fetch('/api/colors', {
@@ -169,8 +170,9 @@ export default function ColorExtractionCard({ url, colors: propColors, loading: 
           const response = await res.json();
           flat = response.colors || response;
         } else {
-          // No data available and no URL to fetch from
+          // No data available
           setLoading(false);
+          setUsageGroups([]);
           return;
         }
 
@@ -287,10 +289,10 @@ export default function ColorExtractionCard({ url, colors: propColors, loading: 
           <Alert severity="error" sx={{ mt: 2 }}>
             {error}
           </Alert>
-        ) : usageGroups.length === 0 ? (
-          <Alert severity="error" sx={{ mt: 2 }}>
-            No colors could be extracted from this website
-          </Alert>
+        ) : (!propColors || propColors.length === 0) && usageGroups.length === 0 ? (
+          <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
+            Color extraction temporarily unavailable - analysis in progress.
+          </Typography>
         ) : (
           <>
             {usageGroups.filter(usageGroup => categoryFilters[usageGroup.name]).map((usageGroup, usageIndex) => (
