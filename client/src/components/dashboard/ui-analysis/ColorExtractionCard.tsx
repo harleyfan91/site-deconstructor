@@ -148,7 +148,7 @@ export default function ColorExtractionCard({ url, colors, disableAPICall = fals
     setFilterAnchor(null);
   };
 
-  const processColorData = (flat: ColorResult[], glowTimer?: NodeJS.Timeout, collapseTimer?: NodeJS.Timeout) => {
+  const processColorData = (flat: ColorResult[], enableTimers: boolean = false) => {
     setLoading(true);
     
     // Map flat response to grouped structure expected by the UI
@@ -175,9 +175,9 @@ export default function ColorExtractionCard({ url, colors, disableAPICall = fals
     });
     setExpandedSections(initialState);
 
-    // Apply glow effect after data loads (only if we have timers)
-    if (glowTimer && collapseTimer) {
-      glowTimer = setTimeout(() => {
+    // Apply glow effect after data loads (only if enableTimers is true)
+    if (enableTimers) {
+      const glowTimer = setTimeout(() => {
         const glowState: Record<string, boolean> = {};
         arr.forEach(group => {
           if (group.name !== 'background') {
@@ -188,7 +188,7 @@ export default function ColorExtractionCard({ url, colors, disableAPICall = fals
         setCogGlowing(true);
       }, 1500);
 
-      collapseTimer = setTimeout(() => {
+      const collapseTimer = setTimeout(() => {
         setExpandedSections(prev => {
           const updated = { ...prev };
           Object.keys(updated).forEach(name => {
@@ -201,9 +201,16 @@ export default function ColorExtractionCard({ url, colors, disableAPICall = fals
         setGlowingSections({});
         setCogGlowing(false);
       }, 2500);
+      
+      // Return cleanup function for the timers
+      return () => {
+        clearTimeout(glowTimer);
+        clearTimeout(collapseTimer);
+      };
     }
 
     setLoading(false);
+    return () => {}; // Empty cleanup function
   };
 
   useEffect(() => {
@@ -213,9 +220,9 @@ export default function ColorExtractionCard({ url, colors, disableAPICall = fals
     // If we have data passed as props and API is disabled, use it directly
     if (disableAPICall && colors) {
       const flat: ColorResult[] = colors;
-      // Process the data immediately
-      processColorData(flat);
-      return;
+      // Process the data immediately with auto-collapse timers enabled
+      const cleanup = processColorData(flat, true);
+      return cleanup;
     }
 
     // Otherwise, fetch from API (original behavior)
@@ -234,7 +241,7 @@ export default function ColorExtractionCard({ url, colors, disableAPICall = fals
         const response = await res.json();
         const flat: ColorResult[] = response.colors || response;
 
-        processColorData(flat, glowTimer, collapseTimer);
+        processColorData(flat, true);
 
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to extract colors from website';
