@@ -18,11 +18,11 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
   const ui = data?.data?.ui;
   const { colors, fonts, images, imageAnalysis, contrastIssues, violations, accessibilityScore } = ui || {};
 
-  // Independent loading: show data if available, regardless of global loading state
-  const showLoadingForColors = !colors || colors.length === 0;
-  const showLoadingForFonts = !fonts || fonts.length === 0;
-  const showLoadingForAccessibility = !accessibilityScore && !contrastIssues?.length && !violations?.length;
-  const showLoadingForImages = !images || images.length === 0;
+  // Independent loading: show loading only if we're actively loading AND have no data
+  const showLoadingForColors = loading && (!colors || colors.length === 0);
+  const showLoadingForFonts = loading && (!fonts || fonts.length === 0);
+  const showLoadingForAccessibility = loading && (!accessibilityScore && !contrastIssues?.length && !violations?.length);
+  const showLoadingForImages = loading && (!images || images.length === 0);
 
   if (error) {
     return (
