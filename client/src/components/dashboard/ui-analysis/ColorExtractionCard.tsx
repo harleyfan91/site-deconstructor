@@ -105,7 +105,7 @@ interface ColorDetail {
 export default function ColorExtractionCard({ colors }: ColorExtractionCardProps) {
   const theme = useTheme();
   const [usageGroups, setUsageGroups] = useState<UsageGroup[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expandedSections, setExpandedSections] = useSessionState<Record<string, boolean>>(
     'ui-color-extraction-expanded',
