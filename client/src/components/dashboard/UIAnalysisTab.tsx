@@ -18,23 +18,12 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
   const ui = data?.data?.ui;
   const { colors, fonts, images, imageAnalysis, contrastIssues, violations, accessibilityScore } = ui || {};
 
-  // Debug logging for UI data flow
-  console.log('🔍 UIAnalysisTab - data:', data);
-  console.log('🔍 UIAnalysisTab - ui:', ui);
-  console.log('🔍 UIAnalysisTab - colors:', colors);
-  console.log('🔍 UIAnalysisTab - accessibility data:', { contrastIssues, violations, accessibilityScore });
-
   // Check if we're in progressive loading (immediate data received but comprehensive loading not complete)
   const isProgressiveLoading = data && !data.loadingComplete;
   const showLoadingForColors = loading || (isProgressiveLoading && (!colors || colors.length === 0));
   const showLoadingForFonts = loading || (isProgressiveLoading && (!fonts || fonts.length === 0));
   const showLoadingForAccessibility = loading || (isProgressiveLoading && !accessibilityScore && !contrastIssues?.length && !violations?.length);
   const showLoadingForImages = loading || (isProgressiveLoading && (!images || images.length === 0));
-
-  console.log('🔍 UIAnalysisTab - loading states:', { 
-    showLoadingForColors, showLoadingForFonts, showLoadingForAccessibility, showLoadingForImages,
-    isProgressiveLoading, loadingComplete: data?.loadingComplete 
-  });
 
   if (error) {
     return (

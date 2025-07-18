@@ -164,7 +164,6 @@ export default function ColorExtractionCard({ colors }: ColorExtractionCardProps
     // Filter to only include non-empty buckets in the specified order
     const sections = SECTION_ORDER.filter(bucket => groups[bucket] && groups[bucket][0].colors.length > 0);
     const arr = sections.map(name => ({ name, groups: groups[name] }));
-    console.log('🎨 ColorExtractionCard - processed groups:', Object.keys(groups), 'sections:', sections, 'final usageGroups:', arr.length);
     setUsageGroups(arr);
 
     // Initialize expanded sections for new data
@@ -213,15 +212,12 @@ export default function ColorExtractionCard({ colors }: ColorExtractionCardProps
   };
 
   useEffect(() => {
-    console.log('🎨 ColorExtractionCard - colors prop:', colors?.length || 0, colors);
     if (colors && colors.length > 0) {
       const flat: ColorResult[] = colors;
-      console.log('🎨 ColorExtractionCard - processing', flat.length, 'colors');
       const cleanup = processColorData(flat, true);
       return cleanup;
     } else {
       // No colors provided
-      console.log('🎨 ColorExtractionCard - no colors provided, setting empty');
       setUsageGroups([]);
       setLoading(false);
     }

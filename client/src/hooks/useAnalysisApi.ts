@@ -93,7 +93,13 @@ export const useAnalysisApi = () => {
         });
 
         if (!immediateResponse.ok) {
-          throw new Error(`Immediate analysis failed: ${immediateResponse.status}`);
+          // Try to get the detailed error message from the backend
+          try {
+            const errorData = await immediateResponse.json();
+            throw new Error(errorData.message || `Immediate analysis failed: ${immediateResponse.status}`);
+          } catch (parseError) {
+            throw new Error(`Immediate analysis failed: ${immediateResponse.status}`);
+          }
         }
 
         const immediateResult: ExtendedAnalysisResponse = await immediateResponse.json();

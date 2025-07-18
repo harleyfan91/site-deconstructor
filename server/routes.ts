@@ -690,10 +690,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     } catch (error) {
       console.error('Analysis error:', error);
-      res.status(500).json({ 
-        error: 'Analysis failed', 
-        message: error instanceof Error ? error.message : 'Unknown error' 
-      });
+      
+      // Check for specific timeout or connection errors
+      const isConnectionError = error?.cause?.code === 'UND_ERR_CONNECT_TIMEOUT' || 
+                               error?.message?.includes('fetch failed') ||
+                               error?.message?.includes('timeout');
+      
+      if (isConnectionError) {
+        res.status(500).json({ 
+          error: 'Connection timeout', 
+          message: `Unable to connect to ${url}. The website may be down, blocking requests, or have connectivity issues. Please try a different URL.`
+        });
+      } else {
+        res.status(500).json({ 
+          error: 'Analysis failed', 
+          message: error instanceof Error ? error.message : 'Unknown error' 
+        });
+      }
     }
   });
 
