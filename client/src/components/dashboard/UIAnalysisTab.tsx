@@ -15,6 +15,9 @@ interface UIAnalysisTabProps {
 }
 
 const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) => {
+  const ui = data?.data?.ui;
+  const { colors, fonts, images, imageAnalysis, contrastIssues, violations, accessibilityScore } = ui || {};
+
   if (error) {
     return (
       <Alert severity="error" sx={{ mt: 2 }}>
@@ -22,17 +25,6 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
       </Alert>
     );
   }
-
-  if (!data && !loading) {
-    return (
-      <Alert severity="info" sx={{ mt: 2 }}>
-        Enter a URL to analyze website UI elements
-      </Alert>
-    );
-  }
-
-  const ui = data?.data?.ui;
-  const { colors, fonts, images, imageAnalysis, contrastIssues, violations, accessibilityScore } = ui || {};
 
   return (
     <Box>
@@ -45,9 +37,25 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
         {/* Color Extraction */}
         <Card sx={{ borderRadius: 2, width: '100%' }}>
           <CardContent sx={{ p: 2 }}>
-            <ColorExtractionCard 
-              colors={colors || []} 
-            />
+            {loading && !colors ? (
+              <Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                  <Typography variant="h6">
+                    Color Extraction
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', py: 4 }}>
+                  <CircularProgress size={32} sx={{ color: 'primary.main', mr: 2 }} />
+                  <Typography variant="body2" color="text.secondary">
+                    Extracting colors from website...
+                  </Typography>
+                </Box>
+              </Box>
+            ) : (
+              <ColorExtractionCard 
+                colors={colors || []} 
+              />
+            )}
           </CardContent>
         </Card>
 
@@ -55,19 +63,49 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
           <Card sx={{ borderRadius: 2, width: '100%' }}>
             <CardContent sx={{ p: 2 }}>
-              <FontAnalysisCard 
-                fonts={fonts ?? []} 
-              />
+              {loading && !fonts ? (
+                <Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                    <Typography variant="h6">
+                      Font Analysis
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
+                    <CircularProgress size={32} sx={{ mr: 2 }} />
+                    <Typography variant="body2" color="text.secondary">
+                      Extracting fonts...
+                    </Typography>
+                  </Box>
+                </Box>
+              ) : (
+                <FontAnalysisCard 
+                  fonts={fonts ?? []} 
+                />
+              )}
             </CardContent>
           </Card>
 
           <Card sx={{ borderRadius: 2, width: '100%' }}>
             <CardContent sx={{ p: 2 }}>
-              <AccessibilityCard 
-                contrastIssues={contrastIssues}
-                accessibilityScore={accessibilityScore}
-                violations={violations}
-              />
+              {loading && !accessibilityScore && !contrastIssues && !violations ? (
+                <Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                    <Typography variant="h6">
+                      Accessibility & Contrast
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', py: 4 }}>
+                    <CircularProgress size={24} sx={{ mr: 2 }} />
+                    <Typography variant="body2">Analyzing accessibility...</Typography>
+                  </Box>
+                </Box>
+              ) : (
+                <AccessibilityCard 
+                  contrastIssues={contrastIssues}
+                  accessibilityScore={accessibilityScore}
+                  violations={violations}
+                />
+              )}
             </CardContent>
           </Card>
         </Box>
@@ -75,10 +113,26 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
         {/* Image Analysis */}
         <Card sx={{ borderRadius: 2, width: '100%' }}>
           <CardContent sx={{ p: 2 }}>
-            <ImageAnalysisCard
-              images={images ?? []}
-              imageAnalysis={imageAnalysis}
-            />
+            {loading && !images ? (
+              <Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                  <Typography variant="h6">
+                    Image Analysis
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', py: 4 }}>
+                  <CircularProgress size={32} sx={{ mr: 2 }} />
+                  <Typography variant="body2" color="text.secondary">
+                    Analyzing images...
+                  </Typography>
+                </Box>
+              </Box>
+            ) : (
+              <ImageAnalysisCard
+                images={images ?? []}
+                imageAnalysis={imageAnalysis}
+              />
+            )}
           </CardContent>
         </Card>
       </Box>
