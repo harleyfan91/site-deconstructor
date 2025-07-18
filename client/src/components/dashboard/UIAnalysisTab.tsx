@@ -18,6 +18,13 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
   const ui = data?.data?.ui;
   const { colors, fonts, images, imageAnalysis, contrastIssues, violations, accessibilityScore } = ui || {};
 
+  // Debug: Log the UI data structure
+  console.log('🎨 UIAnalysisTab - data:', data);
+  console.log('🎨 UIAnalysisTab - ui:', ui);
+  console.log('🎨 UIAnalysisTab - colors:', colors?.length || 0);
+  console.log('🎨 UIAnalysisTab - fonts:', fonts?.length || 0);
+  console.log('🎨 UIAnalysisTab - loading:', loading);
+
   if (error) {
     return (
       <Alert severity="error" sx={{ mt: 2 }}>
