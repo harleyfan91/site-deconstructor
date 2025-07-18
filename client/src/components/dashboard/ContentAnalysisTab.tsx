@@ -73,16 +73,9 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
     );
   }
 
-  // No data state (only when not loading)
-  if (!data && !loading) {
-    return (
-      <Box sx={{ p: 3 }}>
-        <Alert severity="info">
-          No content analysis data available. Please analyze a website first.
-        </Alert>
-      </Box>
-    );
-  }
+  // Progressive loading check
+  const isProgressiveLoading = data && !data.loadingComplete;
+  const contentData = data?.data?.content;
 
   // Extract content-specific data from API response
   const imageData = data?.data?.ui?.imageAnalysis;
@@ -91,7 +84,6 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
   const estimatedIcons = imageData?.estimatedIcons || 0;
 
   // Content readability and text analysis data - should pull from Playwright
-  const contentData = data?.data?.content;
   
   const readabilityScore: number = typeof contentData?.readabilityScore === 'number' ? contentData.readabilityScore : 
     (contentData?.readabilityScore === "!" ? 0 : Number(contentData?.readabilityScore) || 0);
