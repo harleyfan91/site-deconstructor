@@ -73,8 +73,7 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
     );
   }
 
-  // Progressive loading check
-  const isProgressiveLoading = data && !data.loadingComplete;
+  // Independent loading - show data as soon as available
   const contentData = data?.data?.content;
 
   // Extract content-specific data from API response
@@ -155,7 +154,7 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
                   Content Distribution
                 </Typography>
               </Box>
-            {(loading || isProgressiveLoading) ? (
+            {loading ? (
               <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
                 <CircularProgress size={20} sx={{ mr: 1 }} />
                 <Typography variant="body2" color="text.secondary">
@@ -203,7 +202,7 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
                   Content Structure Analysis
                 </Typography>
               </Box>
-            {(loading || isProgressiveLoading) ? (
+            {loading ? (
               <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
                 <CircularProgress size={20} sx={{ mr: 1 }} />
                 <Typography variant="body2" color="text.secondary">
@@ -237,7 +236,7 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
                 </Typography>
               </Box>
             
-            {(loading || isProgressiveLoading) ? (
+            {loading ? (
               <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
                 <CircularProgress size={20} sx={{ mr: 1 }} />
                 <Typography variant="body2" color="text.secondary">
@@ -364,7 +363,7 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
               </Typography>
             </Box>
             
-            {(loading || isProgressiveLoading) ? (
+            {loading ? (
               <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
                 <CircularProgress size={20} sx={{ mr: 1 }} />
                 <Typography variant="body2" color="text.secondary">
