@@ -18,12 +18,12 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
   const ui = data?.data?.ui;
   const { colors, fonts, images, imageAnalysis, contrastIssues, violations, accessibilityScore } = ui || {};
 
-  // Debug: Log the UI data structure
-  console.log('🎨 UIAnalysisTab - data:', data);
-  console.log('🎨 UIAnalysisTab - ui:', ui);
-  console.log('🎨 UIAnalysisTab - colors:', colors?.length || 0);
-  console.log('🎨 UIAnalysisTab - fonts:', fonts?.length || 0);
-  console.log('🎨 UIAnalysisTab - loading:', loading);
+  // Check if we're in progressive loading (immediate data received but comprehensive loading not complete)
+  const isProgressiveLoading = data && !data.loadingComplete;
+  const showLoadingForColors = loading || (isProgressiveLoading && (!colors || colors.length === 0));
+  const showLoadingForFonts = loading || (isProgressiveLoading && (!fonts || fonts.length === 0));
+  const showLoadingForAccessibility = loading || (isProgressiveLoading && !accessibilityScore && !contrastIssues?.length && !violations?.length);
+  const showLoadingForImages = loading || (isProgressiveLoading && (!images || images.length === 0));
 
   if (error) {
     return (
@@ -44,7 +44,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
         {/* Color Extraction */}
         <Card sx={{ borderRadius: 2, width: '100%' }}>
           <CardContent sx={{ p: 2 }}>
-            {loading && !colors ? (
+            {showLoadingForColors ? (
               <Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
                   <Typography variant="h6">
@@ -70,7 +70,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
           <Card sx={{ borderRadius: 2, width: '100%' }}>
             <CardContent sx={{ p: 2 }}>
-              {loading && !fonts ? (
+              {showLoadingForFonts ? (
                 <Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
                     <Typography variant="h6">
@@ -94,7 +94,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
 
           <Card sx={{ borderRadius: 2, width: '100%' }}>
             <CardContent sx={{ p: 2 }}>
-              {loading && !accessibilityScore && !contrastIssues && !violations ? (
+              {showLoadingForAccessibility ? (
                 <Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
                     <Typography variant="h6">
@@ -120,7 +120,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
         {/* Image Analysis */}
         <Card sx={{ borderRadius: 2, width: '100%' }}>
           <CardContent sx={{ p: 2 }}>
-            {loading && !images ? (
+            {showLoadingForImages ? (
               <Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
                   <Typography variant="h6">
