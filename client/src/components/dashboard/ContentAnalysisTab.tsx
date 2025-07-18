@@ -155,7 +155,7 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
                   Content Distribution
                 </Typography>
               </Box>
-            {loading ? (
+            {(loading || isProgressiveLoading) ? (
               <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
                 <CircularProgress size={20} sx={{ mr: 1 }} />
                 <Typography variant="body2" color="text.secondary">
@@ -203,7 +203,7 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
                   Content Structure Analysis
                 </Typography>
               </Box>
-            {loading ? (
+            {(loading || isProgressiveLoading) ? (
               <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
                 <CircularProgress size={20} sx={{ mr: 1 }} />
                 <Typography variant="body2" color="text.secondary">
@@ -237,7 +237,7 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
                 </Typography>
               </Box>
             
-            {loading ? (
+            {(loading || isProgressiveLoading) ? (
               <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
                 <CircularProgress size={20} sx={{ mr: 1 }} />
                 <Typography variant="body2" color="text.secondary">
@@ -364,7 +364,7 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
               </Typography>
             </Box>
             
-            {loading ? (
+            {(loading || isProgressiveLoading) ? (
               <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
                 <CircularProgress size={20} sx={{ mr: 1 }} />
                 <Typography variant="body2" color="text.secondary">
