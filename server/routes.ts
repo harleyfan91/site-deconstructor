@@ -11,6 +11,7 @@ import { getTechnicalAnalysis, type TechnicalAnalysis } from './lib/tech-extract
 import { getLighthouseSEO, getLighthousePerformance, getLighthouseBestPractices, getLighthousePageLoadTime } from './lib/lighthouse-service';
 import { getAccessibilityAnalysis } from './lib/axe-integration';
 import { getEnhancedTechAnalysis } from './lib/enhanced-tech-analysis';
+import { colorsProxyHandler } from './routes/colorsProxy';
 
 // Helper function to normalize URLs with proper protocol
 function normalizeUrl(url: string): string {
@@ -255,7 +256,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Color extraction API route with caching
-  app.post('/api/colors', async (req, res) => {
+  // Fast colors proxy using cached UIScraperService
+  app.post('/api/colors', colorsProxyHandler);
+
+  // OLD HEAVY COLOR ROUTE - COMMENTED OUT (will be deleted after verification)
+  /*
+  app.post('/api/colors-old', async (req, res) => {
     try {
       const { url } = req.body;
       
@@ -352,6 +358,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: 'Color extraction failed' });
     }
   });
+  */
 
   // Font analysis API route with caching
   app.post('/api/fonts', async (req, res) => {
