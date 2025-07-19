@@ -26,6 +26,7 @@ const DISABLE_PLAYWRIGHT = process.env.DISABLE_PLAYWRIGHT === 'true' || process.
 const BROWSER_CONFIG = {
   headless: true,
   executablePath: '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium',
+  timeout: 20000, // 20 second browser launch timeout
   args: [
     '--no-sandbox',
     '--disable-setuid-sandbox', 
@@ -50,7 +51,11 @@ const BROWSER_CONFIG = {
     '--disable-ipc-flooding-protection',
     '--memory-pressure-off',
     '--max_old_space_size=512',
-    '--single-process'
+    '--single-process',
+    '--disable-blink-features=AutomationControlled',
+    '--disable-features=TranslateUI',
+    '--disable-backgrounding-occluded-windows',
+    '--disable-component-update'
   ]
 };
 
@@ -292,10 +297,14 @@ export class UIScraperService {
       try {
         return await queuePlaywrightTask(url, async () => {
           let browser: Browser | null = null;
+          let context: any = null;
+          let page: Page | null = null;
+          
           try {
-            // Launch browser with timeout
+            // Launch browser with timeout and better error handling
+            console.log(`🚀 Launching browser for ${url}...`);
             const launchTimeout = new Promise((_, reject) => 
-              setTimeout(() => reject(new Error('Browser launch timeout')), 15000)
+              setTimeout(() => reject(new Error('Browser launch timeout after 20s')), 20000)
             );
             
             browser = await Promise.race([
@@ -303,47 +312,62 @@ export class UIScraperService {
               launchTimeout
             ]) as Browser;
             
-            const context = await browser.newContext({
+            console.log(`✅ Browser launched for ${url}`);
+            
+            context = await browser.newContext({
               viewport: { width: 1920, height: 1080 },
-              userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+              userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+              ignoreHTTPSErrors: true
             });
-            const page = await context.newPage();
+            
+            page = await context.newPage();
+            
+            // Set navigation timeout
+            page.setDefaultNavigationTimeout(30000);
+            page.setDefaultTimeout(30000);
 
-        // Navigate to page
-        await page.goto(url, { 
-          waitUntil: 'domcontentloaded', 
-          timeout: 30000 
-        });
-        await page.waitForTimeout(2000); // Let page settle
+            // Navigate to page with error handling
+            console.log(`🌐 Navigating to ${url}...`);
+            
+            await page.goto(url, { 
+              waitUntil: 'domcontentloaded', 
+              timeout: 30000 
+            });
+            
+            console.log(`✅ Page loaded for ${url}`);
+            await page.waitForTimeout(2000); // Let page settle
 
-        // Run all extractions in parallel using the SAME browser context
-        const [
-          colorResults,
-          fontResults,
-          imageResults,
-          accessibilityResults
-        ] = await Promise.all([
-          extractColorsFromPage(page, url).catch(err => {
-            console.warn('Color extraction failed:', err.message);
-            return [];
-          }),
-          extractFontsFromPage(page).catch(err => {
-            console.warn('Font extraction failed:', err.message);
-            return [];
-          }),
-          extractImagesFromPage(page).catch(err => {
-            console.warn('Image extraction failed:', err.message);
-            return { images: [], analysis: {
-              totalImages: 0, estimatedPhotos: 0, estimatedIcons: 0,
-              imageUrls: [], photoUrls: [], iconUrls: [],
-              altStats: { withAlt: 0, withoutAlt: 0, emptyAlt: 0, totalImages: 0 }
-            }};
-          }),
-          getAccessibilityAnalysis(page, url).catch(err => {
-            console.warn('Accessibility analysis failed:', err.message);
-            return { contrastIssues: [], violations: [], score: 0 };
-          })
-        ]);
+            // Run all extractions in parallel using the SAME browser context
+            console.log(`🔍 Starting parallel analysis for ${url}...`);
+            const [
+              colorResults,
+              fontResults,
+              imageResults,
+              accessibilityResults
+            ] = await Promise.all([
+              extractColorsFromPage(page, url).catch(err => {
+                console.warn('Color extraction failed:', err.message);
+                return [];
+              }),
+              extractFontsFromPage(page).catch(err => {
+                console.warn('Font extraction failed:', err.message);
+                return [];
+              }),
+              extractImagesFromPage(page).catch(err => {
+                console.warn('Image extraction failed:', err.message);
+                return { images: [], analysis: {
+                  totalImages: 0, estimatedPhotos: 0, estimatedIcons: 0,
+                  imageUrls: [], photoUrls: [], iconUrls: [],
+                  altStats: { withAlt: 0, withoutAlt: 0, emptyAlt: 0, totalImages: 0 }
+                }};
+              }),
+              getAccessibilityAnalysis(page, url).catch(err => {
+                console.warn('Accessibility analysis failed:', err.message);
+                return { contrastIssues: [], violations: [], score: 0 };
+              })
+            ]);
+            
+            console.log(`✅ Parallel analysis completed for ${url}`);
 
         const analysis: UIAnalysis = {
           colors: colorResults,
@@ -364,11 +388,25 @@ export class UIScraperService {
         const analysisWithStatus = { ...analysis, status: 'complete' };
         await unifiedCache.set('ui_analysis', url, analysisWithStatus, 24 * 60 * 60 * 1000);
 
-        return analysis;
+            return analysis;
 
+          } catch (error) {
+            console.error(`❌ Browser operation failed for ${url}:`, error.message);
+            throw error;
           } finally {
-            if (browser) {
-              await browser.close();
+            // Cleanup browser resources properly
+            try {
+              if (page && !page.isClosed()) {
+                await page.close().catch(() => {});
+              }
+              if (context) {
+                await context.close().catch(() => {});
+              }
+              if (browser) {
+                await browser.close().catch(() => {});
+              }
+            } catch (cleanupError) {
+              console.warn(`⚠️ Browser cleanup warning for ${url}:`, cleanupError.message);
             }
           }
         }, 'ui-analysis'); // Task name for queue logging

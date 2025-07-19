@@ -10,8 +10,8 @@ import PQueue from 'p-queue';
  */
 export const playwrightQueue = new PQueue({ 
   concurrency: 1, // Reduced to 1 for resource-constrained environment
-  timeout: 60000, // 60 second timeout per task
-  throwOnTimeout: true
+  timeout: 120000, // 2 minute timeout per task
+  throwOnTimeout: false // Don't throw on timeout, let tasks handle it gracefully
 });
 
 /**

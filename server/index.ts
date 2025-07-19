@@ -18,8 +18,22 @@ process.on('unhandledRejection', (reason, promise) => {
     console.warn('Caught unhandled rejection for performance mark, continuing...', reason.message);
     return;
   }
+  
+  // Handle Playwright browser closure errors gracefully
+  if (reason && typeof reason === 'object' && 'message' in reason) {
+    const message = (reason as any).message;
+    if (message && (
+      message.includes('Target page, context or browser has been closed') ||
+      message.includes('Browser has been closed') ||
+      message.includes('Protocol error')
+    )) {
+      console.warn('Caught Playwright browser closure error, continuing...', message);
+      return;
+    }
+  }
+  
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-  process.exit(1);
+  // Don't exit process, just log the error
 });
 
 const app = express();
