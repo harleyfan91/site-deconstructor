@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import type { AnalysisResponse } from '@/types/analysis';
 
 // Extended types for the new analysis data
@@ -40,148 +40,87 @@ export interface ExtendedAnalysisResponse extends AnalysisResponse {
 
 export type { AnalysisResponse } from '@/types/analysis';
 
-// Request deduplication cache
-const requestCache = new Map<string, Promise<ExtendedAnalysisResponse | null>>();
-
 export const useAnalysisApi = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<ExtendedAnalysisResponse | null>(null);
   const currentRequestRef = useRef<string | null>(null);
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const analyzeWebsite = useCallback(async (url: string): Promise<ExtendedAnalysisResponse | null> => {
-    // Prevent duplicate requests for the same URL
-    if (currentRequestRef.current === url) {
-      console.log('Request already in progress for:', url);
-      return data;
-    }
-
-    // Check if there's already a request for this URL
-    if (requestCache.has(url)) {
-      console.log('Using cached request for:', url);
-      setLoading(true);
+  // Optimized polling for overview data
+  const startPolling = useCallback((url: string) => {
+    console.log('⚡ Starting polling for analysis...');
+    let pollCount = 0;
+    
+    const poll = async () => {
       try {
-        const result = await requestCache.get(url)!;
-        if (result) {
-          setData(result);
-          setError(null);
-        }
-        return result;
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-        setError(errorMessage);
-        return null;
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    currentRequestRef.current = url;
-    setLoading(true);
-    setError(null);
-
-    // Create the request promise and cache it
-    const requestPromise = (async (): Promise<ExtendedAnalysisResponse | null> => {
-      try {
-        console.log('🚀 Starting progressive analysis for:', url);
-
-        // Polling logic for fast UX
-        console.log('⚡ Starting polling for analysis...');
-        let pollAttempts = 0;
-        const maxPollAttempts = 30; // 2 minutes max
+        pollCount++;
+        const response = await fetch(`/api/overview?url=${encodeURIComponent(url)}`);
+        const result = await response.json();
         
-        const pollForResults = async (): Promise<ExtendedAnalysisResponse> => {
-          const overviewResponse = await fetch(`/api/overview?url=${encodeURIComponent(url)}`, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' }
-          });
-
-          if (!overviewResponse.ok) {
-            throw new Error(`Overview analysis failed: ${overviewResponse.status}`);
-          }
-
-          const overviewData = await overviewResponse.json();
-          
-          // Check if still pending
-          if (overviewData.status === 'pending') {
-            console.log(`⏳ Analysis pending, poll attempt ${pollAttempts + 1}`);
-            
-            // Create partial result for immediate display with skeletons
-            const partialResult: ExtendedAnalysisResponse = {
-              id: Math.random().toString(36).substr(2, 9),
-              timestamp: new Date().toISOString(),
-              url,
-              data: overviewData,
-              loadingComplete: false,
-              status: 'pending'
-            };
-            
-            // Update UI with pending state immediately on first call
-            if (pollAttempts === 0) {
-              setData(partialResult);
-            }
-            
-            pollAttempts++;
-            if (pollAttempts < maxPollAttempts) {
-              // Poll every 4 seconds
-              await new Promise(resolve => setTimeout(resolve, 4000));
-              return pollForResults();
-            } else {
-              throw new Error('Analysis timed out after 2 minutes');
-            }
-          }
-
+        if (result.status === 'complete') {
           console.log('✅ Overview analysis completed');
-          
-          // Complete result
-          const result: ExtendedAnalysisResponse = {
-            id: Math.random().toString(36).substr(2, 9),
-            timestamp: new Date().toISOString(),
-            url,
-            data: overviewData,
-            loadingComplete: true,
-            status: 'complete'
-          };
-
           setData(result);
           setLoading(false);
-          return result;
-        };
-
-        return await pollForResults();
-
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-        console.error('Analysis API Error:', err);
-        throw new Error(errorMessage);
+          if (pollingIntervalRef.current) {
+            clearInterval(pollingIntervalRef.current);
+            pollingIntervalRef.current = null;
+          }
+        } else {
+          console.log(`⏳ Analysis pending, poll attempt ${pollCount}`);
+          setData(result); // Show partial data if available
+        }
+      } catch (error) {
+        console.error('Polling error:', error);
+        setError('Failed to fetch analysis data');
+        setLoading(false);
+        if (pollingIntervalRef.current) {
+          clearInterval(pollingIntervalRef.current);
+          pollingIntervalRef.current = null;
+        }
       }
-    })();
+    };
 
-    // Cache the request
-    requestCache.set(url, requestPromise);
+    // Start polling immediately, then every 4 seconds
+    poll();
+    pollingIntervalRef.current = setInterval(poll, 4000);
+  }, []);
 
+  const analyzeWebsite = useCallback(async (url: string): Promise<ExtendedAnalysisResponse | null> => {
+    console.log('🚀 Starting progressive analysis for:', url);
+    
+    // Reset state
+    setLoading(true);
+    setError(null);
+    setData(null);
+    currentRequestRef.current = url;
+
+    // Fire-and-forget scan trigger (as per execution gate)
     try {
-      const result = await requestPromise;
-      setLoading(false);
-      return result;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-      setError(errorMessage);
-      setLoading(false);
-      return null;
-    } finally {
-      currentRequestRef.current = null;
-      // Clean up cache after 5 minutes to prevent memory leaks
-      setTimeout(() => {
-        requestCache.delete(url);
-      }, 5 * 60 * 1000);
+      await fetch('/api/scan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url })
+      });
+    } catch (error) {
+      console.warn('Scan trigger failed (non-blocking):', error);
     }
-  }, [data]);
 
-  return {
-    analyzeWebsite,
-    loading,
-    error,
-    data,
-  };
+    // Start optimized polling
+    startPolling(url);
+    
+    return data; // Will be updated via polling
+  }, [startPolling]);
+
+  // Cleanup polling on unmount
+  React.useEffect(() => {
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
+    };
+  }, []);
+
+  return { analyzeWebsite, loading, error, data };
 };

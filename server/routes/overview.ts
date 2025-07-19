@@ -45,19 +45,23 @@ router.get('/', async (req, res) => {
     const normalizedUrl = normalizeUrl(url);
     console.log('📊 Aggregating overview data for:', normalizedUrl);
     
-    // Fast response with immediate pending status on cache miss
+    // Ultra-fast cache check - memory first, then immediate pending
+    const startTime = Date.now();
     const cachedUI = await UIScraperService.getCachedUI(normalizedUrl);
+    const cacheCheckTime = Date.now() - startTime;
     
     if (!cachedUI) {
-      // Cache miss - trigger background scrape and return fast pending response
-      console.log(`⚡ Cache miss for ${normalizedUrl}, triggering background scrape`);
+      // Cache miss - trigger background scrape and return instant pending response
+      console.log(`⚡ Cache miss for ${normalizedUrl} (${cacheCheckTime}ms), returning instant pending`);
       
-      // Kick off background analysis without awaiting
-      UIScraperService.getOrCreateAnalysis(normalizedUrl).catch(error => {
-        console.error(`❌ Background scrape failed for ${normalizedUrl}:`, error);
+      // Fire-and-forget background analysis (no await)
+      setImmediate(() => {
+        UIScraperService.analyzeUI(normalizedUrl).catch(error => {
+          console.error(`❌ Background UI analysis failed for ${normalizedUrl}:`, error.message);
+        });
       });
       
-      // Return immediate pending response (<200ms)
+      // Return ultra-fast pending response (target: <100ms)
       return res.json({ 
         status: 'pending',
         url: normalizedUrl,
@@ -70,7 +74,8 @@ router.get('/', async (req, res) => {
           overview: null
         },
         schemaVersion: '1.1.0',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        responseTime: Date.now() - startTime
       });
     }
     
