@@ -58,7 +58,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
     );
   }
 
-  const overview = data.data.overview;
+  const overview = data?.data?.overview || {};
   if (!overview) return null;
 
   // REPLACED PLACEHOLDER: now pulls real data from overview.pageLoadTime and overview.coreWebVitals
@@ -118,7 +118,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
           }}>
             Website Overview
           </Typography>
-          <UrlDisplayBox url={data.url ?? ''} />
+          <UrlDisplayBox url={data?.url ?? ''} />
         </Box>
       </Box>
 
@@ -154,7 +154,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
           <CardContent sx={{ p: 3 }}>
             {overview ? (
               <Typography variant="body1" paragraph>
-                Analysis completed at {data.timestamp ? new Date(data.timestamp).toLocaleString() : 'Unknown time'}.
+                Analysis completed at {data?.timestamp ? new Date(data.timestamp).toLocaleString() : 'Unknown time'}.
                 {(overview?.overallScore ?? 0) >= 80
                   ? ' The page shows excellent performance across most metrics.'
                   : ' The page has room for improvement in several areas.'}

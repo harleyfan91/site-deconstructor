@@ -87,7 +87,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
     );
   }
 
-  const { performance, overview, tech } = data.data;
+  const { performance, overview, tech } = data?.data || {};
   const performanceScore = overview?.overallScore || 0;
   const mobileScore = Math.round((performance?.pageLoadTime?.mobile || 0) < 3000 ? 90 : 
                                  (performance?.pageLoadTime?.mobile || 0) < 5000 ? 70 : 50);

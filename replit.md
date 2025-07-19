@@ -305,6 +305,11 @@ A comprehensive website analysis tool that provides insights into performance, S
 - ✓ Added comprehensive test suites for overview API and queue concurrency control
 - ✓ Implemented CORS security hardening and API key authentication for scan endpoints
 - ✓ Created unified type definitions with OverviewResponse and APIResponse types
+- ✓ Performed comprehensive legacy code audit and cleanup (January 19, 2025)
+- ✓ Completely removed deprecated server/routes.ts file containing all legacy endpoints (/api/colors, /api/fonts, /api/lighthouse, /api/ui)
+- ✓ Updated documentation to reflect unified architecture with only /api/overview and /api/scan endpoints
+- ✓ Fixed TypeScript compilation errors in dashboard components with proper null safety
+- ✓ Verified single-network-call architecture working correctly with only /api/overview requests
 
 ## Technical Stack
 - **Frontend**: React, TypeScript, MUI, Framer Motion
@@ -321,16 +326,8 @@ A comprehensive website analysis tool that provides insights into performance, S
 - Implement performance optimizations without altering UI elements
 
 ## API Endpoints
-- `GET /api/analyze/full?url=<website-url>` - Complete analysis with aggregated data and Supabase caching
-- `GET /api/analyze?url=<website-url>` - Legacy endpoint (redirects to full analysis)
-- `GET /api/overview?url=<website-url>` - Comprehensive overview aggregating all specialized endpoints
-- `GET /api/performance?url=<website-url>` - Performance analysis with Lighthouse page load times and Core Web Vitals
-- `GET /api/ui?url=<website-url>` - UI data extraction (fonts, images, contrast analysis)
-- `POST /api/content` - Content analysis (word count, readability) via Playwright extraction
-- `POST /api/colors` - Extracts colors from website using Playwright
-- `POST /api/fonts` - Extracts fonts from website using Playwright  
-- `POST /api/seo` - SEO analysis with Playwright extraction and Lighthouse audits
-- `POST /api/tech` - Technology detection with lightweight HTTP-based analysis
+- `GET /api/overview?url=<website-url>` - Primary endpoint for comprehensive website analysis (unified single-scrape architecture)
+- `POST /api/scan` - Queue-based website scraping with API key authentication and concurrency control
 
 ## Setup Instructions
 ### Supabase Database Setup

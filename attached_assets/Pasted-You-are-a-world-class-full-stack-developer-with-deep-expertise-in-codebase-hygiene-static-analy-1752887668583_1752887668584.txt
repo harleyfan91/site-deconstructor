@@ -1,0 +1,68 @@
+You are a **world‑class full‑stack developer** with deep expertise in codebase hygiene, static analysis, and automated refactors.
+
+**Mission:** Perform a final audit to confirm that all deletions and refactors described in the Phase 1‑3 prompt have actually been executed. Your job is to *verify* and, if needed, surgically **delete any lingering code**—nothing more. This pass should introduce **zero new functionality**.
+
+> ⚠️  **Do not** re‑introduce helpers, proxies, or routes. Only remove leftovers.
+
+---
+
+## 🔍 Audit Scope
+
+1. **Routes & Handlers** – legacy files or exports for:
+
+   * `/api/colors`, `/api/fonts`, `/api/lighthouse`, `/api/ui`, any route that spawns its own Playwright session.
+2. **Frontend Hooks** – `useColors`, `useFonts`, `useLighthouse`, or any fetch pointing to removed endpoints.
+3. **Utilities & Caches** – in‑memory caches declared in route files; duplicate Playwright helpers now superseded by `uiScraper`.
+4. **Type Definitions** – `ColorResponse`, `FontResponse`, etc. no longer used.
+5. **Tests & Mocks** – any test hitting deleted endpoints.
+
+---
+
+## 🗂️  Task List (one pass)
+
+### STEP 1 – Static Search
+
+* Run the following commands and review output:
+
+  ```bash
+  git grep -E "/api/(colors|fonts|lighthouse|ui)" -- '*.ts' '*.tsx'
+  git grep -E "(ColorResponse|FontResponse)" -- '*.ts' '*.tsx'
+  git grep -E "inMemoryCache" -- '*.ts'
+  ```
+
+### STEP 2 – Delete leftovers
+
+* **DELETE** any files or code blocks surfaced that match the legacy pattern. Do **not** comment—*remove*.
+* If removing a file breaks imports, remove the import lines or migrate to the unified type (`UIAnalysis`) as needed.
+
+### STEP 3 – Compile & Test
+
+* `pnpm test` (or `npm test`) must pass.
+* `tsc --noEmit` returns zero errors.
+* Run dev server and load the dashboard → exactly **one** network call (`/api/overview`). All tabs render.
+
+### STEP 4 – Commit & Report
+
+* If no leftovers found, commit a tiny noop change (e.g., update README whitespace) with message `chore(audit): confirm legacy code removed` so CI run records the audit.
+* If deletions occurred, commit: `chore(cleanup): purge lingering legacy endpoints/hooks`.
+* Print a short summary in PR description listing deleted paths.
+
+---
+
+## ✅ Validation Checklist
+
+* **Legacy routes purged** – `git grep -E "/api/(colors|fonts|lighthouse|ui)"` returns *no matches*.
+* **No obsolete hooks** – no `useColors`, `useFonts`, etc. remain in `/client` source tree.
+* **Duplicate caches removed** – no `inMemoryCache` declarations outside `cache.ts`.
+* **Types migrated** – `ColorResponse`, `FontResponse`, etc. are either deleted or aliased to `UIAnalysis`.
+* **Tests updated** – test suite passes without mocking legacy endpoints.
+* **Single network call** – loading dashboard triggers exactly one request: `/api/overview`.
+
+### Agent Guidance
+
+* **Think > code** – spend real time reading grep output before deleting.
+* Keep commit diff minimal and focused on deletions.
+* Do not adjust formatting or variable names outside deleted regions.
+* If unsure about a match, leave a TODO comment referencing the file & line for manual review—do **not** create new code.
+
+Good luck—this is the cleanup sprint before we move to Phase 4 cache tuning.

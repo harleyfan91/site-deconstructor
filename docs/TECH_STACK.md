@@ -114,23 +114,16 @@ The application features a sophisticated multi-tier analysis system powered by i
 * `/api/analyze/full` - Complete analysis with PageSpeed Insights data and Supabase caching
 * `/api/analyze` - Legacy endpoint (redirects to main analysis for backward compatibility)
 
-#### Specialized Analysis Endpoints
-* `/api/seo` - Playwright extraction + Lighthouse SEO audits (blended scoring: 60% extraction + 40% Lighthouse)
-* `/api/tech` - Enhanced tech detection (lightweight + Lighthouse best practices)
-* `/api/colors` - Real color extraction with axe-core accessibility analysis
-* `/api/fonts` - Authentic font extraction from rendered websites
-* `/api/lighthouse/seo` - Direct Lighthouse SEO audit data
-* `/api/lighthouse/performance` - Lighthouse performance metrics
-* `/api/lighthouse/best-practices` - Lighthouse best practices assessment
+#### Unified Analysis Architecture
+* `/api/overview` - Primary endpoint for comprehensive website analysis (single-scrape + single-endpoint pattern)
+* `/api/scan` - Queue-based website scraping with concurrency control and per-domain throttling
 
 #### Intelligent Caching Architecture
 1. **In-memory cache** (30 minutes) for ultra-fast repeated requests
-2. **Supabase cache** (24 hours) with URL hash-based keys:
-   - `seo_{hash}` - SEO analysis results
-   - `tech_lightweight_{hash}` - Enhanced tech analysis
-   - `colors_{hash}` - Color extraction with accessibility data
-   - `fonts_{hash}` - Font analysis results
-   - `lighthouse_seo_{hash}` - Lighthouse SEO audit data
+2. **Supabase cache** (24 hours) with schema version 1.1.0:
+   - `ui_{hash}` - Complete UI analysis (colors, fonts, accessibility, images)
+   - Enhanced TTL: 24h for successful scrapes, 15min for failed ones
+   - Cache invalidation for stale data with schema versioning
 3. **Request deduplication** to prevent duplicate API calls during concurrent requests
 
 #### Performance Metrics

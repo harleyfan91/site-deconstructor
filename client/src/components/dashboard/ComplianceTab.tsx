@@ -84,11 +84,13 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
   }
 
   // Use original data structure that was working before
-  const tech = data?.data?.tech || data?.data?.technical || {};
+  const tech = data?.data?.tech || {};
   const violations = tech.accessibility?.violations || [];
   const social = tech.social || { hasOpenGraph: false, hasTwitterCard: false, hasShareButtons: false };
   const cookies = tech.cookies || { hasCookieScript: false, scripts: [] };
   const minify = tech.minification || { cssMinified: false, jsMinified: false };
+  const lighthouseSecurityScore = tech.lighthouseScore || 0;
+  const lhr = tech.lighthouse || null;
   const links = tech.linkIssues || { brokenLinks: [], mixedContentLinks: [] };
 
   // Get security headers from the tech data (new structure)

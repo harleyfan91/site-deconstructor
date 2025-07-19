@@ -43,7 +43,7 @@ const ContentAnalysisTab = ({ data, loading, error }: ContentAnalysisTabProps) =
 
   // Content distribution data
   const contentTypes = [
-    { name: 'Text', value: Math.max(wordCount * 0.7, 10), color: theme.palette.primary.main },
+    { name: 'Text', value: Math.max(Number(wordCount) * 0.7 || 10, 10), color: theme.palette.primary.main },
     { name: 'Images', value: Math.max(totalImages * 5, 10), color: theme.palette.secondary.main },
     { name: 'Other', value: 20, color: theme.palette.grey[400] }
   ];
