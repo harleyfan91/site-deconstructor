@@ -74,12 +74,8 @@ const DashboardContent = () => {
     }
   }, [loading, hasAutoSwitched]);
 
-  // Redirect to the dedicated analyze page if no analysis data is available
-  useEffect(() => {
-    if (!analysisData && !loading) {
-      navigate('/analyze');
-    }
-  }, [analysisData, loading, navigate]);
+  // Show loading state instead of redirecting to prevent infinite loops
+  // The OverviewTab will handle the "no data" state properly]);
 
   return (
     <Box id="dashboard-root" data-dashboard="true">

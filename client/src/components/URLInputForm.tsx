@@ -41,15 +41,15 @@ const URLInputForm: React.FC<URLInputFormProps> = ({ onAnalysisComplete }) => {
     setLocalLoading(true);
     
     try {
-      // Start the analysis (non-blocking)
-      analyzeWebsite(url.trim());
+      // Start the analysis and wait for it to be properly initiated
+      const result = await analyzeWebsite(url.trim());
       
-      // Navigate immediately to dashboard for instant UX
+      // Navigate to dashboard after analysis is properly started
       navigate('/dashboard');
       
       // Call completion callback if provided
       if (onAnalysisComplete) {
-        onAnalysisComplete({ url: url.trim() });
+        onAnalysisComplete({ url: url.trim(), result });
       }
     } catch (error) {
       console.error('Analysis start failed:', error);
