@@ -266,6 +266,23 @@ export class UIScraperService {
   }
 
   /**
+   * Get or create analysis (alias for analyzeUI for consistency)
+   */
+  static async getOrCreateAnalysis(url: string): Promise<UIAnalysis> {
+    return this.analyzeUI(url);
+  }
+
+  /**
+   * Force fresh scrape (bypass cache)
+   */
+  static async scrape(url: string, options: { force?: boolean } = {}): Promise<UIAnalysis> {
+    if (options.force) {
+      await this.invalidateCache(url);
+    }
+    return this.analyzeUI(url);
+  }
+
+  /**
    * Invalidate cache for a specific URL
    */
   static async invalidateCache(url: string): Promise<void> {

@@ -85,57 +85,41 @@ export const useAnalysisApi = () => {
       try {
         console.log('🚀 Starting progressive analysis for:', url);
 
-        // Step 1: Get immediate local analysis for fast Overview display
-        console.log('⚡ Fetching immediate local analysis...');
-        const immediateResponse = await fetch(`/api/analyze/full?url=${encodeURIComponent(url)}&immediate=true`, {
+        // Step 1: Fetch unified overview data (single endpoint)
+        console.log('⚡ Fetching unified overview analysis...');
+        const overviewResponse = await fetch(`/api/overview?url=${encodeURIComponent(url)}`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' }
         });
 
-        if (!immediateResponse.ok) {
+        if (!overviewResponse.ok) {
           // Try to get the detailed error message from the backend
           try {
-            const errorData = await immediateResponse.json();
-            throw new Error(errorData.message || `Immediate analysis failed: ${immediateResponse.status}`);
+            const errorData = await overviewResponse.json();
+            throw new Error(errorData.message || `Overview analysis failed: ${overviewResponse.status}`);
           } catch (parseError) {
-            throw new Error(`Immediate analysis failed: ${immediateResponse.status}`);
+            throw new Error(`Overview analysis failed: ${overviewResponse.status}`);
           }
         }
 
-        const immediateResult: ExtendedAnalysisResponse = await immediateResponse.json();
-        console.log('✅ Immediate analysis completed - Overview can render');
+        const overviewData = await overviewResponse.json();
+        console.log('✅ Overview analysis completed');
 
-        // Update UI immediately with local data and show Overview tab
-        setData(immediateResult);
-        setLoading(false); // Allow Overview tab to render
+        // Transform overview data to match expected structure
+        const result: ExtendedAnalysisResponse = {
+          id: Math.random().toString(36).substr(2, 9),
+          timestamp: new Date().toISOString(),
+          url,
+          data: overviewData,
+          loadingComplete: true,
+          status: 'complete'
+        };
 
-        // Step 2: Get complete analysis from overview aggregator in background
-        console.log('🔍 Fetching comprehensive overview data in background...');
-        fetch(`/api/overview?url=${encodeURIComponent(url)}`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
-        }).then(async (overviewResponse) => {
-          if (overviewResponse.ok) {
-            const overviewData = await overviewResponse.json();
-            console.log('🎯 Complete overview data received - updating all metrics');
-            
-            // Transform overview data to match expected structure
-            const completeResult: ExtendedAnalysisResponse = {
-              ...immediateResult,
-              data: overviewData,
-              loadingComplete: true
-            };
-            
-            // Update with complete data including all analysis
-            setData(completeResult);
-          } else {
-            console.warn('Overview analysis failed, keeping immediate analysis');
-          }
-        }).catch((err) => {
-          console.warn('Background overview fetch error:', err);
-        });
+        // Update UI with complete data
+        setData(result);
+        setLoading(false);
 
-        return immediateResult;
+        return result;
 
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';

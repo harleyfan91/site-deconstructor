@@ -185,7 +185,11 @@ function logTiming(operation: string, startTime: number) {
 
 
 
-export async function registerRoutes(app: Express): Promise<Server> {
+// LEGACY ROUTES FILE - DEPRECATED
+// This file is being replaced by server/routes/index.ts with unified endpoints
+// TODO: Phase 3 - Delete this file after validation
+
+export async function registerRoutesLegacy(app: Express): Promise<Server> {
   // Initialize Supabase cache service and create table if needed
   console.log('🚀 Initializing Supabase cache service...');
   await SupabaseCacheService.createTableIfNotExists();
@@ -258,7 +262,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
 
-  app.post('/api/colors-old', async (req, res) => {
+  // REMOVED: Legacy /api/colors-old endpoint - replaced by unified /api/overview
+  app.post('/api/colors-old-DISABLED', async (req, res) => {
     try {
       const { url } = req.body;
       
