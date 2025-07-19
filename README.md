@@ -85,38 +85,21 @@ npm run dev
 * Click on "New codespace" to launch a new Codespace environment.
 * Edit files directly within the Codespace and commit and push your changes once you're done.
 
-## What technologies are used for this project?
+## Technology Overview
 
-This project is built with:
+| Layer | Key packages | Why they’re here |
+|-------|--------------|------------------|
+| UI Core | **React 18**, **Radix UI**, **MUI** | Declarative components and accessible primitives |
+| Styling | **Tailwind CSS**, **Emotion** | Utility‑first styling + CSS‑in‑JS for one‑offs |
+| Motion | **framer‑motion** | Page/element animations |
+| Data‑fetch & State | **@tanstack/react‑query**, **react‑hook‑form** | Async data caching & form state |
+| Charts | **recharts** | SVG/Canvas charts in dashboard |
+| Routing | **react‑router‑dom** | SPA navigation |
+| Backend Runtime | **Node.js**, **Express 4** | HTTP API & static build serving |
+| Analysis Engine | **Playwright**, **Lighthouse**, **axe‑core** | Browser automation, perf/SEO, a11y |
+| DB / Cache | **Supabase (Postgres)**, **Drizzle ORM** | Persist & reuse analysis results |
 
-### Frontend
-* **React 18** with TypeScript for component architecture
-* **Material-UI (MUI)** for responsive component library
-* **Framer Motion** for smooth animations and transitions
-* **Vite** for fast development and build tooling
-
-### Backend & Analysis Engine
-* **Express.js** server with TypeScript for robust API architecture
-* **Lighthouse** for comprehensive performance, SEO, and best practices analysis (replacing PageSpeed Insights)
-* **Playwright** for headless browser automation and content extraction
-* **axe-core** for real-time accessibility testing and contrast analysis
-* **@mozilla/readability** for authentic article content parsing
-* **jsdom** for server-side DOM manipulation and analysis
-* **Enhanced Tech Detection** combining lightweight HTTP analysis with Lighthouse data
-
-### Content Analysis Pipeline
-* **Real-time scraping**: Playwright extracts fonts, images, and text content
-* **Content classification**: 32×32 pixel threshold for photo vs icon detection  
-* **Readability analysis**: Flesch-Kincaid scoring on extracted article text
-* **Progressive loading**: Quick analysis followed by enhanced Playwright data
-
-### Data Storage & Performance
-* **Supabase** (PostgreSQL) for analysis caching with 24-hour TTL
-* **Multi-tier caching**: In-memory (30min) + Database (24hr) + Request deduplication
-* **Drizzle ORM** for type-safe database operations
-* **Express.js** API architecture with specialized analysis endpoints
-
-*For a complete list of all frameworks and libraries (including package names and versions), see [docs/TECH\_STACK.md](docs/TECH_STACK.md).*
+*Need to know more? See [`docs/TECH_STACK.md`](docs/TECH_STACK.md) for narratives and [`docs/DEPENDENCIES.md`](docs/DEPENDENCIES.md) for **every** package with a one‑liner.*
 
 ### Advanced Analysis Capabilities
 
@@ -206,3 +189,7 @@ responsive layout.
 
 // Run your usual "lint" and "tsc --noEmit" commands.
 // All remaining errors should be unrelated to colour extraction.
+
+---
+### Regenerating dependency docs
+Run `npm run deps:docs` after adding or removing any package.  It rewrites **docs/DEPENDENCIES.md** from `package.json` so the list never drifts.
