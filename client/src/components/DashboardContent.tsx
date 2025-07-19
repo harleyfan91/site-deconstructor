@@ -21,6 +21,7 @@ const DashboardContent = () => {
   const sectionLoading = useSectionLoading(analysisData, loading);
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
+  const [hasAutoSwitched, setHasAutoSwitched] = useState(false);
   const [visitedTabs, setVisitedTabs] = useSessionState('dashboard-visited-tabs', new Set(['overview']));
   
   // Ensure visitedTabs is always a Set
@@ -56,6 +57,22 @@ const DashboardContent = () => {
       return () => clearTimeout(timer);
     }
   }, [analysisData, backgroundLoadingStarted, activeTab]);
+
+  // Auto-switch to Overview tab when analysis is complete (only once per analysis)
+  useEffect(() => {
+    if (analysisData?.status === 'complete' && !loading && !hasAutoSwitched) {
+      console.log('🎯 Analysis complete, switching to Overview tab');
+      setActiveTab('overview');
+      setHasAutoSwitched(true);
+    }
+  }, [analysisData?.status, loading, hasAutoSwitched]);
+
+  // Reset auto-switch flag when starting new analysis
+  useEffect(() => {
+    if (loading && hasAutoSwitched) {
+      setHasAutoSwitched(false);
+    }
+  }, [loading, hasAutoSwitched]);
 
   // Redirect to the dedicated analyze page if no analysis data is available
   useEffect(() => {

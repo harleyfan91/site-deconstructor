@@ -62,10 +62,12 @@ export const useAnalysisApi = () => {
           console.log('✅ Overview analysis completed');
           setData(result);
           setLoading(false);
+          // Stop polling immediately
           if (pollingIntervalRef.current) {
             clearInterval(pollingIntervalRef.current);
             pollingIntervalRef.current = null;
           }
+          return; // Exit polling function
         } else {
           console.log(`⏳ Analysis pending, poll attempt ${pollCount}`);
           setData(result); // Show partial data if available
