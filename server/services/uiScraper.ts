@@ -9,8 +9,9 @@ import { unifiedCache } from '../lib/cache';
 import { queuePlaywrightTask } from '../lib/queue';
 
 // Import existing utilities
-import { extractColors } from '../lib/color-extraction';
 import { getAccessibilityAnalysis } from '../lib/axe-integration-new';
+import { colord } from 'colord';
+import colorNamer from 'color-namer';
 
 const CURRENT_VERSION = '1.1.0';
 
@@ -28,6 +29,75 @@ const BROWSER_CONFIG = {
     '--disable-features=VizDisplayCompositor'
   ]
 };
+
+/**
+ * Extract colors from the current page context (no new browser launch)
+ */
+async function extractColorsFromPage(page: Page, url: string): Promise<ColorResult[]> {
+  console.log('🎨 Extracting colors from current page context...');
+  
+  return page.evaluate(() => {
+    const colorMap = new Map<string, { property: string; count: number }>();
+    
+    // Get all elements and extract colors from computed styles
+    const elements = Array.from(document.querySelectorAll('*'));
+    
+    elements.forEach(element => {
+      const style = window.getComputedStyle(element);
+      const properties = ['color', 'backgroundColor', 'borderColor', 'borderTopColor', 'borderRightColor', 'borderBottomColor', 'borderLeftColor'];
+      
+      properties.forEach(property => {
+        const value = style.getPropertyValue(property);
+        if (value && value !== 'rgba(0, 0, 0, 0)' && value !== 'transparent' && value !== 'initial' && value !== 'inherit') {
+          // Convert to hex
+          const div = document.createElement('div');
+          div.style.color = value;
+          document.body.appendChild(div);
+          const computedColor = window.getComputedStyle(div).color;
+          document.body.removeChild(div);
+          
+          if (computedColor && computedColor.startsWith('rgb')) {
+            const hex = rgbToHex(computedColor);
+            if (hex && hex !== '#000000' && hex !== '#ffffff') {
+              const existing = colorMap.get(hex);
+              if (existing) {
+                existing.count++;
+              } else {
+                colorMap.set(hex, { property, count: 1 });
+              }
+            }
+          }
+        }
+      });
+    });
+    
+    // Convert RGB to HEX helper
+    function rgbToHex(rgb: string): string {
+      const match = rgb.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+      if (match) {
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
+        return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+      }
+      return '';
+    }
+    
+    // Return color results
+    return Array.from(colorMap.entries()).map(([hex, { property, count }]) => ({
+      hex,
+      property,
+      occurrences: count,
+      name: '' // Will be filled by color-namer on server side
+    }));
+  }).then(colors => {
+    // Add human-readable names using color-namer
+    return colors.map(color => ({
+      ...color,
+      name: colorNamer(color.hex).ntc[0]?.name || 'Unknown'
+    })).slice(0, 100); // Limit to 100 colors for performance
+  });
+}
 
 /**
  * Extract fonts from page using computed styles and CSS parsing
@@ -207,14 +277,14 @@ export class UIScraperService {
         });
         await page.waitForTimeout(2000); // Let page settle
 
-        // Run all extractions in parallel where possible
+        // Run all extractions in parallel using the SAME browser context
         const [
           colorResults,
           fontResults,
           imageResults,
           accessibilityResults
         ] = await Promise.all([
-          extractColors(url).catch(err => {
+          extractColorsFromPage(page, url).catch(err => {
             console.warn('Color extraction failed:', err.message);
             return [];
           }),
