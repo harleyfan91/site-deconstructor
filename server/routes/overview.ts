@@ -45,8 +45,18 @@ router.get('/', async (req, res) => {
     const normalizedUrl = normalizeUrl(url);
     console.log('📊 Aggregating overview data for:', normalizedUrl);
     
-    // Use getOrCreateAnalysis for UI data - this is the main unified scraper
+    // Use getOrCreateAnalysis for UI data - this handles schema versioning and pending states
     const uiData = await UIScraperService.getOrCreateAnalysis(normalizedUrl);
+    
+    // If UI analysis is pending (stale cache or in progress), return 202 Accepted
+    if (uiData && 'status' in uiData && uiData.status === 'pending') {
+      console.log(`📊 Analysis pending for ${normalizedUrl}, returning 202`);
+      return res.status(202).json({ 
+        message: 'Analysis in progress, please poll again',
+        url: normalizedUrl,
+        schemaVersion: '1.1.0'
+      });
+    }
     
     // Call all specialized endpoints and handle failures gracefully
     const results = await Promise.allSettled([
@@ -113,7 +123,7 @@ router.get('/', async (req, res) => {
         securityScore: techData?.overallScore || "!",
         accessibilityScore: uiData?.accessibilityScore || "!"
       },
-      schemaVersion: '1.0.0'
+      schemaVersion: '1.1.0'
     };
     
     console.log(`✅ Overview aggregation completed for ${normalizedUrl}`);
@@ -123,7 +133,7 @@ router.get('/', async (req, res) => {
     console.error('Overview aggregation error:', error);
     res.status(500).json({ 
       error: 'Failed to aggregate analysis data',
-      schemaVersion: '1.0.0'
+      schemaVersion: '1.1.0'
     });
   }
 });

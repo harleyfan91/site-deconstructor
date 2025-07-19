@@ -21,7 +21,22 @@ function normalizeUrl(url: string): string {
  * Body: { url: string, force?: boolean }
  * Returns: { status: 'queued' | 'running' | 'done', url: string }
  */
-router.post('/', async (req, res) => {
+// API key authentication middleware for scan endpoint
+function authenticateAPI(req: any, res: any, next: any) {
+  const apiKey = req.headers['x-api-key'];
+  const expectedKey = process.env.API_KEY;
+  
+  if (process.env.NODE_ENV === 'production' && (!apiKey || apiKey !== expectedKey)) {
+    return res.status(401).json({ 
+      error: 'Unauthorized - API key required',
+      schemaVersion: '1.1.0'
+    });
+  }
+  
+  next();
+}
+
+router.post('/', authenticateAPI, async (req, res) => {
   try {
     const { url, force = false } = req.body;
     

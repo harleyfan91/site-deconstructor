@@ -6,12 +6,13 @@
 import { chromium, Browser, Page } from 'playwright';
 import { UIAnalysis, ColorResult, FontResult, ImageResult, ContrastIssue, AccessibilityViolation, ImageAnalysis } from '../../types/UIAnalysis';
 import { unifiedCache } from '../lib/cache';
+import { queuePlaywrightTask } from '../lib/queue';
 
 // Import existing utilities
 import { extractColors } from '../lib/color-extraction';
 import { getAccessibilityAnalysis } from '../lib/axe-integration-new';
 
-const SCHEMA_VERSION = '1.0.0';
+const CURRENT_VERSION = '1.1.0';
 
 /**
  * Browser configuration for consistent scraping
@@ -187,15 +188,17 @@ export class UIScraperService {
       console.log(`🎨 Starting unified UI analysis for: ${url}`);
       const startTime = Date.now();
       
-      let browser: Browser | null = null;
-      try {
-        // Launch browser
-        browser = await chromium.launch(BROWSER_CONFIG);
-        const context = await browser.newContext({
-          viewport: { width: 1920, height: 1080 },
-          userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        });
-        const page = await context.newPage();
+      // Use queued Playwright task to prevent saturation
+      return queuePlaywrightTask(url, async () => {
+        let browser: Browser | null = null;
+        try {
+          // Launch browser
+          browser = await chromium.launch(BROWSER_CONFIG);
+          const context = await browser.newContext({
+            viewport: { width: 1920, height: 1080 },
+            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+          });
+          const page = await context.newPage();
 
         // Navigate to page
         await page.goto(url, { 
@@ -241,35 +244,66 @@ export class UIScraperService {
           contrastIssues: accessibilityResults.contrastIssues || [],
           violations: accessibilityResults.violations || [],
           accessibilityScore: accessibilityResults.score || 0,
-          schemaVersion: SCHEMA_VERSION,
+          schemaVersion: CURRENT_VERSION,
           scrapedAt: new Date().toISOString()
         };
 
         const duration = Date.now() - startTime;
         console.log(`✅ Unified UI analysis completed in ${duration}ms: ${analysis.fonts.length} fonts, ${analysis.colors.length} colors, ${analysis.images.length} images, accessibility score: ${analysis.accessibilityScore}`);
 
-        return analysis;
+          return analysis;
 
-      } finally {
-        if (browser) {
-          await browser.close();
+        } finally {
+          if (browser) {
+            await browser.close();
+          }
         }
-      }
+      }, 'ui-analysis'); // Task name for queue logging
     });
   }
 
   /**
-   * Get cached UI analysis if available
+   * Get cached UI analysis if available, checking schema version
    */
   static async getCachedUI(url: string): Promise<UIAnalysis | null> {
-    return unifiedCache.get('ui_analysis', url);
+    const cached = await unifiedCache.get('ui_analysis', url);
+    
+    // Check schema version - if stale, return null to trigger fresh scrape
+    if (cached && cached.schemaVersion !== CURRENT_VERSION) {
+      console.log(`🔄 Schema version mismatch for ${url}: cached ${cached.schemaVersion} vs current ${CURRENT_VERSION}, triggering fresh scrape`);
+      return null;
+    }
+    
+    return cached;
   }
 
   /**
-   * Get or create analysis (alias for analyzeUI for consistency)
+   * Get or create analysis with schema version protection
+   * Returns { status: 'pending' } for stale cache, fresh analysis otherwise
    */
-  static async getOrCreateAnalysis(url: string): Promise<UIAnalysis> {
-    return this.analyzeUI(url);
+  static async getOrCreateAnalysis(url: string): Promise<UIAnalysis | { status: 'pending' }> {
+    // First check cache with schema version validation
+    const cached = await this.getCachedUI(url);
+    if (cached) {
+      return cached;
+    }
+    
+    // Check if a fresh scrape is already in progress to avoid duplicate work
+    const cacheKey = `ui_analysis_${url}`;
+    const inProgress = (unifiedCache as any).concurrentRequests?.[cacheKey];
+    if (inProgress) {
+      console.log(`⏳ Fresh scrape already in progress for ${url}, returning pending status`);
+      return { status: 'pending' };
+    }
+    
+    try {
+      // Trigger fresh analysis
+      const analysis = await this.analyzeUI(url);
+      return analysis;
+    } catch (error) {
+      console.error(`❌ Failed to analyze ${url}:`, error);
+      return { status: 'pending' };
+    }
   }
 
   /**

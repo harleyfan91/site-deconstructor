@@ -1,4 +1,5 @@
 import express, { type Request, Response, NextFunction } from "express";
+import cors from "cors";
 import { registerRoutes } from "./routes/index";
 import { setupVite, serveStatic, log } from "./vite";
 
@@ -22,6 +23,17 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 const app = express();
+
+// CORS configuration for production security
+const corsOptions = {
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://dashboard.yoursite.com', 'https://app.yoursite.com']
+    : true, // Allow all origins in development
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 

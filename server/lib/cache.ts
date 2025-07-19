@@ -67,9 +67,10 @@ class LRUCache<T> {
  */
 export class UnifiedCache {
   private memoryCache = new LRUCache(50); // In-memory cache for hot data
-  private concurrentRequests: ConcurrentRequestTracker = {};
+  public concurrentRequests: ConcurrentRequestTracker = {}; // Made public for schema guard access
   private readonly MEMORY_TTL = 30 * 60 * 1000; // 30 minutes
-  private readonly SUPABASE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+  private readonly SUCCESS_TTL = 24 * 60 * 60 * 1000; // 24 hours for successful scrapes
+  private readonly FAILURE_TTL = 15 * 60 * 1000; // 15 minutes for failed scrapes
 
   /**
    * Generate cache key from URL
@@ -109,18 +110,19 @@ export class UnifiedCache {
   }
 
   /**
-   * Set data in both caches
+   * Set data in both caches with optimized TTL based on success/failure
    */
-  async set<T>(prefix: string, url: string, data: T): Promise<void> {
+  async set<T>(prefix: string, url: string, data: T, isSuccess: boolean = true): Promise<void> {
     const cacheKey = this.generateCacheKey(prefix, url);
+    const ttl = isSuccess ? this.SUCCESS_TTL : this.FAILURE_TTL;
     
     // Store in memory cache
     this.memoryCache.set(cacheKey, data, this.MEMORY_TTL);
     
-    // Store in Supabase cache
+    // Store in Supabase cache with appropriate TTL
     try {
       await SupabaseCacheService.set(cacheKey, url, data);
-      console.log(`✅ Cached data for ${url} in both memory and Supabase`);
+      console.log(`✅ Cached data for ${url} (TTL: ${ttl/1000/60}min, success: ${isSuccess})`);
     } catch (error) {
       console.warn(`⚠️ Supabase cache storage failed for ${url}:`, error.message);
     }
@@ -154,7 +156,9 @@ export class UnifiedCache {
     const computePromise = (async () => {
       try {
         const result = await computeFn();
-        await this.set(prefix, url, result);
+        // Determine if this is a successful result for TTL optimization
+        const isSuccess = result && typeof result === 'object' && !('status' in result && result.status === 'pending');
+        await this.set(prefix, url, result, isSuccess);
         return result;
       } finally {
         // Clean up concurrent request tracker
