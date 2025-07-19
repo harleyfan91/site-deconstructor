@@ -36,19 +36,26 @@ const URLInputForm: React.FC<URLInputFormProps> = ({ onAnalysisComplete }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!url.trim()) return;
+    if (!url.trim() || localLoading || loading) return;
 
-    // Trigger scan endpoint without awaiting
-    fetch('/api/scan', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url: url.trim() })
-    }).catch(error => {
-      console.error('Scan trigger failed:', error);
-    });
-
-    // Navigate immediately to dashboard for instant UX
-    navigate(`/dashboard?url=${encodeURIComponent(url.trim())}`);
+    setLocalLoading(true);
+    
+    try {
+      // Start the analysis in the context
+      const result = await analyzeWebsite(url.trim());
+      
+      // Navigate to dashboard after analysis starts
+      navigate('/dashboard');
+      
+      // Call completion callback if provided
+      if (onAnalysisComplete) {
+        onAnalysisComplete(result);
+      }
+    } catch (error) {
+      console.error('Analysis failed:', error);
+    } finally {
+      setLocalLoading(false);
+    }
   };
 
   return (
@@ -153,7 +160,7 @@ const URLInputForm: React.FC<URLInputFormProps> = ({ onAnalysisComplete }) => {
             type="submit"
             variant="contained"
             size="large"
-            disabled={!url || !isValid || loading}
+            disabled={!url || !isValid || loading || localLoading}
             sx={{
               minWidth: { xs: '100%', sm: 150 },
               height: 56,
@@ -175,7 +182,7 @@ const URLInputForm: React.FC<URLInputFormProps> = ({ onAnalysisComplete }) => {
               },
             }}
           >
-            {loading ? (
+            {(loading || localLoading) ? (
               <CircularProgress size={24} color="inherit" />
             ) : (
               <>

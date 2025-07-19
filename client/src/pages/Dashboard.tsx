@@ -16,15 +16,15 @@ const Dashboard = ({ darkMode, toggleDarkMode }: DashboardProps) => {
   const { analyzeWebsite, data } = useAnalysisContext();
 
   useEffect(() => {
-    // Check if there's a URL parameter - trigger polling immediately
+    // Check if there's a URL parameter - trigger analysis immediately
     const urlParams = new URLSearchParams(location.search);
     const urlToAnalyze = urlParams.get('url');
     
-    if (urlToAnalyze) {
-      console.log('🚀 Starting polling for URL parameter:', urlToAnalyze);
+    if (urlToAnalyze && !data) {
+      console.log('🚀 Starting analysis for URL parameter:', urlToAnalyze);
       analyzeWebsite(urlToAnalyze);
     }
-  }, [location.search, analyzeWebsite]);
+  }, [location.search, analyzeWebsite, data]);
 
   return (
     <Box>

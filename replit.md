@@ -25,6 +25,14 @@ A comprehensive website analysis tool that provides insights into performance, S
 - Export functionality for analysis reports
 
 ## Recent Changes
+- ✓ Fixed Chromium resource constraint issues causing app startup failures (January 19, 2025)
+- ✓ Added fallback analysis system when Playwright fails to launch due to resource limitations
+- ✓ Reduced Playwright queue concurrency from 3 to 1 for resource-constrained Replit environment
+- ✓ Implemented graceful degradation with timeout protection for browser launch operations
+- ✓ Enhanced browser configuration with additional flags to reduce memory and CPU usage
+- ✓ Fixed navigation flow from URL input form to dashboard to ensure proper analysis triggering
+- ✓ Improved loading states in URLInputForm with proper disabled states during analysis
+- ✓ Updated Dashboard component to properly handle URL parameters and trigger analysis
 - ✓ Migrated from Supabase to PostgreSQL database
 - ✓ Replaced Supabase Edge Functions with Express.js API routes
 - ✓ Updated dependencies for React 18 compatibility
