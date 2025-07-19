@@ -90,6 +90,36 @@ The application features a sophisticated multi-tier analysis system powered by i
 * **Drizzle Zod** - Package: `drizzle-zod`
   * Runtime validation with TypeScript integration
 
+### Utility & Helper Libraries
+
+* **clsx** / **class-variance-authority** - Build conditional Tailwind class strings
+* **tailwind-merge** - Resolve Tailwind class conflicts
+* **colord** - Color maths for contrast & palette features
+* **date-fns** - Lightweight date formatting in reports
+* **p-queue** - Rate-limit concurrent Playwright/Lighthouse jobs
+* **zod** / **zod-validation-error** - Runtime schema validation for API inputs
+* **ws** & **bufferutil** - WebSocket live-status feed during long scans
+
+### UI Component Add-ons
+
+* **cmdk** - Spotlight-style command palette
+* **lucide-react** - Feather-style SVG icon set
+* **swiper** / **embla-carousel-react** - Touch-friendly carousel in media tab
+* **react-day-picker** - Date selector for scheduled scans
+* **react-resizable-panels** - Adjustable split panes in dashboard
+* **vaul** - Radix-powered drawers / sheets
+* **wouter** - 3 KB router used inside the React-powered docs site
+
+### Dev / Build Tooling
+
+* **vite** - Dev server & production bundler
+* **tsx** - Zero-config TypeScript runner for scripts
+* **esbuild** - Ultra-fast TS/JS bundler in CI
+* **vitest** - Unit-test framework
+* **drizzle-kit** - Generates SQL migrations from schema
+* **@vitejs/plugin-react** - React fast-refresh in Vite
+* **Tailwind plugins** - Typography, forms, aspect-ratio helpers
+
 ## Content Analysis Integration
 
 ### Frontend Components Using Playwright Data
