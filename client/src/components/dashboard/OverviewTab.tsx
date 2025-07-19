@@ -58,8 +58,8 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
     );
   }
 
-  const overview = data?.data?.overview || {};
-  if (!overview) return null;
+  const overview = data?.data?.overview || { overallScore: 0 };
+  if (!overview.overallScore && overview.overallScore !== 0) return null;
 
   // REPLACED PLACEHOLDER: now pulls real data from overview.pageLoadTime and overview.coreWebVitals
   const metrics = getMetricDefinitions(overview, theme);
@@ -179,7 +179,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 3 }}>
             {overview ? (
-              <KeyFindingsGrid overview={overview} theme={theme} />
+              <KeyFindingsGrid overview={overview.overallScore ? overview : { overallScore: 0 }} theme={theme} />
             ) : (
               <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 2 }}>
                 <CircularProgress size={30} />

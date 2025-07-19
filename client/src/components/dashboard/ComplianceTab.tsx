@@ -84,7 +84,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
   }
 
   // Use original data structure that was working before
-  const tech = data?.data?.tech || {};
+  const tech = data?.data?.tech || data?.data?.technical || { accessibility: { violations: [] } };
   const violations = tech.accessibility?.violations || [];
   const social = tech.social || { hasOpenGraph: false, hasTwitterCard: false, hasShareButtons: false };
   const cookies = tech.cookies || { hasCookieScript: false, scripts: [] };

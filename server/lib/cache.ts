@@ -47,7 +47,9 @@ class LRUCache<T> {
     // Remove oldest entries if at capacity
     if (this.cache.size >= this.maxSize) {
       const firstKey = this.cache.keys().next().value;
-      this.cache.delete(firstKey);
+      if (firstKey) {
+        this.cache.delete(firstKey);
+      }
     }
 
     this.cache.set(key, {
@@ -102,8 +104,9 @@ export class UnifiedCache {
         this.memoryCache.set(cacheKey, supabaseResult.analysis_data, this.MEMORY_TTL);
         return supabaseResult.analysis_data;
       }
-    } catch (error) {
-      console.warn(`⚠️ Supabase cache lookup failed for ${cacheKey}:`, error.message);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.warn(`⚠️ Supabase cache lookup failed for ${cacheKey}:`, errorMessage);
     }
 
     return null;
@@ -123,8 +126,9 @@ export class UnifiedCache {
     try {
       await SupabaseCacheService.set(cacheKey, url, data);
       console.log(`✅ Cached data for ${url} (TTL: ${ttl/1000/60}min, success: ${isSuccess})`);
-    } catch (error) {
-      console.warn(`⚠️ Supabase cache storage failed for ${url}:`, error.message);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.warn(`⚠️ Supabase cache storage failed for ${url}:`, errorMessage);
     }
   }
 
@@ -140,9 +144,9 @@ export class UnifiedCache {
     const cacheKey = this.generateCacheKey(prefix, url);
     
     // Check cache first
-    const cached = await this.get<T>(prefix, url);
+    const cached = await this.get(prefix, url);
     if (cached) {
-      return cached;
+      return cached as T;
     }
 
     // Check if request is already in progress
