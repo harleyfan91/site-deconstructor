@@ -38,24 +38,17 @@ const URLInputForm: React.FC<URLInputFormProps> = ({ onAnalysisComplete }) => {
     e.preventDefault();
     if (!url.trim()) return;
 
-    setLocalLoading(true);
+    // Trigger scan endpoint without awaiting
+    fetch('/api/scan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: url.trim() })
+    }).catch(error => {
+      console.error('Scan trigger failed:', error);
+    });
 
-    // Start analysis in background
-    const analysisPromise = analyzeWebsite(url.trim());
-
-    // Navigate immediately to dashboard for better UX
+    // Navigate immediately to dashboard for instant UX
     navigate(`/dashboard?url=${encodeURIComponent(url.trim())}`);
-
-    try {
-      const result = await analysisPromise;
-      if (result && onAnalysisComplete) {
-        onAnalysisComplete(result);
-      }
-    } catch (err) {
-      console.error('Analysis failed:', err);
-    } finally {
-      setLocalLoading(false);
-    }
   };
 
   return (

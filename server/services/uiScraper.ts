@@ -251,7 +251,11 @@ export class UIScraperService {
         const duration = Date.now() - startTime;
         console.log(`✅ Unified UI analysis completed in ${duration}ms: ${analysis.fonts.length} fonts, ${analysis.colors.length} colors, ${analysis.images.length} images, accessibility score: ${analysis.accessibilityScore}`);
 
-          return analysis;
+        // Cache the completed analysis with status: 'complete'
+        const analysisWithStatus = { ...analysis, status: 'complete' };
+        await unifiedCache.set('ui_analysis', url, analysisWithStatus, 24 * 60 * 60 * 1000);
+
+        return analysis;
 
         } finally {
           if (browser) {

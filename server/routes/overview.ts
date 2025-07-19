@@ -45,18 +45,36 @@ router.get('/', async (req, res) => {
     const normalizedUrl = normalizeUrl(url);
     console.log('📊 Aggregating overview data for:', normalizedUrl);
     
-    // Use getOrCreateAnalysis for UI data - this handles schema versioning and pending states
-    const uiData = await UIScraperService.getOrCreateAnalysis(normalizedUrl);
+    // Fast response with immediate pending status on cache miss
+    const cachedUI = await UIScraperService.getCachedUI(normalizedUrl);
     
-    // If UI analysis is pending (stale cache or in progress), return 202 Accepted
-    if (uiData && 'status' in uiData && uiData.status === 'pending') {
-      console.log(`📊 Analysis pending for ${normalizedUrl}, returning 202`);
-      return res.status(202).json({ 
-        message: 'Analysis in progress, please poll again',
+    if (!cachedUI) {
+      // Cache miss - trigger background scrape and return fast pending response
+      console.log(`⚡ Cache miss for ${normalizedUrl}, triggering background scrape`);
+      
+      // Kick off background analysis without awaiting
+      UIScraperService.getOrCreateAnalysis(normalizedUrl).catch(error => {
+        console.error(`❌ Background scrape failed for ${normalizedUrl}:`, error);
+      });
+      
+      // Return immediate pending response (<200ms)
+      return res.json({ 
+        status: 'pending',
         url: normalizedUrl,
-        schemaVersion: '1.1.0'
+        data: {
+          ui: null,
+          seo: null, 
+          performance: null,
+          tech: null,
+          content: null,
+          overview: null
+        },
+        schemaVersion: '1.1.0',
+        timestamp: new Date().toISOString()
       });
     }
+    
+    const uiData = cachedUI;
     
     // Call all specialized endpoints and handle failures gracefully
     const results = await Promise.allSettled([
@@ -105,23 +123,28 @@ router.get('/', async (req, res) => {
     const performanceData = performanceResult.status === 'fulfilled' ? performanceResult.value : null;
     const contentData = contentResult.status === 'fulfilled' ? contentResult.value : null;
     
-    // Build unified overview response
+    // Build unified overview response with status
     const overviewResponse = {
-      ui: uiData, // This contains colors, fonts, images, accessibility
-      seo: seoData || { score: "!", checks: [], recommendations: [], metaTags: {}, keywords: [], headings: [] },
-      perf: performanceData || { 
-        pageLoadTime: { desktop: "!", mobile: "!" },
-        coreWebVitals: { lcpMs: "!", inpMs: "!", cls: "!" }
-      },
-      tech: techData || { techStack: [], overallScore: "!", minification: {}, securityHeaders: {} },
-      content: contentData || { wordCount: "!", readabilityScore: "!", contentDistribution: {} },
-      overview: {
-        overallScore: seoData?.score || "!",
-        seoScore: seoData?.score || "!",
-        pageLoadTime: performanceData?.pageLoadTime?.desktop || "!",
-        performanceScore: performanceData?.coreWebVitals ? Math.round((3000 - performanceData.pageLoadTime.desktop) / 30) : "!",
-        securityScore: techData?.overallScore || "!",
-        accessibilityScore: uiData?.accessibilityScore || "!"
+      status: 'complete',
+      url: normalizedUrl,
+      timestamp: new Date().toISOString(),
+      data: {
+        ui: uiData, // This contains colors, fonts, images, accessibility
+        seo: seoData || { score: "!", checks: [], recommendations: [], metaTags: {}, keywords: [], headings: [] },
+        performance: performanceData || { 
+          pageLoadTime: { desktop: "!", mobile: "!" },
+          coreWebVitals: { lcpMs: "!", inpMs: "!", cls: "!" }
+        },
+        tech: techData || { techStack: [], overallScore: "!", minification: {}, securityHeaders: {} },
+        content: contentData || { wordCount: "!", readabilityScore: "!", contentDistribution: {} },
+        overview: {
+          overallScore: seoData?.score || "!",
+          seoScore: seoData?.score || "!",
+          pageLoadTime: performanceData?.pageLoadTime?.desktop || "!",
+          performanceScore: performanceData?.coreWebVitals ? Math.round((3000 - performanceData.pageLoadTime.desktop) / 30) : "!",
+          securityScore: techData?.overallScore || "!",
+          accessibilityScore: uiData?.accessibilityScore || "!"
+        }
       },
       schemaVersion: '1.1.0'
     };

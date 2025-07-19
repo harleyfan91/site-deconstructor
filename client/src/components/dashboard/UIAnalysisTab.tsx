@@ -7,6 +7,7 @@ import FontAnalysisCard from './ui-analysis/FontAnalysisCard';
 import ImageAnalysisCard from './ui-analysis/ImageAnalysisCard';
 import AccessibilityCard from './ui-analysis/AccessibilityCard';
 import LegendContainer from './LegendContainer';
+import SkeletonCard from '../ui/SkeletonCard';
 
 interface UIAnalysisTabProps {
   data: AnalysisResponse | null;

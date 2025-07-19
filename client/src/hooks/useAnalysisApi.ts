@@ -85,41 +85,70 @@ export const useAnalysisApi = () => {
       try {
         console.log('🚀 Starting progressive analysis for:', url);
 
-        // Step 1: Fetch unified overview data (single endpoint)
-        console.log('⚡ Fetching unified overview analysis...');
-        const overviewResponse = await fetch(`/api/overview?url=${encodeURIComponent(url)}`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
-        });
+        // Polling logic for fast UX
+        console.log('⚡ Starting polling for analysis...');
+        let pollAttempts = 0;
+        const maxPollAttempts = 30; // 2 minutes max
+        
+        const pollForResults = async (): Promise<ExtendedAnalysisResponse> => {
+          const overviewResponse = await fetch(`/api/overview?url=${encodeURIComponent(url)}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+          });
 
-        if (!overviewResponse.ok) {
-          // Try to get the detailed error message from the backend
-          try {
-            const errorData = await overviewResponse.json();
-            throw new Error(errorData.message || `Overview analysis failed: ${overviewResponse.status}`);
-          } catch (parseError) {
+          if (!overviewResponse.ok) {
             throw new Error(`Overview analysis failed: ${overviewResponse.status}`);
           }
-        }
 
-        const overviewData = await overviewResponse.json();
-        console.log('✅ Overview analysis completed');
+          const overviewData = await overviewResponse.json();
+          
+          // Check if still pending
+          if (overviewData.status === 'pending') {
+            console.log(`⏳ Analysis pending, poll attempt ${pollAttempts + 1}`);
+            
+            // Create partial result for immediate display with skeletons
+            const partialResult: ExtendedAnalysisResponse = {
+              id: Math.random().toString(36).substr(2, 9),
+              timestamp: new Date().toISOString(),
+              url,
+              data: overviewData,
+              loadingComplete: false,
+              status: 'pending'
+            };
+            
+            // Update UI with pending state immediately on first call
+            if (pollAttempts === 0) {
+              setData(partialResult);
+            }
+            
+            pollAttempts++;
+            if (pollAttempts < maxPollAttempts) {
+              // Poll every 4 seconds
+              await new Promise(resolve => setTimeout(resolve, 4000));
+              return pollForResults();
+            } else {
+              throw new Error('Analysis timed out after 2 minutes');
+            }
+          }
 
-        // Transform overview data to match expected structure
-        const result: ExtendedAnalysisResponse = {
-          id: Math.random().toString(36).substr(2, 9),
-          timestamp: new Date().toISOString(),
-          url,
-          data: overviewData,
-          loadingComplete: true,
-          status: 'complete'
+          console.log('✅ Overview analysis completed');
+          
+          // Complete result
+          const result: ExtendedAnalysisResponse = {
+            id: Math.random().toString(36).substr(2, 9),
+            timestamp: new Date().toISOString(),
+            url,
+            data: overviewData,
+            loadingComplete: true,
+            status: 'complete'
+          };
+
+          setData(result);
+          setLoading(false);
+          return result;
         };
 
-        // Update UI with complete data
-        setData(result);
-        setLoading(false);
-
-        return result;
+        return await pollForResults();
 
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
