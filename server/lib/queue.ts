@@ -6,10 +6,10 @@
 import PQueue from 'p-queue';
 
 /**
- * Global queue instance with bounded concurrency
+ * Global queue instance with bounded concurrency (reduced for Replit)
  */
 export const playwrightQueue = new PQueue({ 
-  concurrency: 3,
+  concurrency: 1, // Reduced to 1 for resource-constrained environment
   timeout: 60000, // 60 second timeout per task
   throwOnTimeout: true
 });

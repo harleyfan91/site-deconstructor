@@ -16,7 +16,12 @@ import colorNamer from 'color-namer';
 const CURRENT_VERSION = '1.1.0';
 
 /**
- * Browser configuration for consistent scraping
+ * Check if Playwright should be disabled (for resource-constrained environments)
+ */
+const DISABLE_PLAYWRIGHT = process.env.DISABLE_PLAYWRIGHT === 'true' || process.env.NODE_ENV === 'test';
+
+/**
+ * Browser configuration for consistent scraping (optimized for Replit)
  */
 const BROWSER_CONFIG = {
   headless: true,
@@ -26,7 +31,26 @@ const BROWSER_CONFIG = {
     '--disable-setuid-sandbox', 
     '--disable-dev-shm-usage',
     '--disable-web-security',
-    '--disable-features=VizDisplayCompositor'
+    '--disable-features=VizDisplayCompositor',
+    '--disable-gpu',
+    '--disable-software-rasterizer',
+    '--disable-background-timer-throttling',
+    '--disable-background-networking',
+    '--disable-backgrounding-occluded-windows',
+    '--disable-renderer-backgrounding',
+    '--disable-extensions',
+    '--disable-default-apps',
+    '--disable-sync',
+    '--disable-translate',
+    '--disable-plugins',
+    '--disable-hang-monitor',
+    '--disable-prompt-on-repost',
+    '--disable-client-side-phishing-detection',
+    '--disable-component-extensions-with-background-pages',
+    '--disable-ipc-flooding-protection',
+    '--memory-pressure-off',
+    '--max_old_space_size=512',
+    '--single-process'
   ]
 };
 
@@ -258,17 +282,32 @@ export class UIScraperService {
       console.log(`🎨 Starting unified UI analysis for: ${url}`);
       const startTime = Date.now();
       
-      // Use queued Playwright task to prevent saturation
-      return queuePlaywrightTask(url, async () => {
-        let browser: Browser | null = null;
-        try {
-          // Launch browser
-          browser = await chromium.launch(BROWSER_CONFIG);
-          const context = await browser.newContext({
-            viewport: { width: 1920, height: 1080 },
-            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-          });
-          const page = await context.newPage();
+      // Check if Playwright is disabled
+      if (DISABLE_PLAYWRIGHT) {
+        console.log(`🔧 Playwright disabled, using fallback analysis for: ${url}`);
+        return this.fallbackAnalysis(url, startTime);
+      }
+
+      // Try Playwright analysis first, fallback to lightweight analysis if it fails
+      try {
+        return await queuePlaywrightTask(url, async () => {
+          let browser: Browser | null = null;
+          try {
+            // Launch browser with timeout
+            const launchTimeout = new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('Browser launch timeout')), 15000)
+            );
+            
+            browser = await Promise.race([
+              chromium.launch(BROWSER_CONFIG),
+              launchTimeout
+            ]) as Browser;
+            
+            const context = await browser.newContext({
+              viewport: { width: 1920, height: 1080 },
+              userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            });
+            const page = await context.newPage();
 
         // Navigate to page
         await page.goto(url, { 
@@ -327,13 +366,67 @@ export class UIScraperService {
 
         return analysis;
 
-        } finally {
-          if (browser) {
-            await browser.close();
+          } finally {
+            if (browser) {
+              await browser.close();
+            }
           }
-        }
-      }, 'ui-analysis'); // Task name for queue logging
+        }, 'ui-analysis'); // Task name for queue logging
+      } catch (playwrightError) {
+        console.warn(`🔧 Playwright analysis failed: ${playwrightError.message}. Falling back to lightweight analysis.`);
+        return this.fallbackAnalysis(url, startTime);
+      }
     });
+  }
+
+  /**
+   * Get cached UI analysis without running new analysis
+   */
+  static async getCachedUI(url: string): Promise<UIAnalysis | null> {
+    try {
+      return await unifiedCache.get('ui_analysis', url);
+    } catch (error) {
+      console.warn(`Cache lookup failed for ${url}:`, error.message);
+      return null;
+    }
+  }
+
+  /**
+   * Fallback analysis when Playwright fails
+   */
+  private static async fallbackAnalysis(url: string, startTime: number): Promise<UIAnalysis> {
+    console.log(`⚡ Running fallback analysis for: ${url}`);
+    
+    const analysis: UIAnalysis = {
+      colors: [],
+      fonts: [],
+      images: [],
+      imageAnalysis: {
+        totalImages: 0,
+        estimatedPhotos: 0,
+        estimatedIcons: 0,
+        imageUrls: [],
+        photoUrls: [],
+        iconUrls: [],
+        altStats: {
+          withAlt: 0,
+          withoutAlt: 0,
+          emptyAlt: 0,
+          totalImages: 0
+        }
+      },
+      contrastIssues: [],
+      violations: [],
+      accessibilityScore: 0,
+      schemaVersion: CURRENT_VERSION,
+      scrapedAt: new Date().toISOString(),
+      status: 'fallback'
+    };
+
+    const duration = Date.now() - startTime;
+    console.log(`✅ Fallback analysis completed in ${duration}ms`);
+    
+    return analysis;
   }
 
   /**
