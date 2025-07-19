@@ -1,0 +1,111 @@
+⚠️ **Execution Gate – Read & Acknowledge before Coding** ⚠️
+
+1. **Review** every step in this prompt and verify paths against the current repo.
+2. Reply in chat with a short confirmation that you understand the plan and believe it will work, if you recommend any updates please implement. Ask clarifying questions if needed.
+3. **Wait** for the user’s explicit "Go ahead" before making any code changes or opening a PR.
+
+---
+
+You are a **world‑class full‑stack developer** with deep expertise in Node + TypeScript, Next.js/React, React‑Query, Playwright, and Supabase.
+
+**Goal**: Give users an *instant* dashboard after they submit a URL, while keeping the backend route surface exactly as‑is:
+
+* `POST /api/scan`  (idempotent trigger)
+* `GET  /api/overview?url=…`  (read‑only, cached JSON)
+
+No new endpoints. Delete dead code instead of commenting.
+
+---
+
+## Backend tasks (minimal, blocking‑fix only)
+
+### 1  Fast “pending / partial” responses
+
+File: `server/lib/cache.ts` (function `getOrCreateAnalysis`)
+
+* **If cache miss**: immediately return
+
+  ```ts
+  { status: 'pending', ui: null, seo: null, perf: null, schemaVersion: CURRENT }
+  ```
+* Fire `queue.add(() => uiScraper.scrape(url))` **without \*\*\*\*\*\*\*\*\*\*\*\*`await`**.
+
+### 2  Write partial slices
+
+File: `server/services/uiScraper.ts`
+
+* After finishing each slice (`ui`, `seo`, `perf`) update the cached row with `status: 'partial'` and whatever slice is ready.
+* On completion, overwrite with `status: 'complete'`.
+
+### 3  Remove blocking awaits
+
+File: `server/routes/overview.ts`
+
+* Ensure it only *reads* from cache; no direct `await uiScraper.scrape()`.
+
+### ✅ Backend validation
+
+`curl -I '/api/overview?url=https://example.com'` should respond < 200 ms on cold URL with `status: pending`.
+
+---
+
+## Front‑end tasks (client‑side only)
+
+### 4  Fire‑and‑forget scan trigger
+
+File: `client/components/UrlEntryForm.tsx`
+
+```ts
+void fetch('/api/scan', { method: 'POST', body: JSON.stringify({ url }) });
+router.push(`/dashboard?url=${encodeURIComponent(url)}`);
+```
+
+### 5  Polling overview
+
+File: `client/pages/dashboard/DashboardPage.tsx`
+
+```ts
+const { data } = useQuery(['overview', url], fetchOverview, {
+  refetchInterval: data?.status === 'complete' ? false : 4000,
+});
+```
+
+### 6  Per‑card skeletons
+
+File: `client/components/dashboard/UIAnalysisTab.tsx` (+ sibling tabs)
+
+```tsx
+{!data?.ui?.colors ? <SkeletonCard title="Colours" /> : <ColorExtractionCard colors={data.ui.colors} />}
+```
+
+Add `SkeletonCard.tsx` if missing.
+
+### 7  Global progress cue (optional)
+
+Integrate NProgress (already in repo at `client/lib/nprogress.ts`) showing while `data?.status !== 'complete'`.
+
+### ✅ Front‑end validation
+
+* **Network**: one `/api/overview` every 4 s until `status === 'complete'`; no other API calls.
+* **Cold cache**: HTML delivered < 300 ms; skeletons visible.
+* **Warm cache**: whole dashboard renders < 500 ms; no skeletons.
+
+---
+
+## Cleanup checklist (run *after* tests pass)
+
+* `git grep '/api/colors'` etc. return **no matches**.
+* `git grep 'useColors'` hooks removed.
+* No `await uiScraper.scrape` inside request/route code.
+
+---
+
+### Commit strategy
+
+1. `feat(cache): return pending overview instantly`
+2. `feat(frontend): poll overview & skeletons`
+3. `chore: delete obsolete hooks/routes`
+
+---
+
+**Remember**: Think it through, confirm understanding, wait for go‑ahead. Do *not* code until user approval.
