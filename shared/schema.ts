@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, json } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, uuid, timestamptz, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -9,12 +9,12 @@ export const users = pgTable("users", {
 });
 
 export const analysisCache = pgTable("analysis_cache", {
-  id: serial("id").primaryKey(),
+  id: uuid("id").primaryKey().defaultRandom(),
   urlHash: text("url_hash").notNull().unique(),
   originalUrl: text("original_url").notNull(),
-  analysisData: json("analysis_data").notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamptz("created_at").notNull().defaultNow(),
+  expiresAt: timestamptz("expires_at"),
+  auditJson: jsonb("audit_json").notNull(),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -25,7 +25,7 @@ export const insertUserSchema = createInsertSchema(users).pick({
 export const insertAnalysisCacheSchema = createInsertSchema(analysisCache).pick({
   urlHash: true,
   originalUrl: true,
-  analysisData: true,
+  auditJson: true,
   expiresAt: true,
 });
 

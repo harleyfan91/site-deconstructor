@@ -369,17 +369,11 @@ A comprehensive website analysis tool that provides insights into performance, S
 2. Run the following SQL to create the analysis cache table:
 ```sql
 CREATE TABLE IF NOT EXISTS analysis_cache (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  url_hash VARCHAR(64) UNIQUE NOT NULL,
-  url TEXT NOT NULL,
-  analysis_data JSONB NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  url_hash TEXT NOT NULL UNIQUE,
+  original_url TEXT NOT NULL,
+  created_at timestamptz DEFAULT now(),
+  expires_at timestamptz,
+  audit_json JSONB NOT NULL
 );
-
-CREATE INDEX IF NOT EXISTS idx_analysis_cache_url_hash ON analysis_cache(url_hash);
-CREATE INDEX IF NOT EXISTS idx_analysis_cache_updated_at ON analysis_cache(updated_at);
-
-ALTER TABLE analysis_cache ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow service role access" ON analysis_cache FOR ALL USING (true);
 ```
