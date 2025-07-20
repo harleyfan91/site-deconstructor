@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Box, Typography, Card, CardContent, Chip, CircularProgress, Alert, Tooltip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import { CheckCircle, AlertCircle, XCircle, Search, Target, TrendingUp, Hash, FileText, Globe, Shield, Check, X } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
@@ -14,46 +14,12 @@ interface SEOAnalysisTabProps {
 
 const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error }) => {
   const theme = useTheme();
-  const [seoData, setSeoData] = useState<any>(null);
-  const [seoLoading, setSeoLoading] = useState(false);
-  const [seoError, setSeoError] = useState<string | null>(null);
+  const seoData = data?.data?.seo;
+  const seoLoading = loading;
+  const seoError = error;
 
   // Extract URL from the data
   const url = (data as any)?.url;
-
-  useEffect(() => {
-    if (url && !seoData && !seoLoading) {
-      fetchSEOData();
-    }
-  }, [url]);
-
-  const fetchSEOData = async () => {
-    if (!url) return;
-    
-    setSeoLoading(true);
-    setSeoError(null);
-    
-    try {
-      const response = await fetch('/api/seo', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ url: decodeURIComponent(url) }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('SEO analysis failed');
-      }
-      
-      const result = await response.json();
-      setSeoData(result);
-    } catch (err) {
-      setSeoError(err instanceof Error ? err.message : 'SEO analysis failed');
-    } finally {
-      setSeoLoading(false);
-    }
-  };
 
   // Show general error
   if (error) {
