@@ -155,22 +155,4 @@ export type OverviewResponse = {
   generatedAt?: string;
 };
 
-// Pending state response
-export interface PendingResponse {
-  message: string;
-  url: string;
-  schemaVersion: string;
-}
-
-// API response union type
-export type APIResponse = OverviewResponse | PendingResponse;
-
-// Extended analysis response for frontend
-export interface ExtendedAnalysisResponse {
-  id: string;
-  timestamp: string;
-  url: string;
-  data: OverviewResponse;
-  loadingComplete: boolean;
-  status: 'complete' | 'pending' | 'error';
-}
+// Legacy API response types removed
