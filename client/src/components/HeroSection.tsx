@@ -63,26 +63,21 @@ const MASK_IMAGE = `linear-gradient(
  * @param loading Prevents new analysis while running
  * @param error Analysis error, triggers UX delay/route
  */
-const handleRecentSearch = async ({
+const handleRecentSearch = ({
   searchUrl,
   analyzeWebsite,
   navigate,
-  error,
   loading,
 }: {
-  searchUrl: string,
-  analyzeWebsite: (url: string) => Promise<any>,
-  navigate: (path: string) => void,
-  error: any,
-  loading: boolean,
+  searchUrl: string;
+  analyzeWebsite: (url: string) => Promise<any>;
+  navigate: (path: string) => void;
+  loading: boolean;
 }) => {
   if (loading) return;
   const fullUrl = `https://${searchUrl}`;
-  const result = await analyzeWebsite(fullUrl);
-  if (result && !error) {
-    // Smooth navigation to dashboard after successful analysis
-    setTimeout(() => navigate('/dashboard'), 500);
-  }
+  analyzeWebsite(fullUrl);
+  navigate('/dashboard');
 };
 
 /**
@@ -92,12 +87,8 @@ const handleRecentSearch = async ({
  * @param navigate React Router navigate function
  * @param error Analysis error
  */
-const handleAnalysisComplete = (
-  result: any, navigate: (path: string) => void, error: any
-) => {
-  if (result && !error) {
-    setTimeout(() => navigate('/dashboard'), 500);
-  }
+const handleAnalysisComplete = (navigate: (path: string) => void) => {
+  navigate('/dashboard');
 };
 
 const HeroSection = () => {
@@ -271,7 +262,7 @@ const HeroSection = () => {
           {/* Input & popular sites shortcuts */}
           <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center', zIndex: 3, position: 'relative' }}>
             <URLInputForm
-              onAnalysisComplete={result => handleAnalysisComplete(result, navigate, error)}
+              onAnalysisComplete={() => handleAnalysisComplete(navigate)}
             />
             <Box 
               component={motion.div}
