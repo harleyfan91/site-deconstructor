@@ -25,7 +25,7 @@ export interface AnalysisCacheRow {
   id: string;
   url_hash: string;
   original_url: string;
-  analysis_data: any;
+  audit_json: any;
   created_at: string;
   expires_at: string;
 }
@@ -73,13 +73,13 @@ export class SupabaseCacheService {
       const expirationTime = new Date();
       expirationTime.setHours(expirationTime.getHours() + this.CACHE_TTL_HOURS);
       
-      // Match the exact table structure from the screenshot: url_hash, original_url, analysis_data
+      // Match the exact table structure from the screenshot: url_hash, original_url, audit_json
       const { data, error } = await supabase
         .from(this.TABLE_NAME)
         .upsert({
           url_hash: urlHash,
           original_url: url,
-          analysis_data: analysisData,
+          audit_json: analysisData,
           expires_at: expirationTime.toISOString()
         }, {
           onConflict: 'url_hash'
@@ -143,14 +143,13 @@ ALTER TABLE analysis_cache DISABLE ROW LEVEL SECURITY;
         console.log(`📝 Please run this SQL in your Supabase SQL editor:`);
         console.log(`-- Create table matching your existing structure
 CREATE TABLE IF NOT EXISTS analysis_cache (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  url_hash VARCHAR(64) UNIQUE NOT NULL,
-  original_url TEXT,
-  analysis_data JSONB NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  expires_at TIMESTAMPTZ DEFAULT NOW()
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  url_hash TEXT NOT NULL UNIQUE,
+  original_url TEXT NOT NULL,
+  created_at timestamptz DEFAULT now(),
+  expires_at timestamptz,
+  audit_json JSONB NOT NULL
 );
-CREATE INDEX IF NOT EXISTS idx_analysis_cache_url_hash ON analysis_cache(url_hash);
 ALTER TABLE analysis_cache DISABLE ROW LEVEL SECURITY;`);
       }
       
