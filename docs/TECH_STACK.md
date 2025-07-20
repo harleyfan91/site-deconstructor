@@ -90,6 +90,12 @@ The application features a sophisticated multi-tier analysis system powered by i
 * **Drizzle Zod** - Package: `drizzle-zod`
   * Runtime validation with TypeScript integration
 
+## Database Schema
+We persist and manage scans using Supabase tables. See [`docs/SUPABASE_SCHEMA.md`](docs/SUPABASE_SCHEMA.md) for table details:
+- **scans**: stores all scan requests.
+- **scan_status**: tracks queue/running/completion per scan.
+- **analysis_cache**: stores JSON audit blobs for reuse.
+
 ### Utility & Helper Libraries
 
 * **clsx** / **class-variance-authority** - Build conditional Tailwind class strings

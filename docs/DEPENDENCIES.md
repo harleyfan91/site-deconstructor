@@ -71,6 +71,7 @@
 | dep-table | ^1.0.0 | Dependency table generator | DevDependency |
 | drizzle-kit | ^0.30.6 | Generate SQL migrations | DevDependency |
 | drizzle-orm | ^0.39.3 | Type-safe ORM | Dependency |
+**Database tables required:** `scans`, `scan_status`, `analysis_cache` (Supabase schema defined in docs/SUPABASE_SCHEMA.md)
 | drizzle-zod | ^0.7.0 | Drizzle schema validation | Dependency |
 | embla-carousel-react | ^8.6.0 | Carousel component | Dependency |
 | esbuild | ^0.25.0 | Fast TS/JS bundler | DevDependency |

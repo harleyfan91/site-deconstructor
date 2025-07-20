@@ -101,6 +101,14 @@ npm run dev
 
 *Need to know more? See [`docs/TECH_STACK.md`](docs/TECH_STACK.md) for narratives and [`docs/DEPENDENCIES.md`](docs/DEPENDENCIES.md) for **every** package with a one‑liner.*
 
+## Database Schema
+We use three Supabase tables to manage requests, progress, and cached results:
+- **scans**  – Master record of scan requests (URL, user ID, timestamps).
+- **scan_status**  – Real-time status & progress of each scan.
+- **analysis_cache**  – Cached audit results keyed by URL hash.
+
+See [`docs/SUPABASE_SCHEMA.md`](docs/SUPABASE_SCHEMA.md) for full column definitions and policies.
+
 ### Advanced Analysis Capabilities
 
 **SEO Analysis** - Blended scoring system combining:
