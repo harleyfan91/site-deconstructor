@@ -1,0 +1,49 @@
+**You are a world‑class full‑stack developer and expert frontend designer.**
+
+This is a **new prompt** to refine the existing colour‑extraction feature with two enhancements:
+
+---
+
+## 1  Backend – simple harmony ordering
+
+Without altering how colours are bucketed, update the extraction code so that within each bucket the colours are **sorted** by hue (HSL) in ascending order (i.e. 0°→360°).
+
+* **Locate** the array of colour objects in `server/lib/color-extraction.ts` (or the file where the API assembles its JSON response).
+* **After** names and hex codes are computed, but **before** returning JSON, inject a sort step using your existing `colord` import:
+
+  ```ts
+  // given colors: Array<{ hex: string; name: string; property: string; occurrences: number }>
+  colors.sort((a, b) => colord(a.hex).toHsl().h - colord(b.hex).toHsl().h);
+  ```
+* Ensure the sort applies **per-bucket** if grouping happens in the backend; or apply globally and let the frontend re‑group.
+* Leave all bucket labels and occurrences intact.
+
+---
+
+## 2  Frontend – color detail popup
+
+**Ensure that the color chips themselves remain identical in appearance and behavior to the current implementation; only their order will change and they will gain the new popup functionality.**
+
+When a user clicks on any colour chip in the `ColorExtractionCard`, display a modal dialog showing:
+
+1. A full‑width header with the clicked colour as its **background**.
+2. The hex code in bold as a title.
+3. The human-friendly name (from the API’s `name` field) as a subtitle below.
+4. Automatically close the popup when the user clicks anywhere outside of it.
+
+Implementation hints:\*\*
+
+* Create or reuse a Modal component (e.g. MUI `<Dialog>` or similar) in `ColorExtractionCard.tsx` or a new helper.
+* Attach an `onClick` handler to each colour chip to set the selected colour in React state and open the modal.
+* Pass the selected hex and name into the modal’s props.
+* Style the modal header using inline styles or your design system to match the colour.
+
+---
+
+### Deliverables
+
+* Backend: sorted colours by hue within each bucket.
+* Frontend: interactive modal displaying colour details on click.
+* No changes to bucket membership or naming.
+
+Good luck!

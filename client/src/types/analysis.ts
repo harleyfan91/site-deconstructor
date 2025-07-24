@@ -1,3 +1,31 @@
+
+
+
+export interface CoreWebVitals {
+  lcp: number;
+  fid: number;
+  cls: number;
+  fcp: number;
+  lcp_benchmark: number;
+  fid_benchmark: number;
+  cls_benchmark: number;
+  fcp_benchmark: number;
+}
+
+export interface AccessibilityViolation {
+  id: string;
+  impact: string;
+  description: string;
+}
+
+export interface SecurityHeaders {
+  csp: string;
+  hsts: string;
+  xfo: string;
+  xcto: string;
+  referrer: string;
+}
+
 export interface AnalysisOverview {
   overallScore: number;
   pageLoadTime?: string;
@@ -6,35 +34,8 @@ export interface AnalysisOverview {
   colors?: string[];
   fonts?: string[];
   images?: string[];
-  imageAnalysis?: {
-    totalImages: number;
-    estimatedPhotos: number;
-    estimatedIcons: number;
-    imageUrls?: string[];
-    photoUrls?: string[];
-    iconUrls?: string[];
-  };
   contrastIssues?: any[];
   [key: string]: any;
-}
-
-export interface CoreWebVitals {
-  lcp?: number;
-  fid?: number;
-  cls?: number;
-  lcpMs?: number;
-  inpMs?: number;
-  tbt?: number;
-  score?: number;
-}
-
-export interface SecurityHeaders {
-  contentSecurityPolicy?: string;
-  strictTransportSecurity?: string;
-  xFrameOptions?: string;
-  xContentTypeOptions?: string;
-  xXSSProtection?: string;
-  referrerPolicy?: string;
 }
 
 export interface AnalysisResponse {
@@ -74,7 +75,66 @@ export interface AnalysisResponse {
     frameOptions: string;
   };
   data: {
-    overview?: AnalysisOverview;
+
+    overview?: {
+      overallScore: number;
+      pageLoadTime?: string;
+      seoScore?: number;
+      userExperienceScore?: number;
+      colors?: string[];
+      fonts?: string[];
+      images?: string[];
+      imageAnalysis?: {
+        totalImages: number;
+        estimatedPhotos: number;
+        estimatedIcons: number;
+        imageUrls?: string[];
+        photoUrls?: string[];
+        iconUrls?: string[];
+      };
+      contrastIssues?: any[];
+      [key: string]: any;
+    };
+
+    technical: {
+      accessibility: {
+        violations: Array<{
+          id: string;
+          description?: string;
+        }>;
+      };
+      social?: {
+        hasOpenGraph: boolean;
+        hasTwitterCard: boolean;
+        hasShareButtons: boolean;
+      };
+      cookies?: {
+        hasCookieScript: boolean;
+        scripts: string[];
+      };
+      minification?: {
+        cssMinified: boolean;
+        jsMinified: boolean;
+      };
+      linkIssues?: {
+        brokenLinks: string[];
+        mixedContentLinks: string[];
+      };
+      techStack?: any[];
+      healthGrade?: string;
+      issues?: any[];
+      securityScore?: number;
+    };
+    performance: {
+      performanceScore: number;
+      coreWebVitals: CoreWebVitals[];
+      mobileResponsive?: boolean;
+      recommendations: Array<{
+        title: string;
+        description: string;
+        type: string;
+      }>;
+    };
     ui?: {
       colors?: Array<{name: string, hex: string, usage: string, count: number}>;
       fonts?: Array<{name: string, category: string, usage: string, weight?: string, isLoaded?: boolean, isPublic?: boolean}>;
@@ -88,8 +148,6 @@ export interface AnalysisResponse {
         iconUrls?: string[];
       };
       contrastIssues?: Array<{textColor: string, backgroundColor: string, ratio: number}>;
-      violations?: any[];
-      accessibilityScore?: number;
     };
     seo?: {
       score: number;
@@ -116,112 +174,75 @@ export interface AnalysisResponse {
         'twitter:title'?: string;
         'twitter:description'?: string;
         'twitter:image'?: string;
-        'twitter:site'?: string;
-        'twitter:creator'?: string;
         keywords?: string;
+        author?: string;
         robots?: string;
-        viewport?: string;
-        charset?: string;
         [key: string]: any;
       };
       keywords?: Array<{
-        word: string;
+        keyword: string;
         count: number;
         density: number;
       }>;
+      headings?: {
+        h1: number;
+        h2: number;
+        h3: number;
+        h4: number;
+        h5: number;
+        h6: number;
+      };
+      hasRobotsTxt?: boolean;
+      hasSitemap?: boolean;
+      structuredData?: Array<{
+        type: string;
+        data: any;
+      }>;
     };
-    performance?: {
-      performanceScore: number;
-      coreWebVitals: any;
-      pageLoadTime?: { mobile: number; desktop: number };
-      mobileResponsive?: boolean;
-      recommendations: { title: string; description: string; type: string; }[];
+    adTags?: {
+      [key: string]: boolean;
     };
-    tech?: any;
     content?: {
-      wordCount: number;
-      readabilityScore: number;
-      contentDistribution: {
-        headings: number;
-        paragraphs: number;
-        images: number;
-        links: number;
+      wordCount: number | string;
+      readabilityScore: number | string;
+    };
+  };
+  lhr: {
+    categories: {
+      security: {
+        score: number;
+        auditRefs: { id: string }[];
+      };
+      'best-practices'?: {
+        auditRefs: { id: string }[];
       };
     };
-    technical?: {
-      accessibility: {
-        violations: Array<{
-          id: string;
-          description?: string;
-        }>;
-      };
-      social?: {
-        hasOpenGraph: boolean;
-        hasTwitterCard: boolean;
-        hasShareButtons: boolean;
-      };
-      cookies?: {
-        hasCookieScript: boolean;
-        scripts: string[];
-      };
-      minification?: {
-        cssMinified: boolean;
-        jsMinified: boolean;
-        htmlMinified?: boolean;
-      };
-      linkIssues?: {
-        brokenLinks: string[];
-        mixedContentLinks: string[];
-      };
-      techStack?: any[];
-      healthGrade?: string;
-      issues?: any[];
-      securityScore?: number;
-    };
+    audits: Record<
+      string,
+      {
+        score: number;
+        title: string;
+        description: string;
+        numericValue?: number;
+        details?: any;
+      }
+    >;
   };
 }
 
-export interface TechnicalAnalysis {
-  techStack: Array<{
-    name: string;
-    category: string;
-    confidence: number;
-  }>;
-  minification: {
-    cssMinified: boolean;
-    jsMinified: boolean;
-    htmlMinified: boolean;
+export interface UIAnalysis {
+  colors?: string[];
+  fonts?: string[];
+  images?: string[];
+  imageAnalysis?: {
+    totalImages: number;
+    estimatedPhotos: number;
+    estimatedIcons: number;
+    imageUrls?: string[];
+    photoUrls?: string[];
+    iconUrls?: string[];
   };
-  social: {
-    hasOpenGraph: boolean;
-    hasTwitterCard: boolean;
-    hasShareButtons: boolean;
-    facebookPixel: boolean;
-    googleAnalytics: boolean;
-    linkedInInsight: boolean;
-  };
-  cookies: {
-    hasCookieScript: boolean;
-    cookieConsentType: 'none' | 'basic' | 'advanced' | 'full';
-  };
-  adTags: Array<{
-    name: string;
-    type: string;
-    found: boolean;
-  }>;
-  securityHeaders: {
-    csp: string;
-    hsts: string;
-    xfo: string;
-    xss: string;
-    xcto: string;
-    referrer: string;
-  };
-  tlsVersion: string;
-  cdn: boolean;
-  gzip: boolean;
-  accessibility: {
-    violations: any[];
-  };
-  issues: string[];
+  contrastIssues?: any[];
 }
+
+

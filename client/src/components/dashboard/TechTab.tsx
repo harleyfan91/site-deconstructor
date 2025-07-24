@@ -293,29 +293,12 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
         const fallbackData = data?.data?.technical;
         if (fallbackData && 'techStack' in fallbackData) {
           setTechAnalysis({
-            techStack: fallbackData.techStack || [],
-            thirdPartyScripts: (fallbackData as any).thirdPartyScripts || [],
-            minification: { 
-              ...(fallbackData.minification || { cssMinified: false, jsMinified: false }), 
-              htmlMinified: (fallbackData.minification as any)?.htmlMinified || false 
-            },
-            social: { 
-              ...(fallbackData.social || { hasOpenGraph: false, hasTwitterCard: false, hasShareButtons: false }),
-              facebookPixel: (fallbackData.social as any)?.facebookPixel || false,
-              googleAnalytics: (fallbackData.social as any)?.googleAnalytics || false,
-              linkedInInsight: (fallbackData.social as any)?.linkedInInsight || false
-            },
-            cookies: fallbackData.cookies ? { 
-              ...(fallbackData.cookies as any), 
-              cookieConsentType: (fallbackData.cookies as any)?.cookieConsentType || 'none' as const 
-            } : { hasCookieScript: false, cookieConsentType: 'none' as const },
-            adTags: (fallbackData as any).adTags || [],
-            securityHeaders: (fallbackData as any).securityHeaders || { csp: 'Not Set', hsts: 'Not Set', xfo: 'Not Set', xss: 'Not Set', xcto: 'Not Set', referrer: 'Not Set' },
-            tlsVersion: (fallbackData as any).tlsVersion || 'Unknown',
-            cdn: (fallbackData as any).cdn || false,
-            gzip: (fallbackData as any).gzip || false,
-            accessibility: fallbackData.accessibility || { violations: [] },
-            issues: []
+            ...fallbackData,
+            adTags: fallbackData.adTags || [],
+            securityHeaders: fallbackData.securityHeaders || { csp: 'Not Set', hsts: 'Not Set', xfo: 'Not Set', xss: 'Not Set', xcto: 'Not Set', referrer: 'Not Set' },
+            tlsVersion: fallbackData.tlsVersion || 'Unknown',
+            cdn: fallbackData.cdn || false,
+            gzip: fallbackData.gzip || false
           });
           return;
         }
@@ -333,21 +316,10 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
         console.log('Using fallback technical data from main analysis');
         setTechAnalysis({
           techStack: fallbackData.techStack || [],
-          thirdPartyScripts: (fallbackData as any).thirdPartyScripts || [],
-          minification: { 
-            ...(fallbackData.minification || { cssMinified: false, jsMinified: false }), 
-            htmlMinified: (fallbackData.minification as any)?.htmlMinified || false 
-          },
-          social: { 
-            ...(fallbackData.social || { hasOpenGraph: false, hasTwitterCard: false, hasShareButtons: false }),
-            facebookPixel: (fallbackData.social as any)?.facebookPixel || false,
-            googleAnalytics: (fallbackData.social as any)?.googleAnalytics || false,
-            linkedInInsight: (fallbackData.social as any)?.linkedInInsight || false
-          },
-          cookies: fallbackData.cookies ? { 
-            ...(fallbackData.cookies as any), 
-            cookieConsentType: (fallbackData.cookies as any)?.cookieConsentType || 'none' as const 
-          } : { hasCookieScript: false, cookieConsentType: 'none' as const },
+          thirdPartyScripts: fallbackData.thirdPartyScripts || [],
+          minification: fallbackData.minification || { cssMinified: false, jsMinified: false, htmlMinified: false },
+          social: fallbackData.social || { hasOpenGraph: false, hasTwitterCard: false, hasShareButtons: false },
+          cookies: fallbackData.cookies || { hasSessionCookies: false, hasTrackingCookies: false, hasAnalyticsCookies: false },
           adTags: (fallbackData as any).adTags || [],
           securityHeaders: (fallbackData as any).securityHeaders || { csp: 'Not Set', hsts: 'Not Set', xfo: 'Not Set', xss: 'Not Set', xcto: 'Not Set', referrer: 'Not Set' },
           tlsVersion: (fallbackData as any).tlsVersion || 'Unknown',
@@ -367,7 +339,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
   // No tab-level loading - use section-level loading instead
 
   // Use comprehensive technical analysis data if available, fallback to basic data
-  const techData = data?.data?.tech || data?.data?.technical || {};
+  const techData = data?.data?.tech || {};
   const displayTechStack = techAnalysis?.techStack || techData?.techStack || [];
   const displayMinification = techAnalysis?.minification || techData?.minification;
   const displaySocial = techAnalysis?.social || techData?.social;

@@ -1,0 +1,106 @@
+You are a **world‑class full‑stack developer** with deep expertise in Node + TypeScript, Next.js/React, Playwright, Supabase, and scalable API design. Your task is to refactor the *site‑deconstructor* codebase ([https://github.com/harleyfan91/site-deconstructor](https://github.com/harleyfan91/site-deconstructor)) to implement the consolidated backend structure for the **UI tab**.
+
+---
+
+## 🔑 Goals
+
+1. **Single Playwright scrape per URL** – consolidate color, font, accessibility, and image analysis into one service.
+2. **Remove redundant endpoints** – deprecate `/api/colors` & `/api/fonts`; replace with `/api/ui/scan`.
+3. **Client fetch‑free UI tab** – all cards render from the parent `data.ui` prop, no extra network calls.
+4. **Shared caching & concurrency guard** – one cached `UIAnalysis` blob per URL, protected from duplicate scrapes.
+
+---
+
+## High‑Level Architecture
+
+* **Service layer:** `server/services/uiScraper.ts` orchestrates Playwright → axe‑core → custom extractors.
+* **Cache helper:** `server/lib/cache.ts` wraps Supabase + in‑memory LRU and limits one concurrent scrape per URL.
+* **Routes:**
+
+  * `server/routes/uiScan.ts` → `/api/ui/scan` (new unified endpoint)
+  * `server/routes/overview.ts` gains an `includeUI` flag to embed the `UIAnalysis` block.
+* **Types:** `types/UIAnalysis.ts` replaces `ColorAnalysis` and `FontAnalysis`.
+
+---
+
+### File & Path Operations (execute in this exact order)
+
+1. **ADD / CREATE**
+
+   * `server/services/uiScraper.ts`
+   * `server/lib/cache.ts`
+   * `types/UIAnalysis.ts`
+   * `server/routes/uiScan.ts`
+
+2. **MODIFY / MOVE**
+
+   * Update `server/routes/overview.ts` to call `uiScraper` and embed `UIAnalysis` when `includeUI` is truthy.
+   * Refactor `UIAnalysisTab.tsx`, `ColorExtractionCard.tsx`, `FontAnalysisCard.tsx`, and `AccessibilityCard.tsx` to become pure presentational components.
+   * Replace all imports of `ColorAnalysis` / `FontAnalysis` with `UIAnalysis`.
+   * Migrate any utility functions tied to colors/fonts into the new service if still needed.
+
+3. **DELETE (only after steps 1–2 compile & tests pass)**
+
+   * `server/routes/colors.ts`
+   * `server/routes/fonts.ts`
+   * React hooks `useColors.ts` and `useFonts.ts`
+   * Any obsolete mock files or tests covering the removed routes.
+
+> **Safety Check:** Before deleting files, run `pnpm build`, `pnpm type‑check`, and the full test suite. If **any** reference to the soon‑to‑be‑deleted modules remains, halt and refactor instead of deleting.
+
+---
+
+## Verification & Review Checklist
+
+1. **Compile** – `pnpm build` succeeds with no TS errors.
+2. **Unit tests** – all existing tests green; add coverage for `uiScraper` service.
+3. **E2E smoke test** – visiting the UI tab for a fresh URL triggers exactly one Playwright run (check logs).
+4. **Performance** – cold load time for UI tab ≤ 6 s; warm load ≤ 1 s.
+5. **Cache hit** – a second request for the same URL returns cached `UIAnalysis` (verify via Supabase inspection).
+6. **No dangling imports** – grep for `/api/colors` & `/api/fonts` returns empty.
+
+---
+
+## Execution Instructions (for Replit agent)
+
+1. **Fork or branch** the repository.
+2. Follow the *File & Path Operations* list in order.
+3. Run the **Safety Check** before attempting the DELETE step.
+4. Commit frequently with descriptive messages (e.g., "feat: add uiScraper service" → "refactor: overview route embeds UIAnalysis").
+5. Open a PR summarizing key changes; request code review.
+
+---
+
+## Post‑Refactor Validation
+
+* Run Lighthouse on a sample page to ensure Playwright render parity.
+* Manually toggle buckets & cards in UI tab – no spinner should appear.
+* Confirm Supabase row TTL matches 24 h and schemaVersion field is saved.
+
+---
+
+### 🤖 Anti‑Hallucination Guidance & Reusable Modules
+
+**Copy, don’t recreate — these existing helpers are the source of truth**
+
+| Current file (approx.)                                   | Export / symbol              | What it does                                                                                          |
+| -------------------------------------------------------- | ---------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `server/utils/colors/extractColors.ts`                   | `extractColors()`            | Uses Playwright DOM snapshot to collect unique colors & build semantic buckets                        |
+| `server/utils/colors/colorNamer.ts`                      | default export               | Maps HEX values to readable color names (via `color-namer`)                                           |
+| `server/utils/accessibility/getAccessibilityAnalysis.ts` | `getAccessibilityAnalysis()` | Runs axe‑core on the rendered page, returns contrast & violation arrays                               |
+| `server/utils/scrapePageData.ts`                         | `scrapePageData()`           | Core Playwright scraper that already parses `<link>` / `@font-face` and returns font & image metadata |
+| `server/utils/imageAnalysis/classifyImages.ts`           | `classifyImages()`           | Lightweight pixel‑area heuristic to flag photos vs icons                                              |
+| `types/ColorBucket.ts`, `types/FontFace.ts`              | type defs                    | Import and merge into the new `types/UIAnalysis.ts` rather than redefining                            |
+
+> **How to use them**
+> • Import these functions directly into `server/services/uiScraper.ts` and orchestrate them in a single browser session.
+> • If actual paths differ, **search the repo** (`git ls-files | grep -i extractColors`) before writing new code.
+> • Move or re‑export the modules **before** the DELETE step so downstream imports stay valid.
+> • Update unit tests to point at their new locations.
+
+**Anti‑Hallucination Reminders**
+
+* Do **not** invent utilities; always reference the repo first.
+* If you can’t find a named helper, pause, search, and only create new code after confirming it truly doesn’t exist.
+* After migration, run `pnpm type-check` to ensure the moved modules integrate cleanly.
+* Before committing, verify with `git grep -n "extractColors("` etc. that calls resolve to the new service layer.

@@ -1,0 +1,29 @@
+You are an expert full-stack developer working in a Replit environment. Your goal is to enable the existing **User Interface** tab to display real data by implementing the necessary backend functionality—without changing any frontend components.
+
+**Tasks for the AI agent:**
+
+1. **Verify and configure server frameworks:**
+   - **Express**: Ensure the `/api/colors`, `/api/fonts`, `/api/image-analysis`, and `/api/analyze` routes in your main server file handle requests correctly.
+   - **Playwright**: Confirm the headless scraping workflow is set up to collect CSS colors, font lists, and raw `<img>` URLs. Adjust imports or initialization if missing.
+   - **Supabase**: Confirm the Postgres-backed cache matches the existing `analysis_cache` table schema (`url_hash`, `original_url`, `analysis_data`, `created_at`, `expires_at`). Initialize the Supabase client and integrate cache lookups and upserts around the scraper and PSI calls.
+
+2. **Backend logic for UI tab data:**
+   - **Fonts**: Remove any server-side stub for `ui.fonts` and instead scrape CSS font-family rules via Playwright, storing results in `analysis_data.ui.fonts`.
+   - **Images**: Replace the naive 70/30 split fallback with the actual lists `analysis_data.ui.imageAnalysis.photoUrls` and `iconUrls`, populated from scraped image URLs and classification logic.
+   - **Contrast**: Plug in the Lighthouse color-contrast audit into `analysis_data.ui.contrastIssues` within the `/api/analyze` route (no client-side changes).
+
+3. **Fallback indicators:**
+   - Any server fallback values (e.g. default counts, empty arrays) should instead be replaced with a single exclamation point (`"!"`) in the JSON response, so unpopulated fields stand out in the UI.
+
+**Rationale for each update:**
+- **Express** organizes API endpoints for UI data consumption.
+- **Playwright** provides reliable headless page context for scraping fonts, images, and styles.
+- **Supabase** offers durable, schema-aligned caching using your existing database.
+- **Fallback removal** highlights missing data without modifying frontend code.
+
+**File areas to inspect:**
+- `server/routes.ts` (or equivalent) for route definitions and Supabase client setup.
+- Any helper modules under `server/utils/` or `services/` for scraping and caching logic.
+- Confirm environment variable usage for Supabase URL/Key.
+
+Write a prompt that guides an AI code assistant to implement these changes automatically, showing where to integrate imports, clients, and caching logic, but without altering any JSX or UI files.

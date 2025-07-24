@@ -17,7 +17,7 @@ interface UIAnalysisTabProps {
 
 const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) => {
   const ui = data?.data?.ui;
-  const { colors, fonts, images, imageAnalysis, contrastIssues = [], violations = [], accessibilityScore = 0 } = ui || {};
+  const { colors, fonts, images, imageAnalysis, contrastIssues, violations, accessibilityScore } = ui || {};
 
   // Use data directly from unified overview endpoint
   // Show loading when actually loading and no complete data available
@@ -109,15 +109,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error }) =
                 </Box>
               ) : (
                 <AccessibilityCard 
-                  contrastIssues={contrastIssues?.map(issue => ({
-                    element: issue.element || 'unknown',
-                    textColor: issue.textColor || issue.foregroundColor || '#000',
-                    backgroundColor: issue.backgroundColor || '#fff',
-                    ratio: issue.ratio || 0,
-                    expectedRatio: 4.5,
-                    severity: 'warning',
-                    recommendation: 'Improve color contrast'
-                  })) || []}
+                  contrastIssues={contrastIssues}
                   accessibilityScore={accessibilityScore}
                   violations={violations}
                 />

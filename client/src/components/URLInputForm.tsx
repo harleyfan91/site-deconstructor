@@ -41,18 +41,18 @@ const URLInputForm: React.FC<URLInputFormProps> = ({ onAnalysisComplete }) => {
     setLocalLoading(true);
     
     try {
-      // Start the analysis and wait for it to be properly initiated
+      // Start the analysis in the context
       const result = await analyzeWebsite(url.trim());
       
-      // Navigate to dashboard after analysis is properly started
+      // Navigate to dashboard after analysis starts
       navigate('/dashboard');
       
       // Call completion callback if provided
       if (onAnalysisComplete) {
-        onAnalysisComplete({ url: url.trim(), result });
+        onAnalysisComplete(result);
       }
     } catch (error) {
-      console.error('Analysis start failed:', error);
+      console.error('Analysis failed:', error);
     } finally {
       setLocalLoading(false);
     }

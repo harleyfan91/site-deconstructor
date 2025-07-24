@@ -1,0 +1,72 @@
+You are a **world‑class full‑stack developer** with deep expertise in Node + TypeScript, Next.js/React, React‑Query, Playwright, Supabase, and lean migrations.
+
+**Objective**: Deliver a "fast‑feeling" UX: the user jumps from the URL entry field to the dashboard **instantly**, then sees per‑section loaders that fill in as each slice of the analysis completes. **Do not create any new HTTP routes.** Work only with the already‑merged endpoints:
+
+* `POST /api/scan`  (idempotent trigger)
+* `GET  /api/overview?url=…`  (read‑only cached blob)
+
+Keep diffs minimal; touch as few files as necessary. Delete dead code rather than commenting.
+
+---
+
+## Phase A — Backend: Early "pending / partial" responses
+
+> **Goal**: `/api/overview` must return fast (<200 ms) even when no scrape is cached.
+
+### ADD / MODIFY (in order)
+
+1. **MODIFY** `server/lib/cache.ts` (or wherever `getOrCreateAnalysis(url)` lives)
+
+   * If cache **misses**, immediately return `{ status:'pending', ui:null, seo:null, perf:null, schemaVersion:CURRENT }`.
+   * Kick off `queue.enqueue(() => uiScraper.scrape(url))`; **do not await**.
+2. **MODIFY** `uiScraper.scrape(url)` (or worker)
+
+   * After each major slice completes (`ui`, `seo`, `perf`), write the *partial* JSON back to cache with `status:'partial'`.
+   * At end of job, write the full JSON with `status:'complete'`.
+3. **MODIFY tests** (if any) to expect `status` field.
+
+### DELETE (after tests pass)
+
+* Any blocking `await scrape()` calls inside `/api/overview` handler. It should read from cache only.
+
+---
+
+## Phase B — Frontend: Instant nav + polling + per‑card skeletons
+
+### ADD / MODIFY
+
+1. **MODIFY** `UrlEntryForm.tsx` (or wherever submit happens)
+
+   * On submit: `fetch('/api/scan', {method:'POST',body:{url}})` **without** await.
+   * Immediately `router.push('/dashboard?url='+encodeURIComponent(url))`.
+2. **MODIFY** `DashboardPage.tsx` (or page component)
+
+   * `const { data, isLoading } = useQuery(['overview', url], fetchOverview, { refetchInterval: data?.status==='complete' ? false : 4000 })`.
+3. **MODIFY** `UIAnalysisTab.tsx` and sibling tabs
+
+   * Each card: `if (!data?.ui?.colors) return <SkeletonCard title="Colours"/>;` etc.
+   * Global thin progress bar (e.g. NProgress) while `data?.status!=='complete'`.
+4. **ADD** `SkeletonCard.tsx` (simple placeholder with shimmer).
+
+### DELETE
+
+* Any per‑card fetch hooks that are still lingering; they aren’t needed once cards read from overview blob.
+
+---
+
+## Validation Checklist
+
+* **Network panel**: after URL submit, exactly **one** request to `/api/overview` every 4 s until `status:'complete'`, then polling stops. No other endpoints hit.
+* **Cold cache**: Dashboard appears ≤ 300 ms; each card shows skeletons that populate within 30 s.
+* **Warm cache**: Dashboard fully rendered ≤ 500 ms, no skeletons.
+* **Routes**: still only `/api/scan` (POST) and `/api/overview` (GET).
+* **Code hygiene**: `git grep 'useColors'`, `'/api/colors'`, etc. return no matches.
+* **Tests**: Adjusted test suite passes (`npm test`).
+
+---
+
+## 🤖 Agent Guidance
+
+1. **Think before coding** – map current cache helper & page flow; spend at least 3  min.
+2. Follow *ADD/MODIFY first → run dev server → DELETE last* pattern.
+3. Keep commit messages focused, e.g. `feat(overview): early pending payload` / `feat(ui): poll overview with skeletons` / `chore: remove obsolete hooks`.

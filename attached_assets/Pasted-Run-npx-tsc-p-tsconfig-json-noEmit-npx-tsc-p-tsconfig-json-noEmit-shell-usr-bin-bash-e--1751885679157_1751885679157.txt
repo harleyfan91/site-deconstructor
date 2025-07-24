@@ -1,0 +1,20 @@
+Run npx tsc -p tsconfig.json --noEmit
+  npx tsc -p tsconfig.json --noEmit
+  shell: /usr/bin/bash -e {0}
+Error: client/src/components/dashboard/ContentAnalysisTab.tsx(65,32): error TS2365: Operator '>' cannot be applied to types 'string | number' and 'number'.
+Error: client/src/components/dashboard/ContentAnalysisTab.tsx(65,57): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+Error: client/src/components/dashboard/ContentAnalysisTab.tsx(212,71): error TS2365: Operator '>=' cannot be applied to types 'string | number' and 'number'.
+Error: client/src/components/dashboard/ContentAnalysisTab.tsx(213,21): error TS2365: Operator '>=' cannot be applied to types 'string | number' and 'number'.
+Error: client/src/components/dashboard/ContentAnalysisTab.tsx(214,21): error TS2365: Operator '>=' cannot be applied to types 'string | number' and 'number'.
+Error: client/src/components/dashboard/ContentAnalysisTab.tsx(215,21): error TS2365: Operator '>=' cannot be applied to types 'string | number' and 'number'.
+Error: client/src/components/dashboard/ContentAnalysisTab.tsx(216,21): error TS2365: Operator '>=' cannot be applied to types 'string | number' and 'number'.
+Error: client/src/components/dashboard/ContentAnalysisTab.tsx(217,21): error TS2365: Operator '>=' cannot be applied to types 'string | number' and 'number'.
+Error: client/src/components/dashboard/ContentAnalysisTab.tsx(225,69): error TS2365: Operator '>=' cannot be applied to types 'string | number' and 'number'.
+Error: client/src/components/dashboard/ContentAnalysisTab.tsx(226,19): error TS2365: Operator '>=' cannot be applied to types 'string | number' and 'number'.
+Error: client/src/components/dashboard/ContentAnalysisTab.tsx(227,19): error TS2365: Operator '>=' cannot be applied to types 'string | number' and 'number'.
+Error: client/src/components/dashboard/ContentAnalysisTab.tsx(228,19): error TS2365: Operator '>=' cannot be applied to types 'string | number' and 'number'.
+Error: client/src/components/dashboard/ContentAnalysisTab.tsx(229,19): error TS2365: Operator '>=' cannot be applied to types 'string | number' and 'number'.
+Error: client/src/components/dashboard/ContentAnalysisTab.tsx(230,19): error TS2365: Operator '>=' cannot be applied to types 'string | number' and 'number'.
+Error: client/src/components/dashboard/ContentAnalysisTab.tsx(236,19): error TS2322: Type 'string | number' is not assignable to type 'number | undefined'.
+  Type 'string' is not assignable to type 'number'.
+Error: Process completed with exit code 2.
