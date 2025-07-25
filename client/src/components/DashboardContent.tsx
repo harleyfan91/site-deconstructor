@@ -4,8 +4,6 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { useAnalysisContext } from '../contexts/AnalysisContext';
-import { useSessionState } from '../hooks/useSessionState';
-import { useSectionLoading } from '../hooks/useSectionLoading';
 import OverviewTab from './dashboard/OverviewTab';
 import PerformanceTab from './dashboard/PerformanceTab';
 import SEOAnalysisTab from './dashboard/SEOAnalysisTab';
@@ -18,15 +16,45 @@ import ExportModal from './export/ExportModal';
 const DashboardContent = () => {
   const { data: analysisData, loading, error } = useAnalysisContext();
   const navigate = useNavigate();
-  const sectionLoading = useSectionLoading(analysisData, loading);
+  const [sectionLoading, setSectionLoading] = useState({
+    performance: true,
+    seo: true,
+    technical: true,
+    ui: true,
+    content: true,
+    compliance: true,
+  });
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [hasAutoSwitched, setHasAutoSwitched] = useState(false);
-  const [visitedTabs, setVisitedTabs] = useSessionState('dashboard-visited-tabs', new Set(['overview']));
+  const [visitedTabs, setVisitedTabs] = useState<Set<string>>(new Set(['overview']));
   
   // Ensure visitedTabs is always a Set
   const visitedTabsSet = visitedTabs instanceof Set ? visitedTabs : new Set(['overview']);
   const [backgroundLoadingStarted, setBackgroundLoadingStarted] = useState(false);
+
+  useEffect(() => {
+    if (!analysisData || loading) {
+      setSectionLoading({
+        performance: true,
+        seo: true,
+        technical: true,
+        ui: true,
+        content: true,
+        compliance: true,
+      });
+      return;
+    }
+
+    setSectionLoading({
+      performance: !analysisData.data?.performance,
+      seo: !analysisData.data?.seo,
+      technical: !analysisData.data?.tech && !analysisData.data?.technical,
+      ui: !analysisData.data?.ui,
+      content: !analysisData.data?.content && !analysisData.data?.overview,
+      compliance: !analysisData.data?.tech && !analysisData.data?.technical,
+    });
+  }, [analysisData, loading]);
 
   const handleExportClick = () => {
     setExportModalOpen(true);

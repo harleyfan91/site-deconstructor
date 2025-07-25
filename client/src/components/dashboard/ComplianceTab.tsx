@@ -16,7 +16,6 @@ import {
 import { ChevronDown, ChevronUp, Shield, Accessibility, CheckCircle, Lock } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 import { dashIfEmpty } from '../../lib/ui';
-import { useSessionState } from '../../hooks/useSessionState';
 import { useAnalysisContext } from '../../contexts/AnalysisContext';
 
 interface ComplianceTabProps {
@@ -50,11 +49,8 @@ function chipStateStyle(isActive: boolean, theme: any) {
 
 const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) => {
   const theme = useTheme();
-  const [securityGradeExpanded, setSecurityGradeExpanded] = useSessionState('compliance-security-grade-expanded', false);
-  const [headerSectionsExpanded, setHeaderSectionsExpanded] = useSessionState<Record<string, boolean>>(
-    'compliance-header-sections-expanded',
-    {}
-  );
+  const [securityGradeExpanded, setSecurityGradeExpanded] = useState(false);
+  const [headerSectionsExpanded, setHeaderSectionsExpanded] = useState<Record<string, boolean>>({});
   const [glowingSections, setGlowingSections] = React.useState<Record<string, boolean>>({});
   const { data: contextData } = useAnalysisContext();
 
