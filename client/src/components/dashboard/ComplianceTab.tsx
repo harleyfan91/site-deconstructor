@@ -5,7 +5,6 @@ import {
   Card,
   CardContent,
   Alert,
-  CircularProgress,
   Chip,
   useTheme,
   Tooltip,
@@ -194,14 +193,6 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
               </Typography>
             </Box>
             
-            {loading ? (
-              <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
-                <CircularProgress size={20} sx={{ mr: 1 }} />
-                <Typography variant="body2" color="text.secondary">
-                  Analyzing security headers...
-                </Typography>
-              </Box>
-            ) : (
             <Box>
               {headerCategories.map((category, categoryIndex) => (
                 <Box key={categoryIndex} sx={{ mb: 2 }}>
@@ -385,14 +376,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
                 Accessibility Violations
               </Typography>
             </Box>
-            {loading ? (
-              <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
-                <CircularProgress size={20} sx={{ mr: 1 }} />
-                <Typography variant="body2" color="text.secondary">
-                  Analyzing accessibility...
-                </Typography>
-              </Box>
-            ) : violations.length === 0 ? (
+            {violations.length === 0 ? (
               <Typography variant="body2">None</Typography>
             ) : (
               <Box component="ul" sx={{ pl: 2 }}>
@@ -422,14 +406,6 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
               Other Checks
             </Typography>
           </Box>
-          {loading ? (
-            <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
-              <CircularProgress size={20} sx={{ mr: 1 }} />
-              <Typography variant="body2" color="text.secondary">
-                Analyzing compliance checks...
-              </Typography>
-            </Box>
-          ) : (
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
             <Tooltip
               title={social.hasOpenGraph ? 'Open Graph tags detected' : 'Open Graph tags missing'}

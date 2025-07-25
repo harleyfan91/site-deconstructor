@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Box, 
   Typography, 
-  LinearProgress, 
-  CircularProgress,
+  LinearProgress,
   Chip,
   Alert,
   Collapse,

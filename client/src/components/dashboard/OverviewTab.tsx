@@ -5,7 +5,6 @@ import {
   Typography,
   Card,
   CardContent,
-  CircularProgress,
   Alert,
 } from '@mui/material';
 import type { AnalysisResponse } from '@/types/analysis';
@@ -46,17 +45,6 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
     );
   }
 
-  // Show loading indicator only when no data at all
-  if (loading && !data) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
-        <CircularProgress size={60} />
-        <Typography variant="h6" sx={{ ml: 2 }}>
-          Analyzing website...
-        </Typography>
-      </Box>
-    );
-  }
 
   const overview = data?.data?.overview || { overallScore: 0 };
   if (!overview.overallScore && overview.overallScore !== 0) return null;
@@ -131,16 +119,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
       />
 
       {/* Metric card grid */}
-      {overview ? (
-        <MetricCards metrics={metrics} onInfo={handleMetricInfo} />
-      ) : (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 4 }}>
-          <CircularProgress size={40} />
-          <Typography variant="body1" sx={{ ml: 2 }}>
-            Loading metrics...
-          </Typography>
-        </Box>
-      )}
+      <MetricCards metrics={metrics} onInfo={handleMetricInfo} />
 
       {/* Popover for metric info (shows only when infoAnchor is set) */}
       <MetricInfoPopover anchorEl={infoAnchor} infoText={infoText} onClose={handleClosePopover} />
@@ -152,21 +131,12 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
         </Typography>
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 3 }}>
-            {overview ? (
-              <Typography variant="body1" paragraph>
-                Analysis completed at {data?.timestamp ? new Date(data.timestamp).toLocaleString() : 'Unknown time'}.
-                {(overview?.overallScore ?? 0) >= 80
-                  ? ' The page shows excellent performance across most metrics.'
-                  : ' The page has room for improvement in several areas.'}
-              </Typography>
-            ) : (
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 2 }}>
-                <CircularProgress size={30} />
-                <Typography variant="body1" sx={{ ml: 2 }}>
-                  Generating analysis summary...
-                </Typography>
-              </Box>
-            )}
+            <Typography variant="body1" paragraph>
+              Analysis completed at {data?.timestamp ? new Date(data.timestamp).toLocaleString() : 'Unknown time'}.
+              {(overview?.overallScore ?? 0) >= 80
+                ? ' The page shows excellent performance across most metrics.'
+                : ' The page has room for improvement in several areas.'}
+            </Typography>
           </CardContent>
         </Card>
       </Box>
@@ -178,16 +148,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
         </Typography>
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 3 }}>
-            {overview ? (
-              <KeyFindingsGrid overview={overview.overallScore ? overview : { overallScore: 0 }} theme={theme} />
-            ) : (
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 2 }}>
-                <CircularProgress size={30} />
-                <Typography variant="body1" sx={{ ml: 2 }}>
-                  Analyzing key findings...
-                </Typography>
-              </Box>
-            )}
+            <KeyFindingsGrid overview={overview.overallScore ? overview : { overallScore: 0 }} theme={theme} />
           </CardContent>
         </Card>
       </Box>
