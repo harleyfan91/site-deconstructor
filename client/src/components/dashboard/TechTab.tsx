@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Box, Typography, Card, CardContent, Chip, CircularProgress, Alert, Tooltip } from '@mui/material';
+import { Box, Typography, Card, CardContent, Chip, Alert, Tooltip } from '@mui/material';
 import { Shield, Globe, Server, Database, Code, Layers, Zap, Activity, BarChart, Users, Cookie, Settings } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import type { AnalysisResponse } from '@/types/analysis';
@@ -290,14 +290,6 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
   // Determine if we have any tech data at all (from either source)
   const hasTechData = !!(techData && Object.keys(techData).length > 0) || !!techAnalysis;
   
-  // Determine loading state for each section - only show loading if we're loading AND don't have any tech data
-  const isTechStackLoading = loading && displayTechStack.length === 0 && !hasTechData;
-  const isMinificationLoading = loading && !displayMinification && !hasTechData;
-  const isSocialLoading = loading && !displaySocial && !hasTechData;
-  // For Ad Tags and Cookies - don't show loading if we have any tech data (these might not be available in basic tech data)
-  const isAdTagsLoading = loading && !displayAdTags && !hasTechData && !techAnalysis;
-  const isCookiesLoading = loading && !displayCookies && !hasTechData && !techAnalysis;
-  const isIssuesLoading = loading && !techAnalysis && !techData?.issues && !hasTechData;
 
   // Only show error state if we have no data at all AND there's an error
   const shouldShowError = techError && !hasTechData;
@@ -328,14 +320,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                   Tech Stack
                 </Typography>
               </Box>
-              {isTechStackLoading ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
-                  <CircularProgress size={32} sx={{ mr: 2 }} />
-                  <Typography variant="body2" color="text.secondary">
-                    Analyzing technologies...
-                  </Typography>
-                </Box>
-              ) : shouldShowError ? (
+              {shouldShowError ? (
                 <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                   Technology analysis unavailable
                 </Typography>
@@ -363,14 +348,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                   Minification Status
                 </Typography>
               </Box>
-              {isMinificationLoading ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
-                  <CircularProgress size={32} sx={{ mr: 2 }} />
-                  <Typography variant="body2" color="text.secondary">
-                    Checking minification...
-                  </Typography>
-                </Box>
-              ) : shouldShowError ? (
+              {shouldShowError ? (
                 <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                   Minification check unavailable
                 </Typography>
@@ -433,14 +411,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                 Tracking Pixels & Ad Tags
               </Typography>
             </Box>
-            {isAdTagsLoading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
-                <CircularProgress size={32} sx={{ mr: 2 }} />
-                <Typography variant="body2" color="text.secondary">
-                  Scanning for tracking pixels and ad tags...
-                </Typography>
-              </Box>
-            ) : shouldShowError ? (
+            {shouldShowError ? (
               <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                 Tracking pixel analysis unavailable
               </Typography>
@@ -501,14 +472,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                 Detected Social Tags
               </Typography>
             </Box>
-            {isSocialLoading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
-                <CircularProgress size={32} sx={{ mr: 2 }} />
-                <Typography variant="body2" color="text.secondary">
-                  Scanning for social tags...
-                </Typography>
-              </Box>
-            ) : shouldShowError ? (
+            {shouldShowError ? (
               <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                 Social tag analysis unavailable
               </Typography>
@@ -582,14 +546,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                 Detected Cookie Banner & Consent Script
               </Typography>
             </Box>
-            {isCookiesLoading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
-                <CircularProgress size={32} sx={{ mr: 2 }} />
-                <Typography variant="body2" color="text.secondary">
-                  Checking for cookies...
-                </Typography>
-              </Box>
-            ) : shouldShowError ? (
+            {shouldShowError ? (
               <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                 Cookie analysis unavailable
               </Typography>
@@ -666,14 +623,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                   Technical Issues
                 </Typography>
               </Box>
-              {isIssuesLoading ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
-                  <CircularProgress size={32} sx={{ mr: 2 }} />
-                  <Typography variant="body2" color="text.secondary">
-                    Analyzing technical issues...
-                  </Typography>
-                </Box>
-              ) : shouldShowError ? (
+              {shouldShowError ? (
                 <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                   Technical issue analysis unavailable
                 </Typography>

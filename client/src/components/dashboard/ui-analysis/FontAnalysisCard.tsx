@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Box, Typography, Chip, CircularProgress, useTheme } from '@mui/material';
+import { Box, Typography, Chip, useTheme } from '@mui/material';
 import { Type } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 

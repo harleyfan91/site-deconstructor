@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Box, Typography, Card, CardContent, Chip, CircularProgress, Alert, Tooltip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+import { Box, Typography, Card, CardContent, Chip, Alert, Tooltip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import { CheckCircle, AlertCircle, XCircle, Search, Target, TrendingUp, Hash, FileText, Globe, Shield, Check, X } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 import { useTheme } from '@mui/material/styles';
@@ -15,7 +15,6 @@ interface SEOAnalysisTabProps {
 const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error }) => {
   const theme = useTheme();
   const seoData = data?.data?.seo;
-  const seoLoading = loading;
   const seoError = error;
 
   // Extract URL from the data
@@ -150,14 +149,7 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
               </Typography>
             </Box>
             <Box>
-              {seoLoading ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
-                  <CircularProgress size={32} sx={{ mr: 2 }} />
-                  <Typography variant="body2" color="text.secondary">
-                    Analyzing SEO checklist...
-                  </Typography>
-                </Box>
-              ) : seoError ? (
+              {seoError ? (
                 <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                   SEO analysis is temporarily unavailable. {seoError}
                 </Typography>
@@ -226,14 +218,7 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
                   SEO Score
                 </Typography>
               </Box>
-              {seoLoading ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
-                  <CircularProgress size={32} sx={{ mr: 2 }} />
-                  <Typography variant="body2" color="text.secondary">
-                    Calculating score...
-                  </Typography>
-                </Box>
-              ) : seoError ? (
+              {seoError ? (
                 <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', py: 3 }}>
                   Score unavailable
                 </Typography>
@@ -279,14 +264,7 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
                   Analysis Status
                 </Typography>
               </Box>
-              {seoLoading ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
-                  <CircularProgress size={32} sx={{ mr: 2 }} />
-                  <Typography variant="body2" color="text.secondary">
-                    Analyzing status...
-                  </Typography>
-                </Box>
-              ) : seoError ? (
+              {seoError ? (
                 <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                   Status unavailable
                 </Typography>
@@ -353,21 +331,14 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
               SEO Recommendations
             </Typography>
           </Box>
-          {seoLoading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
-              <CircularProgress size={32} sx={{ mr: 2 }} />
-              <Typography variant="body2" color="text.secondary">
-                Generating recommendations...
+            {seoError ? (
+              <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
+                Recommendations unavailable
               </Typography>
-            </Box>
-          ) : seoError ? (
-            <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
-              Recommendations unavailable
-            </Typography>
-          ) : !seoData ? (
-            <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
-              Recommendations pending...
-            </Typography>
+            ) : !seoData ? (
+              <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
+                Recommendations pending...
+              </Typography>
           ) : (
             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 2 }}>
               {seoData.recommendations?.map((rec, index) => (
@@ -426,14 +397,7 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
                 Top Keywords
               </Typography>
             </Box>
-            {seoLoading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
-                <CircularProgress size={32} sx={{ mr: 2 }} />
-                <Typography variant="body2" color="text.secondary">
-                  Analyzing keywords...
-                </Typography>
-              </Box>
-            ) : seoError ? (
+            {seoError ? (
               <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                 Keywords unavailable
               </Typography>
@@ -477,14 +441,7 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
                 Heading Structure
               </Typography>
             </Box>
-            {seoLoading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
-                <CircularProgress size={32} sx={{ mr: 2 }} />
-                <Typography variant="body2" color="text.secondary">
-                  Analyzing headings...
-                </Typography>
-              </Box>
-            ) : seoError ? (
+            {seoError ? (
               <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                 Heading analysis unavailable
               </Typography>
@@ -528,14 +485,7 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
                 Technical SEO
               </Typography>
             </Box>
-            {seoLoading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
-                <CircularProgress size={32} sx={{ mr: 2 }} />
-                <Typography variant="body2" color="text.secondary">
-                  Checking technical SEO...
-                </Typography>
-              </Box>
-            ) : seoError ? (
+            {seoError ? (
               <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                 Technical SEO check unavailable
               </Typography>

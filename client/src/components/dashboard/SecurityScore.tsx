@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Box, Typography, Card, CardContent, Chip, Alert, CircularProgress } from '@mui/material';
+import { Box, Typography, Card, CardContent, Chip, Alert } from '@mui/material';
 import { useAnalysisContext } from '../../contexts/AnalysisContext';
 
 interface GradeBadgeProps {
@@ -48,18 +48,7 @@ const FindingItem: React.FC<FindingItemProps> = ({ title, description }) => (
 );
 
 const SecurityScore = () => {
-  const { data, loading, error } = useAnalysisContext();
-
-  if (loading) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" py={4}>
-        <CircularProgress />
-        <Typography variant="body1" sx={{ ml: 2 }}>
-          Analyzing security...
-        </Typography>
-      </Box>
-    );
-  }
+  const { data, error } = useAnalysisContext();
 
   if (error) {
     return (

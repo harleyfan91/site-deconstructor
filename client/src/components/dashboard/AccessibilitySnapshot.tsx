@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Box, Typography, Card, CardContent, LinearProgress, Alert, CircularProgress } from '@mui/material';
+import { Box, Typography, Card, CardContent, LinearProgress, Alert } from '@mui/material';
 import { useAnalysisContext } from '../../contexts/AnalysisContext';
 
 interface ViolationCardProps {
@@ -32,18 +32,7 @@ const ViolationCard: React.FC<ViolationCardProps> = ({ id, impact, description }
 );
 
 const AccessibilitySnapshot = () => {
-  const { data, loading, error } = useAnalysisContext();
-
-  if (loading) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" py={4}>
-        <CircularProgress />
-        <Typography variant="body1" sx={{ ml: 2 }}>
-          Analyzing accessibility...
-        </Typography>
-      </Box>
-    );
-  }
+  const { data, error } = useAnalysisContext();
 
   if (error) {
     return (

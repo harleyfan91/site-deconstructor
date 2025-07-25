@@ -5,7 +5,6 @@ import {
   Card,
   CardContent,
   LinearProgress,
-  CircularProgress,
   Alert,
   Chip,
   Tooltip,
@@ -36,29 +35,8 @@ const getScoreTooltip = (score: number) => {
 
 
 
-function CoreWebVitalsSection({ performance, loading = false }: { performance: AnalysisResponse["data"]["performance"]; loading?: boolean }) {
+function CoreWebVitalsSection({ performance }: { performance: AnalysisResponse["data"]["performance"] }) {
   const theme = useTheme();
-  
-  if (loading) {
-    return (
-      <Card sx={{ borderRadius: 2, height: '400px' }}>
-        <CardContent sx={{ p: 2, height: '100%' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-            <BarChart size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
-              Core Web Vitals
-            </Typography>
-          </Box>
-          <Box display="flex" justifyContent="center" alignItems="center" height="300px">
-            <CircularProgress size={40} />
-            <Typography variant="body2" sx={{ ml: 2 }}>
-              Loading Core Web Vitals...
-            </Typography>
-          </Box>
-        </CardContent>
-      </Card>
-    );
-  }
 
   const chartConfig = {
     value: { label: 'Your Site', color: '#FF6B35' },
@@ -225,28 +203,7 @@ function SecurityAuditsSection() {
 }
 
 function MobileResponsivenessSection() {
-  const { data, loading, error } = useAnalysisContext();
-
-  if (loading) {
-    return (
-      <Card sx={{ borderRadius: 2 }}>
-        <CardContent sx={{ p: 2 }}>
-          <Box display="flex" alignItems="center" mb={2}>
-            <Smartphone size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-              Mobile Responsiveness Details
-            </Typography>
-          </Box>
-          <Box display="flex" justifyContent="center" alignItems="center" py={2}>
-            <CircularProgress size={24} />
-            <Typography variant="body2" sx={{ ml: 2 }}>
-              Analyzing mobile responsiveness...
-            </Typography>
-          </Box>
-        </CardContent>
-      </Card>
-    );
-  }
+  const { data, error } = useAnalysisContext();
 
   if (error) {
     return (
@@ -314,28 +271,7 @@ function MobileResponsivenessSection() {
 }
 
 function SecurityScoreSection() {
-  const { data, loading, error } = useAnalysisContext();
-
-  if (loading) {
-    return (
-      <Card sx={{ borderRadius: 2 }}>
-        <CardContent sx={{ p: 2 }}>
-          <Box display="flex" alignItems="center" mb={2}>
-            <Shield size={24} color="#FF6B35" style={{ marginRight: 8 }} />
-            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-              Security Score Details
-            </Typography>
-          </Box>
-          <Box display="flex" justifyContent="center" alignItems="center" py={2}>
-            <CircularProgress size={24} />
-            <Typography variant="body2" sx={{ ml: 2 }}>
-              Analyzing security...
-            </Typography>
-          </Box>
-        </CardContent>
-      </Card>
-    );
-  }
+  const { data, error } = useAnalysisContext();
 
   if (error) {
     return (
@@ -484,8 +420,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
     );
   }
 
-  // Show content immediately, with individual loading indicators for missing sections
-  const showLoadingForPerformance = loading || !data.data?.performance?.coreWebVitals || data.data.performance.coreWebVitals.length === 0;
+  // Show content immediately without section loading states
 
   const { performance } = data.data;
   const mobileScore = contextData?.mobileResponsiveness?.score || 0;
@@ -501,7 +436,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
 
       {/* Main content - exactly like SEO tab pattern */}
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 2, mb: 2 }}>
-        <CoreWebVitalsSection performance={performance} loading={showLoadingForPerformance} />
+        <CoreWebVitalsSection performance={performance} />
         
         <Card sx={{ borderRadius: 2 }}>
           <CardContent sx={{ p: 2 }}>

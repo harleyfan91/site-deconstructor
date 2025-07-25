@@ -1,22 +1,11 @@
 
 import React from 'react';
-import { Box, Typography, Alert, CircularProgress } from '@mui/material';
+import { Box, Typography, Alert } from '@mui/material';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { useAnalysisContext } from '../../contexts/AnalysisContext';
 
 const HeaderChecks = () => {
-  const { data, loading, error } = useAnalysisContext();
-
-  if (loading) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" py={4}>
-        <CircularProgress />
-        <Typography variant="body1" sx={{ ml: 2 }}>
-          Analyzing security headers...
-        </Typography>
-      </Box>
-    );
-  }
+  const { data, error } = useAnalysisContext();
 
   if (error) {
     return (
