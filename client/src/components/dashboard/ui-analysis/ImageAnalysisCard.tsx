@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Box, Typography, List, ListItem, Link, Collapse, IconButton, useTheme } from '@mui/material';
 import { Image, ChevronDown, ChevronUp } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
-import { useSessionState } from '@/hooks/useSessionState';
 
 interface ImageAnalysisCardProps {
   images?: Array<{url: string, alt?: string, type?: string}>;
@@ -94,14 +93,11 @@ const AdaptiveLink: React.FC<AdaptiveLinkProps> = ({ url, index }) => {
 
 const ImageAnalysisCard: React.FC<ImageAnalysisCardProps> = ({ images, imageAnalysis }) => {
   const theme = useTheme();
-  const [expandedSections, setExpandedSections] = useSessionState<Record<string, boolean>>(
-    'ui-image-analysis-expanded',
-    {
-      total: false,
-      photos: false,
-      icons: false
-    }
-  );
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+    total: false,
+    photos: false,
+    icons: false,
+  });
 
   const toggleSection = (name: string) => {
     setExpandedSections(prev => ({

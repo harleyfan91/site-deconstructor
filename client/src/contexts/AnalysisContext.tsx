@@ -1,6 +1,6 @@
 
-import React, { createContext, useContext, ReactNode, useMemo } from 'react';
-import { useAnalysisApi, AnalysisResponse } from '../hooks/useAnalysisApi';
+import React, { createContext, useContext, ReactNode, useMemo, useState } from 'react';
+import type { AnalysisResponse } from '@/types/analysis';
 
 interface AnalysisContextType {
   data: AnalysisResponse | null;
@@ -16,15 +16,22 @@ interface AnalysisProviderProps {
 }
 
 export const AnalysisProvider: React.FC<AnalysisProviderProps> = ({ children }) => {
-  const analysisApi = useAnalysisApi();
+  const [loading] = useState(false);
+  const [error] = useState<string | null>(null);
+  const [data] = useState<AnalysisResponse | null>(null);
+
+  const analyzeWebsite = async (_url: string): Promise<AnalysisResponse | null> => {
+    console.warn('analyzeWebsite called but backend is removed');
+    return null;
+  };
 
   // Memoize the context value to prevent unnecessary re-renders
   const contextValue = useMemo(() => ({
-    data: analysisApi.data,
-    loading: analysisApi.loading,
-    error: analysisApi.error,
-    analyzeWebsite: analysisApi.analyzeWebsite,
-  }), [analysisApi.data, analysisApi.loading, analysisApi.error, analysisApi.analyzeWebsite]);
+    data,
+    loading,
+    error,
+    analyzeWebsite,
+  }), [data, loading, error]);
 
   return (
     <AnalysisContext.Provider value={contextValue}>
