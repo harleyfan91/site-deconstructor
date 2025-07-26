@@ -311,7 +311,6 @@ const HeroSection = () => {
                           searchUrl: search,
                           analyzeWebsite,
                           navigate,
-                          error,
                           loading,
                         })
                       }

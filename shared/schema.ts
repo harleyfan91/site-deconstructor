@@ -1,4 +1,4 @@
-import { pgTable, text, serial, uuid, timestamptz, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, uuid, timestamp, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -12,8 +12,8 @@ export const analysisCache = pgTable("analysis_cache", {
   id: uuid("id").primaryKey().defaultRandom(),
   urlHash: text("url_hash").notNull().unique(),
   originalUrl: text("original_url").notNull(),
-  createdAt: timestamptz("created_at").notNull().defaultNow(),
-  expiresAt: timestamptz("expires_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  expiresAt: timestamp("expires_at"),
   auditJson: jsonb("audit_json").notNull(),
 });
 

@@ -401,7 +401,7 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
               <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                 Keywords unavailable
               </Typography>
-            ) : !seoData || !seoData.keywords || seoData.keywords.length === 0 || seoData.keywords[0]?.keyword === '!analysis pending' ? (
+            ) : !seoData || !seoData.keywords || seoData.keywords.length === 0 || seoData.keywords[0]?.word === '!analysis pending' ? (
               <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                 No keywords detected
               </Typography>
@@ -419,7 +419,7 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
                     {seoData.keywords.slice(0, 6).map((keyword, index) => (
                       <TableRow key={index}>
                         <TableCell component="th" scope="row">
-                          {keyword.keyword}
+                          {keyword.word}
                         </TableCell>
                         <TableCell align="right">{keyword.count}</TableCell>
                         <TableCell align="right">{keyword.density}%</TableCell>
@@ -451,7 +451,7 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
               </Typography>
             ) : (
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                {seoData.headings && Object.entries(seoData.headings).map(([level, count]) => (
+                {(seoData as any).headings && Object.entries((seoData as any).headings).map(([level, count]) => (
                   <Box key={level} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
                       {level.toUpperCase()}
@@ -498,8 +498,8 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Typography variant="body2">Robots.txt</Typography>
                   <Chip
-                    label={seoData.hasRobotsTxt ? 'Present' : 'Missing'}
-                    color={seoData.hasRobotsTxt ? 'success' : 'error'}
+                    label={(seoData as any).hasRobotsTxt ? 'Present' : 'Missing'}
+                    color={(seoData as any).hasRobotsTxt ? 'success' : 'error'}
                     size="small"
                     variant="outlined"
                   />
@@ -507,17 +507,17 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Typography variant="body2">XML Sitemap</Typography>
                   <Chip
-                    label={seoData.hasSitemap ? 'Present' : 'Missing'}
-                    color={seoData.hasSitemap ? 'success' : 'error'}
+                    label={(seoData as any).hasSitemap ? 'Present' : 'Missing'}
+                    color={(seoData as any).hasSitemap ? 'success' : 'error'}
                     size="small"
                     variant="outlined"
                   />
                 </Box>
-                {seoData.structuredData && seoData.structuredData.length > 0 ? (
+                {(seoData as any).structuredData && (seoData as any).structuredData.length > 0 ? (
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Typography variant="body2">Structured Data</Typography>
                     <Chip
-                      label={`${seoData.structuredData.length} items`}
+                      label={`${(seoData as any).structuredData.length} items`}
                       color="success"
                       size="small"
                       variant="outlined"
@@ -540,7 +540,7 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
         </Card>
 
         {/* Meta Tags Section */}
-        {seo?.metaTags && Object.keys(seo.metaTags).length > 0 && seo.metaTags.title !== '!Analysis pending' && (
+        {(seoData as any)?.metaTags && Object.keys((seoData as any).metaTags).length > 0 && (seoData as any).metaTags.title !== '!Analysis pending' && (
           <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
@@ -550,7 +550,7 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, maxHeight: 200, overflowY: 'auto' }}>
-                {Object.entries(seo.metaTags).slice(0, 8).map(([key, value]) => (
+                {Object.entries((seoData as any).metaTags).slice(0, 8).map(([key, value]) => (
                   <Box key={key} sx={{ pb: 1, borderBottom: '1px solid', borderColor: 'divider' }}>
                     <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold' }}>
                       {key}
