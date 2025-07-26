@@ -53,7 +53,90 @@ app.get('/api/overview', async (req, res) => {
   }
 });
 
-// Queue-based website scraping endpoint
+// Optimistic scan creation endpoint - Part 2/7 of refactor
+app.post('/api/scans', async (req, res) => {
+  try {
+    const { url, taskTypes = ["tech", "colors", "seo", "perf"] } = req.body;
+    
+    if (!url || typeof url !== 'string') {
+      return res.status(400).json({ 
+        error: 'URL is required in request body',
+        status: 'error' 
+      });
+    }
+
+    // Import crypto and database modules
+    const { randomUUID } = await import('crypto');
+    const { Pool } = await import('pg');
+    
+    const scanId = randomUUID();
+
+    // Insert into database tables optimistically
+    try {
+      // Create database connection
+      const pool = new Pool({
+        connectionString: process.env.DATABASE_URL,
+      });
+
+      // Begin transaction
+      const client = await pool.connect();
+      
+      try {
+        await client.query('BEGIN');
+        
+        // Insert scan record
+        await client.query(
+          'INSERT INTO scans (id, url, user_id, active, created_at) VALUES ($1, $2, NULL, true, NOW())',
+          [scanId, url.trim()]
+        );
+        
+        // Insert scan status record
+        await client.query(
+          'INSERT INTO scan_status (scan_id, status, progress) VALUES ($1, $2, 0)',
+          [scanId, 'queued']
+        );
+        
+        // Insert scan tasks for each requested type
+        for (const type of taskTypes) {
+          await client.query(
+            'INSERT INTO scan_tasks (scan_id, type, status, created_at) VALUES ($1, $2, $3, NOW())',
+            [scanId, type, 'queued']
+          );
+        }
+        
+        await client.query('COMMIT');
+        console.log('Scan created successfully:', scanId);
+        
+      } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+      } finally {
+        client.release();
+        await pool.end();
+      }
+      
+    } catch (dbError) {
+      console.error('Database insertion failed:', dbError);
+      throw new Error('Failed to create scan record');
+    }
+
+    res.status(201).json({
+      scan_id: scanId,
+      status: 'queued',
+      url: url.trim(),
+      task_types: taskTypes
+    });
+    
+  } catch (error) {
+    console.error('Scan creation error:', error);
+    res.status(500).json({ 
+      error: 'Failed to create scan',
+      status: 'error' 
+    });
+  }
+});
+
+// Keep existing scan endpoint for backward compatibility
 app.post('/api/scan', async (req, res) => {
   try {
     const { url } = req.body;

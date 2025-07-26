@@ -24,6 +24,7 @@ const App = () => {
           <Routes>
             <Route path="/" element={<LandingPage darkMode={darkMode} toggleDarkMode={toggleDarkMode} />} />
             <Route path="/dashboard" element={<Dashboard darkMode={darkMode} toggleDarkMode={toggleDarkMode} />} />
+            <Route path="/dashboard/:scanId" element={<Dashboard darkMode={darkMode} toggleDarkMode={toggleDarkMode} />} />
             <Route path="/analyze" element={<AnalyzePage darkMode={darkMode} toggleDarkMode={toggleDarkMode} />} />
           </Routes>
         </Router>

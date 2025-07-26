@@ -296,7 +296,6 @@ const AnalyzePage = ({ darkMode, toggleDarkMode }: AnalyzePageProps) => {
                             searchUrl: search,
                             analyzeWebsite,
                             navigate,
-                            error,
                             loading,
                           })
                         }
