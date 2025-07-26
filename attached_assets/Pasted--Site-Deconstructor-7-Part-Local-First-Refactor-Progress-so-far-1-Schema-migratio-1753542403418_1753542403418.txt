@@ -1,0 +1,123 @@
+## 🚀 **Site Deconstructor – 7‑Part Local‑First Refactor**
+
+Progress so far:
+
+1. **Schema & migrations** ✅
+2. Optimistic **POST /scans** stub & redirect ✅
+3. **Worker & task fan‑out** loop ✅
+4. **React‑Query hooks + skeleton cards** ← *current task*
+5. LocalStorage **panel‑state** hook
+6. **Realtime progress** subscription
+7. **Supabase Auth** + RLS
+
+### ⛔ Hard constraints for **Part 4 (Hooks & skeleton)**
+
+* **Only** touch front‑end code: React‑Query provider, hooks, and dashboard UI placeholders.
+* Do **not** edit server code, worker logic, Auth, or CI configs.
+* Provide a Replit‑preview test that works even if Realtime and Auth aren’t implemented yet.
+
+---
+
+# Part 4 / 7 – Client data hooks & skeleton UI
+
+\### 🎯 Goals
+
+1. Add a **React‑Query provider** at the app root (`client/src/main.tsx` or `App.tsx`).
+2. Implement two hooks:
+
+   * `useScanStatus(scanId: string)` → fetches `/api/scans/${scanId}/status`.
+   * `useTaskData(scanId: string, type: string)` → fetches `/api/scans/${scanId}/task/${type}`.
+3. Update **Dashboard page**:
+
+   * Show a skeleton card for each task type (`tech`, `colors`, `seo`, `perf`).
+   * Replace skeleton with data as soon as its hook resolves (independently).
+4. Provide a local test: with worker running, dashboard fills in tech card first even if others are slow.
+
+---
+
+\## 1 · Add React‑Query provider
+**File:** `client/src/main.tsx` (or top‑level entry)
+
+```tsx
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
+
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <App />
+    </QueryClientProvider>
+  </React.StrictMode>
+);
+```
+
+\## 2 · Hooks implementation
+Create `client/src/hooks/useScanStatus.ts`:
+
+```ts
+import { useQuery } from "@tanstack/react-query";
+export function useScanStatus(scanId: string) {
+  return useQuery(["scanStatus", scanId], async () => {
+    const res = await fetch(`/api/scans/${scanId}/status`);
+    if (!res.ok) throw new Error("status fetch failed");
+    return res.json(); // { status, progress }
+  }, { refetchInterval: 2000 });
+}
+```
+
+Create `client/src/hooks/useTaskData.ts`:
+
+```ts
+import { useQuery } from "@tanstack/react-query";
+export function useTaskData(scanId: string, type: string) {
+  return useQuery(["task", scanId, type], async () => {
+    const res = await fetch(`/api/scans/${scanId}/task/${type}`);
+    if (!res.ok) throw new Error("task fetch failed");
+    return res.json();
+  }, { staleTime: Infinity, refetchInterval: 5000 });
+}
+```
+
+\## 3 · Dashboard skeleton update
+**File:** `client/src/pages/Dashboard.tsx`
+
+```tsx
+const taskTypes = ["tech", "colors", "seo", "perf"] as const;
+
+return (
+  <div className="grid gap-4">
+    {taskTypes.map((t) => {
+      const { data, isLoading } = useTaskData(scanId, t);
+      return (
+        <Card key={t}>
+          <CardHeader>{t.toUpperCase()}</CardHeader>
+          <CardContent>
+            {isLoading ? <Skeleton className="h-24" /> : <pre>{JSON.stringify(data, null, 2)}</pre>}
+          </CardContent>
+        </Card>
+      );
+    })}
+  </div>
+);
+```
+
+Skeleton component can reuse Tailwind shimmer or simple gray box.
+
+\## 4 · Local test instructions
+
+1. **Shell A:** `npm run server` (Fastify API).
+2. **Shell B:** `npm run worker:dev` (stub workers).
+3. **Shell C:** `npm run dev` (Vite UI).
+4. In preview: enter a URL → dashboard loads.
+5. Observe: tech card populates first (\~1‑3 s) while others still show skeleton; once worker completes, remaining cards fill independently.
+
+---
+
+\### Commit
+
+```bash
+git add client/src/main.tsx client/src/hooks useScanStatus.ts useTaskData.ts client/src/pages/Dashboard.tsx
+# plus any skeleton/UI component files if added
+git commit -m "feat: add React‑Query provider, data hooks, and skeleton dashboard cards"
+```

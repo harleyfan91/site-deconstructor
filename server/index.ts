@@ -136,6 +136,120 @@ app.post('/api/scans', async (req, res) => {
   }
 });
 
+// Scan status endpoint
+app.get('/api/scans/:scanId/status', async (req, res) => {
+  try {
+    const { scanId } = req.params;
+    
+    // Import database modules
+    const { Pool } = await import('pg');
+    const pool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+    });
+
+    const client = await pool.connect();
+    
+    try {
+      // Get scan info
+      const scanResult = await client.query(
+        'SELECT id, url, active FROM scans WHERE id = $1',
+        [scanId]
+      );
+      
+      if (scanResult.rows.length === 0) {
+        return res.status(404).json({ error: 'Scan not found' });
+      }
+
+      // Get scan status
+      const statusResult = await client.query(
+        'SELECT status, progress FROM scan_status WHERE scan_id = $1',
+        [scanId]
+      );
+
+      const scan = scanResult.rows[0];
+      const status = statusResult.rows[0] || { status: 'queued', progress: 0 };
+
+      res.json({
+        scanId,
+        url: scan.url,
+        status: status.status,
+        progress: status.progress || 0,
+      });
+
+    } finally {
+      client.release();
+      await pool.end();
+    }
+  } catch (error) {
+    console.error('Error fetching scan status:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Task data endpoint
+app.get('/api/scans/:scanId/task/:type', async (req, res) => {
+  try {
+    const { scanId, type } = req.params;
+    
+    // Import database modules
+    const { Pool } = await import('pg');
+    const pool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+    });
+
+    const client = await pool.connect();
+    
+    try {
+      // Get task info
+      const taskResult = await client.query(
+        'SELECT task_id, type, status, payload FROM scan_tasks WHERE scan_id = $1 AND type = $2',
+        [scanId, type]
+      );
+      
+      if (taskResult.rows.length === 0) {
+        return res.status(404).json({ error: 'Task not found' });
+      }
+
+      const task = taskResult.rows[0];
+
+      // If task is complete, try to get cached results
+      let data = null;
+      if (task.status === 'complete') {
+        const crypto = await import('crypto');
+        const scanInfo = await client.query('SELECT url FROM scans WHERE id = $1', [scanId]);
+        if (scanInfo.rows.length > 0) {
+          const url = scanInfo.rows[0].url;
+          const urlHash = crypto.createHash('sha256').update(url).digest('hex');
+          const cacheKey = `${type}_${urlHash}`;
+          
+          const cacheResult = await client.query(
+            'SELECT audit_json FROM analysis_cache WHERE url_hash = $1',
+            [cacheKey]
+          );
+          
+          if (cacheResult.rows.length > 0) {
+            data = cacheResult.rows[0].audit_json;
+          }
+        }
+      }
+
+      res.json({
+        type,
+        status: task.status,
+        data,
+        error: task.payload?.error || null,
+      });
+
+    } finally {
+      client.release();
+      await pool.end();
+    }
+  } catch (error) {
+    console.error('Error fetching task data:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Keep existing scan endpoint for backward compatibility
 app.post('/api/scan', async (req, res) => {
   try {
