@@ -59,7 +59,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
       [sectionName]: !prev[sectionName]
     }));
   };
-  
+
   // Remove tab-level loading - we use section-level loading instead
 
   if (error) {
@@ -96,7 +96,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
     xcto: '', 
     referrer: '' 
   };
-  
+
   // Simplified security score logic to avoid dependency issues
   const showSeparateSecurityGrade = false; // Disable separate security grade for now
 
@@ -134,7 +134,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
   // Restored auto-collapse animation with fixed dependencies
   React.useEffect(() => {
     if (!data || headerCategories.length === 0) return;
-    
+
     // Always initialize sections as expanded for fresh data
     const initialState: Record<string, boolean> = {};
     headerCategories.forEach(category => {
@@ -175,7 +175,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
           Compliance Audits
         </Typography>
       </Box>
-      
+
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: showSeparateSecurityGrade ? '1fr 1fr 1fr' : '1fr 1fr' }, gap: 2, mb: 2 }}>
         {/* Security Headers - No top-level collapsibility */}
         <Card sx={{ borderRadius: 2 }}>
@@ -192,7 +192,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
                 Security Headers
               </Typography>
             </Box>
-            
+
             <Box>
               {headerCategories.map((category, categoryIndex) => (
                 <Box key={categoryIndex} sx={{ mb: 2 }}>
@@ -282,7 +282,6 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
                 </Box>
               ))}
             </Box>
-            )}
           </CardContent>
         </Card>
 
@@ -324,7 +323,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
                   {securityGradeExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                 </IconButton>
               </Box>
-              
+
               <Collapse in={securityGradeExpanded} timeout="auto">
                 <Box sx={{ mt: 2 }}>
                   {lhr?.categories['best-practices'] ? (
@@ -480,7 +479,6 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
               />
             </Tooltip>
           </Box>
-          )}
           <Typography variant="body2">
             <strong>Broken Links:</strong> {links.brokenLinks.length || 0}
           </Typography>
