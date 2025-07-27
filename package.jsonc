@@ -6,7 +6,9 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently \"npm:server\" \"npm:client\"",
+    "server": "tsx server/index.ts",
+    "client": "vite",
     "dev:ui": "vite",
     "build": "vite build",
     "start": "vite preview",
