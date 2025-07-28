@@ -49,10 +49,10 @@ const DashboardContent = () => {
     setSectionLoading({
       performance: !analysisData.data?.performance,
       seo: !analysisData.data?.seo,
-      technical: !analysisData.data?.tech && !analysisData.data?.technical,
+      technical: !analysisData.data?.technical,
       ui: !analysisData.data?.ui,
       content: !analysisData.data?.content && !analysisData.data?.overview,
-      compliance: !analysisData.data?.tech && !analysisData.data?.technical,
+      compliance: !analysisData.data?.technical,
     });
   }, [analysisData, loading]);
 
@@ -102,12 +102,7 @@ const DashboardContent = () => {
     }
   }, [loading, hasAutoSwitched]);
 
-  // Redirect to the dedicated analyze page if no analysis data is available
-  useEffect(() => {
-    if (!analysisData && !loading) {
-      navigate('/analyze');
-    }
-  }, [analysisData, loading, navigate]);
+  // Note: Removed automatic redirect to /analyze to prevent dashboard reset issues
 
   return (
     <Box id="dashboard-root" data-dashboard="true">
