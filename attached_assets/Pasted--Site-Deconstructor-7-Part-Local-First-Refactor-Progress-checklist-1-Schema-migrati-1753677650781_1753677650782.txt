@@ -1,0 +1,117 @@
+## 🚀 **Site Deconstructor – 7‑Part Local‑First Refactor**
+
+Progress checklist:
+
+1. Schema & migrations ✅
+2. Optimistic **POST /scans** stub & redirect ✅
+3. Worker & task fan‑out loop ✅
+4. React‑Query hooks + skeleton cards ✅
+5. LocalStorage panel‑state hook ✅
+6. **Realtime progress subscription** ← *current task*
+7. Supabase Auth + RLS
+
+### ⛔ Hard constraints for **Part 6 (Realtime)**
+
+* Only add **Supabase Realtime** integration and a lightweight hook/UI tie‑in.
+* Do **not** modify Auth logic or deployment configs.
+* Do **not** edit worker code (it already updates `scan_status`).
+* Provide a Replit‑preview test that works without Auth.
+
+---
+
+# Part 6 / 7 – Live progress bar via Supabase Realtime
+
+### 🎯 Goals
+
+1. Add a `useScanProgress(scanId)` hook that subscribes to the `scan_status` row in Supabase Realtime and returns `{ progress, status }`.
+2. Update the dashboard’s shared **progress bar component** to use this hook instead of polling.
+3. Keep the existing React‑Query `useScanStatus` polling as a **fallback** (unsubscribe when Realtime fires).
+4. Provide a Replit test: with worker running, watch the bar advance live without page refresh.
+
+---
+
+## 1 · Add Realtime hook
+
+**File:** `client/src/hooks/useScanProgress.ts`
+
+```ts
+import { useEffect, useState } from "react";
+import { createClient } from "@supabase/supabase-js";
+import { useScanStatus } from "./useScanStatus";
+
+const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
+
+type Prog = { progress: number; status: string };
+
+export function useScanProgress(scanId: string): Prog {
+  const { data: initial } = useScanStatus(scanId); // polling fallback
+  const [prog, setProg] = useState<Prog>(() => ({
+    progress: initial?.progress ?? 0,
+    status: initial?.status ?? "queued",
+  }));
+
+  useEffect(() => {
+    const chan = supabase
+      .channel("scan_status")
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "scan_status",
+          filter: `scan_id=eq.${scanId}`,
+        },
+        (payload) => {
+          const row = payload.new as { progress: number; status: string };
+          setProg({ progress: row.progress, status: row.status });
+        }
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(chan);
+    };
+  }, [scanId]);
+
+  return prog;
+}
+```
+
+## 2 · Wire into progress bar
+
+**File:** `client/src/components/ScanProgressBar.tsx`
+
+```tsx
+import { useScanProgress } from "../hooks/useScanProgress";
+
+export function ScanProgressBar({ scanId }: { scanId: string }) {
+  const { progress, status } = useScanProgress(scanId);
+  return (
+    <div className="w-full bg-gray-200 rounded">
+      <div
+        className="h-2 bg-green-500 rounded transition-all"
+        style={{ width: `${progress}%` }}
+      />
+      <span className="text-xs ml-2">{status}</span>
+    </div>
+  );
+}
+```
+
+Replace any previous polling‑based progress bar usage with this component.
+
+## 3 · Local test in Replit
+
+1. Shell A: `npm run server` (API)
+2. Shell B: `npm run worker:dev` (stub workers)
+3. Shell C: `npm run dev` (Vite UI)
+4. Create a new scan. In the dashboard, progress bar should tick upward live (0 → 100%) without manual refresh.
+5. Stop the worker mid‑run; bar should pause. Restart worker; bar resumes.
+
+---
+
+### Commit
+
+```bash
+git add client/src/hooks/useScanProgress.ts client/src/components/ScanProgressBar.tsx client/src/pages/Dashboard.tsx
+git commit -m "feat: live progress bar via Supabase Realtime subscription"
+```

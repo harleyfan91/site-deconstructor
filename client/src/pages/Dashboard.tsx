@@ -8,6 +8,7 @@ import { TaskCard } from '../components/TaskCard';
 import { useAnalysisContext } from '../contexts/AnalysisContext';
 import { useScanStatus } from '../hooks/useScanStatus';
 import { useTaskData } from '../hooks/useTaskData';
+import { ScanProgressBar } from '../components/ScanProgressBar';
 
 interface DashboardProps {
   darkMode: boolean;
@@ -68,22 +69,17 @@ const Dashboard = ({ darkMode, toggleDarkMode }: DashboardProps) => {
           {scanId ? (
             // New scan-based dashboard with React-Query hooks
             <Box>
-              {/* Scan Status Header */}
-              {scanStatus && (
-                <Box sx={{ mb: 3, p: 2, backgroundColor: 'action.hover', borderRadius: 1 }}>
+              {/* Scan Status Header with Progress Bar */}
+              {scanId && (
+                <Box sx={{ mb: 3, p: 3, backgroundColor: 'action.hover', borderRadius: 2 }}>
                   <Typography variant="h6" gutterBottom>
-                    Scan Status: {scanStatus.status}
+                    Analysis Progress
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    URL: {scanStatus.url}
-                  </Typography>
-                  {scanStatus.status !== 'complete' && (
-                    <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-                      <CircularProgress size={20} sx={{ mr: 1 }} />
-                      <Typography variant="body2">
-                        Progress: {scanStatus.progress}%
-                      </Typography>
-                    </Box>
+                  <ScanProgressBar scanId={scanId} showDetails={true} />
+                  {scanStatus && (
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                      URL: {scanStatus.url}
+                    </Typography>
                   )}
                 </Box>
               )}

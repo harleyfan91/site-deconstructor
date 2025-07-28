@@ -5,6 +5,7 @@ import LandingPage from './pages/LandingPage';
 import Dashboard from './pages/Dashboard';
 import AnalyzePage from './pages/AnalyzePage';
 import PanelTestPage from './pages/PanelTestPage';
+import ProgressTestPage from './pages/ProgressTestPage';
 import { AnalysisProvider } from './contexts/AnalysisContext';
 import { useState } from 'react';
 
@@ -28,6 +29,7 @@ const App = () => {
             <Route path="/dashboard/:scanId" element={<Dashboard darkMode={darkMode} toggleDarkMode={toggleDarkMode} />} />
             <Route path="/analyze" element={<AnalyzePage darkMode={darkMode} toggleDarkMode={toggleDarkMode} />} />
             <Route path="/panel-test" element={<PanelTestPage darkMode={darkMode} toggleDarkMode={toggleDarkMode} />} />
+            <Route path="/progress-test" element={<ProgressTestPage darkMode={darkMode} toggleDarkMode={toggleDarkMode} />} />
           </Routes>
         </Router>
       </AnalysisProvider>
