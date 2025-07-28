@@ -7,6 +7,8 @@ import type { AnalysisResponse } from '@/types/analysis';
 import TechStackGrid from './TechStackGrid';
 import LegendContainer from './LegendContainer';
 import { useTheme } from '@mui/material/styles';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
+import { usePanelState } from '../../hooks/usePanelState';
 
 /** ===========================
  *  Helpers and constants
@@ -180,6 +182,7 @@ interface TechTabProps {
   data: AnalysisResponse | null;
   loading: boolean;
   error: string | null;
+  scanId?: string;
 }
 
 /** Interface for comprehensive technical analysis data */
@@ -257,8 +260,9 @@ interface TechnicalAnalysis {
 /**
  * Main TechTab component – renders technical analysis panels with real data.
  */
-const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
+const TechTab: React.FC<TechTabProps> = ({ data, loading, error, scanId = 'default' }) => {
   const theme = useTheme();
+  const { state, toggle } = usePanelState(scanId);
   
   // State for comprehensive technical analysis
   const techAnalysis = null;

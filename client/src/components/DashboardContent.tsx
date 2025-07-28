@@ -190,7 +190,7 @@ const DashboardContent = () => {
               </TabsContent>
 
               <TabsContent value="ui" data-tab-panel-id="ui" forceMount={visitedTabsSet.has('ui') || undefined}>
-                <UIAnalysisTab data={analysisData} loading={sectionLoading.ui} error={error} />
+                <UIAnalysisTab data={analysisData} loading={sectionLoading.ui} error={error} scanId="default" />
               </TabsContent>
 
               <TabsContent value="content" data-tab-panel-id="content" forceMount={visitedTabsSet.has('content') || undefined}>
@@ -206,7 +206,7 @@ const DashboardContent = () => {
               </TabsContent>
 
               <TabsContent value="tech" data-tab-panel-id="tech" forceMount={visitedTabsSet.has('tech') || undefined}>
-                <TechTab data={analysisData} loading={sectionLoading.technical} error={error} />
+                <TechTab data={analysisData} loading={sectionLoading.technical} error={error} scanId="default" />
               </TabsContent>
 
               <TabsContent value="compliance" data-tab-panel-id="compliance" forceMount={visitedTabsSet.has('compliance') || undefined}>

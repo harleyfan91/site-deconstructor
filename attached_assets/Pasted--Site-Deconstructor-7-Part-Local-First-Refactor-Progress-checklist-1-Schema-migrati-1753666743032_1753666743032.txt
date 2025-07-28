@@ -1,0 +1,106 @@
+## 🚀 **Site Deconstructor – 7‑Part Local‑First Refactor**
+
+Progress checklist:
+
+1. Schema & migrations ✅
+2. Optimistic **POST /scans** stub & redirect ✅
+3. Worker & task fan‑out loop ✅
+4. React‑Query hooks + skeleton cards ✅
+5. **LocalStorage panel‑state hook** ← *current task*
+6. Realtime progress subscription
+7. Supabase Auth + RLS
+
+### ⛔ Hard constraints for **Part 5 (panel‑state)**
+
+* Only touch **client‑side React code** for remembering expanded/collapsed sections.
+* Do **not** edit API routes, worker logic, Auth, or Realtime.
+* Provide a Replit‑preview test that requires no backend changes.
+
+---
+
+# Part 5 / 7 – Persist panel expansion per scan
+
+\### 🎯 Goals
+
+1. Implement a hook `usePanelState(scanId: string)` that stores a `{ [sectionId: string]: boolean }` map in **localStorage**, keyed by `panelState:<scanId>`.
+2. Update each dashboard tab component (e.g. `UI.tsx`, `Tech.tsx`) to use this hook so that when a user toggles sections, state persists when navigation occurs.
+3. If the JSON is malformed or missing, fall back to `{}` without throwing.
+4. Provide a local manual test in Replit preview: expand two sections, leave tab, return → same sections still expanded.
+
+---
+
+\## 1 · Create hook file \`\`
+
+```ts
+import { useEffect, useState, useCallback } from "react";
+
+type PanelMap = Record<string, boolean>;
+
+export function usePanelState(scanId: string) {
+  const key = `panelState:${scanId}`;
+
+  const [state, setState] = useState<PanelMap>(() => {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? (JSON.parse(raw) as PanelMap) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  // persist on change
+  useEffect(() => {
+    try {
+      localStorage.setItem(key, JSON.stringify(state));
+    } catch {
+      /* ignore quota errors */
+    }
+  }, [key, state]);
+
+  // helper toggle
+  const toggle = useCallback(
+    (sectionId: string) =>
+      setState((prev) => ({ ...prev, [sectionId]: !prev[sectionId] })),
+    []
+  );
+
+  return { state, toggle } as const;
+}
+```
+
+\## 2 · Integrate into tab components Example for \`\` (apply similar to other tabs):
+
+```tsx
+import { usePanelState } from "../../hooks/usePanelState";
+
+export function UITab({ scanId }: { scanId: string }) {
+  const { state, toggle } = usePanelState(scanId);
+
+  return (
+    <Accordion type="multiple" value={Object.keys(state).filter((k) => state[k])}>
+      <AccordionItem value="layout" onValueChange={() => toggle("layout")}> … </AccordionItem>
+      <AccordionItem value="contrast" onValueChange={() => toggle("contrast")}> … </AccordionItem>
+      {/* other sections */}
+    </Accordion>
+  );
+}
+```
+
+*If your UI uses a different collapsible component, adapt the props while keeping the same **`toggle()`** logic.*
+
+\## 3 · Manual test in Replit
+
+1. `npm run dev` (Vite UI) — no need for server/worker.
+2. Navigate to an existing dashboard URL (or create a new scan).
+3. Expand two sections in the UI tab.
+4. Switch to Tech tab, then come back to UI → expanded sections remain.
+5. Hard‑reload the preview → sections still expanded for that scan; perform a different scan → state isolated by scanId.
+
+---
+
+\### Commit
+
+```bash
+git add client/src/hooks/usePanelState.ts client/src/pages/tabs/*
+git commit -m "feat: persist panel expand/collapse per scan via localStorage hook"
+```
