@@ -37,11 +37,11 @@ export function useScanProgress(scanId: string): ProgressData {
           filter: `scan_id=eq.${scanId}`,
         },
         (payload) => {
-          const row = payload.new as { progress: number; status: string; updated_at?: string };
+          const row = payload.new as { progress: number; status: string; finishedAt?: string };
           setRealtimeData({
             progress: row.progress || 0,
             status: row.status || 'queued',
-            lastUpdated: row.updated_at || new Date().toISOString()
+            lastUpdated: row.finishedAt || new Date().toISOString()
           });
           setIsRealtimeConnected(true);
         }
@@ -71,6 +71,6 @@ export function useScanProgress(scanId: string): ProgressData {
   return {
     progress: initial?.progress ?? 0,
     status: initial?.status ?? (isLoading ? 'loading' : 'queued'),
-    lastUpdated: initial?.updated_at
+    lastUpdated: initial?.finishedAt
   };
 }
