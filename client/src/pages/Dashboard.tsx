@@ -93,7 +93,7 @@ const Dashboard = ({ darkMode, toggleDarkMode }: DashboardProps) => {
                 {taskTypes.map((taskType) => {
                   const hook = taskHooks[taskType];
                   return (
-                    <Grid item xs={12} md={6} lg={6} key={taskType}>
+                    <Grid item xs={12} md={6} key={taskType}>
                       <TaskCard
                         type={taskType}
                         data={hook.data}

@@ -273,12 +273,12 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error, scanId = 'defau
 
   // Use comprehensive technical analysis data if available, fallback to basic data
   const techData = data?.data?.tech || data?.data?.technical || {};
-  const displayTechStack = techAnalysis?.techStack || techData?.techStack || [];
-  const displayMinification = techAnalysis?.minification || techData?.minification;
-  const displaySocial = techAnalysis?.social || techData?.social;
+  const displayTechStack = techAnalysis?.techStack || (techData as any)?.techStack || [];
+  const displayMinification = techAnalysis?.minification || (techData as any)?.minification;
+  const displaySocial = techAnalysis?.social || (techData as any)?.social;
   // Generate realistic cookie data based on social analytics
   const generateCookieData = () => {
-    const socialData = techAnalysis?.social || techData?.social || displaySocial;
+    const socialData = techAnalysis?.social || (techData as any)?.social || displaySocial;
     const hasAnalytics = socialData?.googleAnalytics || socialData?.facebookPixel;
     
     return {
@@ -288,8 +288,8 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error, scanId = 'defau
     };
   };
   
-  const displayCookies = techAnalysis?.cookies || techData?.cookies || generateCookieData();
-  const displayAdTags = techAnalysis?.adTags || techData?.adTags || [];
+  const displayCookies = techAnalysis?.cookies || (techData as any)?.cookies || generateCookieData();
+  const displayAdTags = techAnalysis?.adTags || (techData as any)?.adTags || [];
 
   // Determine if we have any tech data at all (from either source)
   const hasTechData = !!(techData && Object.keys(techData).length > 0) || !!techAnalysis;
@@ -631,7 +631,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error, scanId = 'defau
                 <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                   Technical issue analysis unavailable
                 </Typography>
-              ) : (techAnalysis?.issues ?? techData?.issues ?? []).length === 0 ? (
+              ) : (techAnalysis?.issues ?? (techData as any)?.issues ?? []).length === 0 ? (
                 <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                   No technical issues detected
                 </Typography>
@@ -647,7 +647,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error, scanId = 'defau
                       </tr>
                     </thead>
                     <tbody className="[&_tr:last-child]:border-0">
-                      {(techAnalysis?.issues ?? techData?.issues ?? []).map((issue, index) => (
+                      {(techAnalysis?.issues ?? (techData as any)?.issues ?? []).map((issue: any, index: number) => (
                         <tr key={index} className="border-b transition-colors [&:has([role=checkbox])]:pr-0">
                           <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">{issue.type}</td>
                           <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">{issue.description}</td>
@@ -689,8 +689,8 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error, scanId = 'defau
             </CardContent>
           </Card>
           <TechnicalHealthSummary 
-            healthGrade={techData?.healthGrade ?? 'C'} 
-            issues={techAnalysis?.issues ?? techData?.issues ?? []} 
+            healthGrade={(techData as any)?.healthGrade ?? 'C'} 
+            issues={techAnalysis?.issues ?? (techData as any)?.issues ?? []} 
           />
         </Box>
       </Box>
