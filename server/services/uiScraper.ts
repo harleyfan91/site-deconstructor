@@ -360,9 +360,8 @@ export class UIScraperService {
         const duration = Date.now() - startTime;
         console.log(`✅ Unified UI analysis completed in ${duration}ms: ${analysis.fonts.length} fonts, ${analysis.colors.length} colors, ${analysis.images.length} images, accessibility score: ${analysis.accessibilityScore}`);
 
-        // Cache the completed analysis with status: 'complete'
-        const analysisWithStatus = { ...analysis, status: 'complete' };
-        await unifiedCache.set('ui_analysis', url, analysisWithStatus, 24 * 60 * 60 * 1000);
+        // Cache the completed analysis
+        await unifiedCache.set('ui_analysis', url, analysis, 24 * 60 * 60 * 1000);
 
         return analysis;
 
@@ -377,18 +376,6 @@ export class UIScraperService {
         return this.fallbackAnalysis(url, startTime);
       }
     });
-  }
-
-  /**
-   * Get cached UI analysis without running new analysis
-   */
-  static async getCachedUI(url: string): Promise<UIAnalysis | null> {
-    try {
-      return await unifiedCache.get('ui_analysis', url);
-    } catch (error) {
-      console.warn(`Cache lookup failed for ${url}:`, error.message);
-      return null;
-    }
   }
 
   /**

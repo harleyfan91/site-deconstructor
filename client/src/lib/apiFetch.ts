@@ -42,10 +42,38 @@ export async function apiRequest<T = any>(path: string, options: RequestInit = {
   return response.json();
 }
 
+// UI Analysis interface
+interface UIAnalysis {
+  colors: any[];
+  fonts: any[];
+  images: any[];
+  imageAnalysis: any;
+  contrastIssues: any[];
+  violations: any[];
+  accessibilityScore: number;
+  status?: string;
+}
+
 // UI Analysis
 export async function ui(url: string): Promise<UIAnalysis> {
-    const response = await fetch(`/api/ui/scan?url=${encodeURIComponent(url)}`);
-    if (!response.ok) throw new Error('Failed to fetch UI analysis');
-    const data = await response.json();
-    return data.data || {};
-  }
+  const response = await apiFetch(`/api/ui/scan?url=${encodeURIComponent(url)}`);
+  if (!response.ok) throw new Error('Failed to fetch UI analysis');
+  const data = await response.json();
+  return data.data || {
+    colors: [],
+    fonts: [],
+    images: [],
+    imageAnalysis: {
+      totalImages: 0,
+      estimatedPhotos: 0,
+      estimatedIcons: 0,
+      imageUrls: [],
+      photoUrls: [],
+      iconUrls: [],
+      altStats: { withAlt: 0, withoutAlt: 0, emptyAlt: 0, totalImages: 0 }
+    },
+    contrastIssues: [],
+    violations: [],
+    accessibilityScore: 0
+  };
+}

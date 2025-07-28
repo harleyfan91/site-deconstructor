@@ -1,9 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Server-side Supabase client with service role key for elevated permissions
-// Note: Environment variables seem to be mixed up in the secrets
-const supabaseUrl = process.env.SUPABASE_SERVICE_ROLE_KEY!; // This contains the URL
-const serviceRoleKey = process.env.VITE_SUPABASE_URL!; // This contains the service role key
+// Fixed: Use hardcoded URL and correct service role key from environment
+const supabaseUrl = 'https://sxrhpwmdslxgwpqfdmxu.supabase.co';
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 console.log('🔧 Supabase configuration check:');
 console.log('📍 URL source (SUPABASE_SERVICE_ROLE_KEY):', supabaseUrl ? `${supabaseUrl.substring(0, 20)}...` : 'MISSING');

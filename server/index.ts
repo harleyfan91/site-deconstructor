@@ -250,6 +250,56 @@ app.get('/api/scans/:scanId/task/:type', async (req, res) => {
   }
 });
 
+// UI Analysis endpoint
+app.get('/api/ui/scan', async (req, res) => {
+  try {
+    const { url } = req.query;
+
+    if (!url || typeof url !== 'string') {
+      return res.status(400).json({ 
+        error: 'URL parameter is required',
+        status: 'error' 
+      });
+    }
+
+    // Import the UI scraper service
+    const { UIScraperService } = await import('./services/uiScraper');
+    
+    // Get or create UI analysis
+    const analysis = await UIScraperService.getOrCreateAnalysis(url);
+    
+    res.json({
+      status: 'success',
+      data: analysis,
+      url
+    });
+
+  } catch (error) {
+    console.error('UI Analysis API error:', error);
+    res.status(500).json({ 
+      error: 'Internal server error',
+      status: 'error',
+      data: {
+        colors: [],
+        fonts: [],
+        images: [],
+        imageAnalysis: {
+          totalImages: 0,
+          estimatedPhotos: 0,
+          estimatedIcons: 0,
+          imageUrls: [],
+          photoUrls: [],
+          iconUrls: [],
+          altStats: { withAlt: 0, withoutAlt: 0, emptyAlt: 0, totalImages: 0 }
+        },
+        contrastIssues: [],
+        violations: [],
+        accessibilityScore: 0
+      }
+    });
+  }
+});
+
 // Keep existing scan endpoint for backward compatibility
 app.post('/api/scan', async (req, res) => {
   try {
