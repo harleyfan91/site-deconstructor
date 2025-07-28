@@ -6,7 +6,9 @@ import Dashboard from './pages/Dashboard';
 import AnalyzePage from './pages/AnalyzePage';
 import PanelTestPage from './pages/PanelTestPage';
 import ProgressTestPage from './pages/ProgressTestPage';
+import AuthPage from './pages/AuthPage';
 import { AnalysisProvider } from './contexts/AnalysisContext';
+import { AuthProvider } from './providers/AuthProvider';
 import { useState } from 'react';
 
 const App = () => {
@@ -21,8 +23,9 @@ const App = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <AnalysisProvider>
-        <Router>
+      <AuthProvider>
+        <AnalysisProvider>
+          <Router>
           <Routes>
             <Route path="/" element={<LandingPage darkMode={darkMode} toggleDarkMode={toggleDarkMode} />} />
             <Route path="/dashboard" element={<Dashboard darkMode={darkMode} toggleDarkMode={toggleDarkMode} />} />
@@ -30,9 +33,11 @@ const App = () => {
             <Route path="/analyze" element={<AnalyzePage darkMode={darkMode} toggleDarkMode={toggleDarkMode} />} />
             <Route path="/panel-test" element={<PanelTestPage darkMode={darkMode} toggleDarkMode={toggleDarkMode} />} />
             <Route path="/progress-test" element={<ProgressTestPage darkMode={darkMode} toggleDarkMode={toggleDarkMode} />} />
+            <Route path="/auth" element={<AuthPage darkMode={darkMode} toggleDarkMode={toggleDarkMode} />} />
           </Routes>
-        </Router>
-      </AnalysisProvider>
+          </Router>
+        </AnalysisProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 };

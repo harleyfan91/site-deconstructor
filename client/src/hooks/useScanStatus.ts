@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { apiRequest } from '../lib/apiFetch';
 
 export interface ScanStatus {
   status: 'queued' | 'running' | 'complete' | 'failed';
@@ -10,13 +11,7 @@ export interface ScanStatus {
 export function useScanStatus(scanId: string) {
   return useQuery({
     queryKey: ['scanStatus', scanId],
-    queryFn: async (): Promise<ScanStatus> => {
-      const res = await fetch(`/api/scans/${scanId}/status`);
-      if (!res.ok) {
-        throw new Error(`Status fetch failed: ${res.status}`);
-      }
-      return res.json();
-    },
+    queryFn: () => apiRequest<ScanStatus>(`/api/scans/${scanId}/status`),
     refetchInterval: (query) => {
       // Stop polling when scan is complete or failed
       if (query.state.data?.status === 'complete' || query.state.data?.status === 'failed') {

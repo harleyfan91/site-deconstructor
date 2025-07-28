@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { apiRequest } from '../lib/apiFetch';
 
 export interface TaskData {
   type: 'tech' | 'colors' | 'seo' | 'perf';
@@ -11,13 +12,7 @@ export interface TaskData {
 export function useTaskData(scanId: string, type: string) {
   return useQuery({
     queryKey: ['task', scanId, type],
-    queryFn: async (): Promise<TaskData> => {
-      const res = await fetch(`/api/scans/${scanId}/task/${type}`);
-      if (!res.ok) {
-        throw new Error(`Task fetch failed: ${res.status}`);
-      }
-      return res.json();
-    },
+    queryFn: () => apiRequest<TaskData>(`/api/scans/${scanId}/task/${type}`),
     staleTime: Infinity, // Cache completed tasks forever
     refetchInterval: (query) => {
       // Stop polling when task is complete or failed
