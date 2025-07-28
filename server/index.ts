@@ -13,8 +13,8 @@ app.use(express.urlencoded({ extended: true }));
 
 // Supabase configuration check
 console.log('🔧 Supabase configuration check:');
-console.log(`📍 VITE_SUPABASE_URL: ${process.env.VITE_SUPABASE_URL?.substring(0, 20)}...`);
-console.log(`📍 SUPABASE_SERVICE_ROLE_KEY: ${process.env.SUPABASE_SERVICE_ROLE_KEY?.substring(0, 20)}...`);
+console.log(`📍 VITE_SUPABASE_URL: ${process.env.VITE_SUPABASE_URL?.substring(0, 50)}...`);
+console.log(`📍 SUPABASE_SERVICE_ROLE_KEY: ${process.env.SUPABASE_SERVICE_ROLE_KEY?.substring(0, 50)}...`);
 
 // API Routes
 console.log('🚀 Registering unified API routes...');
@@ -28,7 +28,7 @@ app.get('/api/health', (req, res) => {
 app.get('/api/overview', async (req, res) => {
   try {
     const { url } = req.query;
-    
+
     if (!url || typeof url !== 'string') {
       return res.status(400).json({ 
         error: 'URL parameter is required',
@@ -43,7 +43,7 @@ app.get('/api/overview', async (req, res) => {
       url,
       message: 'Analysis infrastructure ready - backend services need integration'
     });
-    
+
   } catch (error) {
     console.error('Overview API error:', error);
     res.status(500).json({ 
@@ -57,7 +57,7 @@ app.get('/api/overview', async (req, res) => {
 app.post('/api/scans', async (req, res) => {
   try {
     const { url, taskTypes = ["tech", "colors", "seo", "perf"] } = req.body;
-    
+
     if (!url || typeof url !== 'string') {
       return res.status(400).json({ 
         error: 'URL is required in request body',
@@ -68,7 +68,7 @@ app.post('/api/scans', async (req, res) => {
     // Import crypto and database modules
     const { randomUUID } = await import('crypto');
     const { Pool } = await import('pg');
-    
+
     const scanId = randomUUID();
 
     // Insert into database tables optimistically
@@ -80,22 +80,22 @@ app.post('/api/scans', async (req, res) => {
 
       // Begin transaction
       const client = await pool.connect();
-      
+
       try {
         await client.query('BEGIN');
-        
+
         // Insert scan record
         await client.query(
           'INSERT INTO scans (id, url, user_id, active, created_at) VALUES ($1, $2, NULL, true, NOW())',
           [scanId, url.trim()]
         );
-        
+
         // Insert scan status record
         await client.query(
           'INSERT INTO scan_status (scan_id, status, progress) VALUES ($1, $2, 0)',
           [scanId, 'queued']
         );
-        
+
         // Insert scan tasks for each requested type
         for (const type of taskTypes) {
           await client.query(
@@ -103,10 +103,10 @@ app.post('/api/scans', async (req, res) => {
             [scanId, type, 'queued']
           );
         }
-        
+
         await client.query('COMMIT');
         console.log('Scan created successfully:', scanId);
-        
+
       } catch (error) {
         await client.query('ROLLBACK');
         throw error;
@@ -114,7 +114,7 @@ app.post('/api/scans', async (req, res) => {
         client.release();
         await pool.end();
       }
-      
+
     } catch (dbError) {
       console.error('Database insertion failed:', dbError);
       throw new Error('Failed to create scan record');
@@ -126,7 +126,7 @@ app.post('/api/scans', async (req, res) => {
       url: url.trim(),
       task_types: taskTypes
     });
-    
+
   } catch (error) {
     console.error('Scan creation error:', error);
     res.status(500).json({ 
@@ -140,7 +140,7 @@ app.post('/api/scans', async (req, res) => {
 app.get('/api/scans/:scanId/status', async (req, res) => {
   try {
     const { scanId } = req.params;
-    
+
     // Import database modules
     const { Pool } = await import('pg');
     const pool = new Pool({
@@ -148,14 +148,14 @@ app.get('/api/scans/:scanId/status', async (req, res) => {
     });
 
     const client = await pool.connect();
-    
+
     try {
       // Get scan info
       const scanResult = await client.query(
         'SELECT id, url, active FROM scans WHERE id = $1',
         [scanId]
       );
-      
+
       if (scanResult.rows.length === 0) {
         return res.status(404).json({ error: 'Scan not found' });
       }
@@ -190,7 +190,7 @@ app.get('/api/scans/:scanId/status', async (req, res) => {
 app.get('/api/scans/:scanId/task/:type', async (req, res) => {
   try {
     const { scanId, type } = req.params;
-    
+
     // Import database modules
     const { Pool } = await import('pg');
     const pool = new Pool({
@@ -198,14 +198,14 @@ app.get('/api/scans/:scanId/task/:type', async (req, res) => {
     });
 
     const client = await pool.connect();
-    
+
     try {
       // Get task info
       const taskResult = await client.query(
         'SELECT task_id, type, status, payload FROM scan_tasks WHERE scan_id = $1 AND type = $2',
         [scanId, type]
       );
-      
+
       if (taskResult.rows.length === 0) {
         return res.status(404).json({ error: 'Task not found' });
       }
@@ -221,12 +221,12 @@ app.get('/api/scans/:scanId/task/:type', async (req, res) => {
           const url = scanInfo.rows[0].url;
           const urlHash = crypto.createHash('sha256').update(url).digest('hex');
           const cacheKey = `${type}_${urlHash}`;
-          
+
           const cacheResult = await client.query(
             'SELECT audit_json FROM analysis_cache WHERE url_hash = $1',
             [cacheKey]
           );
-          
+
           if (cacheResult.rows.length > 0) {
             data = cacheResult.rows[0].audit_json;
           }
@@ -254,7 +254,7 @@ app.get('/api/scans/:scanId/task/:type', async (req, res) => {
 app.post('/api/scan', async (req, res) => {
   try {
     const { url } = req.body;
-    
+
     if (!url || typeof url !== 'string') {
       return res.status(400).json({ 
         error: 'URL is required in request body',
@@ -269,7 +269,7 @@ app.post('/api/scan', async (req, res) => {
       url,
       message: 'Scan queued - backend integration needed'
     });
-    
+
   } catch (error) {
     console.error('Scan API error:', error);
     res.status(500).json({ 

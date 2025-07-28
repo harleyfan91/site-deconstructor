@@ -18,7 +18,7 @@ interface UIAnalysisTabProps {
 }
 
 const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error, scanId = 'default' }) => {
-  const ui = data?.data?.ui;
+  const ui = data?.data;
   const { colors, fonts, images, imageAnalysis, contrastIssues = [], violations = [], accessibilityScore = 0 } = ui || {};
   const { state, toggle } = usePanelState(scanId);
 

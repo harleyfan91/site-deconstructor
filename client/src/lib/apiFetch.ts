@@ -3,7 +3,7 @@ import { supabase } from './supabaseClient';
 export async function apiFetch(path: string, options: RequestInit = {}) {
   try {
     const { data: { session } } = await supabase.auth.getSession();
-    
+
     const headers = {
       'Content-Type': 'application/json',
       ...(options.headers || {}),
@@ -33,7 +33,7 @@ export async function apiFetch(path: string, options: RequestInit = {}) {
 // Helper for JSON responses
 export async function apiRequest<T = any>(path: string, options: RequestInit = {}): Promise<T> {
   const response = await apiFetch(path, options);
-  
+
   if (!response.ok) {
     const errorText = await response.text();
     throw new Error(`API Error ${response.status}: ${errorText}`);
@@ -41,3 +41,11 @@ export async function apiRequest<T = any>(path: string, options: RequestInit = {
 
   return response.json();
 }
+
+// UI Analysis
+export async function ui(url: string): Promise<UIAnalysis> {
+    const response = await fetch(`/api/ui/scan?url=${encodeURIComponent(url)}`);
+    if (!response.ok) throw new Error('Failed to fetch UI analysis');
+    const data = await response.json();
+    return data.data || {};
+  }
