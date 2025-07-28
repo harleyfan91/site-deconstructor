@@ -86,31 +86,27 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
     );
   }
 
-  const { performance, overview, tech, technical } = data?.data || {};
+  const { performance, overview, tech } = data?.data || {};
   const performanceScore = overview?.overallScore || 0;
-  const pageLoadTime = performance?.pageLoadTime || { mobile: 0, desktop: 0 };
-  const mobileScore = Math.round((pageLoadTime.mobile || 0) < 3000 ? 90 : 
-                                 (pageLoadTime.mobile || 0) < 5000 ? 70 : 50);
-  const techData = tech || technical || {};
-  const securityScore = techData?.lighthouseScore || 0;
+  const mobileScore = Math.round((performance?.pageLoadTime?.mobile || 0) < 3000 ? 90 : 
+                                 (performance?.pageLoadTime?.mobile || 0) < 5000 ? 70 : 50);
+  const securityScore = tech?.lighthouseScore || 0;
   
   // Handle both old array format and new object format
-  const coreWebVitalsArray = performance?.coreWebVitals;
-  const coreWebVitals = Array.isArray(coreWebVitalsArray) && coreWebVitalsArray.length > 0 
-    ? { lcpMs: coreWebVitalsArray[0]?.lcp || 0, inpMs: coreWebVitalsArray[0]?.fid || 0, cls: coreWebVitalsArray[0]?.cls || 0 }
-    : coreWebVitalsArray || { lcpMs: 0, inpMs: 0, cls: 0 };
+  const coreWebVitals = performance?.coreWebVitals;
+  const pageLoadTime = performance?.pageLoadTime;
   
 
   // Convert Core Web Vitals object to chart data
-  const vitalsChartData = [
+  const vitalsChartData = coreWebVitals ? [
     { name: 'LCP', value: Math.round(coreWebVitals.lcpMs || 0), benchmark: 2500 },
     { name: 'INP', value: Math.round(coreWebVitals.inpMs || 0), benchmark: 200 },
     { name: 'CLS', value: Math.round((coreWebVitals.cls || 0) * 100), benchmark: 10 }
-  ];
+  ] : [];
 
   // Convert page load times to seconds with proper fallbacks
-  const desktopTimeMs = pageLoadTime.desktop || 0;
-  const mobileTimeMs = pageLoadTime.mobile || 0;
+  const desktopTimeMs = pageLoadTime?.desktop || 0;
+  const mobileTimeMs = pageLoadTime?.mobile || 0;
   const desktopTimeSec = Number(desktopTimeMs) / 1000;
   const mobileTimeSec = Number(mobileTimeMs) / 1000;
 

@@ -45,6 +45,17 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data, loading, error }) => {
     );
   }
 
+  // Show loading indicator only when no data at all
+  if (loading && !data) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
+        <CircularProgress size={60} />
+        <Typography variant="h6" sx={{ ml: 2 }}>
+          Analyzing website...
+        </Typography>
+      </Box>
+    );
+  }
 
   const overview = data?.data?.overview || { overallScore: 0 };
   if (!overview.overallScore && overview.overallScore !== 0) return null;
