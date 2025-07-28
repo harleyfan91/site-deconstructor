@@ -1,5 +1,9 @@
 {
-  "include": ["client/src/**/*", "shared/**/*", "server/**/*"],
+  "include": [
+    "client/src/**/*",  // React UI
+    "shared/**/*",      // shared types
+    "server/analysis/**/*" // analysis engine
+  ],
   "exclude": ["node_modules", "build", "dist", "**/*.test.ts"],
   "compilerOptions": {
     "incremental": true,

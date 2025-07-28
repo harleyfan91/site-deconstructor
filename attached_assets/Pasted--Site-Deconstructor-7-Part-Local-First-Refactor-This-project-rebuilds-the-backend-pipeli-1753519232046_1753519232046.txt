@@ -1,0 +1,144 @@
+## 🚀 **Site Deconstructor – 7‑Part Local‑First Refactor**
+
+This project rebuilds the backend pipeline while keeping the React/Tailwind UI intact. The seven prompts are:
+
+1. **Schema & migrations** ← *current task*
+2. Optimistic **POST /scans** stub & redirect
+3. **Worker & task fan‑out** loop
+4. **React‑Query hooks** + skeleton cards
+5. LocalStorage **panel‑state** hook
+6. **Realtime progress** subscription
+7. **Supabase Auth** + RLS
+   *(CI/deploy scripting will follow after these steps in a separate prompt.)*
+
+### ⛔ Hard constraints for **Part 1 (Schema & migrations)**
+
+* **Only** touch database‑related code: Drizzle models, migration SQL, `package.jsonc` script.
+* **Do NOT** edit any UI component, API route, worker file, Auth logic, or deployment config.
+* Provide a self‑contained test the human can run **now** in Replit—no dependency on future prompts.
+
+---
+
+# Part 1 / 7 – Database schema & Drizzle migrations
+
+\### 🎯 Goals for this prompt
+
+1. Add or update Drizzle models for the four tables: `scans`, `scan_status`, `analysis_cache`, `scan_tasks`.
+2. Generate migration SQL that makes Supabase match the models.
+3. Ensure a `migrate:supabase` npm script exists.
+4. Supply a local test command the user can run immediately.
+
+---
+
+\## 1 · Update `shared/schema.ts`
+Replace the existing `pgTable("analysis_cache"…)` block (and any old tables) with **all four** fresh table definitions:
+
+```ts
+// scans\export const scans = pgTable("scans", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id"), // FK -> auth.users (nullable for anon)
+  url: text("url").notNull(),
+  createdAt: timestamptz("created_at").defaultNow(),
+  lastRunAt: timestamptz("last_run_at"),
+  active: boolean("active").default(true),
+});
+
+// scan_status
+export const scanStatus = pgTable("scan_status", {
+  scanId: uuid("scan_id")
+    .primaryKey()
+    .references(() => scans.id, { onDelete: "cascade" }),
+  status: text("status")
+    .$type<"queued" | "running" | "complete" | "failed">()
+    .notNull(),
+  progress: smallint("progress").default(0),
+  startedAt: timestamptz("started_at"),
+  finishedAt: timestamptz("finished_at"),
+  error: text("error"),
+});
+
+// analysis_cache
+export const analysisCache = pgTable("analysis_cache", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  urlHash: text("url_hash").notNull().unique(),
+  originalUrl: text("original_url").notNull(),
+  createdAt: timestamptz("created_at").defaultNow(),
+  expiresAt: timestamptz("expires_at"),
+  auditJson: jsonb("audit_json").notNull(),
+});
+
+// scan_tasks
+export const scanTasks = pgTable("scan_tasks", {
+  taskId: uuid("task_id").primaryKey().defaultRandom(),
+  scanId: uuid("scan_id").references(() => scans.id, { onDelete: "cascade" }),
+  type: text("type")
+    .$type<"tech" | "colors" | "seo" | "perf">()
+    .notNull(),
+  status: text("status")
+    .$type<"queued" | "running" | "complete" | "failed">()
+    .default("queued"),
+  payload: jsonb("payload"),
+  createdAt: timestamptz("created_at").defaultNow(),
+});
+```
+
+---
+
+\## 2 · Generate migrations
+If a Drizzle generator script already exists, run:
+
+```bash
+npm run drizzle:migrate
+```
+
+otherwise run:
+
+```bash
+npx drizzle-kit generate:pg --schema src/shared/schema.ts
+```
+
+This should create SQL files in the `migrations/` folder reflecting the four tables, with uuid defaults (`uuid_generate_v4()` or `gen_random_uuid()`), unique index on `url_hash`, etc.
+
+---
+
+\## 3 · Ensure `migrate:supabase` script
+Add to **`package.jsonc`** if missing:
+
+```jsonc
+"scripts": {
+  "migrate:supabase": "npx drizzle-kit push:pg --schema \"postgres\".\"public\"",
+  // … (other scripts)
+}
+```
+
+---
+
+\## 4 · Local verification (Replit)
+
+1. **In Replit shell**:
+
+   ```bash
+   npm run migrate:supabase
+   ```
+
+   Should apply migrations without error.
+2. **In Supabase SQL editor** run:
+
+   ```sql
+   select table_name from information_schema.tables
+   where table_schema = 'public'
+     and table_name in ('scans','scan_status','analysis_cache','scan_tasks');
+   ```
+
+   Expect exactly **4 rows** back.
+   No UI, API, or worker code is needed to pass this test.
+
+---
+
+\### Commit changes
+
+```bash
+# Only DB-related files are staged
+git add src/shared/schema.ts migrations package.jsonc
+git commit -m "db: add scans, scan_status, analysis_cache, scan_tasks models + migrations"
+```

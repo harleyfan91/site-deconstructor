@@ -1,0 +1,104 @@
+## 🚀 **Site Deconstructor – 7‑Part Local‑First Refactor**
+
+We’re on **Part 2 / 7**. The full roadmap:
+
+1. **Schema & migrations** ✅ (done)
+2. **Optimistic POST /scans stub & redirect** ← *current task*
+3. Worker & task fan‑out loop
+4. React‑Query hooks + skeleton cards
+5. LocalStorage panel‑state hook
+6. Realtime progress subscription
+7. Supabase Auth + RLS
+   *(CI/deploy scripting comes after part 7.)*
+
+### ⛔ Hard constraints for *this* prompt
+
+* **Only** touch the new minimalist API route + URL‑entry page wiring.
+* Do **not** edit worker code, React‑Query hooks, Auth, or deployment config.
+* Provide a test the human can run inside Replit preview without worker logic.
+
+---
+
+# Part 2 / 7 – Optimistic scan creation & instant redirect
+
+### 🎯 Goals
+
+1. Add a lightweight **Fastify route** `/api/scans` that inserts rows into Supabase (`scans`, `scan_status`, `scan_tasks`) and returns `{ scan_id }` immediately.
+2. Wire the **URL‑entry page** (`client/src/pages/UrlInput.tsx`) to call that route, then `navigate('/dashboard/:scan_id')` as soon as it resolves.
+3. Add a simple in‑page toast or console log on error.
+4. Supply a local test that shows redirect works <½ second with no worker running.
+
+---
+
+## 1 · Create server endpoint
+
+**File:** `server/api/scans.ts`
+
+```ts
+import fastify from "fastify";
+import { drizzle } from "drizzle-orm/node-postgres";
+import * as schema from "../../src/shared/schema";
+import { randomUUID } from "crypto";
+
+export default async function (app: ReturnType<typeof fastify>) {
+  const db = drizzle(/* pg client with Supabase creds via env */);
+
+  app.post("/api/scans", async (req, reply) => {
+    const { url, taskTypes = ["tech", "colors", "seo", "perf"] } = req.body as { url: string; taskTypes?: string[] };
+    const scanId = randomUUID();
+
+    // 1. insert into scans & scan_status
+    await db.transaction(async (tx) => {
+      await tx.insert(schema.scans).values({ id: scanId, url });
+      await tx.insert(schema.scanStatus).values({ scanId, status: "queued" });
+      await Promise.all(
+        taskTypes.map((type) =>
+          tx.insert(schema.scanTasks).values({ taskId: randomUUID(), scanId, type, status: "queued" })
+        )
+      );
+    });
+
+    reply.code(201).send({ scan_id: scanId });
+  });
+}
+```
+
+*If a Fastify instance doesn’t exist yet, create `server/index.ts` with a minimal boot that registers this route and listens on `PORT || 5000`.*
+
+## 2 · Proxy in dev (if needed)
+
+In `vite.config.ts` ensure a dev proxy forwards `/api/**` to `http://localhost:5000` so the React app can hit the Fastify server in Replit preview.
+
+## 3 · Update URL input page
+
+**File:** `client/src/pages/UrlInput.tsx`
+
+1. `import { useNavigate } from "react-router-dom";`
+2. On submit handler:
+
+   ```ts
+   const res = await fetch("/api/scans", {
+     method: "POST",
+     headers: { "Content-Type": "application/json" },
+     body: JSON.stringify({ url }),
+   });
+   const { scan_id } = await res.json();
+   navigate(`/dashboard/${scan_id}`);
+   ```
+3. Show an inline toast `Could not start scan` if `res.ok` is false.
+
+## 4 · Local test (Replit preview)
+
+1. In one shell tab: `npm run dev` (Vite UI).
+2. In another: `npm run server` (Fastify).
+3. In the preview, enter `https://example.com` → Should redirect to `/dashboard/<uuid>` in under ½ second.
+4. Supabase should show new rows in `scans`, `scan_status`, and 4 queued rows in `scan_tasks`.
+
+---
+
+### Commit
+
+```bash
+git add server/api/scans.ts server/index.ts vite.config.ts client/src/pages/UrlInput.tsx
+git commit -m "feat: optimistic POST /scans endpoint and instant dashboard redirect"
+```

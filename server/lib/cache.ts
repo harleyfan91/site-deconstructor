@@ -87,10 +87,10 @@ export class UnifiedCache {
     const cacheKey = this.generateCacheKey(prefix, url);
     
     // Try memory cache first
-    const memoryResult = this.memoryCache.get<T>(cacheKey);
+    const memoryResult = this.memoryCache.get(cacheKey);
     if (memoryResult) {
       console.log(`📋 Memory cache hit for: ${cacheKey}`);
-      return memoryResult;
+      return memoryResult as T;
     }
 
     // Try Supabase cache
@@ -98,9 +98,12 @@ export class UnifiedCache {
       const supabaseResult = await SupabaseCacheService.get(cacheKey);
       if (supabaseResult) {
         console.log(`🗄️ Supabase cache hit for: ${cacheKey}`);
-        // Store in memory for future requests
-        this.memoryCache.set(cacheKey, supabaseResult.analysis_data, this.MEMORY_TTL);
-        return supabaseResult.analysis_data;
+        // Store in memory for future requests  
+        const data = (supabaseResult as any).audit_json || (supabaseResult as any).analysis_data;
+        if (data) {
+          this.memoryCache.set(cacheKey, data, this.MEMORY_TTL);
+          return data as T;
+        }
       }
     } catch (error) {
       console.warn(`⚠️ Supabase cache lookup failed for ${cacheKey}:`, error.message);
@@ -146,9 +149,10 @@ export class UnifiedCache {
     }
 
     // Check if request is already in progress
-    if (this.concurrentRequests[cacheKey]) {
+    const existingRequest = this.concurrentRequests[cacheKey];
+    if (existingRequest) {
       console.log(`⏳ Concurrent request detected for ${cacheKey}, waiting...`);
-      return this.concurrentRequests[cacheKey];
+      return existingRequest;
     }
 
     // Start new computation

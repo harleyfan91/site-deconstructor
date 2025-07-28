@@ -4,7 +4,6 @@ import {
   Typography,
   Card,
   CardContent,
-  CircularProgress,
   Alert,
   Tooltip,
   Slider,
@@ -97,7 +96,6 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
   const coreWebVitals = performance?.coreWebVitals;
   const pageLoadTime = performance?.pageLoadTime;
   
-  const showLoadingForPerformance = loading || !coreWebVitals;
 
   // Convert Core Web Vitals object to chart data
   const vitalsChartData = coreWebVitals ? [
@@ -137,22 +135,14 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
               </Typography>
             </Box>
             
-            {showLoadingForPerformance ? (
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', py: 4 }}>
-                <CircularProgress size={32} sx={{ color: 'primary.main', mr: 2 }} />
-                <Typography variant="body2" color="text.secondary">
-                  Loading performance metrics...
-                </Typography>
-              </Box>
-            ) : (
-              <>
-                <Box sx={{ mb: 3 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="body2">Performance Score</Typography>
-                    <Typography variant="h4" sx={{ color: getScoreColor(performanceScore, theme) }}>
-                      {performanceScore}
-                    </Typography>
-                  </Box>
+            <>
+              <Box sx={{ mb: 3 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                  <Typography variant="body2">Performance Score</Typography>
+                  <Typography variant="h4" sx={{ color: getScoreColor(performanceScore, theme) }}>
+                    {performanceScore}
+                  </Typography>
+                </Box>
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                     {performanceScore >= 90 ? 'Excellent Performance' : 
                      performanceScore >= 70 ? 'Good Performance' : 'Needs Improvement'}
@@ -255,7 +245,6 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
                   </Box>
                 )}
               </>
-            )}
           </CardContent>
         </Card>
         
@@ -268,15 +257,7 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
                 Core Web Vitals
               </Typography>
             </Box>
-            {showLoadingForPerformance ? (
-              <Box display="flex" justifyContent="center" alignItems="center" height="300px">
-                <CircularProgress size={40} />
-                <Typography variant="body2" sx={{ ml: 2 }}>
-                  Loading Core Web Vitals...
-                </Typography>
-              </Box>
-            ) : (
-              <ChartContainer config={chartConfig} className="h-80 w-full">
+            <ChartContainer config={chartConfig} className="h-80 w-full">
                 <RechartsBarChart
                   data={vitalsChartData}
                   margin={{ top: 20, right: 30, left: 10, bottom: 5 }}
@@ -288,7 +269,6 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
                   <Bar dataKey="benchmark" fill={theme.palette.grey[300]} />
                 </RechartsBarChart>
               </ChartContainer>
-            )}
           </CardContent>
         </Card>
       </Box>
@@ -303,27 +283,18 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
                 Mobile Analysis
               </Typography>
             </Box>
-            {loading ? (
-              <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
-                <CircularProgress size={20} sx={{ mr: 1 }} />
-                <Typography variant="body2" color="text.secondary">
-                  Analyzing mobile responsiveness...
+            <>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                <Typography variant="body2">Mobile Score</Typography>
+                <Typography variant="h4" sx={{ color: getScoreColor(mobileScore, theme) }}>
+                  {mobileScore}%
                 </Typography>
               </Box>
-            ) : (
-              <>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography variant="body2">Mobile Score</Typography>
-                  <Typography variant="h4" sx={{ color: getScoreColor(mobileScore, theme) }}>
-                    {mobileScore}%
-                  </Typography>
-                </Box>
-                <Typography variant="body2" color="text.secondary">
-                  {mobileScore >= 90 ? 'Excellent mobile experience' : 
-                   mobileScore >= 70 ? 'Good mobile experience' : 'Mobile needs improvement'}
-                </Typography>
-              </>
-            )}
+              <Typography variant="body2" color="text.secondary">
+                {mobileScore >= 90 ? 'Excellent mobile experience' :
+                 mobileScore >= 70 ? 'Good mobile experience' : 'Mobile needs improvement'}
+              </Typography>
+            </>
           </CardContent>
         </Card>
         
@@ -335,24 +306,15 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
                 Recommendations
               </Typography>
             </Box>
-            {loading ? (
-              <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
-                <CircularProgress size={20} sx={{ mr: 1 }} />
-                <Typography variant="body2" color="text.secondary">
-                  Generating recommendations...
-                </Typography>
-              </Box>
-            ) : (
-              <>
-                <Typography variant="body2" sx={{ mb: 1 }}>
-                  Performance improvements available
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {performanceScore >= 90 ? 'Site is well optimized' : 
-                   performanceScore >= 70 ? 'Some optimizations possible' : 'Multiple improvements needed'}
-                </Typography>
-              </>
-            )}
+            <>
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                Performance improvements available
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {performanceScore >= 90 ? 'Site is well optimized' :
+                 performanceScore >= 70 ? 'Some optimizations possible' : 'Multiple improvements needed'}
+              </Typography>
+            </>
           </CardContent>
         </Card>
       </Box>

@@ -5,7 +5,6 @@ import {
   Card,
   CardContent,
   Alert,
-  CircularProgress,
   Chip,
   useTheme,
   Tooltip,
@@ -16,7 +15,6 @@ import {
 import { ChevronDown, ChevronUp, Shield, Accessibility, CheckCircle, Lock } from 'lucide-react';
 import type { AnalysisResponse } from '@/types/analysis';
 import { dashIfEmpty } from '../../lib/ui';
-import { useSessionState } from '../../hooks/useSessionState';
 import { useAnalysisContext } from '../../contexts/AnalysisContext';
 
 interface ComplianceTabProps {
@@ -50,11 +48,8 @@ function chipStateStyle(isActive: boolean, theme: any) {
 
 const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) => {
   const theme = useTheme();
-  const [securityGradeExpanded, setSecurityGradeExpanded] = useSessionState('compliance-security-grade-expanded', false);
-  const [headerSectionsExpanded, setHeaderSectionsExpanded] = useSessionState<Record<string, boolean>>(
-    'compliance-header-sections-expanded',
-    {}
-  );
+  const [securityGradeExpanded, setSecurityGradeExpanded] = useState(false);
+  const [headerSectionsExpanded, setHeaderSectionsExpanded] = useState<Record<string, boolean>>({});
   const [glowingSections, setGlowingSections] = React.useState<Record<string, boolean>>({});
   const { data: contextData } = useAnalysisContext();
 
@@ -64,7 +59,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
       [sectionName]: !prev[sectionName]
     }));
   };
-  
+
   // Remove tab-level loading - we use section-level loading instead
 
   if (error) {
@@ -101,7 +96,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
     xcto: '', 
     referrer: '' 
   };
-  
+
   // Simplified security score logic to avoid dependency issues
   const showSeparateSecurityGrade = false; // Disable separate security grade for now
 
@@ -139,7 +134,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
   // Restored auto-collapse animation with fixed dependencies
   React.useEffect(() => {
     if (!data || headerCategories.length === 0) return;
-    
+
     // Always initialize sections as expanded for fresh data
     const initialState: Record<string, boolean> = {};
     headerCategories.forEach(category => {
@@ -180,7 +175,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
           Compliance Audits
         </Typography>
       </Box>
-      
+
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: showSeparateSecurityGrade ? '1fr 1fr 1fr' : '1fr 1fr' }, gap: 2, mb: 2 }}>
         {/* Security Headers - No top-level collapsibility */}
         <Card sx={{ borderRadius: 2 }}>
@@ -197,15 +192,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
                 Security Headers
               </Typography>
             </Box>
-            
-            {loading ? (
-              <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
-                <CircularProgress size={20} sx={{ mr: 1 }} />
-                <Typography variant="body2" color="text.secondary">
-                  Analyzing security headers...
-                </Typography>
-              </Box>
-            ) : (
+
             <Box>
               {headerCategories.map((category, categoryIndex) => (
                 <Box key={categoryIndex} sx={{ mb: 2 }}>
@@ -295,7 +282,6 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
                 </Box>
               ))}
             </Box>
-            )}
           </CardContent>
         </Card>
 
@@ -337,7 +323,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
                   {securityGradeExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                 </IconButton>
               </Box>
-              
+
               <Collapse in={securityGradeExpanded} timeout="auto">
                 <Box sx={{ mt: 2 }}>
                   {lhr?.categories['best-practices'] ? (
@@ -389,14 +375,7 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
                 Accessibility Violations
               </Typography>
             </Box>
-            {loading ? (
-              <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
-                <CircularProgress size={20} sx={{ mr: 1 }} />
-                <Typography variant="body2" color="text.secondary">
-                  Analyzing accessibility...
-                </Typography>
-              </Box>
-            ) : violations.length === 0 ? (
+            {violations.length === 0 ? (
               <Typography variant="body2">None</Typography>
             ) : (
               <Box component="ul" sx={{ pl: 2 }}>
@@ -426,14 +405,6 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
               Other Checks
             </Typography>
           </Box>
-          {loading ? (
-            <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
-              <CircularProgress size={20} sx={{ mr: 1 }} />
-              <Typography variant="body2" color="text.secondary">
-                Analyzing compliance checks...
-              </Typography>
-            </Box>
-          ) : (
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
             <Tooltip
               title={social.hasOpenGraph ? 'Open Graph tags detected' : 'Open Graph tags missing'}
@@ -508,7 +479,6 @@ const ComplianceTab: React.FC<ComplianceTabProps> = ({ data, loading, error }) =
               />
             </Tooltip>
           </Box>
-          )}
           <Typography variant="body2">
             <strong>Broken Links:</strong> {links.brokenLinks.length || 0}
           </Typography>

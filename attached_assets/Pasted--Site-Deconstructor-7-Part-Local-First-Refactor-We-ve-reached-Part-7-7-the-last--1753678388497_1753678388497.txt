@@ -1,0 +1,181 @@
+## 🚀 **Site Deconstructor – 7‑Part Local‑First Refactor**
+
+We’ve reached **Part 7 / 7** — the last functional slice before CI / deploy scripting. Your job is to wire in Supabase Auth + RLS **and** add a battery of tests covering everything built in Parts 1‑6.
+
+### Progress so far
+
+1. Schema & migrations ✅
+2. Optimistic **POST /scans** stub & redirect ✅
+3. Worker & task fan‑out loop ✅
+4. React‑Query hooks + skeleton cards ✅
+5. LocalStorage panel‑state hook ✅
+6. Realtime progress subscription ✅
+7. **Supabase Auth + row‑level security + full test suite** ← *current task*
+
+### ⛔ Hard constraints
+
+* Touch only **auth**, **RLS SQL**, **API auth‑guard**, and **test files**.  No deployment YAML, no new UI features beyond login/logout.
+* Tests must run headless in Replit (Vitest + Playwright within the workspace).  Use mock Supabase client for unit tests; real Supabase for integration.
+
+---
+
+# Part 7 / 7 – Supabase Auth + RLS & End‑to‑End Tests
+
+### 🎯 Goals
+
+1. **Login/logout UI** using Supabase Auth (email magic‑link).  Store session in client and expose `supabase.auth.getSession()`.
+2. **JWT injection**: every fetch from React‑Query hooks sends `Authorization: Bearer <access_token>` header.
+3. **API guard**: Fastify route middleware verifies the JWT with Supabase Admin key and sub‑claims `uid`.
+4. **Row‑Level Security**: add SQL policies so users can only `select/insert/update` rows where `user_id = auth.uid()` for `scans`, `scan_status`, `scan_tasks`; `analysis_cache` remains read‑only public.
+5. **Test suite**: implement & run tests that cover Parts 1‑6 **plus** new auth flow.
+
+   * Vitest unit tests:
+
+     * schema integrity (tables exist, columns match).  – already stubbed; ensure it passes.
+     * `usePanelState` stores & retrieves JSON.
+     * `useScanProgress` merges polling + realtime.
+   * Vitest integration:
+
+     * Mock Supabase client → call `POST /api/scans` with fake JWT; expect 201 + DB rows.
+     * Worker consumes tasks → `scan_status` flips to `complete`.
+   * Playwright E2E:
+
+     * Login via email magic link (stub Supabase auth in `page.route`).
+     * Submit URL, verify redirect, skeleton loads, tech card fills, progress bar hits 100%.  Cache row appears.
+6. **NPM test script**: `npm run test` executes Vitest + Playwright.
+
+---
+
+## 1 · Login component
+
+**`client/src/components/Auth/Login.tsx`**
+
+```tsx
+import { useState } from "react";
+import { supabase } from "../../lib/supabaseClient";
+export function Login() {
+  const [email, setEmail] = useState("");
+  const [sent, setSent] = useState(false);
+  return sent ? (
+    <p>Check your inbox for the magic link.</p>
+  ) : (
+    <form
+      onSubmit={async (e) => {
+        e.preventDefault();
+        await supabase.auth.signInWithOtp({ email });
+        setSent(true);
+      }}>
+      <input value={email} onChange={(e) => setEmail(e.target.value)} />
+      <button type="submit">Send magic link</button>
+    </form>
+  );
+}
+```
+
+Add a simple `Logout` button that calls `supabase.auth.signOut()`.
+
+## 2 · Auth context
+
+**`client/src/providers/AuthProvider.tsx`** → supply session + user to children via context.
+
+## 3 · Inject JWT into fetch
+
+Modify `client/src/lib/fetch.ts` helper used by React‑Query hooks:
+
+```ts
+export async function apiFetch(path: string, options: RequestInit = {}) {
+  const { data: { session } } = await supabase.auth.getSession();
+  const headers = {
+    ...(options.headers || {}),
+    Authorization: session ? `Bearer ${session.access_token}` : "",
+    "Content-Type": "application/json",
+  };
+  return fetch(path, { ...options, headers });
+}
+```
+
+Update hooks to call `apiFetch` instead of `fetch`.
+
+## 4 · Fastify JWT guard
+
+In `server/index.ts`:
+
+```ts
+import { createClient } from "@supabase/supabase-js";
+const supabaseAdmin = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+
+app.addHook("preHandler", async (req, reply) => {
+  const token = req.headers["authorization"]?.replace("Bearer ", "");
+  if (!token) return reply.code(401).send({ error: "missing token" });
+  const { data, error } = await supabaseAdmin.auth.getUser(token!);
+  if (error || !data.user) return reply.code(401).send({ error: "invalid token" });
+  req.user = data.user;
+});
+```
+
+Also set `user_id` when inserting into `scans` (Part 2) using `req.user.id`.
+
+## 5 · RLS policies SQL (save in `migrations/` new file)
+
+```sql
+alter table scans enable row level security;
+create policy "scans_read" on scans for select using ( user_id = auth.uid() );
+create policy "scans_write" on scans for insert with check ( user_id = auth.uid() );
+-- repeat for scan_status & scan_tasks
+```
+
+Run `npm run migrate:supabase` after adding.
+
+## 6 · Tests
+
+### Vitest config (`vitest.config.ts`) – ensure Playwright preset.
+
+**Sample unit test** `tests/usePanelState.test.ts`:
+
+```ts
+import { renderHook, act } from "@testing-library/react";
+import { usePanelState } from "../client/src/hooks/usePanelState";
+
+global.localStorage.clear();
+const { result } = renderHook(() => usePanelState("abc"));
+act(() => result.current.toggle("layout"));
+expect(result.current.state.layout).toBe(true);
+expect(JSON.parse(localStorage.getItem("panelState:abc")!)).toEqual({ layout: true });
+```
+
+*(Add similar tests for schema presence, API success, worker flow.)*
+
+**Playwright E2E** `tests/e2e/scanFlow.spec.ts` skeleton:
+
+```ts
+test("full scan flow", async ({ page, context }) => {
+  // mock magic link login
+  await page.route("https://*.supabase.co/auth/**", (route) => route.fulfill({ status: 200, body: JSON.stringify({ access_token: "fake" }) }));
+  await page.goto("/");
+  await page.getByPlaceholder("Enter URL").fill("https://example.com");
+  await page.getByRole("button", { name: "Analyze" }).click();
+  await page.waitForURL(/dashboard/);
+  await expect(page.getByText("TECH")).toHaveScreenshot();
+});
+```
+
+Add **`npm run test`** script: `vitest run && playwright test`.
+
+---
+
+### Local run order (Replit)
+
+1. `npm run migrate:supabase` (ensure RLS)
+2. `npm run dev` (concurrently server+vite)
+3. `npm run worker:dev`
+4. In UI: login, submit URL, see live progress, cards fill, panel state persists.
+5. `npm run test` — all Vitest + Playwright suites pass.
+
+---
+
+### Commit
+
+```bash
+git add client/src/components/Auth client/src/providers/AuthProvider.tsx client/src/lib/fetch.ts server/index.ts migrations/* tests/**/* package.jsonc
+git commit -m "feat: Supabase Auth + RLS and full test suite"
+```

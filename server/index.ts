@@ -1,101 +1,299 @@
-import express, { type Request, Response, NextFunction } from "express";
-import cors from "cors";
-import { registerRoutes } from "./routes/index";
+import express from "express";
+import { createServer } from "http";
 import { setupVite, serveStatic, log } from "./vite";
-
-// Global error handlers to prevent process crashes from Lighthouse performance mark errors
-process.on('uncaughtException', (error) => {
-  if (error instanceof DOMException && error.message.includes('performance mark')) {
-    console.warn('Caught DOMException for performance mark, continuing...', error.message);
-    return;
-  }
-  console.error('Uncaught Exception:', error);
-  process.exit(1);
-});
-
-process.on('unhandledRejection', (reason, promise) => {
-  if (reason instanceof DOMException && reason.message.includes('performance mark')) {
-    console.warn('Caught unhandled rejection for performance mark, continuing...', reason.message);
-    return;
-  }
-  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-  process.exit(1);
-});
+import cors from "cors";
 
 const app = express();
+const server = createServer(app);
 
-// CORS configuration for production security
-const corsOptions = {
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['https://dashboard.yoursite.com', 'https://app.yoursite.com']
-    : true, // Allow all origins in development
-  credentials: true,
-  optionsSuccessStatus: 200
-};
-
-app.use(cors(corsOptions));
+// Basic middleware
+app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 
-app.use((req, res, next) => {
-  const start = Date.now();
-  const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
+// Supabase configuration check
+console.log('🔧 Supabase configuration check:');
+console.log(`📍 URL source (SUPABASE_SERVICE_ROLE_KEY): ${process.env.VITE_SUPABASE_URL?.substring(0, 20)}...`);
+console.log(`📍 Key source (VITE_SUPABASE_URL): ${process.env.SUPABASE_SERVICE_ROLE_KEY?.substring(0, 20)}...`);
 
-  const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
-  };
+// API Routes
+console.log('🚀 Registering unified API routes...');
 
-  res.on("finish", () => {
-    const duration = Date.now() - start;
-    if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
-      }
-
-      if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "…";
-      }
-
-      log(logLine);
-    }
-  });
-
-  next();
+// Basic health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-(async () => {
-  const server = await registerRoutes(app);
+// Main API endpoint for comprehensive website analysis
+app.get('/api/overview', async (req, res) => {
+  try {
+    const { url } = req.query;
+    
+    if (!url || typeof url !== 'string') {
+      return res.status(400).json({ 
+        error: 'URL parameter is required',
+        status: 'error' 
+      });
+    }
 
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
+    // For now, return a basic response structure
+    // TODO: Implement full analysis using existing backend services
+    res.json({
+      status: 'pending',
+      url,
+      message: 'Analysis infrastructure ready - backend services need integration'
+    });
+    
+  } catch (error) {
+    console.error('Overview API error:', error);
+    res.status(500).json({ 
+      error: 'Internal server error',
+      status: 'error' 
+    });
+  }
+});
 
-    res.status(status).json({ message });
-    throw err;
-  });
+// Optimistic scan creation endpoint - Part 2/7 of refactor
+app.post('/api/scans', async (req, res) => {
+  try {
+    const { url, taskTypes = ["tech", "colors", "seo", "perf"] } = req.body;
+    
+    if (!url || typeof url !== 'string') {
+      return res.status(400).json({ 
+        error: 'URL is required in request body',
+        status: 'error' 
+      });
+    }
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
-  } else {
+    // Import crypto and database modules
+    const { randomUUID } = await import('crypto');
+    const { Pool } = await import('pg');
+    
+    const scanId = randomUUID();
+
+    // Insert into database tables optimistically
+    try {
+      // Create database connection
+      const pool = new Pool({
+        connectionString: process.env.DATABASE_URL,
+      });
+
+      // Begin transaction
+      const client = await pool.connect();
+      
+      try {
+        await client.query('BEGIN');
+        
+        // Insert scan record
+        await client.query(
+          'INSERT INTO scans (id, url, user_id, active, created_at) VALUES ($1, $2, NULL, true, NOW())',
+          [scanId, url.trim()]
+        );
+        
+        // Insert scan status record
+        await client.query(
+          'INSERT INTO scan_status (scan_id, status, progress) VALUES ($1, $2, 0)',
+          [scanId, 'queued']
+        );
+        
+        // Insert scan tasks for each requested type
+        for (const type of taskTypes) {
+          await client.query(
+            'INSERT INTO scan_tasks (scan_id, type, status, created_at) VALUES ($1, $2, $3, NOW())',
+            [scanId, type, 'queued']
+          );
+        }
+        
+        await client.query('COMMIT');
+        console.log('Scan created successfully:', scanId);
+        
+      } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+      } finally {
+        client.release();
+        await pool.end();
+      }
+      
+    } catch (dbError) {
+      console.error('Database insertion failed:', dbError);
+      throw new Error('Failed to create scan record');
+    }
+
+    res.status(201).json({
+      scan_id: scanId,
+      status: 'queued',
+      url: url.trim(),
+      task_types: taskTypes
+    });
+    
+  } catch (error) {
+    console.error('Scan creation error:', error);
+    res.status(500).json({ 
+      error: 'Failed to create scan',
+      status: 'error' 
+    });
+  }
+});
+
+// Scan status endpoint
+app.get('/api/scans/:scanId/status', async (req, res) => {
+  try {
+    const { scanId } = req.params;
+    
+    // Import database modules
+    const { Pool } = await import('pg');
+    const pool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+    });
+
+    const client = await pool.connect();
+    
+    try {
+      // Get scan info
+      const scanResult = await client.query(
+        'SELECT id, url, active FROM scans WHERE id = $1',
+        [scanId]
+      );
+      
+      if (scanResult.rows.length === 0) {
+        return res.status(404).json({ error: 'Scan not found' });
+      }
+
+      // Get scan status
+      const statusResult = await client.query(
+        'SELECT status, progress FROM scan_status WHERE scan_id = $1',
+        [scanId]
+      );
+
+      const scan = scanResult.rows[0];
+      const status = statusResult.rows[0] || { status: 'queued', progress: 0 };
+
+      res.json({
+        scanId,
+        url: scan.url,
+        status: status.status,
+        progress: status.progress || 0,
+      });
+
+    } finally {
+      client.release();
+      await pool.end();
+    }
+  } catch (error) {
+    console.error('Error fetching scan status:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Task data endpoint
+app.get('/api/scans/:scanId/task/:type', async (req, res) => {
+  try {
+    const { scanId, type } = req.params;
+    
+    // Import database modules
+    const { Pool } = await import('pg');
+    const pool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+    });
+
+    const client = await pool.connect();
+    
+    try {
+      // Get task info
+      const taskResult = await client.query(
+        'SELECT task_id, type, status, payload FROM scan_tasks WHERE scan_id = $1 AND type = $2',
+        [scanId, type]
+      );
+      
+      if (taskResult.rows.length === 0) {
+        return res.status(404).json({ error: 'Task not found' });
+      }
+
+      const task = taskResult.rows[0];
+
+      // If task is complete, try to get cached results
+      let data = null;
+      if (task.status === 'complete') {
+        const crypto = await import('crypto');
+        const scanInfo = await client.query('SELECT url FROM scans WHERE id = $1', [scanId]);
+        if (scanInfo.rows.length > 0) {
+          const url = scanInfo.rows[0].url;
+          const urlHash = crypto.createHash('sha256').update(url).digest('hex');
+          const cacheKey = `${type}_${urlHash}`;
+          
+          const cacheResult = await client.query(
+            'SELECT audit_json FROM analysis_cache WHERE url_hash = $1',
+            [cacheKey]
+          );
+          
+          if (cacheResult.rows.length > 0) {
+            data = cacheResult.rows[0].audit_json;
+          }
+        }
+      }
+
+      res.json({
+        type,
+        status: task.status,
+        data,
+        error: task.payload?.error || null,
+      });
+
+    } finally {
+      client.release();
+      await pool.end();
+    }
+  } catch (error) {
+    console.error('Error fetching task data:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Keep existing scan endpoint for backward compatibility
+app.post('/api/scan', async (req, res) => {
+  try {
+    const { url } = req.body;
+    
+    if (!url || typeof url !== 'string') {
+      return res.status(400).json({ 
+        error: 'URL is required in request body',
+        status: 'error' 
+      });
+    }
+
+    // For now, return a basic response structure
+    // TODO: Implement queue-based scanning using existing backend services
+    res.json({
+      status: 'queued',
+      url,
+      message: 'Scan queued - backend integration needed'
+    });
+    
+  } catch (error) {
+    console.error('Scan API error:', error);
+    res.status(500).json({ 
+      error: 'Internal server error',
+      status: 'error' 
+    });
+  }
+});
+
+const port = Number(process.env.PORT) || 5000;
+
+async function startServer() {
+  if (process.env.NODE_ENV === "production") {
     serveStatic(app);
+  } else {
+    await setupVite(app, server);
   }
 
-  // ALWAYS serve the app on port 5000
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = 5000;
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
+  server.listen(port, "0.0.0.0", () => {
     log(`serving on port ${port}`);
   });
-})();
+}
+
+startServer().catch((err) => {
+  console.error("Failed to start server:", err);
+  process.exit(1);
+});

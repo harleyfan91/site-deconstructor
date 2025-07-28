@@ -5,7 +5,6 @@ import {
   Card,
   CardContent,
   Button,
-  CircularProgress,
   Alert,
   Grid,
   Chip,
@@ -163,7 +162,7 @@ const ResponsiveLayoutProbe: React.FC<ResponsiveLayoutProbeProps> = ({ url }) =>
           <Button
             variant="contained"
             size="small"
-            startIcon={isProbing ? <CircularProgress size={16} color="inherit" /> : <RefreshCw size={16} />}
+            startIcon={<RefreshCw size={16} />}
             onClick={runResponsiveProbe}
             disabled={!url || isProbing}
           >
@@ -205,15 +204,6 @@ const ResponsiveLayoutProbe: React.FC<ResponsiveLayoutProbeProps> = ({ url }) =>
                         </Box>
                       </Box>
 
-                      {/* Loading State */}
-                      {device.loading && (
-                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 3 }}>
-                          <CircularProgress size={32} sx={{ mb: 2 }} />
-                          <Typography variant="body2" color="text.secondary">
-                            Analyzing {device.device.toLowerCase()} layout...
-                          </Typography>
-                        </Box>
-                      )}
 
                       {/* Error State */}
                       {device.error && (

@@ -3,9 +3,8 @@
  * Now supports 11 semantic color buckets for comprehensive analysis.
  */
 import React, { useState, useEffect, useRef } from 'react';
-import { Box, Typography, Collapse, IconButton, CircularProgress, Alert, Dialog, DialogContent, SxProps, Theme, Popover, FormControlLabel, Checkbox, FormGroup, useTheme } from '@mui/material';
+import { Box, Typography, Collapse, IconButton, Alert, Dialog, DialogContent, SxProps, Theme, Popover, FormControlLabel, Checkbox, FormGroup, useTheme } from '@mui/material';
 import { Palette, ChevronDown, ChevronUp, Settings } from 'lucide-react';
-import { useSessionState } from '@/hooks/useSessionState';
 
 const SECTION_ORDER = [
   'background', 'text', 'border', 'icons',
@@ -107,17 +106,13 @@ export default function ColorExtractionCard({ colors }: ColorExtractionCardProps
   const [usageGroups, setUsageGroups] = useState<UsageGroup[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [expandedSections, setExpandedSections] = useSessionState<Record<string, boolean>>(
-    'ui-color-extraction-expanded',
-    {}
-  );
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
   const [glowingSections, setGlowingSections] = useState<Record<string, boolean>>({});
   const [expandedHex, setExpandedHex] = useState<string | null>(null);
   const [expandedElement, setExpandedElement] = useState<HTMLElement | null>(null);
   
   // Filter state and popover controls
-  const [categoryFilters, setCategoryFilters] = useSessionState<Record<string, boolean>>(
-    'ui-color-category-filters',
+  const [categoryFilters, setCategoryFilters] = useState<Record<string, boolean>>(
     Object.fromEntries(SECTION_ORDER.map(cat => [cat, PRIORITY_CATEGORIES.has(cat)]))
   );
   const [filterAnchor, setFilterAnchor] = useState<HTMLElement | null>(null);
@@ -258,14 +253,7 @@ export default function ColorExtractionCard({ colors }: ColorExtractionCardProps
       </Box>
       
       <Box>
-        {loading ? (
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', py: 4 }}>
-            <CircularProgress size={32} sx={{ color: 'primary.main', mr: 2 }} />
-            <Typography variant="body2" color="text.secondary">
-              Extracting colors from website...
-            </Typography>
-          </Box>
-        ) : error ? (
+        {error ? (
           <Alert severity="error" sx={{ mt: 2 }}>
             {error}
           </Alert>

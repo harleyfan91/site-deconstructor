@@ -1,0 +1,159 @@
+## 🚀 **Site Deconstructor – 7‑Part Local‑First Refactor**
+
+We are on **Part 3 / 7**. Sequence so far:
+
+1. **Schema & migrations** ✅
+2. Optimistic **POST /scans** stub & redirect ✅
+3. **Worker & task fan‑out** loop ← *current task*
+4. React‑Query hooks + skeleton cards
+5. LocalStorage panel‑state hook
+6. Realtime progress subscription
+7. Supabase Auth + RLS
+   *(CI / deploy scripting comes later.)*
+
+### ⛔ Hard constraints for **Part 3 (Worker & task fan‑out)**
+
+* **Only** create/modify code responsible for picking queued rows in `scan_tasks`, running analysis, writing `analysis_cache` and updating `scan_status`.
+* **Do NOT** touch React hooks, UI components, Auth, or deploy configs.
+* Provide a dev‑only test command the human can run inside Replit shell—no Realtime or UI required yet.
+
+---
+
+# Part 3 / 7 – Background worker & task fan‑out
+
+\### 🎯 Goals
+
+1. Implement a **Node worker script** (`worker/index.ts`) that:
+
+   1. Polls `scan_tasks` where `status='queued'` order by `created_at` asc `limit 1`.
+   2. Sets the picked task `status='running'`.
+   3. Calls stub analysers based on `type` (`tech`, `colors`, `seo`, `perf`).
+      *For now the stub just waits 1–3 sec and returns fake JSON.*
+   4. Inserts/updates a row in `analysis_cache` (`url_hash`, `audit_json`, `created_at`).
+   5. Marks task `status='complete'` (or `failed` on error).
+   6. When **all** tasks for a `scan_id` are complete, update `scan_status.status='complete'`.
+2. Add scripts to **`package.jsonc`**:
+
+   ```jsonc
+   "scripts": {
+     "worker:dev": "ts-node --transpile-only worker/index.ts"
+   }
+   ```
+3. Provide mock analyser functions in `worker/analysers/tech.ts`, `colors.ts`, etc.
+4. Supply a simple **shell test** to prove the worker runs and updates the DB.
+
+---
+
+\## 1 · Directory scaffold
+
+```
+worker/
+  index.ts
+  analysers/
+    tech.ts
+    colors.ts
+    seo.ts
+    perf.ts
+```
+
+\### `worker/index.ts` outline
+
+```ts
+import { drizzle } from "drizzle-orm/node-postgres";
+import * as schema from "../src/shared/schema";
+import { createClient } from "@supabase/supabase-js";
+import { runTech } from "./analysers/tech";
+import { runColors } from "./analysers/colors";
+import { runSeo } from "./analysers/seo";
+import { runPerf } from "./analysers/perf";
+
+const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+const db = drizzle(/* pg client via supabase connection string */);
+
+const runners: Record<string, (url: string) => Promise<any>> = {
+  tech: runTech,
+  colors: runColors,
+  seo: runSeo,
+  perf: runPerf,
+};
+
+async function work() {
+  while (true) {
+    const task = await db
+      .select()
+      .from(schema.scanTasks)
+      .where(eq(schema.scanTasks.status, "queued"))
+      .limit(1);
+    if (!task.length) {
+      await new Promise((r) => setTimeout(r, 2000));
+      continue;
+    }
+    const t = task[0];
+    await db.update(schema.scanTasks).set({ status: "running" }).where(eq(schema.scanTasks.taskId, t.taskId));
+
+    try {
+      const result = await runners[t.type](t.url);
+      await db
+        .insert(schema.analysisCache)
+        .values({ urlHash: t.urlHash, originalUrl: t.url, auditJson: result })
+        .onConflictDoUpdate(/* upsert */);
+      await db.update(schema.scanTasks).set({ status: "complete" }).where(eq(schema.scanTasks.taskId, t.taskId));
+
+      // check if all tasks complete → update scan_status
+      const remaining = await db
+        .select()
+        .from(schema.scanTasks)
+        .where(and(eq(schema.scanTasks.scanId, t.scanId), eq(schema.scanTasks.status, "queued")));
+      if (remaining.length === 0) {
+        await db.update(schema.scanStatus).set({ status: "complete" }).where(eq(schema.scanStatus.scanId, t.scanId));
+      }
+    } catch (err) {
+      console.error(err);
+      await db.update(schema.scanTasks).set({ status: "failed" }).where(eq(schema.scanTasks.taskId, t.taskId));
+    }
+  }
+}
+
+work();
+```
+
+\### Stub analysers (e.g. `analysers/tech.ts`)
+
+```ts
+export async function runTech(url: string) {
+  await new Promise(r => setTimeout(r, Math.random()*2000+1000));
+  return { fake: "techResult" };
+}
+```
+
+*(repeat similar stubs for colors, seo, perf)*
+
+---
+
+\## 2 · Update `package.jsonc`
+
+```jsonc
+"scripts": {
+  "worker:dev": "ts-node --transpile-only worker/index.ts"
+}
+```
+
+(Add TS‑Node dev‑dependency if missing.)
+
+---
+
+\## 3 · Local test in Replit
+
+1. **Shell A:** `npm run server` (Fastify route from Part 2)
+2. **Shell B:** `npm run worker:dev`
+3. In preview: submit URL to generate scan.
+4. In Supabase dashboard, verify each task row flips to `running` then `complete`; `scan_status.status` becomes `complete` without manual refresh.
+
+---
+
+\### Commit
+
+```bash
+git add worker index.ts analysers package.jsonc
+git commit -m "feat: add worker and task fan-out loop with stub analysers"
+```

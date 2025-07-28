@@ -39,20 +39,35 @@ const URLInputForm: React.FC<URLInputFormProps> = ({ onAnalysisComplete }) => {
     if (!url.trim() || localLoading || loading) return;
 
     setLocalLoading(true);
-    
+
     try {
-      // Start the analysis in the context
-      const result = await analyzeWebsite(url.trim());
-      
-      // Navigate to dashboard after analysis starts
-      navigate('/dashboard');
-      
-      // Call completion callback if provided
-      if (onAnalysisComplete) {
-        onAnalysisComplete(result);
+      // Call optimistic POST /scans endpoint
+      const response = await fetch('/api/scans', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: url.trim() }),
+      });
+
+      if (response.ok) {
+        const { scan_id } = await response.json();
+        // Navigate to dashboard with scan ID immediately
+        navigate(`/dashboard/${scan_id}`);
+
+        if (onAnalysisComplete) {
+          onAnalysisComplete({ url: url.trim(), scanId: scan_id });
+        }
+      } else {
+        // Show error for failed scan creation
+        console.error('Could not start scan:', await response.text());
+        // Fallback to old behavior
+        analyzeWebsite(url.trim());
+        navigate('/dashboard');
       }
     } catch (error) {
-      console.error('Analysis failed:', error);
+      console.error('Scan creation failed:', error);
+      // Fallback to old behavior
+      analyzeWebsite(url.trim());
+      navigate('/dashboard');
     } finally {
       setLocalLoading(false);
     }

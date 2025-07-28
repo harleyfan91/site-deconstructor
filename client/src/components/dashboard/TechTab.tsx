@@ -1,12 +1,14 @@
 
-import React, { useState, useEffect } from 'react';
-import { Box, Typography, Card, CardContent, Chip, CircularProgress, Alert, Tooltip } from '@mui/material';
+import React from 'react';
+import { Box, Typography, Card, CardContent, Chip, Alert, Tooltip } from '@mui/material';
 import { Shield, Globe, Server, Database, Code, Layers, Zap, Activity, BarChart, Users, Cookie, Settings } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import type { AnalysisResponse } from '@/types/analysis';
 import TechStackGrid from './TechStackGrid';
 import LegendContainer from './LegendContainer';
 import { useTheme } from '@mui/material/styles';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
+import { usePanelState } from '../../hooks/usePanelState';
 
 /** ===========================
  *  Helpers and constants
@@ -180,6 +182,7 @@ interface TechTabProps {
   data: AnalysisResponse | null;
   loading: boolean;
   error: string | null;
+  scanId?: string;
 }
 
 /** Interface for comprehensive technical analysis data */
@@ -257,95 +260,25 @@ interface TechnicalAnalysis {
 /**
  * Main TechTab component – renders technical analysis panels with real data.
  */
-const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
+const TechTab: React.FC<TechTabProps> = ({ data, loading, error, scanId = 'default' }) => {
   const theme = useTheme();
+  const { state, toggle } = usePanelState(scanId);
   
   // State for comprehensive technical analysis
-  const [techAnalysis, setTechAnalysis] = useState<TechnicalAnalysis | null>(null);
-  const [techLoading, setTechLoading] = useState(false);
-  const [techError, setTechError] = useState<string | null>(null);
-
-  // Fetch comprehensive technical data when URL is available
-  useEffect(() => {
-    if (data?.url && !loading && !error) {
-      fetchTechnicalAnalysis(data.url);
-    }
-  }, [data?.url, loading, error]);
-
-  const fetchTechnicalAnalysis = async (url: string) => {
-    setTechLoading(true);
-    setTechError(null);
-    
-    try {
-      console.log('🔧 Fetching comprehensive tech analysis for:', url);
-      
-      const response = await fetch('/api/tech', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ url }),
-      });
-
-      if (!response.ok) {
-        // Try to get fallback data from the main analysis
-        console.warn('Enhanced tech analysis failed, using basic data if available');
-        const fallbackData = data?.data?.technical;
-        if (fallbackData && 'techStack' in fallbackData) {
-          setTechAnalysis({
-            ...fallbackData,
-            adTags: fallbackData.adTags || [],
-            securityHeaders: fallbackData.securityHeaders || { csp: 'Not Set', hsts: 'Not Set', xfo: 'Not Set', xss: 'Not Set', xcto: 'Not Set', referrer: 'Not Set' },
-            tlsVersion: fallbackData.tlsVersion || 'Unknown',
-            cdn: fallbackData.cdn || false,
-            gzip: fallbackData.gzip || false
-          });
-          return;
-        }
-        throw new Error('Technical analysis temporarily unavailable');
-      }
-
-      const analysisData = await response.json();
-      console.log('✅ Technical analysis data received:', analysisData);
-      setTechAnalysis(analysisData);
-    } catch (err) {
-      console.error('Technical analysis error:', err);
-      // Use fallback data from main analysis if available
-      const fallbackData = data?.data?.technical;
-      if (fallbackData && 'techStack' in fallbackData) {
-        console.log('Using fallback technical data from main analysis');
-        setTechAnalysis({
-          techStack: fallbackData.techStack || [],
-          thirdPartyScripts: fallbackData.thirdPartyScripts || [],
-          minification: fallbackData.minification || { cssMinified: false, jsMinified: false, htmlMinified: false },
-          social: fallbackData.social || { hasOpenGraph: false, hasTwitterCard: false, hasShareButtons: false },
-          cookies: fallbackData.cookies || { hasSessionCookies: false, hasTrackingCookies: false, hasAnalyticsCookies: false },
-          adTags: (fallbackData as any).adTags || [],
-          securityHeaders: (fallbackData as any).securityHeaders || { csp: 'Not Set', hsts: 'Not Set', xfo: 'Not Set', xss: 'Not Set', xcto: 'Not Set', referrer: 'Not Set' },
-          tlsVersion: (fallbackData as any).tlsVersion || 'Unknown',
-          cdn: (fallbackData as any).cdn || false,
-          gzip: (fallbackData as any).gzip || false,
-          accessibility: fallbackData.accessibility || { violations: [] },
-          issues: []
-        });
-      } else {
-        setTechError('Technical analysis temporarily unavailable');
-      }
-    } finally {
-      setTechLoading(false);
-    }
-  };
+  const techAnalysis = null;
+  const techLoading = loading;
+  const techError = error;
 
   // No tab-level loading - use section-level loading instead
 
   // Use comprehensive technical analysis data if available, fallback to basic data
-  const techData = data?.data?.tech || {};
-  const displayTechStack = techAnalysis?.techStack || techData?.techStack || [];
-  const displayMinification = techAnalysis?.minification || techData?.minification;
-  const displaySocial = techAnalysis?.social || techData?.social;
+  const techData = data?.data?.tech || data?.data?.technical || {};
+  const displayTechStack = techAnalysis?.techStack || (techData as any)?.techStack || [];
+  const displayMinification = techAnalysis?.minification || (techData as any)?.minification;
+  const displaySocial = techAnalysis?.social || (techData as any)?.social;
   // Generate realistic cookie data based on social analytics
   const generateCookieData = () => {
-    const socialData = techAnalysis?.social || techData?.social || displaySocial;
+    const socialData = techAnalysis?.social || (techData as any)?.social || displaySocial;
     const hasAnalytics = socialData?.googleAnalytics || socialData?.facebookPixel;
     
     return {
@@ -355,20 +288,12 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
     };
   };
   
-  const displayCookies = techAnalysis?.cookies || techData?.cookies || generateCookieData();
-  const displayAdTags = techAnalysis?.adTags || techData?.adTags || [];
+  const displayCookies = techAnalysis?.cookies || (techData as any)?.cookies || generateCookieData();
+  const displayAdTags = techAnalysis?.adTags || (techData as any)?.adTags || [];
 
   // Determine if we have any tech data at all (from either source)
   const hasTechData = !!(techData && Object.keys(techData).length > 0) || !!techAnalysis;
   
-  // Determine loading state for each section - only show loading if we're loading AND don't have any tech data
-  const isTechStackLoading = loading && displayTechStack.length === 0 && !hasTechData;
-  const isMinificationLoading = loading && !displayMinification && !hasTechData;
-  const isSocialLoading = loading && !displaySocial && !hasTechData;
-  // For Ad Tags and Cookies - don't show loading if we have any tech data (these might not be available in basic tech data)
-  const isAdTagsLoading = loading && !displayAdTags && !hasTechData && !techAnalysis;
-  const isCookiesLoading = loading && !displayCookies && !hasTechData && !techAnalysis;
-  const isIssuesLoading = loading && !techAnalysis && !techData?.issues && !hasTechData;
 
   // Only show error state if we have no data at all AND there's an error
   const shouldShowError = techError && !hasTechData;
@@ -399,14 +324,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                   Tech Stack
                 </Typography>
               </Box>
-              {isTechStackLoading ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
-                  <CircularProgress size={32} sx={{ mr: 2 }} />
-                  <Typography variant="body2" color="text.secondary">
-                    Analyzing technologies...
-                  </Typography>
-                </Box>
-              ) : shouldShowError ? (
+              {shouldShowError ? (
                 <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                   Technology analysis unavailable
                 </Typography>
@@ -434,14 +352,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                   Minification Status
                 </Typography>
               </Box>
-              {isMinificationLoading ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
-                  <CircularProgress size={32} sx={{ mr: 2 }} />
-                  <Typography variant="body2" color="text.secondary">
-                    Checking minification...
-                  </Typography>
-                </Box>
-              ) : shouldShowError ? (
+              {shouldShowError ? (
                 <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                   Minification check unavailable
                 </Typography>
@@ -504,14 +415,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                 Tracking Pixels & Ad Tags
               </Typography>
             </Box>
-            {isAdTagsLoading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
-                <CircularProgress size={32} sx={{ mr: 2 }} />
-                <Typography variant="body2" color="text.secondary">
-                  Scanning for tracking pixels and ad tags...
-                </Typography>
-              </Box>
-            ) : shouldShowError ? (
+            {shouldShowError ? (
               <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                 Tracking pixel analysis unavailable
               </Typography>
@@ -572,14 +476,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                 Detected Social Tags
               </Typography>
             </Box>
-            {isSocialLoading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
-                <CircularProgress size={32} sx={{ mr: 2 }} />
-                <Typography variant="body2" color="text.secondary">
-                  Scanning for social tags...
-                </Typography>
-              </Box>
-            ) : shouldShowError ? (
+            {shouldShowError ? (
               <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                 Social tag analysis unavailable
               </Typography>
@@ -653,14 +550,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                 Detected Cookie Banner & Consent Script
               </Typography>
             </Box>
-            {isCookiesLoading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
-                <CircularProgress size={32} sx={{ mr: 2 }} />
-                <Typography variant="body2" color="text.secondary">
-                  Checking for cookies...
-                </Typography>
-              </Box>
-            ) : shouldShowError ? (
+            {shouldShowError ? (
               <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                 Cookie analysis unavailable
               </Typography>
@@ -737,18 +627,11 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                   Technical Issues
                 </Typography>
               </Box>
-              {isIssuesLoading ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
-                  <CircularProgress size={32} sx={{ mr: 2 }} />
-                  <Typography variant="body2" color="text.secondary">
-                    Analyzing technical issues...
-                  </Typography>
-                </Box>
-              ) : shouldShowError ? (
+              {shouldShowError ? (
                 <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                   Technical issue analysis unavailable
                 </Typography>
-              ) : (techAnalysis?.issues ?? techData?.issues ?? []).length === 0 ? (
+              ) : (techAnalysis?.issues ?? (techData as any)?.issues ?? []).length === 0 ? (
                 <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                   No technical issues detected
                 </Typography>
@@ -764,7 +647,7 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
                       </tr>
                     </thead>
                     <tbody className="[&_tr:last-child]:border-0">
-                      {(techAnalysis?.issues ?? techData?.issues ?? []).map((issue, index) => (
+                      {(techAnalysis?.issues ?? (techData as any)?.issues ?? []).map((issue: any, index: number) => (
                         <tr key={index} className="border-b transition-colors [&:has([role=checkbox])]:pr-0">
                           <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">{issue.type}</td>
                           <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">{issue.description}</td>
@@ -806,8 +689,8 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error }) => {
             </CardContent>
           </Card>
           <TechnicalHealthSummary 
-            healthGrade={techData?.healthGrade ?? 'C'} 
-            issues={techAnalysis?.issues ?? techData?.issues ?? []} 
+            healthGrade={(techData as any)?.healthGrade ?? 'C'} 
+            issues={techAnalysis?.issues ?? (techData as any)?.issues ?? []} 
           />
         </Box>
       </Box>

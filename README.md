@@ -118,6 +118,14 @@ This project is built with:
 
 *For a complete list of all frameworks and libraries (including package names and versions), see [docs/TECH\_STACK.md](docs/TECH_STACK.md).*
 
+## Database Schema
+We use three Supabase tables to manage requests, progress, and cached results:
+- **scans**  – Master record of scan requests (URL, user ID, timestamps).
+- **scan_status**  – Real-time status & progress of each scan.
+- **analysis_cache**  – Cached audit results keyed by URL hash.
+
+See [`docs/SUPABASE_SCHEMA.md`](docs/SUPABASE_SCHEMA.md) for full column definitions and policies.
+
 ### Advanced Analysis Capabilities
 
 **SEO Analysis** - Blended scoring system combining:
