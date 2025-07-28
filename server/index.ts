@@ -13,8 +13,8 @@ app.use(express.urlencoded({ extended: true }));
 
 // Supabase configuration check
 console.log('🔧 Supabase configuration check:');
-console.log(`📍 URL source (SUPABASE_SERVICE_ROLE_KEY): ${process.env.VITE_SUPABASE_URL?.substring(0, 20)}...`);
-console.log(`📍 Key source (VITE_SUPABASE_URL): ${process.env.SUPABASE_SERVICE_ROLE_KEY?.substring(0, 20)}...`);
+console.log(`📍 VITE_SUPABASE_URL: ${process.env.VITE_SUPABASE_URL?.substring(0, 20)}...`);
+console.log(`📍 SUPABASE_SERVICE_ROLE_KEY: ${process.env.SUPABASE_SERVICE_ROLE_KEY?.substring(0, 20)}...`);
 
 // API Routes
 console.log('🚀 Registering unified API routes...');

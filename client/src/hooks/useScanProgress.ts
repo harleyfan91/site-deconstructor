@@ -1,11 +1,6 @@
 import { useEffect, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
 import { useScanStatus } from "./useScanStatus";
-
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co',
-  import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-key'
-);
+import { supabase } from "../lib/supabaseClient";
 
 type ProgressData = { 
   progress: number; 
@@ -22,10 +17,9 @@ export function useScanProgress(scanId: string): ProgressData {
     // Skip if no scanId provided
     if (!scanId) return;
 
-    // Check if Supabase is properly configured
-    const hasSupabaseConfig = import.meta.env.VITE_SUPABASE_URL && 
-                             import.meta.env.VITE_SUPABASE_ANON_KEY &&
-                             import.meta.env.VITE_SUPABASE_URL !== 'https://placeholder.supabase.co';
+    // Check if Supabase is properly configured  
+    const hasSupabaseConfig = import.meta.env.VITE_SUPABASE_ANON_KEY &&
+                             import.meta.env.VITE_SUPABASE_ANON_KEY !== 'placeholder-key';
 
     if (!hasSupabaseConfig) {
       console.warn('Supabase not configured for realtime, using polling fallback');

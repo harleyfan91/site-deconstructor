@@ -11,12 +11,12 @@ console.log('🚀 Starting Website Analysis Tool server...');
 // Set environment
 process.env.NODE_ENV = 'development';
 
-// Start the tsx server
-const tsxPath = path.join(__dirname, 'node_modules', '.bin', 'tsx');
+// Start the tsx server directly
 const serverPath = path.join(__dirname, 'server', 'index.ts');
 
-const server = spawn('node', [tsxPath, serverPath], {
+const server = spawn('npx', ['tsx', serverPath], {
   stdio: 'inherit',
+  cwd: __dirname,
   env: { ...process.env, NODE_ENV: 'development' }
 });
 

@@ -1,29 +1,54 @@
 #!/usr/bin/env node
-// Simple dev script to start the Express server with Vite integration
-import { exec } from 'child_process';
 
-const server = exec('tsx server/index.ts', { stdio: 'inherit' });
+/**
+ * Development server startup script
+ * This script ensures the Express server starts correctly on port 5000
+ * with Vite middleware integrated
+ */
 
-server.stdout?.on('data', (data) => {
-  console.log(data.toString());
+import { spawn } from 'child_process';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+console.log('🚀 Starting Website Analysis Tool...');
+console.log('📍 Server will start on port 5000');
+
+// Set environment to development
+process.env.NODE_ENV = 'development';
+
+// Start the Express server with TypeScript support
+const serverPath = join(__dirname, 'server', 'index.ts');
+const serverProcess = spawn('npx', ['tsx', serverPath], {
+  stdio: 'inherit',
+  cwd: __dirname,
+  env: process.env
 });
 
-server.stderr?.on('data', (data) => {
-  console.error(data.toString());
+// Handle process events
+serverProcess.on('close', (code) => {
+  if (code === 0) {
+    console.log('✅ Server shut down gracefully');
+  } else {
+    console.log(`❌ Server process exited with code ${code}`);
+  }
+  process.exit(code);
 });
 
-server.on('close', (code) => {
-  console.log(`Process exited with code ${code}`);
-  process.exit(code || 0);
+serverProcess.on('error', (error) => {
+  console.error('❌ Failed to start server:', error);
+  process.exit(1);
 });
 
-// Handle process termination
-process.on('SIGINT', () => {
-  console.log('Received SIGINT, shutting down server...');
-  server.kill('SIGINT');
-});
+// Handle graceful shutdown
+const shutdown = (signal) => {
+  console.log(`\n🛑 Received ${signal}, shutting down gracefully...`);
+  serverProcess.kill(signal);
+};
 
-process.on('SIGTERM', () => {
-  console.log('Received SIGTERM, shutting down server...');
-  server.kill('SIGTERM');
-});
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
+
+console.log('⚡ Development server starting...');
