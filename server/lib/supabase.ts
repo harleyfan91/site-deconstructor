@@ -1,16 +1,15 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Server-side Supabase client with service role key for elevated permissions
-// Fixed: Use hardcoded URL and correct service role key from environment
 const supabaseUrl = 'https://sxrhpwmdslxgwpqfdmxu.supabase.co';
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 console.log('🔧 Supabase configuration check:');
-console.log('📍 URL source (SUPABASE_SERVICE_ROLE_KEY):', supabaseUrl ? `${supabaseUrl.substring(0, 20)}...` : 'MISSING');
-console.log('📍 Key source (VITE_SUPABASE_URL):', serviceRoleKey ? `${serviceRoleKey.substring(0, 20)}...` : 'MISSING');
+console.log('📍 URL:', supabaseUrl ? `${supabaseUrl.substring(0, 20)}...` : 'MISSING');
+console.log('📍 Service Role Key:', serviceRoleKey ? `${serviceRoleKey.substring(0, 20)}...` : 'MISSING');
 
 if (!supabaseUrl || !serviceRoleKey) {
-  throw new Error('Missing Supabase environment variables: VITE_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required');
+  throw new Error('Missing Supabase environment variables: SUPABASE_SERVICE_ROLE_KEY is required');
 }
 
 export const supabase = createClient(supabaseUrl, serviceRoleKey, {
@@ -106,8 +105,7 @@ export class SupabaseCacheService {
     try {
       // First, validate environment variables
       console.log('🔍 Checking Supabase environment variables...');
-      console.log(`📍 SUPABASE_SERVICE_ROLE_KEY (URL): ${process.env.SUPABASE_SERVICE_ROLE_KEY ? 'Set' : 'Missing'}`);
-      console.log(`📍 VITE_SUPABASE_URL (Key): ${process.env.VITE_SUPABASE_URL ? 'Set' : 'Missing'}`);
+      console.log(`📍 SUPABASE_SERVICE_ROLE_KEY: ${process.env.SUPABASE_SERVICE_ROLE_KEY ? 'Set' : 'Missing'}`);
       
       // Test basic connection
       console.log('🔍 Testing Supabase connection...');

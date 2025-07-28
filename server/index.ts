@@ -19,9 +19,55 @@ console.log(`📍 SUPABASE_SERVICE_ROLE_KEY: ${process.env.SUPABASE_SERVICE_ROLE
 // API Routes
 console.log('🚀 Registering unified API routes...');
 
-// Basic health check endpoint
+// Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// UI Analysis endpoint
+app.post('/api/analyze-ui', async (req, res) => {
+  try {
+    const { url } = req.body;
+
+    if (!url) {
+      return res.status(400).json({ error: 'URL is required' });
+    }
+
+    console.log(`🎨 Starting UI analysis for: ${url}`);
+
+    // Import services dynamically to avoid circular dependencies
+    const { extractColors } = await import('./lib/color-extraction.js');
+    const { scrapeFonts } = await import('./services/uiScraper.js');
+
+    // Run color and font analysis in parallel
+    const [colors, fonts] = await Promise.all([
+      extractColors(url).catch(err => {
+        console.error('Color extraction failed:', err);
+        return { colors: [], error: 'Color extraction failed' };
+      }),
+      scrapeFonts(url).catch(err => {
+        console.error('Font analysis failed:', err);
+        return { fonts: [], error: 'Font analysis failed' };
+      })
+    ]);
+
+    const uiAnalysis = {
+      colors: colors.colors || [],
+      fonts: fonts.fonts || [],
+      timestamp: new Date().toISOString(),
+      url
+    };
+
+    console.log(`✅ UI analysis completed for ${url}`);
+
+    res.json(uiAnalysis);
+  } catch (error) {
+    console.error('UI analysis error:', error);
+    res.status(500).json({ 
+      error: 'UI analysis failed',
+      details: error.message 
+    });
+  }
 });
 
 // Main API endpoint for comprehensive website analysis
@@ -264,10 +310,10 @@ app.get('/api/ui/scan', async (req, res) => {
 
     // Import the UI scraper service
     const { UIScraperService } = await import('./services/uiScraper');
-    
+
     // Get or create UI analysis
     const analysis = await UIScraperService.getOrCreateAnalysis(url);
-    
+
     res.json({
       status: 'success',
       data: analysis,

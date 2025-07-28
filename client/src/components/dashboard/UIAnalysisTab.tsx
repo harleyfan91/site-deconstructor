@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Box, Typography, Card, CardContent, Alert } from '@mui/material';
 import type { AnalysisResponse } from '@/types/analysis';
@@ -43,7 +42,7 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error, sca
           User Interface Analysis
         </Typography>
       </Box>
-      
+
       <Accordion type="multiple" value={expandedSections}>
         {/* Color Extraction Section */}
         <AccordionItem value="colors">
