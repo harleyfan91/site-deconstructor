@@ -1,16 +1,16 @@
 import { eq, and } from "drizzle-orm";
 import * as schema from "../shared/schema.js";
-import { runTech } from "./analysers/tech";
-import { runColors } from "./analysers/colors";
-import { runSeo } from "./analysers/seo";
-import { runPerf } from "./analysers/perf";
+import { analyzeTech } from "./analysers/tech";
+import { analyzeColors } from "./analysers/colors";
+import { analyzeSEO } from "./analysers/seo";
+import { analyzePerformance } from "./analysers/perf";
 
 // Task runners mapping
 const runners: Record<string, (url: string) => Promise<any>> = {
-  tech: runTech,
-  colors: runColors,
-  seo: runSeo,
-  perf: runPerf,
+  tech: analyzeTech,
+  colors: analyzeColors,
+  seo: analyzeSEO,
+  perf: analyzePerformance,
 };
 
 async function generateUrlHash(url: string): Promise<string> {
