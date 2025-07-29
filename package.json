@@ -4,13 +4,13 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "server": "tsx watch server/index.ts",          // Fastify API on 5000
-    "client": "vite",                               // Vite UI on 5173
-    "dev": "concurrently \"npm:server\" \"npm:client\"", // single Run command for Replit
+    "server": "tsx watch server/index.ts",          
+    "client": "vite",                               
+    "dev": "concurrently \"npm:server\" \"npm:client\"", 
     "dev:ui": "vite",
     "build": "vite build",
     "start": "vite preview",
-    "worker:dev": "ts-node --transpile-only worker/index.ts",  // task fan‑out loop
+    "worker:dev": "ts-node --transpile-only worker/index.ts",  
     "migrate:supabase": "npx drizzle-kit push:pg --schema \"postgres\".\"public\"",
     "check": "tsc",
     "deps:docs": "npx dep-table --out docs/DEPENDENCIES.md",
@@ -124,6 +124,6 @@
     "tsx": "^4.19.1",
     "typescript": "5.6.3",
     "vite": "^5.4.14",
-    "ts-node": "^10.9.2"                           // new dev‑dep for worker:dev
+    "ts-node": "^10.9.2"                           
   }
 }
