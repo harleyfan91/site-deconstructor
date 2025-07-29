@@ -143,13 +143,11 @@ async function work() {
 // Graceful shutdown
 process.on('SIGINT', async () => {
   console.log('🛑 Worker shutting down...');
-  await pool.end();
   process.exit(0);
 });
 
 process.on('SIGTERM', async () => {
   console.log('🛑 Worker shutting down...');
-  await pool.end();
   process.exit(0);
 });
 
