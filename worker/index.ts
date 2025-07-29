@@ -1,5 +1,4 @@
 import { eq, and } from "drizzle-orm";
-import { db } from '../server/db.js';
 import * as schema from "../shared/schema.js";
 import { runTech } from "./analysers/tech";
 import { runColors } from "./analysers/colors";
@@ -19,9 +18,26 @@ async function generateUrlHash(url: string): Promise<string> {
   return crypto.createHash('sha256').update(url).digest('hex');
 }
 
+async function initializeWorker() {
+  console.log('🔗 Initializing worker database connection...');
+
+  try {
+    // Import database connection after environment is ready
+    const { db } = await import('../server/db.js');
+    console.log('✅ Database connection established');
+    return db;
+  } catch (error) {
+    console.error('❌ Failed to connect to database:', error);
+    throw error;
+  }
+}
+
 async function work() {
-  console.log('🚀 Worker started - polling for queued tasks...');
-  
+  console.log('🚀 Worker started - initializing...');
+
+  const db = await initializeWorker();
+  console.log('🔄 Starting task polling loop...');
+
   while (true) {
     try {
       // Get next queued task
@@ -64,7 +80,7 @@ async function work() {
 
         // Run the appropriate analyzer
         const result = await runners[task.type](url);
-        
+
         // Generate URL hash for cache key
         const urlHash = await generateUrlHash(url);
 
@@ -121,7 +137,7 @@ async function work() {
 
       } catch (err) {
         console.error(`❌ Error processing ${task.type} for scan ${task.scanId}:`, err);
-        
+
         // Mark task as failed
         await db
           .update(schema.scanTasks)
@@ -140,19 +156,19 @@ async function work() {
   }
 }
 
-// Graceful shutdown
-process.on('SIGINT', async () => {
+// Graceful shutdown handling
+process.on('SIGTERM', () => {
   console.log('🛑 Worker shutting down...');
   process.exit(0);
 });
 
-process.on('SIGTERM', async () => {
-  console.log('🛑 Worker shutting down...');
+process.on('SIGINT', () => {
+  console.log('🛑 Worker interrupted...');
   process.exit(0);
 });
 
-// Start the worker
-work().catch((err) => {
-  console.error('💥 Failed to start worker:', err);
+// Start worker with error handling
+work().catch((error) => {
+  console.error('💥 Worker crashed:', error);
   process.exit(1);
 });
