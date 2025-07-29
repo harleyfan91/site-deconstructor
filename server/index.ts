@@ -331,7 +331,61 @@ app.post('/api/scan', async (req, res) => {
   }
 });
 
-// Test endpoint to create a scan manually
+// Test endpoint to create a scan manually (GET for easy browser testing)
+app.get('/api/test-scan', async (req, res) => {
+  try {
+    const url = req.query.url as string || 'https://linear.app';
+    
+    console.log(`🔄 Creating test scan for: ${url}`);
+
+    // Import necessary modules
+    const { db } = await import('./db.js');
+    const schema = await import('../shared/schema.js');
+
+    // Create scan record
+    const scanResult = await db.insert(schema.scans).values({
+      url: url,
+      userId: null, // Anonymous scan
+      createdAt: new Date(),
+      active: true
+    }).returning();
+
+    const scanId = scanResult[0].id;
+    console.log(`✅ Created scan with ID: ${scanId}`);
+
+    // Create scan status
+    await db.insert(schema.scanStatus).values({
+      scanId: scanId,
+      status: 'queued',
+      progress: 0,
+      startedAt: new Date()
+    });
+
+    // Create individual tasks
+    const taskTypes = ['tech', 'colors', 'seo', 'perf'] as const;
+    for (const taskType of taskTypes) {
+      await db.insert(schema.scanTasks).values({
+        scanId: scanId,
+        type: taskType,
+        status: 'queued'
+      });
+    }
+
+    console.log(`✅ Created ${taskTypes.length} tasks for scan ${scanId}`);
+
+    res.json({ 
+      success: true, 
+      scanId, 
+      message: `Scan created with ${taskTypes.length} tasks`,
+      note: 'Check your Supabase tables now!'
+    });
+  } catch (error) {
+    console.error('❌ Error creating test scan:', error);
+    res.status(500).json({ error: 'Failed to create scan', details: error.message });
+  }
+});
+
+// POST version too
 app.post('/api/test-scan', async (req, res) => {
   try {
     const { url } = req.body;
