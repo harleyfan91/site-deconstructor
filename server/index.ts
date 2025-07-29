@@ -127,23 +127,18 @@ app.post('/api/scans', async (req, res) => {
 
       // Insert scan status record
       await db.insert(scanStatus).values({
-        id: randomUUID(),
         scanId: scanId,
         status: 'queued',
-        progress: 0,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        progress: 0
       });
 
       // Insert scan tasks for each requested type
       for (const type of taskTypes) {
         await db.insert(scanTasks).values({
-          taskId: randomUUID(),
           scanId: scanId,
           type: type as any,
           status: 'queued',
-          createdAt: new Date(),
-          result: null
+          createdAt: new Date()
         });
       }
 
@@ -175,45 +170,30 @@ app.get('/api/scans/:scanId/status', async (req, res) => {
   try {
     const { scanId } = req.params;
 
-    // Import database modules
-    const { Pool } = await import('pg');
-    const pool = new Pool({
-      connectionString: process.env.DATABASE_URL,
-    });
+    // Import database and schema modules
+    const { db } = await import('./db.js');
+    const { scans, scanStatus } = await import('../shared/schema.js');
+    const { eq } = await import('drizzle-orm');
 
-    const client = await pool.connect();
-
-    try {
-      // Get scan info
-      const scanResult = await client.query(
-        'SELECT id, url, active FROM scans WHERE id = $1',
-        [scanId]
-      );
-
-      if (scanResult.rows.length === 0) {
-        return res.status(404).json({ error: 'Scan not found' });
-      }
-
-      // Get scan status
-      const statusResult = await client.query(
-        'SELECT status, progress FROM scan_status WHERE scan_id = $1',
-        [scanId]
-      );
-
-      const scan = scanResult.rows[0];
-      const status = statusResult.rows[0] || { status: 'queued', progress: 0 };
-
-      res.json({
-        scanId,
-        url: scan.url,
-        status: status.status,
-        progress: status.progress || 0,
-      });
-
-    } finally {
-      client.release();
-      await pool.end();
+    // Get scan info using Drizzle
+    const scanResult = await db.select().from(scans).where(eq(scans.id, scanId));
+    
+    if (scanResult.length === 0) {
+      return res.status(404).json({ error: 'Scan not found' });
     }
+
+    // Get scan status
+    const statusResult = await db.select().from(scanStatus).where(eq(scanStatus.scanId, scanId));
+    
+    const scan = scanResult[0];
+    const status = statusResult[0] || { status: 'queued', progress: 0 };
+
+    res.json({
+      scanId,
+      url: scan.url,
+      status: status.status,
+      progress: status.progress || 0,
+    });
   } catch (error) {
     console.error('Error fetching scan status:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -225,59 +205,47 @@ app.get('/api/scans/:scanId/task/:type', async (req, res) => {
   try {
     const { scanId, type } = req.params;
 
-    // Import database modules
-    const { Pool } = await import('pg');
-    const pool = new Pool({
-      connectionString: process.env.DATABASE_URL,
-    });
+    // Import database and schema modules
+    const { db } = await import('./db.js');
+    const { scanTasks, scans, analysisCache } = await import('../shared/schema.js');
+    const { eq, and } = await import('drizzle-orm');
 
-    const client = await pool.connect();
+    // Get task info using Drizzle
+    const taskResult = await db.select().from(scanTasks).where(
+      and(eq(scanTasks.scanId, scanId), eq(scanTasks.type, type as any))
+    );
 
-    try {
-      // Get task info
-      const taskResult = await client.query(
-        'SELECT task_id, type, status, payload FROM scan_tasks WHERE scan_id = $1 AND type = $2',
-        [scanId, type]
-      );
+    if (taskResult.length === 0) {
+      return res.status(404).json({ error: 'Task not found' });
+    }
 
-      if (taskResult.rows.length === 0) {
-        return res.status(404).json({ error: 'Task not found' });
-      }
+    const task = taskResult[0];
 
-      const task = taskResult.rows[0];
+    // If task is complete, try to get cached results
+    let data = null;
+    if (task.status === 'complete') {
+      const crypto = await import('crypto');
+      const scanInfo = await db.select({ url: scans.url }).from(scans).where(eq(scans.id, scanId));
+      
+      if (scanInfo.length > 0) {
+        const url = scanInfo[0].url;
+        const urlHash = crypto.createHash('sha256').update(url).digest('hex');
+        const cacheKey = `${type}_${urlHash}`;
 
-      // If task is complete, try to get cached results
-      let data = null;
-      if (task.status === 'complete') {
-        const crypto = await import('crypto');
-        const scanInfo = await client.query('SELECT url FROM scans WHERE id = $1', [scanId]);
-        if (scanInfo.rows.length > 0) {
-          const url = scanInfo.rows[0].url;
-          const urlHash = crypto.createHash('sha256').update(url).digest('hex');
-          const cacheKey = `${type}_${urlHash}`;
+        const cacheResult = await db.select().from(analysisCache).where(eq(analysisCache.urlHash, cacheKey));
 
-          const cacheResult = await client.query(
-            'SELECT audit_json FROM analysis_cache WHERE url_hash = $1',
-            [cacheKey]
-          );
-
-          if (cacheResult.rows.length > 0) {
-            data = cacheResult.rows[0].audit_json;
-          }
+        if (cacheResult.length > 0) {
+          data = cacheResult[0].auditJson as any;
         }
       }
-
-      res.json({
-        type,
-        status: task.status,
-        data,
-        error: task.payload?.error || null,
-      });
-
-    } finally {
-      client.release();
-      await pool.end();
     }
+
+    res.json({
+      type,
+      status: task.status,
+      data,
+      error: (task.payload as any)?.error || null,
+    });
   } catch (error) {
     console.error('Error fetching task data:', error);
     res.status(500).json({ error: 'Internal server error' });

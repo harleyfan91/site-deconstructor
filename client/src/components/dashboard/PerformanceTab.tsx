@@ -86,22 +86,23 @@ const PerformanceTab: React.FC<PerformanceTabProps> = ({ data, loading, error })
     );
   }
 
-  const { performance, overview, tech } = data?.data || {};
+  const { performance, overview } = data?.data || {};
+  const tech = (data?.data as any)?.tech || {};
   const performanceScore = overview?.overallScore || 0;
-  const mobileScore = Math.round((performance?.pageLoadTime?.mobile || 0) < 3000 ? 90 : 
-                                 (performance?.pageLoadTime?.mobile || 0) < 5000 ? 70 : 50);
+  const mobileScore = Math.round(((performance as any)?.pageLoadTime?.mobile || 0) < 3000 ? 90 : 
+                                 ((performance as any)?.pageLoadTime?.mobile || 0) < 5000 ? 70 : 50);
   const securityScore = tech?.lighthouseScore || 0;
   
   // Handle both old array format and new object format
   const coreWebVitals = performance?.coreWebVitals;
-  const pageLoadTime = performance?.pageLoadTime;
+  const pageLoadTime = (performance as any)?.pageLoadTime;
   
 
   // Convert Core Web Vitals object to chart data
   const vitalsChartData = coreWebVitals ? [
-    { name: 'LCP', value: Math.round(coreWebVitals.lcpMs || 0), benchmark: 2500 },
-    { name: 'INP', value: Math.round(coreWebVitals.inpMs || 0), benchmark: 200 },
-    { name: 'CLS', value: Math.round((coreWebVitals.cls || 0) * 100), benchmark: 10 }
+    { name: 'LCP', value: Math.round((coreWebVitals as any)?.lcpMs || 0), benchmark: 2500 },
+    { name: 'INP', value: Math.round((coreWebVitals as any)?.inpMs || 0), benchmark: 200 },
+    { name: 'CLS', value: Math.round(((coreWebVitals as any)?.cls || 0) * 100), benchmark: 10 }
   ] : [];
 
   // Convert page load times to seconds with proper fallbacks

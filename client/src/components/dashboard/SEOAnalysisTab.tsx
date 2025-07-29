@@ -401,7 +401,7 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
               <Typography variant="body2" color="error" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                 Keywords unavailable
               </Typography>
-            ) : !seoData || !seoData.keywords || seoData.keywords.length === 0 || seoData.keywords[0]?.word === '!analysis pending' ? (
+            ) : !seoData || !seoData.keywords || seoData.keywords.length === 0 || seoData.keywords[0]?.keyword === '!analysis pending' ? (
               <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                 No keywords detected
               </Typography>
@@ -419,7 +419,7 @@ const SEOAnalysisTab: React.FC<SEOAnalysisTabProps> = ({ data, loading, error })
                     {seoData.keywords.slice(0, 6).map((keyword, index) => (
                       <TableRow key={index}>
                         <TableCell component="th" scope="row">
-                          {keyword.word}
+                          {keyword.keyword}
                         </TableCell>
                         <TableCell align="right">{keyword.count}</TableCell>
                         <TableCell align="right">{keyword.density}%</TableCell>

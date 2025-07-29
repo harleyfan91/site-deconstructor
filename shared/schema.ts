@@ -20,8 +20,9 @@ export const scans = pgTable("scans", {
 
 // scan_status
 export const scanStatus = pgTable("scan_status", {
+  id: uuid("id").primaryKey().defaultRandom(),
   scanId: uuid("scan_id")
-    .primaryKey()
+    .notNull()
     .references(() => scans.id, { onDelete: "cascade" }),
   status: text("status")
     .$type<"queued" | "running" | "complete" | "failed">()
@@ -30,6 +31,8 @@ export const scanStatus = pgTable("scan_status", {
   startedAt: timestamp("started_at"),
   finishedAt: timestamp("finished_at"),
   error: text("error"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // analysis_cache
