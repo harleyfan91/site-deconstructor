@@ -30,7 +30,7 @@ externalPort = 3002
 exposeLocalhost = true
 
 [workflows]
-runButton = "Project"
+runButton = "Complete App with Worker"
 
 [[workflows.workflow]]
 name = "Project"
@@ -49,3 +49,16 @@ author = "agent"
 task = "shell.exec"
 args = "concurrently \"npm run dev\" \"npx tsx worker/index.ts\" --names \"app,worker\" --prefix-colors \"blue,green\""
 waitForPort = 5000
+
+[[workflows.workflow]]
+name = "Complete App with Worker"
+author = 44193618
+mode = "parallel"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run worker:dev"
