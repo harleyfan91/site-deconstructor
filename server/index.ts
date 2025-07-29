@@ -40,13 +40,13 @@ app.post('/api/analyze-ui', async (req, res) => {
     const { UIScraperService } = await import('./services/uiScraper.js');
 
     // Run color extraction only for now (fonts handled by UIScraperService in other endpoints)
-    const colors = await extractColors(url).catch(err => {
+    const colorsResult = await extractColors(url).catch(err => {
       console.error('Color extraction failed:', err);
-      return { colors: [], error: 'Color extraction failed' };
+      return [];
     });
 
     const uiAnalysis = {
-      colors: colors.colors || [],
+      colors: Array.isArray(colorsResult) ? colorsResult : [],
       fonts: [],  // Fonts handled by UIScraperService
       timestamp: new Date().toISOString(),
       url
@@ -107,53 +107,47 @@ app.post('/api/scans', async (req, res) => {
 
     // Import crypto and database modules
     const { randomUUID } = await import('crypto');
-    const { Pool } = await import('pg');
+    const { db } = await import('./db.js');
 
     const scanId = randomUUID();
 
-    // Insert into database tables optimistically
+    // Insert into database tables optimistically using Drizzle
     try {
-      // Create database connection
-      const pool = new Pool({
-        connectionString: process.env.DATABASE_URL,
+      const { scans, scanStatus, scanTasks } = await import('../shared/schema.js');
+
+      // Insert scan record
+      await db.insert(scans).values({
+        id: scanId,
+        url: url.trim(),
+        userId: null,
+        active: true,
+        createdAt: new Date(),
+        lastRunAt: null
       });
 
-      // Begin transaction
-      const client = await pool.connect();
+      // Insert scan status record
+      await db.insert(scanStatus).values({
+        id: randomUUID(),
+        scanId: scanId,
+        status: 'queued',
+        progress: 0,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
 
-      try {
-        await client.query('BEGIN');
-
-        // Insert scan record
-        await client.query(
-          'INSERT INTO scans (id, url, user_id, active, created_at) VALUES ($1, $2, NULL, true, NOW())',
-          [scanId, url.trim()]
-        );
-
-        // Insert scan status record
-        await client.query(
-          'INSERT INTO scan_status (scan_id, status, progress) VALUES ($1, $2, 0)',
-          [scanId, 'queued']
-        );
-
-        // Insert scan tasks for each requested type
-        for (const type of taskTypes) {
-          await client.query(
-            'INSERT INTO scan_tasks (scan_id, type, status, created_at) VALUES ($1, $2, $3, NOW())',
-            [scanId, type, 'queued']
-          );
-        }
-
-        await client.query('COMMIT');
-        console.log('Scan created successfully:', scanId);
-
-      } catch (error) {
-        await client.query('ROLLBACK');
-        throw error;
-      } finally {
-        client.release();
-        await pool.end();
+      // Insert scan tasks for each requested type
+      for (const type of taskTypes) {
+        await db.insert(scanTasks).values({
+          taskId: randomUUID(),
+          scanId: scanId,
+          type: type as any,
+          status: 'queued',
+          createdAt: new Date(),
+          result: null
+        });
       }
+
+      console.log('Scan created successfully:', scanId);
 
     } catch (dbError) {
       console.error('Database insertion failed:', dbError);

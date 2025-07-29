@@ -1,18 +1,10 @@
-import { drizzle } from "drizzle-orm/node-postgres";
-import { Pool } from "pg";
 import { eq, and } from "drizzle-orm";
+import { db } from '../server/db.js';
 import * as schema from "../shared/schema.js";
 import { runTech } from "./analysers/tech";
 import { runColors } from "./analysers/colors";
 import { runSeo } from "./analysers/seo";
 import { runPerf } from "./analysers/perf";
-
-// Database connection
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
-
-const db = drizzle(pool, { schema });
 
 // Task runners mapping
 const runners: Record<string, (url: string) => Promise<any>> = {
