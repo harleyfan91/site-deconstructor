@@ -37,23 +37,17 @@ app.post('/api/analyze-ui', async (req, res) => {
 
     // Import services dynamically to avoid circular dependencies
     const { extractColors } = await import('./lib/color-extraction.js');
-    const { scrapeFonts } = await import('./services/uiScraper.js');
+    const { UIScraperService } = await import('./services/uiScraper.js');
 
-    // Run color and font analysis in parallel
-    const [colors, fonts] = await Promise.all([
-      extractColors(url).catch(err => {
-        console.error('Color extraction failed:', err);
-        return { colors: [], error: 'Color extraction failed' };
-      }),
-      scrapeFonts(url).catch(err => {
-        console.error('Font analysis failed:', err);
-        return { fonts: [], error: 'Font analysis failed' };
-      })
-    ]);
+    // Run color extraction only for now (fonts handled by UIScraperService in other endpoints)
+    const colors = await extractColors(url).catch(err => {
+      console.error('Color extraction failed:', err);
+      return { colors: [], error: 'Color extraction failed' };
+    });
 
     const uiAnalysis = {
       colors: colors.colors || [],
-      fonts: fonts.fonts || [],
+      fonts: [],  // Fonts handled by UIScraperService
       timestamp: new Date().toISOString(),
       url
     };

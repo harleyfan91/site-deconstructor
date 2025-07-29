@@ -51,32 +51,43 @@ const MASK_IMAGE = `linear-gradient(
  */
 const handleRecentSearch = async ({
   searchUrl,
-  analyzeWebsite,
   navigate,
   loading,
 }: {
   searchUrl: string,
-  analyzeWebsite: (url: string) => Promise<any>,
   navigate: (path: string) => void,
   loading: boolean,
 }) => {
   if (loading) return;
-  const fullUrl = `https://${searchUrl}`;
-  analyzeWebsite(fullUrl);
-  navigate('/dashboard');
+  
+  try {
+    const fullUrl = `https://${searchUrl}`;
+    const response = await fetch('/api/scans', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: fullUrl }),
+    });
+
+    if (response.ok) {
+      const { scan_id } = await response.json();
+      navigate(`/dashboard/${scan_id}`);
+    } else {
+      console.error('Failed to create scan:', await response.text());
+    }
+  } catch (error) {
+    console.error('Scan creation failed:', error);
+  }
 };
 
 /**
  * Handles successful analysis completion from the URL input form.
  */
-const handleAnalysisComplete = (
-  navigate: (path: string) => void
-) => {
-  navigate('/dashboard');
+const handleAnalysisComplete = ({ scanId }: { scanId: string }) => {
+  // URLInputForm now handles navigation automatically
 };
 
 const AnalyzePage = ({ darkMode, toggleDarkMode }: AnalyzePageProps) => {
-  const { analyzeWebsite, loading, error } = useAnalysisContext();
+  const { loading } = useAnalysisContext();
   const navigate = useNavigate();
   const theme = useTheme();
 
@@ -251,7 +262,7 @@ const AnalyzePage = ({ darkMode, toggleDarkMode }: AnalyzePageProps) => {
             {/* Input & popular sites shortcuts */}
             <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center', zIndex: 3, position: 'relative' }}>
               <URLInputForm
-                onAnalysisComplete={() => handleAnalysisComplete(navigate)}
+                onAnalysisComplete={handleAnalysisComplete}
               />
               <motion.div {...motionProps.formSection}>
                 <Typography
@@ -294,7 +305,6 @@ const AnalyzePage = ({ darkMode, toggleDarkMode }: AnalyzePageProps) => {
                         onClick={() =>
                           handleRecentSearch({
                             searchUrl: search,
-                            analyzeWebsite,
                             navigate,
                             loading,
                           })
