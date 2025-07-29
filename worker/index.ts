@@ -64,6 +64,29 @@ async function work() {
         .limit(1);
 
       console.log(`📊 Found ${tasks.length} queued tasks`);
+      
+      // Debug: Check total tasks in database
+      const allTasks = await db.select().from(schema.scanTasks).limit(5);
+      console.log(`🔍 Total tasks in database: ${allTasks.length}`);
+      if (allTasks.length > 0) {
+        console.log(`📋 Sample tasks:`, allTasks.map(t => ({
+          id: t.taskId,
+          type: t.type,
+          status: t.status,
+          scanId: t.scanId
+        })));
+      }
+      
+      // Debug: Check scans in database
+      const allScans = await db.select().from(schema.scans).limit(3);
+      console.log(`📊 Total scans in database: ${allScans.length}`);
+      if (allScans.length > 0) {
+        console.log(`🔗 Recent scans:`, allScans.map(s => ({
+          id: s.id,
+          url: s.url,
+          createdAt: s.createdAt
+        })));
+      }
 
       if (!tasks.length) {
         // No tasks available, wait and continue
