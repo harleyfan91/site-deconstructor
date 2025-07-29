@@ -10,7 +10,7 @@
     "dev:ui": "vite",
     "build": "vite build",
     "start": "vite preview",
-    "worker:dev": "ts-node --transpile-only worker/index.ts",  
+    "worker:dev": "tsx watch worker/index.ts",  
     "migrate:supabase": "npx drizzle-kit push:pg --schema \"postgres\".\"public\"",
     "check": "tsc",
     "deps:docs": "npx dep-table --out docs/DEPENDENCIES.md",
