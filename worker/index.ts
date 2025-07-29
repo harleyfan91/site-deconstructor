@@ -1,5 +1,5 @@
 import { eq, and } from "drizzle-orm";
-import * as schema from "../shared/schema.js";
+import * as schema from "../shared/schema.ts";
 import { analyzeTech } from "./analysers/tech";
 import { analyzeColors } from "./analysers/colors";
 import { analyzeSEO } from "./analysers/seo";
@@ -33,11 +33,11 @@ async function initializeWorker() {
     // Import database connection after environment is ready
     const { db } = await import('../server/db.js');
     console.log('✅ Database connection established');
-    
+
     // Test the connection
     const testQuery = await db.select().from(schema.scans).limit(1);
     console.log('✅ Database test query successful');
-    
+
     return db;
   } catch (error) {
     console.error('❌ Failed to connect to database:', error);
@@ -54,7 +54,7 @@ async function work() {
   while (true) {
     try {
       console.log('🔍 Polling for queued tasks...');
-      
+
       // Get next queued task
       const tasks = await db
         .select()
@@ -107,7 +107,7 @@ async function work() {
         try {
           const { SupabaseCacheService } = await import('../server/lib/supabase.js');
           const cacheSuccess = await SupabaseCacheService.set(cacheKey, url, result);
-          
+
           if (cacheSuccess) {
             console.log(`✅ Cached ${task.type} analysis for: ${url}`);
           } else {
