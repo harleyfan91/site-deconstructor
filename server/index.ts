@@ -108,12 +108,12 @@ app.post('/api/scans', async (req, res) => {
     // Import crypto and database modules
     const { randomUUID } = await import('crypto');
     const { db } = await import('./db.js');
+    const { scans, scanStatus, scanTasks } = await import('../shared/schema.js');
 
     const scanId = randomUUID();
 
     // Insert into database tables optimistically using Drizzle
     try {
-      const { scans, scanStatus, scanTasks } = await import('../shared/schema.js');
 
       // Insert scan record
       await db.insert(scans).values({
@@ -335,7 +335,7 @@ app.post('/api/scan', async (req, res) => {
 app.get('/api/test-scan', async (req, res) => {
   try {
     const url = req.query.url as string || 'https://linear.app';
-    
+
     console.log(`🔄 Creating test scan for: ${url}`);
 
     // Import necessary modules

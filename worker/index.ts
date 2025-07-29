@@ -83,25 +83,45 @@ async function work() {
 
         // Generate URL hash for cache key
         const urlHash = await generateUrlHash(url);
+        const cacheKey = `${task.type}_${urlHash}`;
 
-        // Insert/update analysis cache
-        await db
-          .insert(schema.analysisCache)
-          .values({
-            urlHash: `${task.type}_${urlHash}`,
-            originalUrl: url,
-            auditJson: result,
-            createdAt: new Date(),
-            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
-          })
-          .onConflictDoUpdate({
-            target: schema.analysisCache.urlHash,
-            set: {
+        // Store in Supabase cache using the service
+        try {
+          const { SupabaseCacheService } = await import('../server/lib/supabase.js');
+          const cacheSuccess = await SupabaseCacheService.set(cacheKey, url, result);
+          
+          if (cacheSuccess) {
+            console.log(`✅ Cached ${task.type} analysis for: ${url}`);
+          } else {
+            console.warn(`⚠️  Failed to cache ${task.type} analysis for: ${url}`);
+          }
+        } catch (cacheError) {
+          console.error(`❌ Cache error for ${task.type}:`, cacheError);
+        }
+
+        // Also store using direct DB insert as backup
+        try {
+          await db
+            .insert(schema.analysisCache)
+            .values({
+              urlHash: cacheKey,
+              originalUrl: url,
               auditJson: result,
               createdAt: new Date(),
-              expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-            },
-          });
+              expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+            })
+            .onConflictDoUpdate({
+              target: schema.analysisCache.urlHash,
+              set: {
+                auditJson: result,
+                createdAt: new Date(),
+                expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+              },
+            });
+          console.log(`✅ Direct DB cache stored for ${task.type}: ${url}`);
+        } catch (dbError) {
+          console.error(`❌ Direct DB cache error for ${task.type}:`, dbError);
+        }
 
         // Mark task as complete
         await db
