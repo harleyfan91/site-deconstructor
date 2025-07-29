@@ -177,14 +177,14 @@ app.get('/api/scans/:scanId/status', async (req, res) => {
 
     // Get scan info using Drizzle
     const scanResult = await db.select().from(scans).where(eq(scans.id, scanId));
-    
+
     if (scanResult.length === 0) {
       return res.status(404).json({ error: 'Scan not found' });
     }
 
     // Get scan status
     const statusResult = await db.select().from(scanStatus).where(eq(scanStatus.scanId, scanId));
-    
+
     const scan = scanResult[0];
     const status = statusResult[0] || { status: 'queued', progress: 0 };
 
@@ -226,7 +226,7 @@ app.get('/api/scans/:scanId/task/:type', async (req, res) => {
     if (task.status === 'complete') {
       const crypto = await import('crypto');
       const scanInfo = await db.select({ url: scans.url }).from(scans).where(eq(scans.id, scanId));
-      
+
       if (scanInfo.length > 0) {
         const url = scanInfo[0].url;
         const urlHash = crypto.createHash('sha256').update(url).digest('hex');
@@ -328,6 +328,62 @@ app.post('/api/scan', async (req, res) => {
       error: 'Internal server error',
       status: 'error' 
     });
+  }
+});
+
+// Test endpoint to create a scan manually
+app.post('/api/test-scan', async (req, res) => {
+  try {
+    const { url } = req.body;
+    if (!url) {
+      return res.status(400).json({ error: 'URL is required' });
+    }
+
+    console.log(`🔄 Creating test scan for: ${url}`);
+
+    // Import necessary modules
+    const { db } = await import('./db.js');
+    const schema = await import('../shared/schema.js');
+
+    // Create scan record
+    const scanResult = await db.insert(schema.scans).values({
+      url: url,
+      userId: null, // Anonymous scan
+      createdAt: new Date(),
+      active: true
+    }).returning();
+
+    const scanId = scanResult[0].id;
+    console.log(`✅ Created scan with ID: ${scanId}`);
+
+    // Create scan status
+    await db.insert(schema.scanStatus).values({
+      scanId: scanId,
+      status: 'queued',
+      progress: 0,
+      startedAt: new Date()
+    });
+
+    // Create individual tasks
+    const taskTypes = ['tech', 'colors', 'seo', 'perf'] as const;
+    for (const taskType of taskTypes) {
+      await db.insert(schema.scanTasks).values({
+        scanId: scanId,
+        type: taskType,
+        status: 'queued'
+      });
+    }
+
+    console.log(`✅ Created ${taskTypes.length} tasks for scan ${scanId}`);
+
+    res.json({ 
+      success: true, 
+      scanId, 
+      message: `Scan created with ${taskTypes.length} tasks` 
+    });
+  } catch (error) {
+    console.error('❌ Error creating test scan:', error);
+    res.status(500).json({ error: 'Failed to create scan' });
   }
 });
 
