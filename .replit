@@ -47,5 +47,5 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npm run dev"
+args = "concurrently \"npm run dev\" \"npx tsx worker/index.ts\" --names \"app,worker\" --prefix-colors \"blue,green\""
 waitForPort = 5000
