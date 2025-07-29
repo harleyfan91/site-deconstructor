@@ -1,44 +1,35 @@
-export async function runTech(url: string) {
+export async function analyzeTech(url: string): Promise<any> {
   console.log(`🔧 Running tech analysis for: ${url}`);
-  
-  // Simulate processing time (1-3 seconds)
-  await new Promise(r => setTimeout(r, Math.random() * 2000 + 1000));
-  
-  // Return fake tech analysis data
-  return {
-    type: "tech",
-    url,
-    timestamp: new Date().toISOString(),
-    technologies: [
-      {
-        name: "React",
-        version: "18.2.0",
-        confidence: 95,
-        category: "JavaScript frameworks"
-      },
-      {
-        name: "TypeScript",
-        version: "5.0.0", 
-        confidence: 90,
-        category: "Programming languages"
-      },
-      {
-        name: "Vite",
-        version: "5.4.0",
-        confidence: 85,
-        category: "Build tools"
-      }
-    ],
-    security: {
-      https: true,
-      hsts: false,
-      csp: false,
-      xfo: true
-    },
-    performance: {
-      minified: true,
-      gzipped: true,
-      bundleSize: "2.1MB"
+
+  try {
+    // Import tech extractor
+    const { TechExtractor } = await import('../../server/lib/tech-extractor.js');
+
+    // Run tech analysis
+    const techData = await TechExtractor.extractTechnologies(url);
+
+    const result = {
+      technologies: techData,
+      timestamp: new Date().toISOString(),
+      url
+    };
+
+    // Cache the result in Supabase
+    try {
+      const { SupabaseCacheService } = await import('../../server/lib/supabase.js');
+      const crypto = await import('crypto');
+      const urlHash = crypto.createHash('sha256').update(url).digest('hex');
+      const cacheKey = `tech_${urlHash}`;
+
+      await SupabaseCacheService.set(cacheKey, url, result);
+      console.log(`✅ Tech analysis cached in Supabase for ${url}`);
+    } catch (cacheError) {
+      console.error('❌ Failed to cache tech analysis:', cacheError);
     }
-  };
+
+    return result;
+  } catch (error) {
+    console.error('❌ Tech analysis failed:', error);
+    throw error;
+  }
 }
