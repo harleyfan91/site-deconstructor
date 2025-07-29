@@ -30,7 +30,7 @@ externalPort = 3002
 exposeLocalhost = true
 
 [workflows]
-runButton = "Complete App with Worker"
+runButton = "Debug App with Worker"
 
 [[workflows.workflow]]
 name = "Project"
@@ -62,3 +62,16 @@ args = "npm run dev"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "npm run worker:dev"
+
+[[workflows.workflow]]
+name = "Debug App with Worker"
+author = 44193618
+mode = "parallel"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run worker:dev 2>&1 | tee worker.log"
