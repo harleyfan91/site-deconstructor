@@ -21,10 +21,23 @@ async function generateUrlHash(url: string): Promise<string> {
 async function initializeWorker() {
   console.log('🔗 Initializing worker database connection...');
 
+  // Ensure environment variables are loaded
+  if (!process.env.VITE_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    console.error('❌ Missing required environment variables');
+    console.log('VITE_SUPABASE_URL:', process.env.VITE_SUPABASE_URL ? 'SET' : 'MISSING');
+    console.log('SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'SET' : 'MISSING');
+    throw new Error('Missing required environment variables');
+  }
+
   try {
     // Import database connection after environment is ready
     const { db } = await import('../server/db.js');
     console.log('✅ Database connection established');
+    
+    // Test the connection
+    const testQuery = await db.select().from(schema.scans).limit(1);
+    console.log('✅ Database test query successful');
+    
     return db;
   } catch (error) {
     console.error('❌ Failed to connect to database:', error);
@@ -40,6 +53,8 @@ async function work() {
 
   while (true) {
     try {
+      console.log('🔍 Polling for queued tasks...');
+      
       // Get next queued task
       const tasks = await db
         .select()
@@ -48,9 +63,12 @@ async function work() {
         .orderBy(schema.scanTasks.taskId)
         .limit(1);
 
+      console.log(`📊 Found ${tasks.length} queued tasks`);
+
       if (!tasks.length) {
         // No tasks available, wait and continue
-        await new Promise((r) => setTimeout(r, 2000));
+        console.log('😴 No tasks found, waiting 5 seconds...');
+        await new Promise((r) => setTimeout(r, 5000));
         continue;
       }
 

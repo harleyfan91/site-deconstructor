@@ -1,42 +1,33 @@
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
-import * as schema from "../shared/schema";
+import * as schema from '../shared/schema.js';
 
-// Function to get the connection string
-function getConnectionString() {
-  // First try DATABASE_URL (for drizzle compatibility)
-  if (process.env.DATABASE_URL) {
-    console.log('🔗 Using DATABASE_URL for connection');
-    return process.env.DATABASE_URL;
-  }
+// Extract project ID from Supabase URL
+const extractProjectId = (url: string): string => {
+  return url.replace('https://', '').replace('.supabase.co', '');
+};
 
-  // Fallback to Supabase connection configuration
+// Build connection string
+const buildConnectionString = (): string => {
   const supabaseUrl = process.env.VITE_SUPABASE_URL;
-  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (!supabaseUrl || !supabaseServiceRoleKey) {
-    throw new Error(
-      "Either DATABASE_URL or both VITE_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set for database connection"
-    );
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error('Missing required environment variables: VITE_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
   }
 
-  // Extract project ID from Supabase URL for direct PostgreSQL connection
-  const projectId = supabaseUrl.replace('https://', '').replace('.supabase.co', '');
-  const connectionString = `postgresql://postgres.${projectId}:${supabaseServiceRoleKey}@aws-0-us-west-1.pooler.supabase.com:5432/postgres`;
-  
-  // Set DATABASE_URL for future use
-  process.env.DATABASE_URL = connectionString;
-  console.log('🔗 Configured DATABASE_URL from Supabase environment variables');
-  
-  return connectionString;
-}
+  const projectId = extractProjectId(supabaseUrl);
+  return `postgresql://postgres.${projectId}:${serviceRoleKey}@aws-0-us-west-1.pooler.supabase.com:5432/postgres`;
+};
 
-const connectionString = getConnectionString();
-console.log('🔗 Connecting to Supabase PostgreSQL...');
+const connectionString = process.env.DATABASE_URL || buildConnectionString();
 
-export const sql = postgres(connectionString, { 
+console.log('🔗 Database connection string configured for project:', connectionString.includes('postgres.') ? connectionString.split('postgres.')[1].split(':')[0] : 'unknown');
+
+export const sql = postgres(connectionString, {
   max: 10,
   idle_timeout: 20,
-  connect_timeout: 10
+  connect_timeout: 10,
 });
+
 export const db = drizzle(sql, { schema });

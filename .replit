@@ -75,3 +75,16 @@ args = "npm run dev"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "npm run worker:dev 2>&1 | tee worker.log"
+
+[[workflows.workflow]]
+name = "Worker Only Debug"
+author = 44193618
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"🚀 Starting worker in debug mode...\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run worker:dev"
