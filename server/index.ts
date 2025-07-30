@@ -415,6 +415,56 @@ app.get('/api/ui/scan', async (req, res) => {
   }
 });
 
+// Debug endpoint to check database state
+app.get('/api/debug/database-status', async (req, res) => {
+  try {
+    const { db } = await import('./db.js');
+    const { scans, scanStatus, scanTasks } = await import('../shared/schema.js');
+    
+    const allScans = await db.select().from(scans).limit(10);
+    const allTasks = await db.select().from(scanTasks).limit(20);
+    const allStatus = await db.select().from(scanStatus).limit(10);
+    
+    console.log('📊 Database status check:');
+    console.log(`  Scans: ${allScans.length}`);
+    console.log(`  Tasks: ${allTasks.length}`);
+    console.log(`  Status: ${allStatus.length}`);
+    
+    const queuedTasks = allTasks.filter(t => t.status === 'queued');
+    console.log(`  Queued tasks: ${queuedTasks.length}`);
+    
+    if (queuedTasks.length > 0) {
+      console.log('  Queued task details:', queuedTasks.map(t => ({
+        id: t.taskId,
+        type: t.type,
+        scanId: t.scanId,
+        status: t.status
+      })));
+    }
+    
+    res.json({
+      scans: allScans.length,
+      tasks: allTasks.length,
+      status: allStatus.length,
+      queuedTasks: queuedTasks.length,
+      recentScans: allScans.slice(0, 3).map(s => ({
+        id: s.id,
+        url: s.url,
+        createdAt: s.createdAt
+      })),
+      recentTasks: allTasks.slice(0, 5).map(t => ({
+        id: t.taskId,
+        type: t.type,
+        status: t.status,
+        scanId: t.scanId
+      }))
+    });
+  } catch (error) {
+    console.error('Database status check failed:', error);
+    res.status(500).json({ error: 'Database check failed' });
+  }
+});
+
 // Keep existing scan endpoint for backward compatibility
 app.post('/api/scan', async (req, res) => {
   try {

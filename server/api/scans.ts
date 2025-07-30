@@ -49,38 +49,51 @@ export default async function (app: FastifyInstance) {
 
     const scanId = nanoid();
 
-    // Create scan record
-    const [scan] = await db.insert(schema.scans).values({
-      id: scanId,
-      url: validUrl,
-      createdAt: new Date(),
-    }).returning();
-
-    // Create scan status record
-    await db.insert(schema.scanStatus).values({
-      scanId,
-      status: "queued",
-      progress: 0,
-    });
-
-    // Create the 4 task records
-    const taskTypes = ['tech', 'colors', 'seo', 'perf'];
-    const taskPromises = taskTypes.map(type =>
-      db.insert(schema.scanTasks).values({
-        taskId: crypto.randomUUID(),
-        scanId,
-        type,
-        status: "queued",
+    try {
+      // Create scan record
+      const [scan] = await db.insert(schema.scans).values({
+        id: scanId,
+        url: validUrl,
+        userId: null, // Add missing fields
+        active: true,
         createdAt: new Date(),
-      })
-    );
+        lastRunAt: null,
+      }).returning();
 
-    await Promise.all(taskPromises);
+      console.log(`✅ Created scan record: ${scanId} for URL: ${validUrl}`);
 
-    console.log(`Scan created successfully: ${scanId}`);
-    console.log(`Created ${taskTypes.length} queued tasks: ${taskTypes.join(', ')}`);
+      // Create scan status record
+      await db.insert(schema.scanStatus).values({
+        scanId,
+        status: "queued",
+        progress: 0,
+      });
 
+      console.log(`✅ Created scan status: ${scanId}`);
 
-    return reply.code(201).send({ id: scanId });
+      // Create the 4 task records
+      const taskTypes = ['tech', 'colors', 'seo', 'perf'];
+      
+      for (const type of taskTypes) {
+        const taskId = crypto.randomUUID();
+        await db.insert(schema.scanTasks).values({
+          taskId,
+          scanId,
+          type,
+          status: "queued",
+          createdAt: new Date(),
+          payload: null,
+        });
+        console.log(`✅ Created ${type} task: ${taskId} for scan: ${scanId}`);
+      }
+
+      console.log(`🎉 Scan created successfully: ${scanId}`);
+      console.log(`📋 Created ${taskTypes.length} queued tasks: ${taskTypes.join(', ')}`);
+
+      return reply.code(201).send({ id: scanId });
+    } catch (error) {
+      console.error(`❌ Error creating scan:`, error);
+      return reply.code(500).send({ error: 'Failed to create scan' });
+    }
   });
 }
