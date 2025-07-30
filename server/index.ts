@@ -27,35 +27,43 @@ app.get('/api/health', (req, res) => {
 // Debug endpoint to clear all caches
 app.get('/api/debug/clear-cache', async (req, res) => {
   try {
-    const { CacheService } = await import('./lib/cache.js');
-    const cache = CacheService.getInstance();
-    
-    console.log('🔍 Current cache keys:', cache.listKeys());
-    cache.clearAll();
-    
+    const cacheModule = await import('./lib/cache.js');
+    const cache = cacheModule.unifiedCache || cacheModule.default;
+
+    const currentKeys = cache.listKeys ? cache.listKeys() : [];
+    console.log('🔍 Current cache keys:', currentKeys);
+
+    if (cache.clearAll) {
+      cache.clearAll();
+    }
+
     res.json({ 
       message: 'All caches cleared',
+      clearedKeys: currentKeys.length,
       timestamp: new Date().toISOString()
     });
   } catch (error) {
     console.error('Cache clear error:', error);
-    res.status(500).json({ error: 'Failed to clear cache' });
+    res.status(500).json({ error: 'Failed to clear cache', details: error.message });
   }
 });
 
 // Debug endpoint to inspect cache contents
 app.get('/api/debug/cache-info', async (req, res) => {
   try {
-    const { CacheService } = await import('./lib/cache.js');
-    const cache = CacheService.getInstance();
-    
+    const cacheModule = await import('./lib/cache.js');
+    const cache = cacheModule.unifiedCache || cacheModule.default;
+
+    const cacheKeys = cache.listKeys ? cache.listKeys() : [];
+
     res.json({ 
-      cacheKeys: cache.listKeys(),
+      cacheKeys,
+      cacheSize: cacheKeys.length,
       timestamp: new Date().toISOString()
     });
   } catch (error) {
     console.error('Cache info error:', error);
-    res.status(500).json({ error: 'Failed to get cache info' });
+    res.status(500).json({ error: 'Failed to get cache info', details: error.message });
   }
 });
 
