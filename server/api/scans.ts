@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { db } from '../db.js';
-import { analysisCache, scanStatus, scanTasks } from '../../shared/schema.js';
+import { scanTasks, scanStatus, analysisCache } from '../../shared/schema.js';
 import { eq, and } from 'drizzle-orm';
 import * as schema from '../../shared/schema.js';
 import { nanoid } from 'nanoid';
