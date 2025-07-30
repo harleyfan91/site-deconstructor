@@ -1,4 +1,4 @@
-import { pgTable, text, serial, uuid, timestamp, timestamptz, jsonb, boolean, smallint } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, uuid, timestamp, jsonb, boolean, smallint } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -61,7 +61,7 @@ export const scanTasks = pgTable("scan_tasks", {
     .notNull()
     .default("queued"),
   payload: jsonb("payload"),
-  createdAt: timestamptz("created_at")
+  createdAt: timestamp("created_at", { mode: "date" })
     .notNull()
     .defaultNow(),
 });
