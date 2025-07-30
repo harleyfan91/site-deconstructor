@@ -59,7 +59,7 @@ const handleRecentSearch = async ({
   loading: boolean,
 }) => {
   if (loading) return;
-  
+
   try {
     const fullUrl = `https://${searchUrl}`;
     const response = await fetch('/api/scans', {
@@ -94,7 +94,7 @@ const AnalyzePage = ({ darkMode, toggleDarkMode }: AnalyzePageProps) => {
   return (
     <>
       <AppHeader darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
-      
+
       <Box
         sx={{
           minHeight: '100vh',

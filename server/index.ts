@@ -24,6 +24,41 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Debug endpoint to clear all caches
+app.get('/api/debug/clear-cache', async (req, res) => {
+  try {
+    const { CacheService } = await import('./lib/cache.js');
+    const cache = CacheService.getInstance();
+    
+    console.log('🔍 Current cache keys:', cache.listKeys());
+    cache.clearAll();
+    
+    res.json({ 
+      message: 'All caches cleared',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Cache clear error:', error);
+    res.status(500).json({ error: 'Failed to clear cache' });
+  }
+});
+
+// Debug endpoint to inspect cache contents
+app.get('/api/debug/cache-info', async (req, res) => {
+  try {
+    const { CacheService } = await import('./lib/cache.js');
+    const cache = CacheService.getInstance();
+    
+    res.json({ 
+      cacheKeys: cache.listKeys(),
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Cache info error:', error);
+    res.status(500).json({ error: 'Failed to get cache info' });
+  }
+});
+
 // UI Analysis endpoint
 app.post('/api/analyze-ui', async (req, res) => {
   try {
