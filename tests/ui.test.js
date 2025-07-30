@@ -1,9 +1,12 @@
-import assert from 'node:assert';
-import { dashIfEmpty, groupByFrequency } from '../dist/lib/ui.js';
+import { describe, it, expect } from 'vitest';
+import { dashIfEmpty, groupByFrequency } from '@/lib/ui';
 
-assert.strictEqual(dashIfEmpty('abc'), 'abc');
-assert.strictEqual(dashIfEmpty(''), '\u2014');
-assert.strictEqual(dashIfEmpty(null), '\u2014');
+describe('ui utils', () => {
+  it('replaces empty values with dash', () => {
+    expect(dashIfEmpty('abc')).toBe('abc');
+    expect(dashIfEmpty('')).toBe('\u2014');
+    expect(dashIfEmpty(null)).toBe('\u2014');
+  });
 
 // frequency grouping
 const sampleColors = [
@@ -13,10 +16,12 @@ const sampleColors = [
   { name: 'D', hex: '#444444', usage: 'Text', count: 1 },
 ];
 
-const freqGroups = groupByFrequency(sampleColors);
-assert.strictEqual(freqGroups[0].name, 'Most Used');
-assert.ok(freqGroups[0].colors.length >= 3);
-if (freqGroups.length > 1) {
-  assert.strictEqual(freqGroups[1].name, 'Supporting Colors');
-}
-console.log('ui utils test passed');
+  it('groups colors by frequency', () => {
+    const freqGroups = groupByFrequency(sampleColors);
+    expect(freqGroups[0].name).toBe('Most Used');
+    expect(freqGroups[0].colors.length).toBeGreaterThanOrEqual(3);
+    if (freqGroups.length > 1) {
+      expect(freqGroups[1].name).toBe('Supporting Colors');
+    }
+  });
+});
