@@ -21,17 +21,33 @@ async function generateUrlHash(url: string): Promise<string> {
 async function initializeWorker() {
   console.log('🔗 Initializing worker database connection...');
 
-  // Ensure environment variables are loaded
-  if (!process.env.VITE_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  // Load environment variables from process.env
+  const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
+  const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
     console.error('❌ Missing required environment variables');
-    console.log('VITE_SUPABASE_URL:', process.env.VITE_SUPABASE_URL ? 'SET' : 'MISSING');
-    console.log('SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'SET' : 'MISSING');
+    console.log('VITE_SUPABASE_URL:', SUPABASE_URL ? 'SET' : 'MISSING');
+    console.log('SUPABASE_SERVICE_ROLE_KEY:', SUPABASE_SERVICE_KEY ? 'SET' : 'MISSING');
     throw new Error('Missing required environment variables');
   }
 
   try {
-    // Import database connection after environment is ready
-    const { db } = await import('../server/db.js');
+    // Import database connection - try different paths
+    let db;
+    try {
+      const dbModule = await import('../server/db.ts');
+      db = dbModule.db;
+    } catch (e1) {
+      try {
+        const dbModule = await import('../server/db.js');
+        db = dbModule.db;
+      } catch (e2) {
+        console.error('❌ Could not import database module:', { e1: e1.message, e2: e2.message });
+        throw new Error('Failed to import database module');
+      }
+    }
+    
     console.log('✅ Database connection established');
 
     // Test the connection
