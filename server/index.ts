@@ -425,14 +425,18 @@ app.get('/api/ui/scan', async (req, res) => {
 // Debug endpoint to check database state
 app.get('/api/debug/database-status', async (req, res) => {
   try {
-    const { db } = await import('./db.js');
+    const { db, sql } = await import('./db.js');
     const { scans, scanStatus, scanTasks } = await import('../shared/schema.js');
+    
+    // Test basic connection
+    await sql`SELECT 1 as test`;
     
     const allScans = await db.select().from(scans).limit(10);
     const allTasks = await db.select().from(scanTasks).limit(20);
     const allStatus = await db.select().from(scanStatus).limit(10);
     
     console.log('📊 Database status check:');
+    console.log(`  Connection: ✅ Active`);
     console.log(`  Scans: ${allScans.length}`);
     console.log(`  Tasks: ${allTasks.length}`);
     console.log(`  Status: ${allStatus.length}`);
@@ -449,11 +453,19 @@ app.get('/api/debug/database-status', async (req, res) => {
       })));
     }
     
+    // Check if these are the same scans showing in console
+    const suspiciousScans = allScans.filter(s => 
+      s.id === '173ac327-8709-41ca-8821-3c8076e76dc0' || 
+      s.id === '8c861fc6-98ce-4e0a-8715-35bc4599591d'
+    );
+    
     res.json({
+      connection: 'active',
       scans: allScans.length,
       tasks: allTasks.length,
       status: allStatus.length,
       queuedTasks: queuedTasks.length,
+      suspiciousScans: suspiciousScans.length,
       recentScans: allScans.slice(0, 3).map(s => ({
         id: s.id,
         url: s.url,
@@ -468,7 +480,11 @@ app.get('/api/debug/database-status', async (req, res) => {
     });
   } catch (error) {
     console.error('Database status check failed:', error);
-    res.status(500).json({ error: 'Database check failed' });
+    res.status(500).json({ 
+      error: 'Database check failed', 
+      details: error.message,
+      connection: 'failed'
+    });
   }
 });
 
