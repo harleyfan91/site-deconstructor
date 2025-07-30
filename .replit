@@ -30,7 +30,7 @@ externalPort = 3002
 exposeLocalhost = true
 
 [workflows]
-runButton = "Debug App with Worker"
+runButton = "Clean Start"
 
 [[workflows.workflow]]
 name = "Project"
@@ -84,6 +84,19 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "echo \"🚀 Starting worker in debug mode...\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run worker:dev"
+
+[[workflows.workflow]]
+name = "Clean Start"
+author = 44193618
+mode = "parallel"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"

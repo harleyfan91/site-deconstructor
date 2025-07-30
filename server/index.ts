@@ -451,7 +451,9 @@ async function startServer() {
   }
 
   server.listen(port, "0.0.0.0", () => {
-    log(`serving on port ${port}`);
+    log(`Server running on http://0.0.0.0:${port}`);
+    console.log(`🌐 Frontend accessible via Replit's webview`);
+    console.log(`🔧 API endpoints available at /api/*`);
   });
 }
 
