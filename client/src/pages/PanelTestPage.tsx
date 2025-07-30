@@ -20,6 +20,11 @@ const PanelTestPage = ({ darkMode, toggleDarkMode }: PanelTestPageProps) => {
 
   // Mock data for demonstration
   const mockData = {
+    success: true,
+    lhr: {
+      categories: { security: { score: 0, auditRefs: [] } },
+      audits: {}
+    },
     data: {
       ui: {
         colors: [
@@ -29,27 +34,39 @@ const PanelTestPage = ({ darkMode, toggleDarkMode }: PanelTestPageProps) => {
           { hex: '#FF6B35', name: 'Orange Accent', usage: 'button', count: 3 },
         ],
         fonts: [
-          { family: 'Inter', weight: 400, size: '16px', usage: 'body' },
-          { family: 'Inter', weight: 600, size: '24px', usage: 'heading' },
-          { family: 'Roboto Mono', weight: 400, size: '14px', usage: 'code' },
+          { name: 'Inter', category: 'sans-serif', usage: 'body', weight: '400' },
+          { name: 'Inter', category: 'sans-serif', usage: 'heading', weight: '600' },
+          { name: 'Roboto Mono', category: 'monospace', usage: 'code', weight: '400' },
         ],
         images: [
-          { src: '/logo.png', alt: 'Logo', size: '2048x1024', type: 'photo' },
-          { src: '/icon.svg', alt: 'Icon', size: '32x32', type: 'icon' },
+          { url: '/logo.png', alt: 'Logo', type: 'photo' },
+          { url: '/icon.svg', alt: 'Icon', type: 'icon' },
         ],
         contrastIssues: [
           { textColor: '#999999', backgroundColor: '#FFFFFF', ratio: 2.1 },
         ],
-        violations: [],
+        violations: [
+          {
+            id: 'color-contrast',
+            impact: 'minor',
+            description: 'Insufficient contrast',
+            help: 'Elements must have sufficient color contrast',
+            nodes: []
+          }
+        ],
         accessibilityScore: 87,
       },
       tech: {
         techStack: [
-          { name: 'React', confidence: 95, category: 'Framework' },
-          { name: 'TypeScript', confidence: 90, category: 'Language' },
-          { name: 'Vite', confidence: 85, category: 'Build Tool' },
+          { technology: 'React', category: 'Framework', confidence: 95 },
+          { technology: 'TypeScript', category: 'Language', confidence: 90 },
+          { technology: 'Vite', category: 'Build Tool', confidence: 85 },
         ],
-        minification: { cssMinified: true, jsMinified: true },
+        minification: { cssMinified: true, jsMinified: true, htmlMinified: true },
+        social: { hasOpenGraph: true, hasTwitterCard: true, hasShareButtons: false },
+        cookies: { hasCookieScript: false },
+        adTags: {},
+        issues: []
       }
     }
   };
