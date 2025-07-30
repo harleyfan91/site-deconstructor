@@ -122,10 +122,9 @@ async function work() {
         // Run the appropriate analyzer
         const result = await runners[task.type](url);
 
-        // Generate URL hash for cache key
+        // Generate URL hash
         const urlHash = await generateUrlHash(url);
         const cacheKey = `${task.type}_${urlHash}`;
-
 
 
         // Mark task as complete

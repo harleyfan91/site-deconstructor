@@ -38,6 +38,8 @@ export const scanStatus = pgTable("scan_status", {
 // analysis_cache
 export const analysisCache = pgTable("analysis_cache", {
   id: uuid("id").primaryKey().defaultRandom(),
+  scanId: uuid("scan_id").notNull(),
+  type: text("type").notNull(),
   urlHash: text("url_hash").notNull().unique(),
   originalUrl: text("original_url").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
@@ -78,6 +80,8 @@ export const insertScanStatusSchema = createInsertSchema(scanStatus).pick({
 });
 
 export const insertAnalysisCacheSchema = createInsertSchema(analysisCache).pick({
+  scanId: true,
+  type: true,
   urlHash: true,
   originalUrl: true,
   auditJson: true,
