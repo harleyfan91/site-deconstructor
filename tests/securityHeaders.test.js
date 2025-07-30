@@ -1,5 +1,5 @@
-import assert from 'node:assert';
-import { extractSecurityHeaders } from '../dist/lib/accessibility.js';
+import { describe, it, expect } from 'vitest';
+import { extractSecurityHeaders } from '@/lib/accessibility';
 
 const headers = {
   'content-security-policy': "default-src 'self'",
@@ -9,14 +9,19 @@ const headers = {
   'referrer-policy': 'no-referrer'
 };
 
-const result = extractSecurityHeaders(headers);
-assert.strictEqual(result.csp, headers['content-security-policy']);
-assert.strictEqual(result.hsts, headers['strict-transport-security']);
-assert.strictEqual(result.xfo, headers['x-frame-options']);
-assert.strictEqual(result.xcto, headers['x-content-type-options']);
-assert.strictEqual(result.referrer, headers['referrer-policy']);
+describe('extractSecurityHeaders', () => {
+  it('parses headers correctly', () => {
+    const result = extractSecurityHeaders(headers);
+    expect(result.csp).toBe(headers['content-security-policy']);
+    expect(result.hsts).toBe(headers['strict-transport-security']);
+    expect(result.xfo).toBe(headers['x-frame-options']);
+    expect(result.xcto).toBe(headers['x-content-type-options']);
+    expect(result.referrer).toBe(headers['referrer-policy']);
+  });
 
-const empty = extractSecurityHeaders({});
-assert.strictEqual(empty.csp, '');
-assert.strictEqual(empty.hsts, '');
-console.log('security headers test passed');
+  it('handles empty headers', () => {
+    const empty = extractSecurityHeaders({});
+    expect(empty.csp).toBe('');
+    expect(empty.hsts).toBe('');
+  });
+});
