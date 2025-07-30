@@ -246,13 +246,18 @@ app.post('/api/scans', async (req, res) => {
       });
 
       // Insert scan tasks for each requested type
+      const crypto = await import('crypto');
       for (const type of taskTypes) {
+        const taskId = crypto.randomUUID();
         await db.insert(scanTasks).values({
+          taskId: taskId,
           scanId: scanId,
           type: type as any,
           status: 'queued',
-          createdAt: new Date()
+          createdAt: new Date(),
+          payload: null
         });
+        console.log(`✅ Created ${type} task: ${taskId} for scan: ${scanId}`);
       }
 
       console.log('Scan created successfully:', scanId);
@@ -270,9 +275,11 @@ app.post('/api/scans', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Scan creation error:', error);
+    console.error('❌ Scan creation error:', error);
+    console.error('Error details:', error instanceof Error ? error.message : String(error));
     res.status(500).json({ 
       error: 'Failed to create scan',
+      details: error instanceof Error ? error.message : String(error),
       status: 'error' 
     });
   }
