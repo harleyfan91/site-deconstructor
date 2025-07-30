@@ -61,7 +61,9 @@ export const scanTasks = pgTable("scan_tasks", {
     .notNull()
     .default("queued"),
   payload: jsonb("payload"),
+
   createdAt: timestamp("created_at", { mode: "date" })
+
     .notNull()
     .defaultNow(),
 });
