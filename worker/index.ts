@@ -33,20 +33,8 @@ async function initializeWorker() {
   }
 
   try {
-    // Import database connection - try different paths
-    let db;
-    try {
-      const dbModule = await import('../server/db.ts');
-      db = dbModule.db;
-    } catch (e1) {
-      try {
-        const dbModule = await import('../server/db.js');
-        db = dbModule.db;
-      } catch (e2) {
-        console.error('❌ Could not import database module:', { e1: e1.message, e2: e2.message });
-        throw new Error('Failed to import database module');
-      }
-    }
+    // Import database connection
+    const { db } = await import('../server/db.js');
     
     console.log('✅ Database connection established');
 
