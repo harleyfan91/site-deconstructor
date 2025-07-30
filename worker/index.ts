@@ -122,7 +122,7 @@ async function work() {
         // Run the appropriate analyzer
         const result = await runners[task.type](url);
 
-        // Generate URL hash for cache key
+        // Generate URL hash
         const urlHash = await generateUrlHash(url);
         const cacheKey = `${task.type}_${urlHash}`;
 
@@ -145,18 +145,17 @@ async function work() {
           await db
             .insert(schema.analysisCache)
             .values({
-              urlHash: cacheKey,
+              scanId: task.scanId!,
+              type: task.type,
+              urlHash: urlHash,
               originalUrl: url,
               auditJson: result,
-              createdAt: new Date(),
-              expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
             })
             .onConflictDoUpdate({
-              target: schema.analysisCache.urlHash,
+              target: [schema.analysisCache.scanId, schema.analysisCache.type],
               set: {
                 auditJson: result,
-                createdAt: new Date(),
-                expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+                expiresAt: new Date(),
               },
             });
           console.log(`✅ Direct DB cache stored for ${task.type}: ${url}`);
