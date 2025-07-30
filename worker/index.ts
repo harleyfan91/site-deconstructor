@@ -33,8 +33,8 @@ async function initializeWorker() {
   }
 
   try {
-    // Import database connection
-    const { db } = await import('../server/db.js');
+    // Import database connection with correct extension
+    const { db } = await import('../server/db.ts');
     
     console.log('✅ Database connection established');
 
