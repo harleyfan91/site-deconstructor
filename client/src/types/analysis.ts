@@ -26,6 +26,43 @@ export interface SecurityHeaders {
   referrer: string;
 }
 
+/** Detailed technical information returned with an analysis. */
+export interface TechDetails {
+  techStack: Array<{
+    category: string;
+    technology: string;
+    version?: string;
+    confidence?: number;
+  }>;
+  minification: {
+    cssMinified: boolean;
+    jsMinified: boolean;
+    htmlMinified?: boolean;
+  };
+  social: {
+    hasOpenGraph: boolean;
+    hasTwitterCard: boolean;
+    hasShareButtons: boolean;
+    facebookPixel?: boolean;
+    googleAnalytics?: boolean;
+    linkedInInsight?: boolean;
+  };
+  cookies: {
+    hasCookieScript: boolean;
+    cookieConsentType?: 'none' | 'banner' | 'popup' | 'overlay';
+    cookieLibrary?: string;
+  };
+  adTags: {
+    [key: string]: boolean;
+  };
+  issues: Array<{
+    type: 'performance' | 'security' | 'accessibility' | 'seo';
+    description: string;
+    severity: 'high' | 'medium' | 'low';
+    recommendation?: string;
+  }>;
+}
+
 export interface AnalysisOverview {
   overallScore: number;
   pageLoadTime?: string;
@@ -70,14 +107,7 @@ export interface AnalysisResponse {
     violations: any[];
   };
   overview?: AnalysisOverview;
-  tech?: {
-    techStack?: any[];
-    minification?: { cssMinified: boolean; jsMinified: boolean };
-    social?: any;
-    cookies?: any;
-    adTags?: any[];
-    issues?: any[];
-  };
+  tech?: TechDetails;
   colors?: any[];
   fonts?: any[];
   images?: any[];
@@ -141,14 +171,7 @@ export interface AnalysisResponse {
       issues?: any[];
       securityScore?: number;
     };
-    tech?: {
-      techStack?: any[];
-      minification?: { cssMinified: boolean; jsMinified: boolean };
-      social?: any;
-      cookies?: any;
-      adTags?: any[];
-      issues?: any[];
-    };
+    tech?: TechDetails;
     colors?: Array<{name: string, hex: string, usage: string, count: number}>;
     fonts?: Array<{name: string, category: string, usage: string, weight?: string, isLoaded?: boolean, isPublic?: boolean}>;
     images?: Array<{url: string, alt?: string, type?: string}>;
