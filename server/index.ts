@@ -48,6 +48,43 @@ app.get('/api/debug/clear-cache', async (req, res) => {
   }
 });
 
+// Debug endpoint to reset failed tasks
+app.get('/api/debug/reset-failed-tasks', async (req, res) => {
+  try {
+    const { db } = await import('./db.js');
+    const { scanTasks } = await import('../shared/schema.js');
+    const { eq } = await import('drizzle-orm');
+
+    // Get all failed tasks
+    const failedTasks = await db
+      .select()
+      .from(scanTasks)
+      .where(eq(scanTasks.status, 'failed'));
+
+    // Reset them to queued
+    if (failedTasks.length > 0) {
+      for (const task of failedTasks) {
+        await db
+          .update(scanTasks)
+          .set({ 
+            status: 'queued',
+            payload: null 
+          })
+          .where(eq(scanTasks.taskId, task.taskId));
+      }
+    }
+
+    res.json({ 
+      message: `Reset ${failedTasks.length} failed tasks to queued`,
+      resetCount: failedTasks.length,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Reset failed tasks error:', error);
+    res.status(500).json({ error: 'Failed to reset tasks', details: error.message });
+  }
+});
+
 // Debug endpoint to inspect cache contents
 app.get('/api/debug/cache-info', async (req, res) => {
   try {

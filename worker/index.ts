@@ -59,6 +59,30 @@ async function work() {
     try {
       console.log('🔍 Polling for queued tasks...');
 
+      // First, check for and reset old failed tasks (older than 5 minutes)
+      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+      const failedTasks = await db
+        .select()
+        .from(schema.scanTasks)
+        .where(eq(schema.scanTasks.status, "failed"))
+        .limit(10);
+
+      if (failedTasks.length > 0) {
+        console.log(`🔄 Found ${failedTasks.length} failed tasks, resetting to queued...`);
+        
+        for (const task of failedTasks) {
+          await db
+            .update(schema.scanTasks)
+            .set({ 
+              status: "queued",
+              payload: null 
+            })
+            .where(eq(schema.scanTasks.taskId, task.taskId));
+        }
+        
+        console.log(`✅ Reset ${failedTasks.length} failed tasks to queued status`);
+      }
+
       // Get next queued task
       const tasks = await db
         .select()
@@ -93,8 +117,15 @@ async function work() {
       }
 
       if (!tasks.length) {
-        // No tasks available, wait and continue
-        console.log('😴 No tasks found, waiting 5 seconds...');
+        // Check if we have any tasks at all
+        const totalTasks = await db.select().from(schema.scanTasks).limit(1);
+        
+        if (totalTasks.length === 0) {
+          console.log('😴 No tasks in database, waiting 5 seconds...');
+        } else {
+          console.log('😴 No queued tasks found (all completed/failed), waiting 5 seconds...');
+        }
+        
         await new Promise((r) => setTimeout(r, 5000));
         continue;
       }
