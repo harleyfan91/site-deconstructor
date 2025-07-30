@@ -55,13 +55,11 @@ const PanelTestPage = ({ darkMode, toggleDarkMode }: PanelTestPageProps) => {
   };
 
   const clearStorage = () => {
-    localStorage.removeItem(`panelState:${scanId}`);
     window.location.reload();
   };
 
   const checkStorage = () => {
-    const stored = localStorage.getItem(`panelState:${scanId}`);
-    alert(`Current panel state for ${scanId}:\n${stored || 'No data stored'}`);
+    alert('LocalStorage functionality has been removed');
   };
 
   return (

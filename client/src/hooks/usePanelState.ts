@@ -1,34 +1,14 @@
-import { useEffect, useState, useCallback } from "react";
-
-type PanelMap = Record<string, boolean>;
+import { useState } from 'react';
 
 export function usePanelState(scanId: string) {
-  const key = `panelState:${scanId}`;
+  const [state, setState] = useState<Record<string, boolean>>({});
 
-  const [state, setState] = useState<PanelMap>(() => {
-    try {
-      const raw = localStorage.getItem(key);
-      return raw ? (JSON.parse(raw) as PanelMap) : {};
-    } catch {
-      return {};
-    }
-  });
+  const toggle = (sectionId: string) => {
+    setState(prev => ({
+      ...prev,
+      [sectionId]: !prev[sectionId]
+    }));
+  };
 
-  // persist on change
-  useEffect(() => {
-    try {
-      localStorage.setItem(key, JSON.stringify(state));
-    } catch {
-      /* ignore quota errors */
-    }
-  }, [key, state]);
-
-  // helper toggle
-  const toggle = useCallback(
-    (sectionId: string) =>
-      setState((prev) => ({ ...prev, [sectionId]: !prev[sectionId] })),
-    []
-  );
-
-  return { state, toggle } as const;
+  return { state, toggle };
 }
