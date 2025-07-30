@@ -1,5 +1,6 @@
 import { eq, and } from "drizzle-orm";
 import * as schema from "../shared/schema.ts";
+import { scanTasks } from "../shared/schema.ts";
 import { analyzeTech } from "./analysers/tech";
 import { analyzeColors } from "./analysers/colors";
 import { analyzeSEO } from "./analysers/seo";
@@ -66,8 +67,8 @@ async function work() {
       const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
       const oldFailedTasks = await db
         .select()
-        .from(schema.scanTasks)
-        .where(eq(schema.scanTasks.status, "failed"))
+        .from(scanTasks)
+        .where(eq(scanTasks.status, "failed"))
         .limit(5); // Limit to prevent too many resets
 
       // Only reset failed tasks that are actually old, not immediately
@@ -77,12 +78,12 @@ async function work() {
           // Check if task was created more than 10 minutes ago
           if (task.createdAt && task.createdAt < tenMinutesAgo) {
             await db
-              .update(schema.scanTasks)
+              .update(scanTasks)
               .set({ 
                 status: "queued",
                 payload: null 
               })
-              .where(eq(schema.scanTasks.taskId, task.taskId));
+              .where(eq(scanTasks.taskId, task.taskId));
             resetCount++;
           }
         }
@@ -95,15 +96,15 @@ async function work() {
       // Get next queued task
       const tasks = await db
         .select()
-        .from(schema.scanTasks)
-        .where(eq(schema.scanTasks.status, "queued"))
-        .orderBy(schema.scanTasks.taskId)
+        .from(scanTasks)
+        .where(eq(scanTasks.status, "queued"))
+        .orderBy(scanTasks.taskId)
         .limit(1);
 
       console.log(`📊 Found ${tasks.length} queued tasks`);
       
       // Debug: Check total tasks in database
-      const allTasks = await db.select().from(schema.scanTasks).limit(5);
+      const allTasks = await db.select().from(scanTasks).limit(5);
       console.log(`🔍 Total tasks in database: ${allTasks.length}`);
       if (allTasks.length > 0) {
         console.log(`📋 Sample tasks:`, allTasks.map(t => ({
@@ -129,7 +130,7 @@ async function work() {
         consecutiveEmptyPolls++;
         
         // Check if we have any tasks at all
-        const totalTasks = await db.select().from(schema.scanTasks).limit(1);
+        const totalTasks = await db.select().from(scanTasks).limit(1);
         
         if (totalTasks.length === 0) {
           console.log(`😴 No tasks in database, waiting... (empty polls: ${consecutiveEmptyPolls})`);
@@ -151,9 +152,9 @@ async function work() {
 
       // Mark task as running
       await db
-        .update(schema.scanTasks)
+        .update(scanTasks)
         .set({ status: "running" })
-        .where(eq(schema.scanTasks.taskId, task.taskId));
+        .where(eq(scanTasks.taskId, task.taskId));
 
       try {
         // Get the URL from the scan record
@@ -197,20 +198,20 @@ async function work() {
 
         // Mark task as complete
         await db
-          .update(schema.scanTasks)
+          .update(scanTasks)
           .set({ status: "complete" })
-          .where(eq(schema.scanTasks.taskId, task.taskId));
+          .where(eq(scanTasks.taskId, task.taskId));
 
         console.log(`✅ Completed ${task.type} analysis for scan ${task.scanId}`);
 
         // Check if all tasks for this scan are complete
         const remainingTasks = await db
           .select()
-          .from(schema.scanTasks)
+          .from(scanTasks)
           .where(
             and(
-              eq(schema.scanTasks.scanId, task.scanId!),
-              eq(schema.scanTasks.status, "queued")
+              eq(scanTasks.scanId, task.scanId!),
+              eq(scanTasks.status, "queued")
             )
           );
 
@@ -232,12 +233,12 @@ async function work() {
 
         // Mark task as failed
         await db
-          .update(schema.scanTasks)
-          .set({ 
+          .update(scanTasks)
+          .set({
             status: "failed",
             payload: { error: err instanceof Error ? err.message : String(err) }
           })
-          .where(eq(schema.scanTasks.taskId, task.taskId));
+          .where(eq(scanTasks.taskId, task.taskId));
       }
 
     } catch (err) {

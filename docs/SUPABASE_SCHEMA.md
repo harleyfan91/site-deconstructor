@@ -25,12 +25,20 @@ Based on the actual database structure, here are the tables and their exact colu
 • **updated_at** (timestamp without time zone) – last update timestamp
 
 ## scans
-• **id** (uuid PK) – auto‑generated via `uuid_generate_v4()`  
-• **user_id** (uuid) – FK → `auth.users.id`, nullable for anonymous scans  
-• **url** (text) – the URL to be scanned  
-• **created_at** (timestamp without time zone) – when the scan was requested  
-• **last_run_at** (timestamp without time zone) – timestamp of last scan execution  
+• **id** (uuid PK) – auto‑generated via `uuid_generate_v4()`
+• **user_id** (uuid) – FK → `auth.users.id`, nullable for anonymous scans
+• **url** (text) – the URL to be scanned
+• **created_at** (timestamp without time zone) – when the scan was requested
+• **last_run_at** (timestamp without time zone) – timestamp of last scan execution
 • **active** (boolean) – whether the scan is active (soft‑delete flag)
+
+### scan_tasks
+• **task_id** (uuid PK) – unique ID for each sub-task  
+• **scan_id** (uuid FK → scans.id) – parent scan reference  
+• **type** (text) – one of `tech`, `colors`, `seo`, `perf`  
+• **status** (text) – `queued`|`running`|`complete`|`failed`  
+• **payload** (jsonb) – parameters or result metadata  
+• **created_at** (timestamptz) – default `now()`
 
 ## Additional Tables
 The database also contains these tables:

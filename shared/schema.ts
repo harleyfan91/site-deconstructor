@@ -1,4 +1,4 @@
-import { pgTable, text, serial, uuid, timestamp, jsonb, boolean, smallint } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, uuid, timestamp, timestamptz, jsonb, boolean, smallint } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -50,15 +50,20 @@ export const analysisCache = pgTable("analysis_cache", {
 // scan_tasks
 export const scanTasks = pgTable("scan_tasks", {
   taskId: uuid("task_id").primaryKey().defaultRandom(),
-  scanId: uuid("scan_id").references(() => scans.id, { onDelete: "cascade" }),
+  scanId: uuid("scan_id")
+    .notNull()
+    .references(() => scans.id, { onDelete: "cascade" }),
   type: text("type")
     .$type<"tech" | "colors" | "seo" | "perf">()
     .notNull(),
   status: text("status")
     .$type<"queued" | "running" | "complete" | "failed">()
+    .notNull()
     .default("queued"),
   payload: jsonb("payload"),
-  createdAt: timestamp("created_at").defaultNow(),
+  createdAt: timestamptz("created_at")
+    .notNull()
+    .defaultNow(),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
