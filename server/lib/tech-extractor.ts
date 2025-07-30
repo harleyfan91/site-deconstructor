@@ -4,7 +4,6 @@
 
 import { chromium, type Browser, type Page } from 'playwright';
 // Using pattern-based detection instead of deprecated Wappalyzer
-import { SupabaseCacheService } from './supabase';
 import * as crypto from 'crypto';
 import PQueue from 'p-queue';
 
@@ -683,18 +682,9 @@ export async function getTechnicalAnalysis(url: string): Promise<TechnicalAnalys
     const urlHash = crypto.createHash('sha256').update(url).digest('hex');
     const cacheKey = `tech_${urlHash}`;
 
-    // Try to get from cache first
-    const cached = await SupabaseCacheService.get(cacheKey);
-    if (cached) {
-      console.log('📦 Technical analysis cache hit');
-      return cached.analysis_data;
-    }
-
     console.log('🔍 Performing fresh technical analysis...');
     const analysis = await extractTechnicalData(url);
 
-    // Cache the results
-    await SupabaseCacheService.set(cacheKey, url, analysis);
     
     return analysis;
   } catch (error) {

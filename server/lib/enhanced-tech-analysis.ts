@@ -4,7 +4,6 @@
  */
 import { getLighthouseBestPractices, type LighthouseBestPracticesData } from './lighthouse-service';
 import { getTechnicalAnalysis as getLightweightTech } from './tech-lightweight';
-import { SupabaseCacheService } from './supabase';
 import * as crypto from 'crypto';
 
 export interface EnhancedTechAnalysis {
@@ -129,11 +128,6 @@ export async function getEnhancedTechAnalysis(url: string): Promise<EnhancedTech
     const cacheKey = `enhanced_tech_${urlHash}`;
 
     // Try cache first
-    const cached = await SupabaseCacheService.get(cacheKey);
-    if (cached) {
-      console.log('📦 Enhanced tech analysis cache hit');
-      return cached.analysis_data;
-    }
 
     console.log('🔍 Performing enhanced tech analysis (lightweight + Lighthouse)...');
     
@@ -302,7 +296,6 @@ export async function getEnhancedTechAnalysis(url: string): Promise<EnhancedTech
     };
 
     // Cache the results
-    await SupabaseCacheService.set(cacheKey, url, enhancedAnalysis);
     
     console.log(`✅ Enhanced tech analysis completed: Lighthouse score ${lighthouseData.score}, Overall score ${enhancedAnalysis.overallScore}`);
     

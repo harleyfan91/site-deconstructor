@@ -14,18 +14,6 @@ export async function analyzeColors(url: string): Promise<any> {
       url
     };
 
-    // Cache the result in Supabase
-    try {
-      const { SupabaseCacheService } = await import('../../server/lib/supabase.js');
-      const crypto = await import('crypto');
-      const urlHash = crypto.createHash('sha256').update(url).digest('hex');
-      const cacheKey = `colors_${urlHash}`;
-
-      await SupabaseCacheService.set(cacheKey, url, result);
-      console.log(`✅ Colors analysis cached in Supabase for ${url}`);
-    } catch (cacheError) {
-      console.error('❌ Failed to cache colors analysis:', cacheError);
-    }
 
     return result;
   } catch (error) {
