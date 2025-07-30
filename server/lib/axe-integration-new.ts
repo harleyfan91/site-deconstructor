@@ -3,7 +3,6 @@
  * Injects axe-core into Playwright pages for real contrast and accessibility testing
  */
 import { Page } from 'playwright';
-import { SupabaseCacheService } from './supabase';
 import * as crypto from 'crypto';
 
 export interface AxeViolation {
@@ -133,17 +132,11 @@ export async function getAccessibilityAnalysis(page: Page, url: string): Promise
     const cacheKey = `axe_accessibility_${urlHash}`;
 
     // Try cache first
-    const cached = await SupabaseCacheService.get(cacheKey);
     if (cached) {
       console.log('📦 Axe accessibility cache hit');
-      return cached.analysis_data;
-    }
-
     console.log('🔍 Performing fresh axe accessibility analysis...');
     const analysis = await runAxeAnalysis(page, url);
 
-    // Cache the results
-    await SupabaseCacheService.set(cacheKey, url, analysis);
     
     return analysis;
   } catch (error) {
