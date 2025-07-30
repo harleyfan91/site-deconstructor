@@ -92,6 +92,28 @@ export class UnifiedCache {
       return memoryResult as T;
     }
 
+    // Try Supabase cache
+    try {
+      const { db } = await import('../db.js');
+      const { analysisCache } = await import('../../shared/schema.js');
+      const { eq } = await import('drizzle-orm');
+      
+      const cached = await db
+        .select()
+        .from(analysisCache)
+        .where(eq(analysisCache.urlHash, cacheKey))
+        .limit(1);
+
+      if (cached.length > 0 && cached[0].expiresAt && cached[0].expiresAt > new Date()) {
+        console.log(`🗄️ Supabase cache hit for: ${cacheKey}`);
+        const result = cached[0].auditJson as T;
+        // Store in memory for next time
+        this.memoryCache.set(cacheKey, result, this.MEMORY_TTL);
+        return result;
+      }
+    } catch (error) {
+      console.error('❌ Error accessing Supabase cache:', error);
+    }
 
     return null;
   }
@@ -105,6 +127,33 @@ export class UnifiedCache {
     // Store in memory cache
     this.memoryCache.set(cacheKey, data, this.MEMORY_TTL);
     
+    // Store in Supabase cache
+    try {
+      const { db } = await import('../db.js');
+      const { analysisCache } = await import('../../shared/schema.js');
+      
+      const ttl = isSuccess ? this.SUCCESS_TTL : this.FAILURE_TTL;
+      const expiresAt = new Date(Date.now() + ttl);
+      
+      await db
+        .insert(analysisCache)
+        .values({
+          urlHash: cacheKey,
+          auditJson: data,
+          expiresAt
+        })
+        .onConflictDoUpdate({
+          target: analysisCache.urlHash,
+          set: {
+            auditJson: data,
+            expiresAt
+          }
+        });
+        
+      console.log(`💾 Stored in Supabase cache: ${cacheKey}`);
+    } catch (error) {
+      console.error('❌ Error storing in Supabase cache:', error);
+    }
   }
 
   /**

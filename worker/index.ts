@@ -126,6 +126,23 @@ async function work() {
         const urlHash = await generateUrlHash(url);
         const cacheKey = `${task.type}_${urlHash}`;
 
+        // Store result in analysis_cache
+        await db
+          .insert(schema.analysisCache)
+          .values({
+            urlHash: cacheKey,
+            auditJson: result,
+            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+          })
+          .onConflictDoUpdate({
+            target: schema.analysisCache.urlHash,
+            set: {
+              auditJson: result,
+              expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
+            }
+          });
+
+        console.log(`💾 Stored ${task.type} result in cache with key: ${cacheKey}`);
 
         // Mark task as complete
         await db
