@@ -55,32 +55,41 @@ async function work() {
   const db = await initializeWorker();
   console.log('🔄 Starting task polling loop...');
 
+  let consecutiveEmptyPolls = 0;
+  const MAX_EMPTY_POLLS = 12; // Max 1 minute of empty polls before longer wait
+
   while (true) {
     try {
       console.log('🔍 Polling for queued tasks...');
 
-      // First, check for and reset old failed tasks (older than 5 minutes)
-      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-      const failedTasks = await db
+      // First, check for and reset old failed tasks (only reset tasks that are older than 10 minutes)
+      const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+      const oldFailedTasks = await db
         .select()
         .from(schema.scanTasks)
         .where(eq(schema.scanTasks.status, "failed"))
-        .limit(10);
+        .limit(5); // Limit to prevent too many resets
 
-      if (failedTasks.length > 0) {
-        console.log(`🔄 Found ${failedTasks.length} failed tasks, resetting to queued...`);
-        
-        for (const task of failedTasks) {
-          await db
-            .update(schema.scanTasks)
-            .set({ 
-              status: "queued",
-              payload: null 
-            })
-            .where(eq(schema.scanTasks.taskId, task.taskId));
+      // Only reset failed tasks that are actually old, not immediately
+      let resetCount = 0;
+      if (oldFailedTasks.length > 0) {
+        for (const task of oldFailedTasks) {
+          // Check if task was created more than 10 minutes ago
+          if (task.createdAt && task.createdAt < tenMinutesAgo) {
+            await db
+              .update(schema.scanTasks)
+              .set({ 
+                status: "queued",
+                payload: null 
+              })
+              .where(eq(schema.scanTasks.taskId, task.taskId));
+            resetCount++;
+          }
         }
         
-        console.log(`✅ Reset ${failedTasks.length} failed tasks to queued status`);
+        if (resetCount > 0) {
+          console.log(`🔄 Reset ${resetCount} old failed tasks to queued status`);
+        }
       }
 
       // Get next queued task
@@ -117,18 +126,25 @@ async function work() {
       }
 
       if (!tasks.length) {
+        consecutiveEmptyPolls++;
+        
         // Check if we have any tasks at all
         const totalTasks = await db.select().from(schema.scanTasks).limit(1);
         
         if (totalTasks.length === 0) {
-          console.log('😴 No tasks in database, waiting 5 seconds...');
+          console.log(`😴 No tasks in database, waiting... (empty polls: ${consecutiveEmptyPolls})`);
         } else {
-          console.log('😴 No queued tasks found (all completed/failed), waiting 5 seconds...');
+          console.log(`😴 No queued tasks found (all completed/failed), waiting... (empty polls: ${consecutiveEmptyPolls})`);
         }
         
-        await new Promise((r) => setTimeout(r, 5000));
+        // Progressive backoff: longer waits if consistently empty
+        const waitTime = consecutiveEmptyPolls > MAX_EMPTY_POLLS ? 30000 : 5000; // 30s vs 5s
+        await new Promise((r) => setTimeout(r, waitTime));
         continue;
       }
+
+      // Reset empty poll counter when we find work
+      consecutiveEmptyPolls = 0;
 
       const task = tasks[0];
       console.log(`📋 Processing task: ${task.type} for scan ${task.scanId}`);

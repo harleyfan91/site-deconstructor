@@ -85,6 +85,39 @@ app.get('/api/debug/reset-failed-tasks', async (req, res) => {
   }
 });
 
+// Debug endpoint to completely wipe all data
+app.get('/api/debug/nuclear-reset', async (req, res) => {
+  try {
+    const { db } = await import('./db.js');
+    const { scans, scanStatus, scanTasks, analysisCache } = await import('../shared/schema.js');
+
+    console.log('🧹 Starting nuclear database reset...');
+
+    // Delete everything in order (FK constraints)
+    await db.delete(scanTasks);
+    await db.delete(scanStatus);
+    await db.delete(scans);
+    await db.delete(analysisCache);
+
+    // Clear memory cache too
+    const cacheModule = await import('./lib/cache.js');
+    const cache = cacheModule.unifiedCache || cacheModule.default;
+    if (cache.clearAll) {
+      cache.clearAll();
+    }
+
+    console.log('✅ Nuclear reset completed');
+
+    res.json({ 
+      message: 'All database tables cleared and memory cache reset',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Nuclear reset error:', error);
+    res.status(500).json({ error: 'Failed to perform nuclear reset', details: error.message });
+  }
+});
+
 // Debug endpoint to inspect cache contents
 app.get('/api/debug/cache-info', async (req, res) => {
   try {
