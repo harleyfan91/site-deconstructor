@@ -37,23 +37,48 @@ async function clearSupabase() {
       console.log(`🗑️ Deleted ${cacheCount || 0} analysis_cache records`);
     }
 
-    // Clear scan_status
-    const { count: statusCount, error: statusError } = await supabase
-      .from('scan_status')
-      .delete({ count: 'exact' })
-      .gte('created_at', '1900-01-01');
+    // Clear scan_status - try different approaches based on actual columns
+    try {
+      const { count: statusCount, error: statusError } = await supabase
+        .from('scan_status')
+        .delete({ count: 'exact' })
+        .not('scan_id', 'is', null); // Use scan_id since it's a required FK
 
-    if (statusError) throw statusError;
-    console.log(`🗑️ Deleted ${statusCount || 0} scan_status records`);
+      if (statusError) throw statusError;
+      console.log(`🗑️ Deleted ${statusCount || 0} scan_status records`);
+    } catch (statusErr) {
+      console.log('Alternative scan_status clear attempt...');
+      const { count: statusCount2, error: statusError2 } = await supabase
+        .from('scan_status')
+        .delete({ count: 'exact' })
+        .gte('started_at', '1900-01-01'); // Try started_at instead
 
-    // Clear scans
-    const { count: scansCount, error: scansError } = await supabase
-      .from('scans')
-      .delete({ count: 'exact' })
-      .gte('created_at', '1900-01-01');
+      if (statusError2) throw statusError2;
+      console.log(`🗑️ Deleted ${statusCount2 || 0} scan_status records`);
+    }
 
-    if (scansError) throw scansError;
-    console.log(`🗑️ Deleted ${scansCount || 0} scans records`);
+    // Clear scans - try different approaches based on actual columns
+    try {
+      const { count: scansCount, error: scansError } = await supabase
+        .from('scans')
+        .delete({ count: 'exact' })
+        .gte('created_at', '1900-01-01');
+
+      if (scansError) {
+        console.log('Alternative scans clear attempt...');
+        const { count: scansCount2, error: scansError2 } = await supabase
+          .from('scans')
+          .delete({ count: 'exact' })
+          .not('url', 'is', null); // Use url since it's required
+
+        if (scansError2) throw scansError2;
+        console.log(`🗑️ Deleted ${scansCount2 || 0} scans records`);
+      } else {
+        console.log(`🗑️ Deleted ${scansCount || 0} scans records`);
+      }
+    } catch (scansErr) {
+      console.error('Failed to clear scans table:', scansErr);
+    }
 
     console.log('✅ Supabase database cleared successfully!');
 
