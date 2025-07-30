@@ -1,4 +1,5 @@
 
+
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL!;
@@ -16,20 +17,31 @@ async function clearSupabase() {
   console.log('🧹 Clearing Supabase database (only existing tables)...');
 
   try {
-    // Clear analysis_cache
+    // Clear analysis_cache - delete all records without column filters
     const { count: cacheCount, error: cacheError } = await supabase
       .from('analysis_cache')
       .delete({ count: 'exact' })
-      .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all records
+      .gte('created_at', '1900-01-01'); // Use a filter that works with timestamp columns
 
-    if (cacheError) throw cacheError;
-    console.log(`🗑️ Deleted ${cacheCount || 0} analysis_cache records`);
+    if (cacheError) {
+      console.log('Trying alternative method for analysis_cache...');
+      // If timestamp filter fails, try without any filter (delete all)
+      const { count: cacheCount2, error: cacheError2 } = await supabase
+        .from('analysis_cache')
+        .delete({ count: 'exact' })
+        .not('url_hash', 'is', null); // This should match all records since url_hash is required
 
-    // Clear scan_status  
+      if (cacheError2) throw cacheError2;
+      console.log(`🗑️ Deleted ${cacheCount2 || 0} analysis_cache records`);
+    } else {
+      console.log(`🗑️ Deleted ${cacheCount || 0} analysis_cache records`);
+    }
+
+    // Clear scan_status
     const { count: statusCount, error: statusError } = await supabase
       .from('scan_status')
       .delete({ count: 'exact' })
-      .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all records
+      .gte('created_at', '1900-01-01');
 
     if (statusError) throw statusError;
     console.log(`🗑️ Deleted ${statusCount || 0} scan_status records`);
@@ -38,7 +50,7 @@ async function clearSupabase() {
     const { count: scansCount, error: scansError } = await supabase
       .from('scans')
       .delete({ count: 'exact' })
-      .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all records
+      .gte('created_at', '1900-01-01');
 
     if (scansError) throw scansError;
     console.log(`🗑️ Deleted ${scansCount || 0} scans records`);
