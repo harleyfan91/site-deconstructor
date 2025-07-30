@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL!;
@@ -15,17 +16,34 @@ async function clearSupabase() {
   console.log('🧹 Clearing Supabase database (only existing tables)...');
 
   try {
-    // Delete all from analysis_cache (this worked before)
+    // Clear analysis_cache
     const { count: cacheCount, error: cacheError } = await supabase
       .from('analysis_cache')
       .delete({ count: 'exact' })
-      .gt('created_at', '1900-01-01');
+      .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all records
 
     if (cacheError) throw cacheError;
-    console.log(`🗑️ Deleted ${cacheCount} analysis_cache records`);
+    console.log(`🗑️ Deleted ${cacheCount || 0} analysis_cache records`);
+
+    // Clear scan_status  
+    const { count: statusCount, error: statusError } = await supabase
+      .from('scan_status')
+      .delete({ count: 'exact' })
+      .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all records
+
+    if (statusError) throw statusError;
+    console.log(`🗑️ Deleted ${statusCount || 0} scan_status records`);
+
+    // Clear scans
+    const { count: scansCount, error: scansError } = await supabase
+      .from('scans')
+      .delete({ count: 'exact' })
+      .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all records
+
+    if (scansError) throw scansError;
+    console.log(`🗑️ Deleted ${scansCount || 0} scans records`);
 
     console.log('✅ Supabase database cleared successfully!');
-    console.log('Note: Only analysis_cache table exists and was cleared.');
 
   } catch (error) {
     console.error('❌ Error clearing Supabase:', error);
