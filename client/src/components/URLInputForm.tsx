@@ -11,6 +11,7 @@ import { Search, Link as LinkIcon } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useAnalysisContext } from '../contexts/AnalysisContext';
 import { useNavigate } from 'react-router-dom';
+import { normalizeUrl } from '@shared/utils/normalizeUrl';
 
 interface URLInputFormProps {
   onAnalysisComplete?: (data: any) => void;
@@ -45,7 +46,7 @@ const URLInputForm: React.FC<URLInputFormProps> = ({ onAnalysisComplete }) => {
       const response = await fetch('/api/scans', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: url.trim() }),
+        body: JSON.stringify({ url: normalizeUrl(url.trim()) }),
       });
 
       if (response.ok) {
