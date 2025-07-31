@@ -3,6 +3,12 @@ import { createServer } from "http";
 import { setupVite, serveStatic, log } from "./vite";
 import cors from "cors";
 
+if (!process.env.DATABASE_URL) {
+  throw new Error(
+    "DATABASE_URL not set. Please configure the Supabase connection string."
+  );
+}
+
 const app = express();
 const server = createServer(app);
 

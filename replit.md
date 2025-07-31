@@ -397,13 +397,13 @@ A comprehensive website analysis tool that provides insights into performance, S
 - ✓ Worker successfully processing queued tasks: 28+ tasks completed, analysis_cache populated
 - ✓ Created comprehensive Vitest test suite for scan API endpoints with mock JWT authentication
 - ✓ Both main application and background worker now running concurrently for full functionality
-- ✓ Diagnosed database connection issue: Application writes to Neon PostgreSQL, user views Supabase dashboard (July 29, 2025)
+- ✓ Diagnosed database connection issue: application wrote to the old database while viewing Supabase dashboard (July 29, 2025)
 - ✓ System working correctly: 11+ scans processed, 44+ tasks completed, Reddit scan processed successfully
 - ✓ Worker actively processing queued tasks with 100% completion rate for all scan types (tech, colors, seo, perf)
-- ✓ All tables exist and populated in Neon database: scans, scan_status, scan_tasks, analysis_cache
-- ✓ **BREAKING CHANGE: Completely removed Neon PostgreSQL, migrated to Supabase + Drizzle only** (July 29, 2025)
+- ✓ All tables exist and populated in the old database: scans, scan_status, scan_tasks, analysis_cache
+- ✓ **BREAKING CHANGE: Migrated to Supabase + Drizzle only** (July 29, 2025)
 - ✓ Updated server/db.ts to use postgres-js driver with direct Supabase PostgreSQL connection  
-- ✓ Removed @neondatabase/serverless dependency and all Neon references from codebase
+- ✓ Removed obsolete serverless dependencies and references to the old provider
 - ✓ Fixed TypeScript compilation errors in server/index.ts color extraction logic
 - ✓ Successfully tested Supabase connection: 1+ scan already in database, Drizzle queries working
 - ✓ Express server running on port 5000 with Supabase backend, ready for worker processing
