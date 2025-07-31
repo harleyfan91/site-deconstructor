@@ -133,10 +133,20 @@ Automated tests cover the analysis utilities, export functions and UI helpers.
 Every pull request runs these tests via GitHub Actions using the workflow at
 `.github/workflows/ci.yml`.
 
-Run tests locally with:
+Run tests locally with one of the following commands:
 
 ```bash
+# Unit tests with coverage
+npm run test:unit
+
+# End-to-end tests with Playwright
+npm run test:e2e
+
+# Run both sets of tests
 npm test
+
+# Playwright debug logs can be inspected via the DEBUG environment variable.
+# The provided script already sets `DEBUG=pw:api,pw:browser*` by default.
 ```
 
 ## Database Management
