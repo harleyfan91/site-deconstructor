@@ -14,7 +14,9 @@
     "migrate:supabase": "npx drizzle-kit push:pg --schema \"postgres\".\"public\"",
     "check": "tsc",
     "deps:docs": "npx dep-table --out docs/DEPENDENCIES.md",
-    "test": "vitest run && playwright test"
+    "test:unit": "vitest run --coverage",
+    "test:e2e": "DEBUG=pw:api,pw:browser* playwright test",
+    "test": "npm run test:unit && npm run test:e2e"
   },
   "dependencies": {
     "@axe-core/playwright": "^4.10.2",
