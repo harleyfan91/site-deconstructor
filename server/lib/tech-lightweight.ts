@@ -3,6 +3,7 @@
  * Designed to avoid browser context conflicts while providing real data
  */
 import * as crypto from 'crypto';
+import { SupabaseCacheService } from './supabase';
 
 export interface TechStackItem {
   category: string;
@@ -321,10 +322,18 @@ export async function getTechnicalAnalysis(url: string): Promise<TechnicalAnalys
     const urlHash = crypto.createHash('sha256').update(url).digest('hex');
     const cacheKey = `tech_lightweight_${urlHash}`;
 
+    // Try to get from cache first
+    const cached = await SupabaseCacheService.get(cacheKey);
+    if (cached) {
+      console.log('📦 Lightweight technical analysis cache hit');
+      return cached.analysis_data;
+    }
 
     console.log('🔍 Performing fresh lightweight technical analysis...');
     const analysis = await extractTechnicalData(url);
 
+    // Cache the results
+    await SupabaseCacheService.set(cacheKey, url, analysis);
     
     return analysis;
   } catch (error) {

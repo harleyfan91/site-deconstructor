@@ -6,7 +6,6 @@ export interface ScanStatus {
   progress: number;
   scanId: string;
   url?: string;
-  finishedAt?: string;
 }
 
 export function useScanStatus(scanId: string) {

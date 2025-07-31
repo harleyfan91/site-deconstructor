@@ -26,43 +26,6 @@ export interface SecurityHeaders {
   referrer: string;
 }
 
-/** Detailed technical information returned with an analysis. */
-export interface TechDetails {
-  techStack: Array<{
-    category: string;
-    technology: string;
-    version?: string;
-    confidence?: number;
-  }>;
-  minification: {
-    cssMinified: boolean;
-    jsMinified: boolean;
-    htmlMinified?: boolean;
-  };
-  social: {
-    hasOpenGraph: boolean;
-    hasTwitterCard: boolean;
-    hasShareButtons: boolean;
-    facebookPixel?: boolean;
-    googleAnalytics?: boolean;
-    linkedInInsight?: boolean;
-  };
-  cookies: {
-    hasCookieScript: boolean;
-    cookieConsentType?: 'none' | 'banner' | 'popup' | 'overlay';
-    cookieLibrary?: string;
-  };
-  adTags: {
-    [key: string]: boolean;
-  };
-  issues: Array<{
-    type: 'performance' | 'security' | 'accessibility' | 'seo';
-    description: string;
-    severity: 'high' | 'medium' | 'low';
-    recommendation?: string;
-  }>;
-}
-
 export interface AnalysisOverview {
   overallScore: number;
   pageLoadTime?: string;
@@ -76,7 +39,7 @@ export interface AnalysisOverview {
 }
 
 export interface AnalysisResponse {
-  success?: boolean;
+  success: boolean;
   id?: string;
   url?: string;
   timestamp?: string;
@@ -106,15 +69,6 @@ export interface AnalysisResponse {
   accessibility?: {
     violations: any[];
   };
-  overview?: AnalysisOverview;
-  tech?: TechDetails;
-  colors?: any[];
-  fonts?: any[];
-  images?: any[];
-  imageAnalysis?: any;
-  contrastIssues?: any[];
-  violations?: any[];
-  accessibilityScore?: number;
   headerChecks?: {
     hsts: string;
     csp: string;
@@ -142,7 +96,7 @@ export interface AnalysisResponse {
       [key: string]: any;
     };
 
-    technical?: {
+    technical: {
       accessibility: {
         violations: Array<{
           id: string;
@@ -171,22 +125,7 @@ export interface AnalysisResponse {
       issues?: any[];
       securityScore?: number;
     };
-    tech?: TechDetails;
-    colors?: Array<{name: string, hex: string, usage: string, count: number}>;
-    fonts?: Array<{name: string, category: string, usage: string, weight?: string, isLoaded?: boolean, isPublic?: boolean}>;
-    images?: Array<{url: string, alt?: string, type?: string}>;
-    imageAnalysis?: {
-      totalImages: number;
-      estimatedPhotos: number;
-      estimatedIcons: number;
-      imageUrls?: string[];
-      photoUrls?: string[];
-      iconUrls?: string[];
-    };
-    contrastIssues?: Array<{textColor: string, backgroundColor: string, ratio: number}>;
-    violations?: Array<{ id: string; impact?: string; description?: string }>;
-    accessibilityScore?: number;
-    performance?: {
+    performance: {
       performanceScore: number;
       coreWebVitals: CoreWebVitals[];
       mobileResponsive?: boolean;
@@ -268,7 +207,7 @@ export interface AnalysisResponse {
       readabilityScore: number | string;
     };
   };
-  lhr?: {
+  lhr: {
     categories: {
       security: {
         score: number;

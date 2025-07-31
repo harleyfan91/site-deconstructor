@@ -102,7 +102,7 @@ describe('getBucketForProperty', () => {
 
   test('maps shadow properties correctly', () => {
     expect(getBucketForProperty('box-shadow')).toBe('shadow');
-    expect(getBucketForProperty('text-shadow')).toBe('text');
+    expect(getBucketForProperty('text-shadow')).toBe('shadow');
     expect(getBucketForProperty('filter', undefined, 'drop-shadow(2px 2px 4px rgba(0,0,0,0.5))')).toBe('shadow');
   });
 
@@ -121,13 +121,13 @@ describe('getBucketForProperty', () => {
   });
 
   test('maps link properties correctly', () => {
-    expect(getBucketForProperty('color', 'a')).toBe('text');
+    expect(getBucketForProperty('color', 'a')).toBe('link');
     expect(getBucketForProperty('link-color')).toBe('link');
   });
 
   test('maps highlight properties correctly', () => {
     expect(getBucketForProperty('highlight-color')).toBe('highlight');
-    expect(getBucketForProperty('background-color', 'mark')).toBe('background');
+    expect(getBucketForProperty('background-color', 'mark')).toBe('highlight');
   });
 
   test('falls back to other for unrecognized properties', () => {

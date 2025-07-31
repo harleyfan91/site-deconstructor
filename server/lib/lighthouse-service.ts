@@ -4,6 +4,7 @@
  */
 import lighthouse from 'lighthouse';
 import { launch } from 'chrome-launcher';
+import { SupabaseCacheService } from './supabase';
 import * as crypto from 'crypto';
 
 // Prevent DOMException errors by stubbing problematic performance methods
@@ -197,6 +198,12 @@ export async function getLighthouseSEO(url: string): Promise<LighthouseSEOData> 
     const urlHash = crypto.createHash('sha256').update(url).digest('hex');
     const cacheKey = `lighthouse_seo_${urlHash}`;
 
+    // Try cache first
+    const cached = await SupabaseCacheService.get(cacheKey);
+    if (cached) {
+      console.log('📦 Lighthouse SEO cache hit');
+      return cached.analysis_data;
+    }
 
     console.log('🔍 Performing fresh Lighthouse SEO analysis...');
     
@@ -219,6 +226,7 @@ export async function getLighthouseSEO(url: string): Promise<LighthouseSEOData> 
       };
 
       // Cache the results
+      await SupabaseCacheService.set(cacheKey, url, seoData);
       
       return seoData;
     } catch (lighthouseError) {
@@ -241,6 +249,7 @@ export async function getLighthouseSEO(url: string): Promise<LighthouseSEOData> 
       };
       
       // Cache fallback data for a shorter period
+      await SupabaseCacheService.set(cacheKey, url, fallbackData);
       
       return fallbackData;
     }
@@ -269,6 +278,12 @@ export async function getLighthousePerformance(url: string): Promise<LighthouseP
     const urlHash = crypto.createHash('sha256').update(url).digest('hex');
     const cacheKey = `lighthouse_performance_${urlHash}`;
 
+    // Try cache first
+    const cached = await SupabaseCacheService.get(cacheKey);
+    if (cached) {
+      console.log('📦 Lighthouse Performance cache hit');
+      return cached.analysis_data;
+    }
 
     console.log('🔍 Performing fresh Lighthouse Performance analysis...');
     const lhr = await runLighthouse(url, ['performance']);
@@ -297,6 +312,7 @@ export async function getLighthousePerformance(url: string): Promise<LighthouseP
     };
 
     // Cache the results
+    await SupabaseCacheService.set(cacheKey, url, performanceData);
     
     return performanceData;
   } catch (error) {
@@ -320,6 +336,7 @@ export async function getLighthousePerformance(url: string): Promise<LighthouseP
     // Cache fallback data for a shorter period
     const urlHash = crypto.createHash('sha256').update(url).digest('hex');
     const cacheKey = `lighthouse_performance_${urlHash}`;
+    await SupabaseCacheService.set(cacheKey, url, fallbackData);
     
     return fallbackData;
   }
@@ -330,6 +347,12 @@ export async function getLighthouseBestPractices(url: string): Promise<Lighthous
     const urlHash = crypto.createHash('sha256').update(url).digest('hex');
     const cacheKey = `lighthouse_best_practices_${urlHash}`;
 
+    // Try cache first
+    const cached = await SupabaseCacheService.get(cacheKey);
+    if (cached) {
+      console.log('📦 Lighthouse Best Practices cache hit');
+      return cached.analysis_data;
+    }
 
     console.log('🔍 Performing fresh Lighthouse Best Practices analysis...');
     
@@ -359,6 +382,7 @@ export async function getLighthouseBestPractices(url: string): Promise<Lighthous
       };
 
       // Cache the results
+      await SupabaseCacheService.set(cacheKey, url, bestPracticesData);
       
       return bestPracticesData;
     } catch (lighthouseError) {
@@ -388,6 +412,7 @@ export async function getLighthouseBestPractices(url: string): Promise<Lighthous
       };
       
       // Cache fallback data for a shorter period
+      await SupabaseCacheService.set(cacheKey, url, fallbackData);
       
       return fallbackData;
     }
@@ -423,6 +448,12 @@ export async function getLighthousePageLoadTime(url: string): Promise<{ desktop:
     const urlHash = crypto.createHash('sha256').update(url).digest('hex');
     const cacheKey = `lighthouse_pageload_${urlHash}`;
 
+    // Try cache first
+    const cached = await SupabaseCacheService.get(cacheKey);
+    if (cached) {
+      console.log('📦 Lighthouse Page Load Time cache hit');
+      return cached.analysis_data;
+    }
 
     console.log('🔍 Performing fresh Lighthouse Page Load Time analysis (desktop & mobile)...');
     
@@ -444,6 +475,7 @@ export async function getLighthousePageLoadTime(url: string): Promise<{ desktop:
       };
 
       // Cache the results
+      await SupabaseCacheService.set(cacheKey, url, pageLoadTimeData);
       
       console.log(`✅ Page Load Time: Desktop ${desktopPageLoadTime}ms, Mobile ${mobilePageLoadTime}ms`);
       return pageLoadTimeData;
@@ -457,6 +489,7 @@ export async function getLighthousePageLoadTime(url: string): Promise<{ desktop:
       };
       
       // Cache fallback data for a shorter period
+      await SupabaseCacheService.set(cacheKey, url, fallbackData);
       
       return fallbackData;
     }

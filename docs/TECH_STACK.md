@@ -95,7 +95,6 @@ We persist and manage scans using Supabase tables. See [`docs/SUPABASE_SCHEMA.md
 - **scans**: stores all scan requests.
 - **scan_status**: tracks queue/running/completion per scan.
 - **analysis_cache**: stores JSON audit blobs for reuse.
-- **scan_tasks**: queue table for individual analyzers per scan (see SUPABASE_SCHEMA.md)
 
 ### Utility & Helper Libraries
 

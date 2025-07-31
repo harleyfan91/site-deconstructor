@@ -42,21 +42,14 @@ const URLInputForm: React.FC<URLInputFormProps> = ({ onAnalysisComplete }) => {
 
     try {
       // Call optimistic POST /scans endpoint
-      const endpoint = '/api/scans';
-      console.log('Creating scan for URL:', url.trim(), '→', endpoint);
-
-      const response = await fetch(endpoint, {
+      const response = await fetch('/api/scans', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: url.trim() }),
       });
 
-      console.log('Scan creation response status:', response.status);
-      const respBody = await response.json().catch(() => null);
-      console.log('Scan creation response body:', respBody);
-
-      if (response.ok && respBody) {
-        const { scan_id } = respBody;
+      if (response.ok) {
+        const { scan_id } = await response.json();
         // Navigate to dashboard with scan ID immediately
         navigate(`/dashboard/${scan_id}`);
 
@@ -65,7 +58,7 @@ const URLInputForm: React.FC<URLInputFormProps> = ({ onAnalysisComplete }) => {
         }
       } else {
         // Show error for failed scan creation
-        console.error('Could not start scan:', respBody);
+        console.error('Could not start scan:', await response.text());
         // Fallback to old behavior
         analyzeWebsite(url.trim());
         navigate('/dashboard');

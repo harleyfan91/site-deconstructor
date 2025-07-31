@@ -1,9 +1,10 @@
 /**
- * Unified caching layer and in-memory LRU
+ * Unified caching layer with Supabase backend and in-memory LRU
  * Provides concurrency protection to prevent duplicate scrapes
  */
 
 import crypto from 'crypto';
+import { SupabaseCacheService } from './supabase';
 
 interface CacheEntry<T> {
   data: T;
@@ -29,7 +30,7 @@ class LRUCache<T> {
   get(key: string): T | null {
     const entry = this.cache.get(key);
     if (!entry) return null;
-
+    
     // Check if expired
     if (Date.now() > entry.expiresAt) {
       this.cache.delete(key);
@@ -84,7 +85,7 @@ export class UnifiedCache {
    */
   async get<T>(prefix: string, url: string): Promise<T | null> {
     const cacheKey = this.generateCacheKey(prefix, url);
-
+    
     // Try memory cache first
     const memoryResult = this.memoryCache.get(cacheKey);
     if (memoryResult) {
@@ -94,44 +95,21 @@ export class UnifiedCache {
 
     // Try Supabase cache
     try {
-      const { db } = await import('../db.js');
-      const { analysisCache } = await import('../../shared/schema.js');
-      const { eq } = await import('drizzle-orm');
-
-      const cached = await db
-        .select()
-        .from(analysisCache)
-        .where(eq(analysisCache.urlHash, cacheKey))
-        .limit(1);
-
-      if (cached.length > 0 && cached[0].expiresAt && cached[0].expiresAt > new Date()) {
+      const supabaseResult = await SupabaseCacheService.get(cacheKey);
+      if (supabaseResult) {
         console.log(`🗄️ Supabase cache hit for: ${cacheKey}`);
-        const result = cached[0].auditJson as T;
-        // Store in memory for next time
-        this.memoryCache.set(cacheKey, result, this.MEMORY_TTL);
-        return result;
+        // Store in memory for future requests  
+        const data = (supabaseResult as any).audit_json || (supabaseResult as any).analysis_data;
+        if (data) {
+          this.memoryCache.set(cacheKey, data, this.MEMORY_TTL);
+          return data as T;
+        }
       }
     } catch (error) {
-      console.error('❌ Error accessing Supabase cache:', error);
+      console.warn(`⚠️ Supabase cache lookup failed for ${cacheKey}:`, error.message);
     }
 
     return null;
-  }
-
-  /**
-   * Clear all caches (for debugging)
-   */
-  clearAll(): void {
-    console.log('🧹 Clearing all memory cache...');
-    this.memoryCache.clear();
-    console.log('✅ Memory cache cleared');
-  }
-
-  /**
-   * Debug: List all cache keys
-   */
-  listKeys(): string[] {
-    return Array.from(this.memoryCache.cache.keys());
   }
 
   /**
@@ -139,46 +117,31 @@ export class UnifiedCache {
    */
   async set<T>(prefix: string, url: string, data: T, isSuccess: boolean = true): Promise<void> {
     const cacheKey = this.generateCacheKey(prefix, url);
-
+    const ttl = isSuccess ? this.SUCCESS_TTL : this.FAILURE_TTL;
+    
     // Store in memory cache
     this.memoryCache.set(cacheKey, data, this.MEMORY_TTL);
-
-    // Store in Supabase cache
+    
+    // Store in Supabase cache with appropriate TTL
     try {
-      const { db } = await import('../db.js');
-      const { analysisCache } = await import('../../shared/schema.js');
-
-      const ttl = isSuccess ? this.SUCCESS_TTL : this.FAILURE_TTL;
-      const expiresAt = new Date(Date.now() + ttl);
-
-      await db
-        .insert(analysisCache)
-        .values({
-          urlHash: cacheKey,
-          auditJson: data,
-          expiresAt
-        })
-        .onConflictDoUpdate({
-          target: analysisCache.urlHash,
-          set: {
-            auditJson: data,
-            expiresAt
-          }
-        });
-
-      console.log(`💾 Stored in Supabase cache: ${cacheKey}`);
+      await SupabaseCacheService.set(cacheKey, url, data);
+      console.log(`✅ Cached data for ${url} (TTL: ${ttl/1000/60}min, success: ${isSuccess})`);
     } catch (error) {
-      console.error('❌ Error storing in Supabase cache:', error);
+      console.warn(`⚠️ Supabase cache storage failed for ${url}:`, error.message);
     }
   }
 
   /**
    * Get or compute with concurrency protection
    * Prevents multiple simultaneous requests for the same URL
+   */
+  async getOrCompute<T>(
+    prefix: string, 
+    url: string, 
     computeFn: () => Promise<T>
   ): Promise<T> {
     const cacheKey = this.generateCacheKey(prefix, url);
-
+    
     // Check cache first
     const cached = await this.get<T>(prefix, url);
     if (cached) {
@@ -209,7 +172,7 @@ export class UnifiedCache {
 
     // Track concurrent request
     this.concurrentRequests[cacheKey] = computePromise;
-
+    
     return computePromise;
   }
 
@@ -219,7 +182,8 @@ export class UnifiedCache {
   async invalidate(prefix: string, url: string): Promise<void> {
     const cacheKey = this.generateCacheKey(prefix, url);
     this.memoryCache.clear();
-
+    
+    // Note: Supabase cache will expire naturally due to TTL
     console.log(`🗑️ Invalidated cache for ${cacheKey}`);
   }
 

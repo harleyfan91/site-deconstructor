@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { detectSocialMeta, detectShareButtons, detectCookieScripts, detectMinification, checkLinks } from '@/lib/social';
+import assert from 'node:assert';
+import { detectSocialMeta, detectShareButtons, detectCookieScripts, detectMinification, checkLinks } from '../dist/lib/social.js';
 
 const html = `
 <meta property="og:title" content="t">
@@ -11,28 +11,26 @@ const html = `
 <a href="https://good.com/"></a>
 `;
 
-describe('social utilities', () => {
-  it('detects social meta and share buttons', async () => {
-    const social = detectSocialMeta(html);
-    expect(social.hasOpenGraph).toBe(true);
-    expect(social.hasTwitterCard).toBe(true);
-    expect(detectShareButtons('<a href="https://twitter.com/share">t</a>')).toBe(true);
+const social = detectSocialMeta(html);
+assert.strictEqual(social.hasOpenGraph, true);
+assert.strictEqual(social.hasTwitterCard, true);
+assert.strictEqual(detectShareButtons('<a href="https://twitter.com/share">t</a>'), true);
 
-    const cookie = detectCookieScripts(html);
-    expect(cookie.hasCookieScript).toBe(true);
-    expect(cookie.scripts).toContain('cookieconsent');
+const cookie = detectCookieScripts(html);
+assert.ok(cookie.hasCookieScript);
+assert.ok(cookie.scripts.includes('cookieconsent'));
 
-    const mini = detectMinification(html);
-    expect(mini.cssMinified).toBe(true);
-    expect(mini.jsMinified).toBe(true);
+const mini = detectMinification(html);
+assert.ok(mini.cssMinified);
+assert.ok(mini.jsMinified);
 
-    async function fetcher(url, _opts) {
-      if (url.includes('good.com')) return { ok: true };
-      return { ok: false };
-    }
+async function fetcher(url, _opts) {
+  if (url.includes('good.com')) return { ok: true };
+  return { ok: false };
+}
 
-    const links = await checkLinks(html, 'https://example.com', fetcher);
-    expect(links.brokenLinks).toEqual(['http://insecure.com/page']);
-    expect(links.mixedContentLinks).toEqual(['http://insecure.com/page']);
-  });
-});
+const links = await checkLinks(html, 'https://example.com', fetcher);
+assert.deepStrictEqual(links.brokenLinks, ['http://insecure.com/page']);
+assert.deepStrictEqual(links.mixedContentLinks, ['http://insecure.com/page']);
+
+console.log('social checks test passed');

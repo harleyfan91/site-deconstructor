@@ -3,7 +3,7 @@
  * Tests the POST /api/scans, GET /api/scans/:id/status, and GET /api/scans/:id/task/:type endpoints
  */
 
-import { beforeAll, afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeAll, afterAll, describe, expect, it } from 'vitest';
 
 // Mock JWT for authentication
 const mockJWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
@@ -13,58 +13,9 @@ const baseUrl = 'http://localhost:5000';
 describe('Scan API Endpoints', () => {
   let scanId: string;
   
-  beforeAll(() => {
-    global.fetch = vi.fn(async (input: RequestInfo, init?: RequestInit) => {
-      const url = typeof input === 'string' ? input : input.url;
-
-      if (url.endsWith('/api/scans') && init?.method === 'POST') {
-        const body = init.body ? JSON.parse(init.body as string) : {};
-        if (!body.url) {
-          return {
-            status: 400,
-            json: async () => ({ error: 'Invalid URL' })
-          } as Response;
-        }
-        scanId = 'test-scan-id';
-        return {
-          status: 201,
-          json: async () => ({
-            scan_id: scanId,
-            status: 'queued',
-            url: body.url,
-            task_types: ['tech', 'colors', 'seo', 'perf']
-          })
-        } as Response;
-      }
-
-      if (url.match(/\/api\/scans\/([^/]+)\/status/)) {
-        if (url.includes('00000000-0000-0000-0000-000000000000')) {
-          return { status: 404, json: async () => ({ error: 'Scan not found' }) } as Response;
-        }
-        return {
-          status: 200,
-          json: async () => ({ scanId, url: 'https://example.com', status: 'queued', progress: 0 })
-        } as Response;
-      }
-
-      const taskMatch = url.match(/\/api\/scans\/([^/]+)\/task\/(.+)$/);
-      if (taskMatch) {
-        const type = taskMatch[2];
-        if (url.includes('00000000-0000-0000-0000-000000000000') || type === 'invalid-type') {
-          return { status: 404, json: async () => ({ error: 'Task not found' }) } as Response;
-        }
-        return {
-          status: 202,
-          json: async () => ({ type, status: 'queued', data: null, error: null })
-        } as Response;
-      }
-
-      return { status: 500, json: async () => ({ error: 'Unhandled' }) } as Response;
-    });
-  });
-
-  beforeEach(() => {
-    vi.clearAllMocks();
+  beforeAll(async () => {
+    // Ensure server is running - this assumes the test runner starts the server
+    // In a real scenario, you might want to start the server programmatically
   });
 
   afterAll(async () => {
@@ -128,7 +79,7 @@ describe('Scan API Endpoints', () => {
         },
       });
 
-      expect([200, 202]).toContain(response.status);
+      expect(response.status).toBe(200);
       
       const data = await response.json();
       expect(data).toHaveProperty('scanId', scanId);
@@ -168,7 +119,7 @@ describe('Scan API Endpoints', () => {
           },
         });
 
-        expect([200, 202]).toContain(response.status);
+        expect(response.status).toBe(200);
         
         const data = await response.json();
         expect(data).toHaveProperty('type', taskType);
@@ -234,7 +185,7 @@ describe('Scan API Endpoints', () => {
         headers: { 'Authorization': `Bearer ${mockJWT}` },
       });
       
-      expect([200, 202]).toContain(statusResponse.status);
+      expect(statusResponse.status).toBe(200);
       const statusData = await statusResponse.json();
       expect(statusData.status).toBe('queued');
 
@@ -245,7 +196,7 @@ describe('Scan API Endpoints', () => {
           headers: { 'Authorization': `Bearer ${mockJWT}` },
         });
         
-        expect([200, 202]).toContain(taskResponse.status);
+        expect(taskResponse.status).toBe(200);
         const taskData = await taskResponse.json();
         expect(taskData.type).toBe(taskType);
         expect(taskData.status).toBe('queued');

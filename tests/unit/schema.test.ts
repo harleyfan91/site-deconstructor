@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { scans, scanStatus, scanTasks, analysisCache } from '@shared/schema';
+import { scans, scanStatus, scanTasks, analysisCache } from '../../shared/schema';
 
-describe.skip('Database Schema', () => {
+describe('Database Schema', () => {
   it('should have all required tables defined', () => {
     expect(scans).toBeDefined();
     expect(scanStatus).toBeDefined();
@@ -37,20 +37,18 @@ describe.skip('Database Schema', () => {
 
   it('should have required columns in scan_tasks table', () => {
     const columns = Object.keys(scanTasks._.columns);
-
-    expect(columns).toContain('task_id');
+    
+    expect(columns).toContain('id');
     expect(columns).toContain('scan_id');
     expect(columns).toContain('type');
     expect(columns).toContain('status');
-    expect(columns).toContain('payload');
+    expect(columns).toContain('data');
   });
 
   it('should have required columns in analysis_cache table', () => {
     const columns = Object.keys(analysisCache._.columns);
-
+    
     expect(columns).toContain('id');
-    expect(columns).toContain('scan_id');
-    expect(columns).toContain('type');
     expect(columns).toContain('url_hash');
     expect(columns).toContain('original_url');
     expect(columns).toContain('audit_json');

@@ -38,8 +38,6 @@ export const scanStatus = pgTable("scan_status", {
 // analysis_cache
 export const analysisCache = pgTable("analysis_cache", {
   id: uuid("id").primaryKey().defaultRandom(),
-  scanId: uuid("scan_id").notNull(),
-  type: text("type").notNull(),
   urlHash: text("url_hash").notNull().unique(),
   originalUrl: text("original_url").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
@@ -50,22 +48,15 @@ export const analysisCache = pgTable("analysis_cache", {
 // scan_tasks
 export const scanTasks = pgTable("scan_tasks", {
   taskId: uuid("task_id").primaryKey().defaultRandom(),
-  scanId: uuid("scan_id")
-    .notNull()
-    .references(() => scans.id, { onDelete: "cascade" }),
+  scanId: uuid("scan_id").references(() => scans.id, { onDelete: "cascade" }),
   type: text("type")
     .$type<"tech" | "colors" | "seo" | "perf">()
     .notNull(),
   status: text("status")
     .$type<"queued" | "running" | "complete" | "failed">()
-    .notNull()
     .default("queued"),
   payload: jsonb("payload"),
-
-  createdAt: timestamp("created_at", { mode: "date" })
-
-    .notNull()
-    .defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -87,8 +78,6 @@ export const insertScanStatusSchema = createInsertSchema(scanStatus).pick({
 });
 
 export const insertAnalysisCacheSchema = createInsertSchema(analysisCache).pick({
-  scanId: true,
-  type: true,
   urlHash: true,
   originalUrl: true,
   auditJson: true,

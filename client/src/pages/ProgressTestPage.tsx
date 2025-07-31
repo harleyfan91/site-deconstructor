@@ -75,7 +75,7 @@ const ProgressTestPage = ({ darkMode, toggleDarkMode }: ProgressTestPageProps) =
 
           <Grid container spacing={3}>
             {/* Test Controls */}
-            <Grid component="div" size={{ xs: 12, md: 6 }}>
+            <Grid item xs={12} md={6}>
               <Card sx={{ p: 3 }}>
                 <Typography variant="h6" gutterBottom>
                   Create Test Scan
@@ -113,7 +113,7 @@ const ProgressTestPage = ({ darkMode, toggleDarkMode }: ProgressTestPageProps) =
             </Grid>
 
             {/* Live Progress Demo */}
-            <Grid component="div" size={{ xs: 12, md: 6 }}>
+            <Grid item xs={12} md={6}>
               <Card sx={{ p: 3 }}>
                 <Typography variant="h6" gutterBottom>
                   Live Progress Demo

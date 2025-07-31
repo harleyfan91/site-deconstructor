@@ -1,13 +1,15 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { apiRequest } from '@/lib/apiFetch';
+import { apiRequest } from '../../client/src/lib/apiFetch';
 
 // Mock supabase client
-vi.mock('@/lib/supabaseClient', () => ({
+const mockGetSession = vi.fn();
+vi.mock('../../client/src/lib/supabaseClient', () => ({
   supabase: {
-    auth: { getSession: vi.fn() },
+    auth: {
+      getSession: mockGetSession,
+    },
   },
 }));
-import { supabase } from '@/lib/supabaseClient';
 
 // Mock fetch
 global.fetch = vi.fn();
@@ -15,7 +17,7 @@ global.fetch = vi.fn();
 describe('API Integration', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    (supabase.auth.getSession as any).mockResolvedValue({
+    mockGetSession.mockResolvedValue({
       data: { session: { access_token: 'fake-jwt-token' } }
     });
   });
@@ -36,7 +38,7 @@ describe('API Integration', () => {
   });
 
   it('should not include Authorization header when user is not authenticated', async () => {
-    (supabase.auth.getSession as any).mockResolvedValue({ data: { session: null } });
+    mockGetSession.mockResolvedValue({ data: { session: null } });
     const mockResponse = { ok: true, json: () => Promise.resolve({ success: true }) };
     (global.fetch as any).mockResolvedValue(mockResponse);
 

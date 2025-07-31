@@ -265,14 +265,14 @@ const TechTab: React.FC<TechTabProps> = ({ data, loading, error, scanId = 'defau
   const { state, toggle } = usePanelState(scanId);
   
   // State for comprehensive technical analysis
-  const techAnalysis: any = null;
+  const techAnalysis = null;
   const techLoading = loading;
   const techError = error;
 
   // No tab-level loading - use section-level loading instead
 
   // Use comprehensive technical analysis data if available, fallback to basic data
-  const techData: any = (data as any)?.data?.tech || (data as any)?.data?.technical || {};
+  const techData = data?.data?.tech || data?.data?.technical || {};
   const displayTechStack = techAnalysis?.techStack || (techData as any)?.techStack || [];
   const displayMinification = techAnalysis?.minification || (techData as any)?.minification;
   const displaySocial = techAnalysis?.social || (techData as any)?.social;

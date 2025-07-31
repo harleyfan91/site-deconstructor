@@ -1,2 +1,0 @@
-DROP TABLE IF EXISTS api_logs;
-DROP TABLE IF EXISTS rate_limits;
