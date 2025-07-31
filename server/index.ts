@@ -9,6 +9,14 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
+// Show the resolved database host at startup for easier troubleshooting
+try {
+  const dbHost = new URL(process.env.DATABASE_URL).host;
+  console.log('🔗 Using database host:', dbHost);
+} catch {
+  console.log('🔗 Using database host: unknown');
+}
+
 const app = express();
 const server = createServer(app);
 

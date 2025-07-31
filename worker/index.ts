@@ -12,6 +12,14 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
+// Log the Supabase host for visibility at startup
+try {
+  const dbHost = new URL(process.env.DATABASE_URL).host;
+  console.log('🔗 Using database host:', dbHost);
+} catch {
+  console.log('🔗 Using database host: unknown');
+}
+
 // Task runners mapping
 const runners: Record<string, (url: string) => Promise<any>> = {
   tech: analyzeTech,
