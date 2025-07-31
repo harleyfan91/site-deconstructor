@@ -6,6 +6,12 @@ import { analyzeColors } from "./analysers/colors";
 import { analyzeSEO } from "./analysers/seo";
 import { analyzePerformance } from "./analysers/perf";
 
+if (!process.env.DATABASE_URL) {
+  throw new Error(
+    "DATABASE_URL not set. Please configure the Supabase connection string."
+  );
+}
+
 // Task runners mapping
 const runners: Record<string, (url: string) => Promise<any>> = {
   tech: analyzeTech,
