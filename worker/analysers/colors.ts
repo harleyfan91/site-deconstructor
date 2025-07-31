@@ -1,4 +1,3 @@
-
 import { normalizeUrl } from '../../shared/utils/normalizeUrl.js';
 
 export async function analyzeColors(url: string): Promise<any> {
@@ -24,5 +23,4 @@ export async function analyzeColors(url: string): Promise<any> {
     console.error('❌ Color analysis failed:', error);
     throw error;
   }
-
 }

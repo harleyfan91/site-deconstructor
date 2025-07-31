@@ -29,4 +29,3 @@ export async function analyzePerformance(url: string): Promise<any> {
     throw error;
   }
 }
-

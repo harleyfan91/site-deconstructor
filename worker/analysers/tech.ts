@@ -1,4 +1,3 @@
-
 import { normalizeUrl } from '../../shared/utils/normalizeUrl.js';
 
 export async function analyzeTech(url: string): Promise<any> {

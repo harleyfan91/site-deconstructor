@@ -30,7 +30,7 @@ externalPort = 3002
 exposeLocalhost = true
 
 [workflows]
-runButton = "Project"
+runButton = "Clean Start"
 
 [[workflows.workflow]]
 name = "Project"
@@ -49,3 +49,55 @@ author = "agent"
 task = "shell.exec"
 args = "concurrently \"npm run dev\" \"npx tsx worker/index.ts\" --names \"app,worker\" --prefix-colors \"blue,green\""
 waitForPort = 5000
+
+[[workflows.workflow]]
+name = "Complete App with Worker"
+author = 44193618
+mode = "parallel"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run worker:dev"
+
+[[workflows.workflow]]
+name = "Debug App with Worker"
+author = 44193618
+mode = "parallel"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run worker:dev 2>&1 | tee worker.log"
+
+[[workflows.workflow]]
+name = "Worker Only Debug"
+author = 44193618
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"🚀 Starting worker in debug mode...\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run worker:dev"
+
+[[workflows.workflow]]
+name = "Clean Start"
+author = 44193618
+mode = "parallel"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run worker:dev"

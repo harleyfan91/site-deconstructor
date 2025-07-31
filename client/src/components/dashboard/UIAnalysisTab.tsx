@@ -59,8 +59,8 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error, sca
                   colors={(colors || []).map(color => ({
                     hex: color.hex || '#000',
                     name: color.name || 'Unknown',
-                    property: color.usage || color.property || 'unknown',
-                    occurrences: color.count || color.occurrences || 1
+                    property: color.usage,
+                    occurrences: color.count
                   }))}
                 />
               </CardContent>
@@ -98,19 +98,25 @@ const UIAnalysisTab: React.FC<UIAnalysisTabProps> = ({ data, loading, error, sca
             </AccordionTrigger>
             <AccordionContent>
               <CardContent sx={{ p: 2, pt: 0 }}>
-                <AccessibilityCard
-                  contrastIssues={contrastIssues?.map(issue => ({
-                    element: (issue as any).element || 'unknown',
-                    textColor: issue.textColor || (issue as any).foregroundColor || '#000',
-                    backgroundColor: issue.backgroundColor || '#fff',
-                    ratio: issue.ratio || 0,
-                    expectedRatio: 4.5,
-                    severity: 'warning' as const,
-                    recommendation: 'Improve color contrast'
-                  })) || []}
-                  accessibilityScore={accessibilityScore}
-                  violations={violations}
-                />
+                  <AccessibilityCard
+                    contrastIssues={contrastIssues?.map(issue => ({
+                      element: (issue as any).element || 'unknown',
+                      textColor: issue.textColor || (issue as any).foregroundColor || '#000',
+                      backgroundColor: issue.backgroundColor || '#fff',
+                      ratio: issue.ratio || 0,
+                      expectedRatio: 4.5,
+                      severity: 'warning' as const,
+                      recommendation: 'Improve color contrast'
+                    })) || []}
+                    accessibilityScore={accessibilityScore}
+                    violations={(violations || []).map(v => ({
+                      id: v.id,
+                      impact: (v.impact as any) || 'minor',
+                      description: v.description || '',
+                      help: (v as any).help || '',
+                      nodes: (v as any).nodes || []
+                    }))}
+                  />
               </CardContent>
             </AccordionContent>
           </Card>
