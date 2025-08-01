@@ -11,7 +11,6 @@ import { Search, Link as LinkIcon } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useAnalysisContext } from '../contexts/AnalysisContext';
 import { useNavigate } from 'react-router-dom';
-import { normalizeUrl } from '@shared/utils/normalizeUrl';
 
 interface URLInputFormProps {
   onAnalysisComplete?: (data: any) => void;
@@ -42,17 +41,13 @@ const URLInputForm: React.FC<URLInputFormProps> = ({ onAnalysisComplete }) => {
     setLocalLoading(true);
 
     try {
-      // Call optimistic POST /scans endpoint
-      const endpoint = '/api/scans';
-      console.log('Creating scan for URL:', url.trim(), '→', endpoint);
-
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: normalizeUrl(url.trim()) }),
+      console.log("🌐 POST /api/scans", url.trim());
+      const response = await fetch("/api/scans", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
       });
-
-      console.log('Scan creation response status:', response.status);
+      console.log("📥 /api/scans status", response.status);
       const respBody = await response.json().catch(() => null);
       console.log('Scan creation response body:', respBody);
 
