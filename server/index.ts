@@ -2,12 +2,10 @@ import express from "express";
 import { createServer } from "http";
 import { setupVite, serveStatic, log } from "./vite";
 import cors from "cors";
+import { sql } from "./db.js";
+import { normalizeUrl } from "../shared/utils/normalizeUrl.js";
 
-if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL not set. Please configure the Supabase connection string."
-  );
-}
+if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL missing");
 
 // Show the resolved database host at startup for easier troubleshooting
 try {
@@ -222,81 +220,15 @@ app.get('/api/overview', async (req, res) => {
 
 // Optimistic scan creation endpoint - Part 2/7 of refactor
 app.post('/api/scans', async (req, res) => {
-  try {
-    const { url, taskTypes = ["tech", "colors", "seo", "perf"] } = req.body;
-
-    if (!url || typeof url !== 'string') {
-      return res.status(400).json({ 
-        error: 'URL is required in request body',
-        status: 'error' 
-      });
-    }
-
-    // Import crypto and database modules
-    const { randomUUID } = await import('crypto');
-    const { db } = await import('./db.js');
-    const { scans, scanStatus, scanTasks } = await import('../shared/schema.js');
-
-    const scanId = randomUUID();
-
-    // Insert into database tables optimistically using Drizzle
-    try {
-
-      // Insert scan record
-      await db.insert(scans).values({
-        id: scanId,
-        url: url.trim(),
-        userId: null,
-        active: true,
-        createdAt: new Date(),
-        lastRunAt: null
-      });
-
-      // Insert scan status record
-      await db.insert(scanStatus).values({
-        scanId: scanId,
-        status: 'queued',
-        progress: 0
-      });
-
-      // Insert scan tasks for each requested type
-      const crypto = await import('crypto');
-      for (const type of taskTypes) {
-        const taskId = crypto.randomUUID();
-        await db.insert(scanTasks).values({
-          taskId: taskId,
-          scanId: scanId,
-          type: type as any,
-          status: 'queued',
-          createdAt: new Date(),
-          payload: null
-        });
-        console.log(`✅ Created ${type} task: ${taskId} for scan: ${scanId}`);
-      }
-
-      console.log('Scan created successfully:', scanId);
-
-    } catch (dbError) {
-      console.error('Database insertion failed:', dbError);
-      throw new Error('Failed to create scan record');
-    }
-
-    res.status(201).json({
-      scan_id: scanId,
-      status: 'queued',
-      url: url.trim(),
-      task_types: taskTypes
-    });
-
-  } catch (error) {
-    console.error('❌ Scan creation error:', error);
-    console.error('Error details:', error instanceof Error ? error.message : String(error));
-    res.status(500).json({ 
-      error: 'Failed to create scan',
-      details: error instanceof Error ? error.message : String(error),
-      status: 'error' 
-    });
-  }
+  console.log('🔔 /api/scans hit with body:', req.body);
+  const { url } = req.body;
+  const normalized = normalizeUrl(url);
+  const { rows } = await sql/*sql*/`
+    insert into public.scans (url, created_at)
+    values (${normalized}, now())
+    returning id, url, created_at`;
+  console.log('✅ scan inserted', rows[0]);
+  res.status(201).json(rows[0]);
 });
 
 // Scan status endpoint

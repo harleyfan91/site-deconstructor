@@ -6,11 +6,7 @@ import { analyzeColors } from "./analysers/colors";
 import { analyzeSEO } from "./analysers/seo";
 import { analyzePerformance } from "./analysers/perf";
 
-if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL not set. Please configure the Supabase connection string."
-  );
-}
+if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL missing");
 
 // Log the Supabase host for visibility at startup
 try {
