@@ -1,15 +1,11 @@
 #!/bin/bash
 
 # Complete application startup script
-# Sets DATABASE_URL properly and starts both server and worker
+# Starts both server and worker
 
 echo "🚀 Starting Website Analysis Tool - Complete Setup"
 
-# Configure database connection
-PROJECT_ID=$(echo $VITE_SUPABASE_URL | sed 's/https:\/\///' | sed 's/\.supabase\.co//')
-export DATABASE_URL="postgresql://postgres.${PROJECT_ID}:${SUPABASE_SERVICE_ROLE_KEY}@aws-0-us-west-1.pooler.supabase.com:5432/postgres"
-
-echo "🔗 Database configured: postgresql://postgres.${PROJECT_ID}:****@aws-0-us-west-1.pooler.supabase.com:5432/postgres"
+echo "🔗 Using $DATABASE_URL"
 
 # Start both server and worker concurrently
 echo "⚡ Starting Express server and background worker..."
