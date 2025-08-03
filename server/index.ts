@@ -3,7 +3,7 @@ import { createServer } from "http";
 import { setupVite, serveStatic, log } from "./vite";
 import cors from "cors";
 import { sql } from "./db.js";
-import { normalizeUrl } from "../shared/utils/normalizeUrl.js";
+import scansRouter from "./routes/scans.js";
 
 if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL missing");
 
@@ -30,6 +30,7 @@ console.log(`📍 SUPABASE_SERVICE_ROLE_KEY: ${process.env.SUPABASE_SERVICE_ROLE
 
 // API Routes
 console.log('🚀 Registering unified API routes...');
+app.use(scansRouter);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -216,19 +217,6 @@ app.get('/api/overview', async (req, res) => {
       status: 'error' 
     });
   }
-});
-
-// Optimistic scan creation endpoint - Part 2/7 of refactor
-app.post('/api/scans', async (req, res) => {
-  console.log('🔔 /api/scans hit with body:', req.body);
-  const { url } = req.body;
-  const normalized = normalizeUrl(url);
-  const { rows } = await sql/*sql*/`
-    insert into public.scans (url, created_at)
-    values (${normalized}, now())
-    returning id, url, created_at`;
-  console.log('✅ scan inserted', rows[0]);
-  res.status(201).json(rows[0]);
 });
 
 // Scan status endpoint
