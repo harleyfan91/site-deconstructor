@@ -42,16 +42,16 @@ const URLInputForm: React.FC<URLInputFormProps> = ({ onAnalysisComplete }) => {
 
     try {
       console.log("🌐 POST /api/scans", url.trim());
-      const response = await fetch("/api/scans", {
+      const res = await fetch("/api/scans", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url }),
       });
-      console.log("📥 /api/scans status", response.status);
-      const respBody = await response.json().catch(() => null);
+      console.log("📥 /api/scans status", res.status);
+      const respBody = await res.json().catch(() => null);
       console.log('Scan creation response body:', respBody);
 
-      if (response.ok && respBody) {
+      if (res.ok && respBody) {
         const { scan_id } = respBody;
         // Navigate to dashboard with scan ID immediately
         navigate(`/dashboard/${scan_id}`);
