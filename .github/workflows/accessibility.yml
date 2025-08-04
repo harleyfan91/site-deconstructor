@@ -50,21 +50,15 @@ jobs:
         script: |
           const fs = require('fs');
           const path = 'pa11y-report.html';
-          
+
           if (fs.existsSync(path)) {
             const report = fs.readFileSync(path, 'utf8');
             const issueCount = (report.match(/error/gi) || []).length;
-            
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `## 🔍 Accessibility Test Results
-              
-Detected ${issueCount} accessibility issues.
-
-📊 **Report:** Download the full pa11y report from the artifacts section.
-
-🛠️ **Action Required:** Review the accessibility issues and fix them before merging.`
+              body: `## 🔍 Accessibility Test Results\n\nDetected ${issueCount} accessibility issues.\n\n📊 **Report:** Download the full pa11y report from the artifacts section.\n\n🛠️ **Action Required:** Review the accessibility issues and fix them before merging.`
             });
           }
