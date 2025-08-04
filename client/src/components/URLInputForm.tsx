@@ -41,7 +41,7 @@ const URLInputForm: React.FC<URLInputFormProps> = ({ onAnalysisComplete }) => {
     setLocalLoading(true);
 
     try {
-      console.log("🌐 POST /api/scans", url.trim());
+      console.log("🌐 POST /api/scans", url);
       const res = await fetch("/api/scans", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
