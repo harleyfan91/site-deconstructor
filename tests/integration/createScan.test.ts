@@ -2,16 +2,25 @@ import express from 'express';
 import request from 'supertest';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 
+const insertedTasks: any[] = [];
+
 vi.mock('../../server/db.js', () => ({
-  sql: vi.fn(async (_strings: TemplateStringsArray, ...values: any[]) => ({
-    rows: [
-      {
-        id: 'test-id',
-        url: values[0],
-        created_at: '2024-01-01T00:00:00.000Z'
+  sql: vi.fn((strings: any, ...values: any[]) => {
+    if (Array.isArray(strings) && strings.raw) {
+      const query = strings.join('');
+      if (query.includes('insert into public.scans')) {
+        return Promise.resolve([{ id: 'test-scan-id' }]);
       }
-    ]
-  }))
+      if (query.includes('insert into public.scan_tasks')) {
+        const tasksArg = values[0];
+        insertedTasks.push(...tasksArg);
+        return Promise.resolve([]);
+      }
+      return Promise.resolve([]);
+    }
+    // sql(tasks) -> just return the tasks array synchronously
+    return strings;
+  })
 }));
 
 let app: express.Express;
@@ -24,12 +33,14 @@ beforeAll(async () => {
 });
 
 describe('POST /api/scans', () => {
-  it('should return 201 and inserted scan', async () => {
+  it('creates scan and queues four tasks', async () => {
     const res = await request(app)
       .post('/api/scans')
       .send({ url: 'https://example.com' });
 
     expect(res.status).toBe(201);
-    expect(res.body).toHaveProperty('url', 'https://example.com');
+    expect(res.body).toHaveProperty('scan_id', 'test-scan-id');
+    expect(insertedTasks).toHaveLength(4);
+    insertedTasks.forEach(t => expect(t.status).toBe('queued'));
   });
 });
