@@ -30,7 +30,8 @@ console.log(`📍 SUPABASE_SERVICE_ROLE_KEY: ${process.env.SUPABASE_SERVICE_ROLE
 
 // API Routes
 console.log('🚀 Registering unified API routes...');
-app.use(scansRouter);
+// Mount scans router under /api/scans
+app.use('/api/scans', scansRouter);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
