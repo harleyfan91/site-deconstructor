@@ -22,7 +22,7 @@ router.post("/api/scans", async (req, res) => {
     scan_id,
     type,
     status: 'queued',
-    created_at: new Date(),
+    created_at: new Date().toISOString(),
   }));
   await sql`insert into public.scan_tasks ${sql(tasks)}`;
   console.log(`🆕 tasks queued ${tasks.length} for scan`, scan_id);
