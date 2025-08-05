@@ -27,6 +27,7 @@ const ProgressTestPage = ({ darkMode, toggleDarkMode }: ProgressTestPageProps) =
   const createTestScan = async () => {
     try {
       // Create a new test scan
+      console.log('🌐 POST /api/scans', url);
       const response = await fetch('/api/scans', {
         method: 'POST',
         headers: {
@@ -35,11 +36,14 @@ const ProgressTestPage = ({ darkMode, toggleDarkMode }: ProgressTestPageProps) =
         body: JSON.stringify({ url }),
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        const newScanId = data.scanId;
+      console.log('📥 /api/scans status', response.status);
+      const data = await response.json().catch(() => null);
+      console.log('Scan creation response body:', data);
+
+      if (response.ok && data?.scan_id) {
+        const newScanId = data.scan_id;
         setTestScanId(newScanId);
-        
+
         // Navigate to dashboard with the new scan ID
         navigate(`/dashboard/${newScanId}`);
       } else {
