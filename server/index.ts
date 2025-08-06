@@ -561,6 +561,25 @@ app.post('/api/test-scan', async (req, res) => {
     res.status(500).json({ error: 'Failed to create scan' });
   }
 });
+// Log all registered routes for debugging
+function logRegisteredRoutes() {
+  const list = (prefix: string, router: any) => {
+    router.stack
+      .filter((layer: any) => layer.route)
+      .forEach((layer: any) => {
+        const methods = Object.keys(layer.route.methods)
+          .map(m => m.toUpperCase())
+          .join(', ');
+        console.log(`🛣️ ${methods} ${prefix}${layer.route.path}`);
+      });
+  };
+  console.log('🛣️ Registered routes:');
+  list('', app._router);
+  if ((scansRouter as any).stack) {
+    list('/api/scans', scansRouter);
+  }
+}
+logRegisteredRoutes();
 
 const port = Number(process.env.PORT) || 5000;
 

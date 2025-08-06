@@ -62,17 +62,21 @@ const handleRecentSearch = async ({
 
   try {
     const fullUrl = `https://${searchUrl}`;
+    console.log('🌐 POST /api/scans', fullUrl);
     const response = await fetch('/api/scans', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ url: fullUrl }),
     });
+    console.log('📥 /api/scans status', response.status);
+    const body = await response.json().catch(() => null);
+    console.log('Scan creation response body:', body);
 
-    if (response.ok) {
-      const { scan_id } = await response.json();
+    if (response.ok && body) {
+      const { scan_id } = body;
       navigate(`/dashboard/${scan_id}`);
     } else {
-      console.error('Failed to create scan:', await response.text());
+      console.error('Failed to create scan:', body);
     }
   } catch (error) {
     console.error('Scan creation failed:', error);
