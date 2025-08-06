@@ -31,6 +31,7 @@ const handleCreateScan = async (req: any, res: any) => {
       scan_id,
       type,
       status: 'queued',
+      created_at: new Date().toISOString(),
     }));
     await sql/*sql*/`insert into public.scan_tasks ${sql(tasks)}`;
     console.log('🆕 tasks queued 4 for scan', scan_id);
