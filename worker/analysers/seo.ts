@@ -1,8 +1,8 @@
 import { normalizeUrl } from '../../shared/utils/normalizeUrl.js';
 
-export async function analyzeSEO(url: string): Promise<any> {
+export async function analyzeSEO(url: string, scanId: string): Promise<any> {
   const target = normalizeUrl(url);
-  console.log(`📈 Running SEO analysis for: ${target}`);
+  console.log('🔍 seo analysing scan', scanId);
 
   try {
     // Import the actual SEO extractor function
@@ -17,10 +17,10 @@ export async function analyzeSEO(url: string): Promise<any> {
       url: target
     };
 
-    console.log(`✅ SEO analysis completed for ${target}`);
+    console.log('✅ seo completed', scanId);
     return result;
-  } catch (error) {
-    console.error('❌ SEO analysis failed:', error);
-    throw error;
+  } catch (err) {
+    console.error('❌ seo failed', err);
+    throw err;
   }
 }

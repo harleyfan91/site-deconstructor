@@ -17,7 +17,7 @@ try {
 }
 
 // Task runners mapping
-const runners: Record<string, (url: string) => Promise<any>> = {
+const runners: Record<string, (url: string, scanId: string) => Promise<any>> = {
   tech: analyzeTech,
   colors: analyzeColors,
   seo: analyzeSEO,
@@ -112,6 +112,9 @@ async function work() {
         .limit(1);
 
       console.log(`📊 Found ${tasks.length} queued tasks`);
+      if (tasks.length) {
+        console.log('📥 Raw queued tasks:', tasks);
+      }
       
       // Debug: Check total tasks in database
       const allTasks = await db.select().from(scanTasks).limit(5);
@@ -161,10 +164,26 @@ async function work() {
       console.log(`📋 Processing task: ${task.type} for scan ${task.scanId}`);
 
       // Mark task as running
-      await db
-        .update(scanTasks)
-        .set({ status: "running" })
-        .where(eq(scanTasks.taskId, task.taskId));
+      try {
+        await db
+          .update(scanTasks)
+          .set({ status: "running" })
+          .where(eq(scanTasks.taskId, task.taskId));
+        console.log(`🏃 Task ${task.taskId} set to running`);
+      } catch (err) {
+        console.error(`❌ Failed to set task ${task.taskId} to running:`, err);
+        throw err;
+      }
+
+      // Ensure scan status shows running
+      try {
+        await db
+          .update(schema.scanStatus)
+          .set({ status: 'running', updatedAt: new Date() })
+          .where(eq(schema.scanStatus.scanId, task.scanId!));
+      } catch (err) {
+        console.error(`❌ Failed to update scan status to running for ${task.scanId}:`, err);
+      }
 
       try {
         // Get the URL from the scan record
@@ -182,73 +201,88 @@ async function work() {
         console.log(`🔍 Analyzing ${task.type} for URL: ${url}`);
 
         // Run the appropriate analyzer
-        const result = await runners[task.type](url);
+        const result = await runners[task.type](url, task.scanId!);
 
         // Generate URL hash
         const urlHash = await generateUrlHash(url);
         const cacheKey = `${task.type}_${urlHash}`;
 
         // Store result in analysis_cache
-        await db
-          .insert(schema.analysisCache)
-          .values({
-            urlHash: cacheKey,
-            auditJson: result,
-            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
-          })
-          .onConflictDoUpdate({
-            target: schema.analysisCache.urlHash,
-            set: {
+        try {
+          console.log('💾 Inserting into analysis_cache', { scanId: task.scanId, type: task.type });
+          await db
+            .insert(schema.analysisCache)
+            .values({
+              scanId: task.scanId!,
+              type: task.type,
+              urlHash: cacheKey,
+              originalUrl: url,
               auditJson: result,
-              expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
-            }
-          });
-
-        console.log(`💾 Stored ${task.type} result in cache with key: ${cacheKey}`);
+              expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+            })
+            .onConflictDoUpdate({
+              target: schema.analysisCache.urlHash,
+              set: {
+                auditJson: result,
+                expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
+              }
+            });
+          console.log(`✅ analysis_cache write complete for key ${cacheKey}`);
+        } catch (err) {
+          console.error('❌ analysis_cache insert failed:', err);
+          throw err;
+        }
 
         // Mark task as complete
-        await db
-          .update(scanTasks)
-          .set({ status: "complete" })
-          .where(eq(scanTasks.taskId, task.taskId));
+        try {
+          await db
+            .update(scanTasks)
+            .set({ status: "complete" })
+            .where(eq(scanTasks.taskId, task.taskId));
+          console.log(`✅ Completed ${task.type} analysis for scan ${task.scanId}`);
+        } catch (err) {
+          console.error(`❌ Failed to mark task ${task.taskId} complete:`, err);
+          throw err;
+        }
 
-        console.log(`✅ Completed ${task.type} analysis for scan ${task.scanId}`);
-
-        // Check if all tasks for this scan are complete
-        const remainingTasks = await db
+        // Update scan progress and status
+        const tasksForScan = await db
           .select()
           .from(scanTasks)
-          .where(
-            and(
-              eq(scanTasks.scanId, task.scanId!),
-              eq(scanTasks.status, "queued")
-            )
-          );
+          .where(eq(scanTasks.scanId, task.scanId!));
 
-        if (remainingTasks.length === 0) {
-          // All tasks complete, update scan status
+        const totalCount = tasksForScan.length;
+        const completedCount = tasksForScan.filter(t => t.status === 'complete').length;
+        const progress = Math.round((completedCount / totalCount) * 100);
+        const newStatus = completedCount === totalCount ? 'complete' : 'running';
+
+        try {
           await db
             .update(schema.scanStatus)
-            .set({ 
-              status: "complete",
-              progress: 100 
-            })
+            .set({ status: newStatus, progress })
             .where(eq(schema.scanStatus.scanId, task.scanId!));
-
-          console.log(`🎉 All tasks completed for scan ${task.scanId}`);
+          if (newStatus === 'complete') {
+            console.log(`🎉 All tasks completed for scan ${task.scanId}`);
+          }
+        } catch (err) {
+          console.error(`❌ Failed to update scan status for ${task.scanId}:`, err);
         }
 
       } catch (err) {
         console.error(`❌ Error processing ${task.type} for scan ${task.scanId}:`, err);
 
         // Mark task as failed
-        await db
-          .update(scanTasks)
-          .set({
-            status: "failed",
-            payload: { error: err instanceof Error ? err.message : String(err) }
-          })
-          .where(eq(scanTasks.taskId, task.taskId));
+        try {
+          await db
+            .update(scanTasks)
+            .set({
+              status: "failed",
+              payload: { error: err instanceof Error ? err.message : String(err) }
+            })
+            .where(eq(scanTasks.taskId, task.taskId));
+        } catch (e2) {
+          console.error(`❌ Failed to mark task ${task.taskId} failed:`, e2);
+        }
       }
 
     } catch (err) {

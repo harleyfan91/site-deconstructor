@@ -9,7 +9,7 @@ if (!process.env.DATABASE_URL) {
 const router = Router();
 
 router.post("/", async (req, res) => {
-  console.log("🔔 Route hit:", req.method, req.path, req.body);
+  console.log('🔔 /api/scans hit', req.method, req.path, req.body);
   const { url } = req.body as { url?: string };
   if (!url) {
     console.warn("⚠️ Missing url in request body");
@@ -48,6 +48,7 @@ router.post("/", async (req, res) => {
       type,
       status: "queued",
     }));
+    console.log('📝 inserting tasks', tasks);
     await sql`insert into public.scan_tasks ${sql(tasks)}`;
     console.log("🆕 tasks queued", { scan_id, count: tasks.length });
   } catch (err) {
