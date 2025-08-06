@@ -1,8 +1,8 @@
 import { normalizeUrl } from '../../shared/utils/normalizeUrl.js';
 
-export async function analyzeColors(url: string): Promise<any> {
+export async function analyzeColors(url: string, scanId: string): Promise<any> {
   const target = normalizeUrl(url);
-  console.log(`🎨 Running color analysis for: ${target}`);
+  console.log('🔍 colors analysing scan', scanId);
 
   try {
     // Import color extraction service
@@ -17,10 +17,10 @@ export async function analyzeColors(url: string): Promise<any> {
       url: target
     };
 
-
+    console.log('✅ colors completed', scanId);
     return result;
-  } catch (error) {
-    console.error('❌ Color analysis failed:', error);
-    throw error;
+  } catch (err) {
+    console.error('❌ colors failed', err);
+    throw err;
   }
 }
