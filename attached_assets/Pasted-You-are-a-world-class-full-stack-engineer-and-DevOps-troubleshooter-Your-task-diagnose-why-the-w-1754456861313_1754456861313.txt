@@ -1,0 +1,80 @@
+You are a world‑class full‑stack engineer and DevOps troubleshooter. Your task: **diagnose why the worker process does not detect queued scan\_tasks even though /api/scans successfully inserts them.**
+
+Repository: [https://github.com/harleyfan91/site-deconstructor](https://github.com/harleyfan91/site-deconstructor)
+
+> **Do *not* implement permanent code changes yet.** Your deliverable is a concise report describing root cause and the exact minimal fix. Temporary console logs are allowed locally but should not be committed.
+
+---
+
+## Step‑by‑step workflow
+
+### 1. Sync & reproduce
+
+1. `git pull origin main` & install deps.
+2. Terminal A: `npm run dev` (API + client).
+3. Terminal B: `npm run worker:dev` (worker).
+4. Using Postman or curl: `POST http://localhost:5000/api/scans {"url":"https://example.com"}`.
+5. Confirm tables `scans` and `scan_tasks` now contain new rows.
+
+### 2. Instrument the polling loop
+
+1. Inside the worker’s polling function (likely `pollForTasks()`):
+
+   ```ts
+   console.log('search_path →', (await sql`show search_path`)[0].search_path);
+   const rows = await sql`
+     select task_id, scan_id, status, created_at
+     from public.scan_tasks
+     where status = 'queued'
+     order by task_id
+     limit 1;
+   `;
+   console.log('poll rows →', rows);
+   ```
+2. Re‑run step 1 curl and observe worker logs.
+
+### 3. Interpret results Instrument the polling loop
+
+1. Inside the worker’s polling function (likely `pollForTasks()`):
+
+   ```ts
+   console.log('search_path →', (await sql`show search_path`)[0].search_path);
+   const rows = await sql`
+     select task_id, scan_id, status, created_at
+     from public.scan_tasks
+     where status = 'queued'
+     order by task_id
+     limit 1;
+   `;
+   console.log('poll rows →', rows);
+   ```
+2. Re‑run step 1 curl and observe worker logs.
+
+### 4. Interpret results
+
+* **If WORKER\_DB ≠ SERVER\_DB** → root cause is env mismatch. Fix: point worker to same `.env`/secret.
+* **If `search_path` not `public`** → qualify table names or `alter role set search_path`.
+* **If `rows` shows empty but SQL in psql returns data** → likely search\_path mismatch.
+* **If `rows` shows the task** → worker logic proceeds; watch for next errors (out of scope for this round).
+
+### 5. Draft the report
+
+Include:
+
+1. Observations (DB URLs, search\_path, poll rows).
+2. Root‑cause analysis.
+3. Minimal code or env change required.
+4. Verification steps confirming worker now processes tasks.
+
+---
+
+### Output format
+
+Return a Markdown report with sections:
+
+* **Observations**
+* **Root cause**
+* **Proposed fix**
+* **Verification**
+
+Stop after writing the report—do *not* commit code fixes; we’ll implement them in a follow‑up task.

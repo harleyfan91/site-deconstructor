@@ -65,6 +65,27 @@ async function work() {
     try {
       console.log('🔍 Polling for queued tasks...');
 
+      // DIAGNOSTIC: Check search_path and raw SQL query
+      console.log('=== DIAGNOSTIC START ===');
+      try {
+        const { sql } = await import('../server/db.js');
+        const searchPath = await sql`show search_path`;
+        console.log('search_path →', searchPath[0]?.search_path);
+        
+        const rows = await sql`
+          select task_id, scan_id, status, created_at
+          from public.scan_tasks
+          where status = 'queued'
+          order by task_id
+          limit 5;
+        `;
+        console.log('poll rows →', rows);
+        console.log('poll rows count →', rows.length);
+      } catch (err) {
+        console.error('Diagnostic SQL error:', err);
+      }
+      console.log('=== DIAGNOSTIC END ===');
+
       // First, check for and reset old failed tasks (only reset tasks that are older than 10 minutes)
       const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
       const oldFailedTasks = await db
