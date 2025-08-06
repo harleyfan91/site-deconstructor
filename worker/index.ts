@@ -10,6 +10,7 @@ const dbUrl = process.env.DATABASE_URL;
 if (!dbUrl) {
   throw new Error("DATABASE_URL missing");
 }
+console.log('DB_URL', process.env.DATABASE_URL);
 console.log('🔗 Using DATABASE_URL =', dbUrl);
 
 // Task runners mapping
