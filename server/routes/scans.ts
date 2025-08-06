@@ -9,7 +9,7 @@ if (!process.env.DATABASE_URL) {
 const router = Router();
 
 router.post("/", async (req, res) => {
-  console.log("🔔 Route hit:", req.method, req.path, req.body);
+  console.log('🔔 /api/scans hit', req.method, req.path, req.body);
   const { url } = req.body as { url?: string };
   if (!url) {
     console.warn("⚠️ Missing url in request body");
