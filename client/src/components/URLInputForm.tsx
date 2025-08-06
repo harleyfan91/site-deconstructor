@@ -41,12 +41,13 @@ const URLInputForm: React.FC<URLInputFormProps> = ({ onAnalysisComplete }) => {
     setLocalLoading(true);
 
     try {
-      console.log('🌐 Submitting scan for', url);
+      console.log('🌐 submitting scan', url);
       const res = await fetch("/api/scans", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url }),
       });
+      console.log('🌐 submitting scan', url);
       console.log("📥 /api/scans status", res.status);
       const respBody = await res.json().catch(() => null);
       console.log('Scan creation response body:', respBody);

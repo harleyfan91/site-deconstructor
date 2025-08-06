@@ -62,12 +62,14 @@ const handleRecentSearch = async ({
 
   try {
     const fullUrl = `https://${searchUrl}`;
+    console.log('🌐 submitting scan', fullUrl);
     console.log('🌐 POST /api/scans', fullUrl);
     const response = await fetch('/api/scans', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ url: fullUrl }),
     });
+    console.log('🌐 submitting scan', fullUrl);
     console.log('📥 /api/scans status', response.status);
     const body = await response.json().catch(() => null);
     console.log('Scan creation response body:', body);

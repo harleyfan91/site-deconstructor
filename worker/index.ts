@@ -1,4 +1,4 @@
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import * as schema from "../shared/schema.ts";
 import { scanTasks } from "../shared/schema.ts";
 import { analyzeTech } from "./analysers/tech";
@@ -6,15 +6,11 @@ import { analyzeColors } from "./analysers/colors";
 import { analyzeSEO } from "./analysers/seo";
 import { analyzePerformance } from "./analysers/perf";
 
-if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL missing");
-
-// Log the Supabase host for visibility at startup
-try {
-  const dbHost = new URL(process.env.DATABASE_URL).host;
-  console.log('🔗 Using database host:', dbHost);
-} catch {
-  console.log('🔗 Using database host: unknown');
+const dbUrl = process.env.DATABASE_URL;
+if (!dbUrl) {
+  throw new Error("DATABASE_URL missing");
 }
+console.log('🔗 Using DATABASE_URL =', dbUrl);
 
 // Task runners mapping
 const runners: Record<string, (url: string, scanId: string) => Promise<any>> = {
@@ -23,11 +19,6 @@ const runners: Record<string, (url: string, scanId: string) => Promise<any>> = {
   seo: analyzeSEO,
   perf: analyzePerformance,
 };
-
-async function generateUrlHash(url: string): Promise<string> {
-  const crypto = await import('crypto');
-  return crypto.createHash('sha256').update(url).digest('hex');
-}
 
 async function initializeWorker() {
   console.log('🔗 Initializing worker database connection...');
@@ -111,33 +102,11 @@ async function work() {
         .orderBy(scanTasks.taskId)
         .limit(1);
       const { sql: pollSql, params: pollParams } = pollQuery.toSQL();
-      console.log('📝 Poll SQL:', pollSql, pollParams);
+      console.log('📝 poll sql', pollSql, pollParams);
       const tasks = await pollQuery;
-      console.log('📋 Poll result rows:', tasks);
-      console.log(`📊 Found ${tasks.length} queued tasks`);
+      console.log('📋 poll rows', tasks);
+      console.log(`📊 poll found ${tasks.length} tasks`);
       
-      // Debug: Check total tasks in database
-      const allTasks = await db.select().from(scanTasks).limit(5);
-      console.log(`🔍 Total tasks in database: ${allTasks.length}`);
-      if (allTasks.length > 0) {
-        console.log(`📋 Sample tasks:`, allTasks.map(t => ({
-          id: t.taskId,
-          type: t.type,
-          status: t.status,
-          scanId: t.scanId
-        })));
-      }
-      
-      // Debug: Check scans in database
-      const allScans = await db.select().from(schema.scans).limit(3);
-      console.log(`📊 Total scans in database: ${allScans.length}`);
-      if (allScans.length > 0) {
-        console.log(`🔗 Recent scans:`, allScans.map(s => ({
-          id: s.id,
-          url: s.url,
-          createdAt: s.createdAt
-        })));
-      }
 
       if (!tasks.length) {
         consecutiveEmptyPolls++;
@@ -200,38 +169,8 @@ async function work() {
         const url = scans[0].url!;
         console.log(`🔍 Analyzing ${task.type} for URL: ${url}`);
 
-        // Run the appropriate analyzer
-        const result = await runners[task.type](url, task.scanId!);
-
-        // Generate URL hash
-        const urlHash = await generateUrlHash(url);
-        const cacheKey = `${task.type}_${urlHash}`;
-
-        // Store result in analysis_cache
-        try {
-          console.log('💾 Inserting into analysis_cache', { scanId: task.scanId, type: task.type });
-          await db
-            .insert(schema.analysisCache)
-            .values({
-              scanId: task.scanId!,
-              type: task.type,
-              urlHash: cacheKey,
-              originalUrl: url,
-              auditJson: result,
-              expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
-            })
-            .onConflictDoUpdate({
-              target: schema.analysisCache.urlHash,
-              set: {
-                auditJson: result,
-                expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
-              }
-            });
-          console.log(`✅ analysis_cache write complete for key ${cacheKey}`);
-        } catch (err) {
-          console.error('❌ analysis_cache insert failed:', err);
-          throw err;
-        }
+        // Run the appropriate analyzer which handles its own persistence
+        await runners[task.type](url, task.scanId!);
 
         // Mark task as complete
         try {
