@@ -9,7 +9,7 @@ if (!process.env.DATABASE_URL) {
 const router = Router();
 
 const handleCreateScan = async (req: any, res: any) => {
-  console.log('🔔 /api/scans hit', req.method, req.path, req.body);
+  console.log('🔔 /api/scans', req.body);
   try {
     const { url } = req.body as { url?: string };
     if (!url) {
@@ -17,36 +17,25 @@ const handleCreateScan = async (req: any, res: any) => {
       return res.status(400).json({ error: "url is required" });
     }
 
-    const normalized = normalizeUrl(url);
-    console.log('🌐 Normalized URL:', normalized);
+    const normalizedUrl = normalizeUrl(url);
+    console.log('🌐 Normalized URL:', normalizedUrl);
 
-    const [{ id: scan_id }] = await sql/*sql*/`
-      insert into public.scans (url, created_at)
-      values (${normalized}, now())
-      returning id`;
-    console.log("✅ scan inserted", { scan_id, url: normalized });
+    const [{ scan_id }] = await sql/*sql*/`
+      insert into public.scans (url)
+      values (${normalizedUrl})
+      returning id as scan_id`;
+    console.log('✅ scan inserted', { scan_id, url: normalizedUrl });
 
-    await sql/*sql*/`
-      insert into public.scan_status (scan_id, status, created_at, updated_at)
-      values (${scan_id}, 'queued', now(), now())`;
-    console.log("📝 scan_status inserted", scan_id);
-
-    const taskTypes = ["tech", "colors", "seo", "perf"];
+    const taskTypes = ['tech', 'colors', 'seo', 'perf'];
     const tasks = taskTypes.map((type) => ({
       scan_id,
       type,
-      status: "queued",
+      status: 'queued',
     }));
-    console.log('📝 inserting tasks', tasks);
-    await sql`insert into public.scan_tasks ${sql(tasks)}`;
-    console.log("🆕 tasks queued", { scan_id, count: tasks.length });
+    await sql/*sql*/`insert into public.scan_tasks ${sql(tasks)}`;
+    console.log('🆕 tasks queued 4 for scan', scan_id);
 
-    res.status(201).json({
-      scan_id,
-      status: "queued",
-      url: normalized,
-      task_types: taskTypes,
-    });
+    res.status(201).json({ scan_id });
   } catch (err) {
     console.error('❌ scan route error:', err);
     res.status(500).json({ error: 'failed to create scan' });
@@ -54,6 +43,5 @@ const handleCreateScan = async (req: any, res: any) => {
 };
 
 router.post('/', handleCreateScan);
-router.post('/api/scans', handleCreateScan);
 
 export default router;

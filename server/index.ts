@@ -5,15 +5,11 @@ import cors from "cors";
 import { sql } from "./db.js";
 import scansRouter from "./routes/scans.js";
 
-if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL missing");
-
-// Show the resolved database host at startup for easier troubleshooting
-try {
-  const dbHost = new URL(process.env.DATABASE_URL).host;
-  console.log('🔗 Using database host:', dbHost);
-} catch {
-  console.log('🔗 Using database host: unknown');
+const dbUrl = process.env.DATABASE_URL;
+if (!dbUrl) {
+  throw new Error("DATABASE_URL missing");
 }
+console.log('🔗 Using DATABASE_URL =', dbUrl);
 
 const app = express();
 const server = createServer(app);

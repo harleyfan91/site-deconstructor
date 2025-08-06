@@ -1,15 +1,19 @@
 
 import { normalizeUrl } from '../../shared/utils/normalizeUrl.js';
+import { sql } from '../../server/db.js';
 
-export async function analyzePerformance(url: string, scanId: string): Promise<any> {
+async function hashUrl(url: string): Promise<string> {
+  const { createHash } = await import('crypto');
+  return createHash('sha256').update(url).digest('hex');
+}
+
+export async function analyzePerformance(url: string, scanId: string): Promise<void> {
   const target = normalizeUrl(url);
-  console.log('🔍 perf analysing scan', scanId, 'url', target);
+  console.log('🔍 analysing perf for', scanId);
 
   try {
-    // Import the actual Lighthouse functions
     const { getLighthousePerformance, getLighthousePageLoadTime } = await import('../../server/lib/lighthouse-service.js');
 
-    // Run Lighthouse performance analysis
     let performanceData, pageLoadTime;
     try {
       performanceData = await getLighthousePerformance(target);
@@ -24,15 +28,13 @@ export async function analyzePerformance(url: string, scanId: string): Promise<a
       throw err;
     }
 
-    const result = {
-      performance: performanceData,
-      pageLoadTime: pageLoadTime,
-      timestamp: new Date().toISOString(),
-      url: target
-    };
-
-    console.log('✅ perf completed', scanId);
-    return result;
+    const urlHash = await hashUrl(`${target}:perf`);
+    const audit = { performance: performanceData, pageLoadTime };
+    await sql/*sql*/`
+      insert into public.analysis_cache (scan_id, type, url_hash, original_url, audit_json)
+      values (${scanId}, 'perf', ${urlHash}, ${target}, ${sql.json(audit)})
+      on conflict (url_hash) do update set audit_json = excluded.audit_json`;
+    console.log('✅ perf analysis saved for', scanId);
   } catch (err) {
     console.error('❌ perf failed', err);
     throw err;
