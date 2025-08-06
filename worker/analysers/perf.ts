@@ -1,9 +1,9 @@
 
 import { normalizeUrl } from '../../shared/utils/normalizeUrl.js';
 
-export async function analyzePerformance(url: string): Promise<any> {
+export async function analyzePerformance(url: string, scanId: string): Promise<any> {
   const target = normalizeUrl(url);
-  console.log(`⚡ Running performance analysis for: ${target}`);
+  console.log('🔍 perf analysing scan', scanId);
 
   try {
     // Import the actual Lighthouse functions
@@ -22,10 +22,10 @@ export async function analyzePerformance(url: string): Promise<any> {
       url: target
     };
 
-    console.log(`✅ Performance analysis completed for ${target}`);
+    console.log('✅ perf completed', scanId);
     return result;
-  } catch (error) {
-    console.error('❌ Performance analysis failed:', error);
-    throw error;
+  } catch (err) {
+    console.error('❌ perf failed', err);
+    throw err;
   }
 }

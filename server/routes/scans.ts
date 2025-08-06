@@ -48,6 +48,7 @@ router.post("/", async (req, res) => {
       type,
       status: "queued",
     }));
+    console.log('📝 inserting tasks', tasks);
     await sql`insert into public.scan_tasks ${sql(tasks)}`;
     console.log("🆕 tasks queued", { scan_id, count: tasks.length });
   } catch (err) {

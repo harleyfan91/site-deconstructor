@@ -1,8 +1,8 @@
 import { normalizeUrl } from '../../shared/utils/normalizeUrl.js';
 
-export async function analyzeTech(url: string): Promise<any> {
+export async function analyzeTech(url: string, scanId: string): Promise<any> {
   const target = normalizeUrl(url);
-  console.log(`🔧 Running tech analysis for: ${target}`);
+  console.log('🔍 tech analysing scan', scanId);
 
   try {
     // Import the actual tech extractor function
@@ -17,10 +17,10 @@ export async function analyzeTech(url: string): Promise<any> {
       url: target
     };
 
-    console.log(`✅ Tech analysis completed for ${target}`);
+    console.log('✅ tech completed', scanId);
     return result;
-  } catch (error) {
-    console.error('❌ Tech analysis failed:', error);
-    throw error;
+  } catch (err) {
+    console.error('❌ tech failed', err);
+    throw err;
   }
 }
