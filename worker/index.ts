@@ -104,17 +104,17 @@ async function work() {
       }
 
       // Get next queued task
-      const tasks = await db
+      const pollQuery = db
         .select()
         .from(scanTasks)
         .where(eq(scanTasks.status, "queued"))
         .orderBy(scanTasks.taskId)
         .limit(1);
-
+      const { sql: pollSql, params: pollParams } = pollQuery.toSQL();
+      console.log('📝 Poll SQL:', pollSql, pollParams);
+      const tasks = await pollQuery;
+      console.log('📋 Poll result rows:', tasks);
       console.log(`📊 Found ${tasks.length} queued tasks`);
-      if (tasks.length) {
-        console.log('📥 Raw queued tasks:', tasks);
-      }
       
       // Debug: Check total tasks in database
       const allTasks = await db.select().from(scanTasks).limit(5);

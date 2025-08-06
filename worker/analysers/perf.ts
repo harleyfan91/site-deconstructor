@@ -3,17 +3,26 @@ import { normalizeUrl } from '../../shared/utils/normalizeUrl.js';
 
 export async function analyzePerformance(url: string, scanId: string): Promise<any> {
   const target = normalizeUrl(url);
-  console.log('🔍 perf analysing scan', scanId);
+  console.log('🔍 perf analysing scan', scanId, 'url', target);
 
   try {
     // Import the actual Lighthouse functions
     const { getLighthousePerformance, getLighthousePageLoadTime } = await import('../../server/lib/lighthouse-service.js');
 
     // Run Lighthouse performance analysis
-    const [performanceData, pageLoadTime] = await Promise.all([
-      getLighthousePerformance(target),
-      getLighthousePageLoadTime(target)
-    ]);
+    let performanceData, pageLoadTime;
+    try {
+      performanceData = await getLighthousePerformance(target);
+    } catch (err) {
+      console.error('❌ getLighthousePerformance failed', err);
+      throw err;
+    }
+    try {
+      pageLoadTime = await getLighthousePageLoadTime(target);
+    } catch (err) {
+      console.error('❌ getLighthousePageLoadTime failed', err);
+      throw err;
+    }
 
     const result = {
       performance: performanceData,
