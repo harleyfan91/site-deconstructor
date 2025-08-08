@@ -151,18 +151,15 @@ npm test
 
 ## Database Management
 
-### Clear Database
-To reset all tables during development:
+### Verification
 
 ```bash
+npm run migrate:supabase
+npm run generate:migration
 npx tsx clear-supabase.ts
-```
-
-### Verify Database Structure
-Check that all required tables exist:
-
-```bash
-psql $DATABASE_URL -c "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name IN ('scans','scan_status','analysis_cache','scan_tasks','users');"
+psql "$DATABASE_URL" -c \
+  "SELECT table_name FROM information_schema.tables \
+   WHERE table_schema='public' AND table_name IN ('scans','scan_status','analysis_cache','scan_tasks','users');"
 ```
 
 ### Monitor Database
@@ -171,3 +168,5 @@ View current scan records:
 ```bash
 psql $DATABASE_URL -c "SELECT COUNT(*) FROM scans;"
 psql $DATABASE_URL -c "SELECT COUNT(*) FROM analysis_cache;"
+```
+
