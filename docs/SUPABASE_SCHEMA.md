@@ -62,8 +62,13 @@ The database also contains these tables:
 - JSONB is used for storing complex analysis results in `analysis_cache`
 - Boolean fields use PostgreSQL's native boolean type
 
-## Clearing Database
-Use the provided `clear-supabase.ts` script to safely clear all tables:
+## Verification
+
 ```bash
+npm run migrate:supabase
+npm run generate:migration
 npx tsx clear-supabase.ts
+psql "$DATABASE_URL" -c \
+  "SELECT table_name FROM information_schema.tables \
+   WHERE table_schema='public' AND table_name IN ('scans','scan_status','analysis_cache','scan_tasks','users');"
 ```
