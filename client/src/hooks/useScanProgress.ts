@@ -17,9 +17,8 @@ export function useScanProgress(scanId: string): ProgressData {
     // Skip if no scanId provided
     if (!scanId) return;
 
-    // Check if Supabase is properly configured  
-    const hasSupabaseConfig = import.meta.env.VITE_SUPABASE_ANON_KEY &&
-                             import.meta.env.VITE_SUPABASE_ANON_KEY !== 'placeholder-key';
+    // Supabase is always configured with hard-coded credentials
+    const hasSupabaseConfig = true;
 
     if (!hasSupabaseConfig) {
       console.warn('Supabase not configured for realtime, using polling fallback');

@@ -2,8 +2,8 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.VITE_SUPABASE_URL!;
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabaseUrl = 'https://kdkuhrbaftksknfgjcch.supabase.co';
+const serviceRoleKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtka3VocmJhZnRrc2tuZmdqY2NoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDY1NTk3MiwiZXhwIjoyMDcwMjMxOTcyfQ.GxgZBq4v6SNusEoW9We2Z2yMJcUt7g-YtwCy8IalErA';
 
 // Use service role to bypass RLS
 const supabase = createClient(supabaseUrl, serviceRoleKey, {

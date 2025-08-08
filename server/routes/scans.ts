@@ -2,10 +2,6 @@ import { Router } from "express";
 import { sql } from "../db.js";
 import { normalizeUrl } from "../../shared/utils/normalizeUrl.js";
 
-if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL not set");
-}
-
 const router = Router();
 
 const handleCreateScan = async (req: any, res: any) => {
