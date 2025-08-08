@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-DATABASE_URL="postgresql://postgres.kdkuhrbaftksknfgjcch:[YOUR-PASSWORD]@aws-0-us-east-1.pooler.supabase.com:6543/postgres"
+DATABASE_URL="postgresql://postgres.kdkuhrbaftksknfgjcch:lkFvjLVOXgPXWJ2S@aws-0-us-east-1.pooler.supabase.com:6543/postgres"
 rm -rf dist
 rm -f node_modules/typescript/tsbuildinfo
 # Compile TypeScript for tests, but don't fail on type errors

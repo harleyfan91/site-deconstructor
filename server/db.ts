@@ -2,7 +2,7 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import * as schema from '../shared/schema.js';
 
-const DATABASE_URL = 'postgresql://postgres.kdkuhrbaftksknfgjcch:[YOUR-PASSWORD]@aws-0-us-east-1.pooler.supabase.com:6543/postgres';
+const DATABASE_URL = 'postgresql://postgres.kdkuhrbaftksknfgjcch:lkFvjLVOXgPXWJ2S@aws-0-us-east-1.pooler.supabase.com:6543/postgres';
 
 let dbHost = 'unknown';
 try {

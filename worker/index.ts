@@ -6,7 +6,7 @@ import { analyzeColors } from "./analysers/colors";
 import { analyzeSEO } from "./analysers/seo";
 import { analyzePerformance } from "./analysers/perf";
 
-const DATABASE_URL = 'postgresql://postgres.kdkuhrbaftksknfgjcch:[YOUR-PASSWORD]@aws-0-us-east-1.pooler.supabase.com:6543/postgres';
+const DATABASE_URL = 'postgresql://postgres.kdkuhrbaftksknfgjcch:lkFvjLVOXgPXWJ2S@aws-0-us-east-1.pooler.supabase.com:6543/postgres';
 const SUPABASE_URL = 'https://kdkuhrbaftksknfgjcch.supabase.co';
 const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtka3VocmJhZnRrc2tuZmdqY2NoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDY1NTk3MiwiZXhwIjoyMDcwMjMxOTcyfQ.GxgZBq4v6SNusEoW9We2Z2yMJcUt7g-YtwCy8IalErA';
 
