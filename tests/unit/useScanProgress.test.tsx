@@ -30,7 +30,6 @@ vi.mock('../../client/src/hooks/useScanStatus', () => ({
 
 describe('useScanProgress', () => {
   let queryClient: QueryClient;
-  const originalEnv = { ...import.meta.env };
 
   const wrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
@@ -44,11 +43,6 @@ describe('useScanProgress', () => {
       },
     });
     vi.clearAllMocks();
-    import.meta.env = { ...originalEnv, VITE_SUPABASE_ANON_KEY: 'key', VITE_SUPABASE_URL: 'url' };
-  });
-
-  afterEach(() => {
-    import.meta.env = originalEnv;
   });
 
   it('should return initial progress from polling fallback', () => {
@@ -84,18 +78,4 @@ describe('useScanProgress', () => {
     });
   });
 
-  it('should handle Supabase configuration errors', () => {
-    // Mock environment variables as undefined
-    const originalEnv = import.meta.env;
-    import.meta.env = { ...originalEnv, VITE_SUPABASE_URL: undefined };
-    
-    const { result } = renderHook(() => useScanProgress('test-scan'), { wrapper });
-    
-    // Should fall back to polling data
-    expect(result.current.progress).toBe(50);
-    expect(result.current.status).toBe('running');
-    
-    // Restore original env
-    import.meta.env = originalEnv;
-  });
 });

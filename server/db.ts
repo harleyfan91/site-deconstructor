@@ -2,17 +2,15 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import * as schema from '../shared/schema.js';
 
-if (!process.env.DATABASE_URL) {
-  throw new Error('DATABASE_URL not set');
-}
+const DATABASE_URL = 'postgresql://postgres.kdkuhrbaftksknfgjcch:[YOUR-PASSWORD]@aws-0-us-east-1.pooler.supabase.com:6543/postgres';
 
 let dbHost = 'unknown';
 try {
-  dbHost = new URL(process.env.DATABASE_URL).host;
+  dbHost = new URL(DATABASE_URL).host;
 } catch {}
 console.log('🔗 Database connection string configured for host:', dbHost);
 
-const connectionString = process.env.DATABASE_URL!;
+const connectionString = DATABASE_URL;
 
 export const sql = postgres(connectionString, {
   max: 10,

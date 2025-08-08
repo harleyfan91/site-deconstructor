@@ -5,6 +5,7 @@
 
 echo "🚀 Starting Website Analysis Tool - Complete Setup"
 
+DATABASE_URL="postgresql://postgres.kdkuhrbaftksknfgjcch:[YOUR-PASSWORD]@aws-0-us-east-1.pooler.supabase.com:6543/postgres"
 echo "🔗 Using $DATABASE_URL"
 
 # Start both server and worker concurrently

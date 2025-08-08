@@ -6,11 +6,12 @@ import { analyzeColors } from "./analysers/colors";
 import { analyzeSEO } from "./analysers/seo";
 import { analyzePerformance } from "./analysers/perf";
 
-const dbUrl = process.env.DATABASE_URL;
-if (!dbUrl) {
-  throw new Error("DATABASE_URL missing");
-}
-console.log('DB_URL', process.env.DATABASE_URL);
+const DATABASE_URL = 'postgresql://postgres.kdkuhrbaftksknfgjcch:[YOUR-PASSWORD]@aws-0-us-east-1.pooler.supabase.com:6543/postgres';
+const SUPABASE_URL = 'https://kdkuhrbaftksknfgjcch.supabase.co';
+const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtka3VocmJhZnRrc2tuZmdqY2NoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDY1NTk3MiwiZXhwIjoyMDcwMjMxOTcyfQ.GxgZBq4v6SNusEoW9We2Z2yMJcUt7g-YtwCy8IalErA';
+
+const dbUrl = DATABASE_URL;
+console.log('DB_URL', DATABASE_URL);
 console.log('🔗 Using DATABASE_URL =', dbUrl);
 
 // Task runners mapping
@@ -24,16 +25,10 @@ const runners: Record<string, (url: string, scanId: string) => Promise<any>> = {
 async function initializeWorker() {
   console.log('🔗 Initializing worker database connection...');
 
-  // Load environment variables from process.env
-  const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
-  const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
-    console.error('❌ Missing required environment variables');
-    console.log('VITE_SUPABASE_URL:', SUPABASE_URL ? 'SET' : 'MISSING');
-    console.log('SUPABASE_SERVICE_ROLE_KEY:', SUPABASE_SERVICE_KEY ? 'SET' : 'MISSING');
-    throw new Error('Missing required environment variables');
-  }
+  const SUPABASE_URL_CONST = SUPABASE_URL;
+  const SUPABASE_SERVICE_KEY_CONST = SUPABASE_SERVICE_KEY;
+  console.log('VITE_SUPABASE_URL:', SUPABASE_URL_CONST ? 'SET' : 'MISSING');
+  console.log('SUPABASE_SERVICE_ROLE_KEY:', SUPABASE_SERVICE_KEY_CONST ? 'SET' : 'MISSING');
 
   try {
     // Import database connection with correct extension
