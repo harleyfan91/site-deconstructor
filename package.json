@@ -12,6 +12,7 @@
     "start": "vite preview",
     "worker:dev": "tsx watch worker/index.ts",
     "migrate:supabase": "npx drizzle-kit push:pg --schema \"postgres\".\"public\"",
+    "generate:migration": "npx drizzle-kit generate:pg",
     "check": "tsc",
     "deps:docs": "npx dep-table --out docs/DEPENDENCIES.md",
     "test:unit": "vitest run --coverage",
