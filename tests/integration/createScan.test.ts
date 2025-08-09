@@ -26,6 +26,7 @@ vi.mock('../../server/db.js', () => ({
 let app: express.Express;
 
 beforeAll(async () => {
+  process.env.ANALYSIS_MODE = 'queued';
   const router = (await import('../../server/routes/scans.ts')).default;
   app = express();
   app.use(express.json());

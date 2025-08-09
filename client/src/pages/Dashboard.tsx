@@ -17,7 +17,7 @@ interface DashboardProps {
 
 const Dashboard = ({ darkMode, toggleDarkMode }: DashboardProps) => {
   const location = useLocation();
-  const { scanId } = useParams<{ scanId: string }>();
+  const { scanId } = useParams<{ scanId?: string }>();
   const { analyzeWebsite, data } = useAnalysisContext();
 
   // Task types for the new local-first architecture
