@@ -13,10 +13,12 @@ export interface SimpleAnalysisResponse {
 
 // Convert server's simple analysis response into AnalysisResponse shape
 export function adaptSimpleResponse(res: SimpleAnalysisResponse): AnalysisResponse {
+  const data = res.results?.data || {};
+  const merged = { ...data, ...(data.ui || {}) };
   return {
     id: res.id,
     url: res.url,
     status: res.status === 'ok' ? 'complete' : 'error',
-    data: res.results?.data || {}
+    data: merged
   } as AnalysisResponse;
 }

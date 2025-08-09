@@ -11,7 +11,6 @@ import { Search, Link as LinkIcon } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useAnalysisContext } from '../contexts/AnalysisContext';
 import { useNavigate } from 'react-router-dom';
-import { adaptSimpleResponse, type SimpleAnalysisResponse } from '../lib/simpleAdapter';
 
 interface URLInputFormProps {
   onAnalysisComplete?: (data: any) => void;
@@ -21,7 +20,7 @@ const URLInputForm: React.FC<URLInputFormProps> = ({ onAnalysisComplete }) => {
   const [url, setUrl] = useState('');
   const [localLoading, setLocalLoading] = useState(false);
   const [isValid, setIsValid] = useState(true);
-  const { setAnalysis, setError, setLoading, loading, error } = useAnalysisContext();
+  const { analyzeWebsite, loading, error } = useAnalysisContext();
   const navigate = useNavigate();
 
   const validateUrl = (value: string) => {
@@ -41,50 +40,14 @@ const URLInputForm: React.FC<URLInputFormProps> = ({ onAnalysisComplete }) => {
 
     setLocalLoading(true);
 
-    const mode = import.meta.env.VITE_ANALYSIS_MODE || 'simple';
-
     try {
-      if (mode === 'queued') {
-        console.log('🌐 submitting scan', url);
-        const res = await fetch('/api/scans', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url }),
-        });
-        console.log('📥 /api/scans status', res.status);
-        const respBody = await res.json().catch(() => null);
-        console.log('Scan creation response body:', respBody);
-        if (res.ok && respBody) {
-          const { scan_id } = respBody;
-          navigate(`/dashboard/${scan_id}`);
-          onAnalysisComplete?.({ url: url.trim(), scanId: scan_id });
-        } else {
-          console.error('Could not start scan:', respBody);
-          setError('Failed to start scan');
-        }
-      } else {
-        setLoading(true);
-        setError(null);
-        const res = await fetch('/api/overview', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: url.trim() }),
-        });
-        if (!res.ok) {
-          throw new Error(`Analysis failed: ${res.status} ${res.statusText}`);
-        }
-        const json: SimpleAnalysisResponse = await res.json();
-        const adapted = adaptSimpleResponse(json);
-        setAnalysis(adapted);
-        onAnalysisComplete?.(adapted);
+      const result = await analyzeWebsite(url.trim());
+      if (result) {
+        onAnalysisComplete?.(result);
         navigate('/dashboard');
       }
-    } catch (err) {
-      console.error('Scan submission failed:', err);
-      setError(err instanceof Error ? err.message : 'Analysis failed');
     } finally {
       setLocalLoading(false);
-      setLoading(false);
     }
   };
 
