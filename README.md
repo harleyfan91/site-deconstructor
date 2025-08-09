@@ -170,3 +170,12 @@ psql $DATABASE_URL -c "SELECT COUNT(*) FROM scans;"
 psql $DATABASE_URL -c "SELECT COUNT(*) FROM analysis_cache;"
 ```
 
+
+### Simple Results Table Migration
+
+```bash
+npm run migrate:supabase
+# verify
+psql "$DATABASE_URL" -c "\d+ public.scan_results"
+psql "$DATABASE_URL" -c "select * from public.scan_results order by requested_at desc limit 1;"
+```
