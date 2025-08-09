@@ -28,8 +28,8 @@ console.log(`📍 SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY.substri
 
 // API Routes
 console.log('🚀 Registering unified API routes...');
-// Mount scans router under /api/scans
-app.use('/api/scans', scansRouter);
+// Mount scans router directly (it defines its own /api/scans paths)
+app.use(scansRouter);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -574,7 +574,7 @@ function logRegisteredRoutes() {
   console.log('🛣️ Registered routes:');
   list('', app._router);
   if ((scansRouter as any).stack) {
-    list('/api/scans', scansRouter);
+    list('', scansRouter);
   }
 }
 logRegisteredRoutes();
