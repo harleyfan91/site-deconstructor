@@ -40,7 +40,7 @@ app.get('/api/health', (req, res) => {
 app.get('/api/debug/clear-cache', async (req, res) => {
   try {
     const cacheModule = await import('./lib/cache.js');
-    const cache = cacheModule.unifiedCache || cacheModule.default;
+    const cache = (cacheModule as any).unifiedCache || cacheModule;
 
     const currentKeys = cache.listKeys ? cache.listKeys() : [];
     console.log('🔍 Current cache keys:', currentKeys);
@@ -113,7 +113,7 @@ app.get('/api/debug/nuclear-reset', async (req, res) => {
 
     // Clear memory cache too
     const cacheModule = await import('./lib/cache.js');
-    const cache = cacheModule.unifiedCache || cacheModule.default;
+    const cache = (cacheModule as any).unifiedCache || cacheModule;
     if (cache.clearAll) {
       cache.clearAll();
     }
@@ -134,7 +134,7 @@ app.get('/api/debug/nuclear-reset', async (req, res) => {
 app.get('/api/debug/cache-info', async (req, res) => {
   try {
     const cacheModule = await import('./lib/cache.js');
-    const cache = cacheModule.unifiedCache || cacheModule.default;
+    const cache = (cacheModule as any).unifiedCache || cacheModule;
 
     const cacheKeys = cache.listKeys ? cache.listKeys() : [];
 
@@ -592,6 +592,18 @@ async function startServer() {
     log(`Server running on http://0.0.0.0:${port}`);
     console.log(`🌐 Frontend accessible via Replit's webview`);
     console.log(`🔧 API endpoints available at /api/*`);
+  }).on('error', (err: any) => {
+    if (err.code === 'EADDRINUSE') {
+      console.log(`⚠️ Port ${port} is busy. Trying port ${port + 1}...`);
+      server.listen(port + 1, "0.0.0.0", () => {
+        log(`Server running on http://0.0.0.0:${port + 1}`);
+        console.log(`🌐 Frontend accessible via Replit's webview`);
+        console.log(`🔧 API endpoints available at /api/*`);
+      });
+    } else {
+      console.error('Server error:', err);
+      process.exit(1);
+    }
   });
 }
 
