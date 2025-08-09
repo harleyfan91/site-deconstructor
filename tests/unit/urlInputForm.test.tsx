@@ -2,8 +2,11 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import URLInputForm from '@/components/URLInputForm';
 
+const setAnalysis = vi.fn();
+const setError = vi.fn();
+const setLoading = vi.fn();
 vi.mock('@/contexts/AnalysisContext', () => ({
-  useAnalysisContext: () => ({ analyzeWebsite: vi.fn(), loading: false, error: null })
+  useAnalysisContext: () => ({ setAnalysis, setError, setLoading, loading: false, error: null })
 }));
 vi.mock('react-router-dom', () => ({
   useNavigate: () => vi.fn(),
@@ -14,14 +17,19 @@ describe('URLInputForm', () => {
     vi.clearAllMocks();
   });
 
-  it('posts to /api/scans and logs status', async () => {
+  it('calls /api/overview and stores result in context', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
-      status: 201,
-      json: vi.fn().mockResolvedValue({ id: '1', url: 'https://example.com', created_at: 'now' }),
       ok: true,
+      status: 200,
+      json: vi.fn().mockResolvedValue({
+        id: '1',
+        url: 'https://example.com',
+        status: 'ok',
+        duration_ms: 10,
+        results: { data: {} }
+      }),
     });
     global.fetch = fetchMock as any;
-    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
     render(<URLInputForm />);
 
@@ -29,9 +37,9 @@ describe('URLInputForm', () => {
     fireEvent.submit(screen.getByRole('button').closest('form')!);
 
     await waitFor(() => {
-      expect(fetchMock).toHaveBeenCalledWith('/api/scans', expect.objectContaining({ method: 'POST' }));
+      expect(fetchMock).toHaveBeenCalledWith('/api/overview', expect.objectContaining({ method: 'POST' }));
     });
 
-    expect(logSpy).toHaveBeenCalledWith('📥 /api/scans status', 201);
+    expect(setAnalysis).toHaveBeenCalled();
   });
 });
