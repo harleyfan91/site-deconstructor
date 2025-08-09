@@ -91,6 +91,30 @@ async function handleAnalysis(url: string) {
     errorMsg = err.error ? (err.error.message || String(err.error)) : 'analysis failed';
   }
 
+  // Normalize color data for UI consumption
+  const hexes =
+    analysisResults?.ui?.colors ??
+    analysisResults?.data?.ui?.colors ??
+    analysisResults?.data?.overview?.colors ?? [];
+
+  const normalizedColors = (hexes as any[]).map((c: any) => {
+    const hex = typeof c === 'string' ? c : c.hex;
+    return {
+      hex,
+      name: typeof c === 'string' ? '' : c.name || '',
+      usage: 'palette',
+      count:
+        typeof c === 'string'
+          ? 1
+          : (c.occurrences ?? c.count ?? 1),
+    };
+  });
+
+  analysisResults.ui = { ...(analysisResults.ui || {}), colors: normalizedColors };
+  if (analysisResults.ui.contrastViolations === undefined) {
+    analysisResults.ui.contrastViolations = 0;
+  }
+
   const [row] = await db.insert(scanResults).values({
     url: normalizedUrl,
     durationMs: duration,
