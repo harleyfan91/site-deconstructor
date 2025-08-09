@@ -11,7 +11,7 @@
     "build": "vite build",
     "start": "vite preview",
     "worker:dev": "tsx watch worker/index.ts",
-    "migrate:supabase": "npx drizzle-kit push:pg",
+    "migrate:supabase": "npx drizzle-kit push",
     "generate:migration": "npx drizzle-kit generate:pg --config drizzle.config.ts",
     "check": "tsc",
     "deps:docs": "npx dep-table --out docs/DEPENDENCIES.md",
