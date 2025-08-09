@@ -16,41 +16,33 @@ const handleCreateScan = async (req: any, res: any) => {
     const normalizedUrl = normalizeUrl(url);
     console.log('🌐 Normalized URL:', normalizedUrl);
 
-    const { scan_id } = await sql.begin(async (sql) => {
-      const [{ scan_id }] = await sql/*sql*/`
-        insert into public.scans (url)
-        values (${normalizedUrl})
-        returning id as scan_id`;
-      console.log('✅ scan inserted', { scan_id, url: normalizedUrl });
+    const [{ id }] = await sql/*sql*/`
+      insert into public.scans (url)
+      values (${normalizedUrl})
+      returning id`;
+    console.log('✅ scan inserted', { scan_id: id, url: normalizedUrl });
 
     const taskTypes = ['tech', 'colors', 'seo', 'perf'];
     const tasks = taskTypes.map((type) => ({
-      scan_id,
+      scan_id: id,
       type,
       status: 'queued',
       created_at: new Date().toISOString(),
     }));
 
-    const transaction = await sql.begin();
-    try {
-      await transaction/*sql*/`insert into public.scan_tasks (scan_id, type, status, created_at) values ${sql(tasks, 'scan_id','type','status','created_at')}`;
-      await transaction.commit();
-      console.log('🆕 tasks queued 4 for scan', scan_id);
-    } catch (taskErr) {
-      await transaction.rollback();
-      throw taskErr;
-    }
+    await sql/*sql*/`insert into public.scan_tasks (scan_id, type, status, created_at) values ${sql(tasks, 'scan_id','type','status','created_at')}`;
+    console.log('🆕 tasks queued 4 for scan', id);
 
-    res.status(201).json({ scan_id });
+    res.status(201).json({ scan_id: id });
   } catch (err) {
     console.error('❌ scan route error:', err);
     res.status(500).json({ error: 'failed to create scan' });
   }
 };
 
-router.post('/', handleCreateScan);
+router.post('/api/scans', handleCreateScan);
 
-router.get('/:scanId/status', async (req: any, res: any) => {
+router.get('/api/scans/:scanId/status', async (req: any, res: any) => {
   const { scanId } = req.params as { scanId: string };
   console.log('🔔 GET status for', scanId);
   try {
@@ -76,7 +68,7 @@ router.get('/:scanId/status', async (req: any, res: any) => {
   }
 });
 
-router.get('/:scanId/task/:type', async (req: any, res: any) => {
+router.get('/api/scans/:scanId/task/:type', async (req: any, res: any) => {
   const { scanId, type } = req.params as { scanId: string; type: string };
   console.log('🔔 GET task', type, 'for', scanId);
   try {
