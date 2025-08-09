@@ -16,11 +16,12 @@ const handleCreateScan = async (req: any, res: any) => {
     const normalizedUrl = normalizeUrl(url);
     console.log('🌐 Normalized URL:', normalizedUrl);
 
-    const [{ scan_id }] = await sql/*sql*/`
-      insert into public.scans (url)
-      values (${normalizedUrl})
-      returning id as scan_id`;
-    console.log('✅ scan inserted', { scan_id, url: normalizedUrl });
+    const { scan_id } = await sql.begin(async (sql) => {
+      const [{ scan_id }] = await sql/*sql*/`
+        insert into public.scans (url)
+        values (${normalizedUrl})
+        returning id as scan_id`;
+      console.log('✅ scan inserted', { scan_id, url: normalizedUrl });
 
     const taskTypes = ['tech', 'colors', 'seo', 'perf'];
     const tasks = taskTypes.map((type) => ({
