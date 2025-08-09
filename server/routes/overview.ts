@@ -5,6 +5,7 @@ import { scanResults } from '../../shared/schema.js';
 import { getLighthousePerformance } from '../lib/lighthouse-service.js';
 import { extractSEOData } from '../lib/seo-extractor.js';
 import { extractColors } from '../lib/color-extraction.js';
+import * as colorHelpers from '../lib/color-extraction.js';
 import { runAxeAnalysis } from '../lib/axe-integration.js';
 import { getTechnicalAnalysis } from '../lib/tech-lightweight.js';
 import { chromium } from 'playwright';
@@ -97,16 +98,22 @@ async function handleAnalysis(url: string) {
     analysisResults?.data?.ui?.colors ??
     analysisResults?.data?.overview?.colors ?? [];
 
+  const toName = (hex: string) => {
+    try {
+      const fn = (colorHelpers as any).getColorName;
+      return typeof fn === 'function' ? fn(hex) : '';
+    } catch {
+      return '';
+    }
+  };
+
   const normalizedColors = (hexes as any[]).map((c: any) => {
     const hex = typeof c === 'string' ? c : c.hex;
     return {
       hex,
-      name: typeof c === 'string' ? '' : c.name || '',
+      name: toName(hex),
       usage: 'palette',
-      count:
-        typeof c === 'string'
-          ? 1
-          : (c.occurrences ?? c.count ?? 1),
+      count: 1,
     };
   });
 
