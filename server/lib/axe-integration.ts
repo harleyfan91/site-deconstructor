@@ -133,8 +133,6 @@ export async function getAccessibilityAnalysis(page: Page, url: string): Promise
     const cacheKey = `axe_accessibility_${urlHash}`;
 
     // Try cache first
-    }
-
     console.log('🔍 Performing fresh axe accessibility analysis...');
     const analysis = await runAxeAnalysis(page, url);
 
