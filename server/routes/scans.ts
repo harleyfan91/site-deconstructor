@@ -23,20 +23,23 @@ const handleCreateScan = async (req: any, res: any) => {
         returning id as scan_id`;
       console.log('✅ scan inserted', { scan_id, url: normalizedUrl });
 
-      await sql/*sql*/`insert into public.scan_status (scan_id, status) values (${scan_id}, 'queued')`;
+    const taskTypes = ['tech', 'colors', 'seo', 'perf'];
+    const tasks = taskTypes.map((type) => ({
+      scan_id,
+      type,
+      status: 'queued',
+      created_at: new Date().toISOString(),
+    }));
 
-      const taskTypes = ['tech', 'colors', 'seo', 'perf'];
-      const tasks = taskTypes.map((type) => ({
-        scan_id,
-        type,
-        status: 'queued',
-        created_at: new Date().toISOString(),
-      }));
-      await sql/*sql*/`insert into public.scan_tasks ${sql(tasks)}`;
+    const transaction = await sql.begin();
+    try {
+      await transaction/*sql*/`insert into public.scan_tasks (scan_id, type, status, created_at) values ${sql(tasks, 'scan_id','type','status','created_at')}`;
+      await transaction.commit();
       console.log('🆕 tasks queued 4 for scan', scan_id);
-
-      return { scan_id };
-    });
+    } catch (taskErr) {
+      await transaction.rollback();
+      throw taskErr;
+    }
 
     res.status(201).json({ scan_id });
   } catch (err) {
