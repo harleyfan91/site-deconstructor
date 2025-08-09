@@ -591,6 +591,25 @@ logRegisteredRoutes();
 
 const port = Number(process.env.PORT) || 5000;
 
+// Handle uncaught exceptions from plugins gracefully
+process.on('uncaughtException', (err) => {
+  if (err.message.includes('Load failed') || err.stack?.includes('runtime-error-modal')) {
+    console.log('⚠️ Vite plugin error ignored:', err.message);
+    return;
+  }
+  console.error('Uncaught Exception:', err);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  if (reason && typeof reason === 'object' && 'message' in reason && 
+      (reason.message as string).includes('Load failed')) {
+    console.log('⚠️ Vite plugin rejection ignored:', reason.message);
+    return;
+  }
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
 async function startServer() {
   if (process.env.NODE_ENV === "production") {
     serveStatic(app);
