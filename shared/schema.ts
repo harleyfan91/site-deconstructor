@@ -1,4 +1,4 @@
-import { pgTable, text, serial, uuid, timestamp, jsonb, boolean, smallint } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, uuid, timestamp, jsonb, boolean, smallint, integer, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -68,6 +68,19 @@ export const scanTasks = pgTable("scan_tasks", {
     .defaultNow(),
 });
 
+// scan_results
+export const scanResults = pgTable("scan_results", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  url: text("url").notNull(),
+  requestedAt: timestamp("requested_at", { withTimezone: true }).notNull().defaultNow(),
+  durationMs: integer("duration_ms").notNull(),
+  status: text("status").$type<'ok' | 'error'>().notNull(),
+  error: text("error"),
+  results: jsonb("results").notNull(),
+}, (table) => ({
+  urlIdx: index("scan_results_url_idx").on(table.url),
+}));
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -112,3 +125,5 @@ export type InsertAnalysisCache = z.infer<typeof insertAnalysisCacheSchema>;
 export type AnalysisCache = typeof analysisCache.$inferSelect;
 export type InsertScanTasks = z.infer<typeof insertScanTasksSchema>;
 export type ScanTasks = typeof scanTasks.$inferSelect;
+export type ScanResults = typeof scanResults.$inferSelect;
+export type InsertScanResults = typeof scanResults.$inferInsert;

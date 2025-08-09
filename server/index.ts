@@ -4,6 +4,7 @@ import { setupVite, serveStatic, log } from "./vite";
 import cors from "cors";
 import { sql } from "./db.js";
 import scansRouter from "./routes/scans.js";
+import overviewRouter from "./routes/overview.js";
 
 const DATABASE_URL = 'postgresql://postgres.kdkuhrbaftksknfgjcch:lkFvjLVOXgPXWJ2S@aws-0-us-east-1.pooler.supabase.com:6543/postgres';
 const VITE_SUPABASE_URL = 'https://kdkuhrbaftksknfgjcch.supabase.co';
@@ -28,7 +29,16 @@ console.log(`📍 SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY.substri
 
 // API Routes
 console.log('🚀 Registering unified API routes...');
-// Mount scans router directly (it defines its own /api/scans paths)
+const ANALYSIS_MODE = process.env.ANALYSIS_MODE || 'simple';
+console.log('🧪 ANALYSIS_MODE =', ANALYSIS_MODE);
+
+// Mount overview router only in simple mode
+if (ANALYSIS_MODE === 'simple') {
+  console.log('✅ Simple analysis mode enabled. Use /api/overview for synchronous analysis.');
+  app.use(overviewRouter);
+}
+
+// Mount scans router (queued path)
 app.use(scansRouter);
 
 // Health check endpoint

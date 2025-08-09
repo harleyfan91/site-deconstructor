@@ -6,6 +6,9 @@ const router = Router();
 
 const handleCreateScan = async (req: any, res: any) => {
   console.log('🔔 /api/scans', req.body);
+  if (process.env.ANALYSIS_MODE !== 'queued') {
+    return res.status(501).json({ error: 'Queued analysis disabled. Use /api/overview or set ANALYSIS_MODE=queued.' });
+  }
   try {
     const { url } = req.body as { url?: string };
     if (!url) {
